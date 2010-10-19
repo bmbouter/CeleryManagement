@@ -1,0 +1,8 @@
+Need to include celeryconfig.py in this directory.
+
+celeryconfig.py will be used by djcelerymon.  Settings are similar to ones for celery workers.
+
+celeryconfig.py should provide database information. This is the database where task information will be stored.  
+
+Current implementation requires that the djcelerymon and CeleryManagementApp use the same database.
+
