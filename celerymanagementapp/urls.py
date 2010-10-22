@@ -10,8 +10,9 @@ DATERANGE2 = '(?:_'+DATEMAX+')'
 USERNAME = r'(?P<username>[a-zA-Z0-9]+)'##JOBID = r'(?:_job_(?P<jobid>[0-9]+))'
 
 urlpatterns = patterns('celerymanagementapp',
-    (r'^view/all/$', 'views.view_all_tasks'),
     (r'^view/throughputs/$', 'views.view_throughputs'),
     (r'^view/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.view_throughputs'),
+    (r'^get/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.get_throughput_data'),
+    (r'^visualize/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.visualize_throughput'),
     )
 

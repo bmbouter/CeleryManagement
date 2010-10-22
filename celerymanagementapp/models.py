@@ -3,7 +3,6 @@ import datetime
 from django.db import models
 from djcelery.models import WorkerState, TaskState
 
-
 #==============================================================================#
 #class DefinedTask(models.Model):
 #    """Represents a task class, that is, a subclass of celery.task.base.Task, 
@@ -13,3 +12,4 @@ from djcelery.models import WorkerState, TaskState
 #    name = models.CharField(max_length=512, editable=False)  # is 512 ok?
     
 #==============================================================================#
+
