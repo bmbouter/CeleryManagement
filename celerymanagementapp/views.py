@@ -81,7 +81,13 @@ def calculate_throughputs(taskname, timerange, interval=1):
     
     return throughputs
     
-
+def test_view(request, taskname=None):
+    now = datetime.datetime.now()
+    timerange = (now-datetime.timedelta(seconds=120), now)
+    start = timerange[0]
+    stop = timerange[1]
+    states_in_range = TaskState.objects.filter(state='SUCCESS', tstamp__range=(start, stop))
+    return HttpResponse(states_in_range)
 #==============================================================================#
 def view_throughputs(request, taskname=None):
     # Simple view, mostly for testing purposes at this point.
