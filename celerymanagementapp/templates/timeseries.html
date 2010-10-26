@@ -1,0 +1,50 @@
+{% block content %}
+<html>
+<head>
+  <title>Getting Started Example</title>
+  <!--Load the AJAX API-->
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+
+  //Load the Visualization API and the ready-made Google annotated timeline visualization
+  google.load('visualization', '1', {'packages':['annotatedtimeline']});
+
+  // Set a callback to run when the API is loaded.
+  google.setOnLoadCallback(init);
+
+  // Send the query to the data source.
+  function init() {
+
+    // Specify the data source URL.
+    var url = "{% url celerymanagementapp.views.get_throughput_data taskname='foo_task' %}";
+    url = url.replace("foo_task","{{task}}");
+    var query = new google.visualization.Query(url);
+
+    // Send the query with a callback function.
+    query.send(handleQueryResponse);
+  }
+
+  // Handle the query response.
+  function handleQueryResponse(response) {
+    if (response.isError()) {
+      alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
+      return;
+    }
+
+    // Draw the visualization.
+    var data = response.getDataTable();
+    // Instantiate and draw our chart, passing in some options.
+    var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));
+    chart.draw(data, {displayAnnotations: true});
+  }
+  </script>
+</head>
+
+  <body>
+    <!--Div that will hold the pie chart-->
+    <div id="chart_div" style='width: 600px; height: 300px;'></div>
+  </body>
+</html>
+ 
+{% endblock %}
+
