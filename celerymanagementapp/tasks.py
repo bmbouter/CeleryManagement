@@ -12,9 +12,9 @@ def print_time():
 def sum_numbers(a,b):
     print '{0} + {1} = {2}'.format(a,b,a+b)
 
-@periodic_task(run_every=datetime.timedelta(minutes=2))
-def periodic_hi():
-    print 'I am saying "Hi".  You are reading me say "Hi".'
+#@periodic_task(run_every=datetime.timedelta(minutes=2))
+#def periodic_hi():
+#    print 'I am saying "Hi".  You are reading me say "Hi".'
     
 @task()
 def silly_loop():

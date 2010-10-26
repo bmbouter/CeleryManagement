@@ -4,12 +4,14 @@ import time
 from runall_config import process_arguments
     
 class ProcessSet(object):
-    def __init__(self, procsargs):
+    def __init__(self, procsargs, init_delay=1.0):
         print 'ProcessSet: Starting processes...'
         self.procs = []
         try:
-            for args in procsargs:
+            for i,args in enumerate(procsargs):
+                print 'ProcessSet: Starting process #{0}'.format(i+1)
                 proc = subprocess.Popen(args)
+                time.sleep(init_delay)
                 self.procs.append(proc)
         except:
             self.terminate()
@@ -42,7 +44,7 @@ class ProcessSet(object):
     def loop(self, interval=1.0):
         print 'ProcessSet: Entering loop...'
         try:
-            while True:
+            while not self.poll():
                 time.sleep(1.0)
                 
         except:
@@ -51,7 +53,8 @@ class ProcessSet(object):
             raise
             
         print 'ProcessSet: Leaving loop normally...'
-            
+        self.terminate()
+        
     def cleanup(self, waittime=2.0):
         print 'ProcessSet: Cleaning up...'
         i = 0
@@ -60,6 +63,7 @@ class ProcessSet(object):
             time.sleep(0.5)
             i+=1
         self.kill()
+        print 'ProcessSet: Allowing extra time for processes to stop...'
         time.sleep(waittime)
 
            
