@@ -4,5 +4,5 @@ django-celery
 nose
 git+git://github.com/cmheisel/nose-xcover.git#egg=nosexcover
 git+git://github.com/jbalogh/django-nose.git#egg=django-nose
-http://code.google.com/p/google-visualization-python/downloads/detail?name=gviz_api_py-1.7.0.tar.gz
+http://google-visualization-python.googlecode.com/files/gviz_api_py-1.7.0.tar.gz
 pylint
