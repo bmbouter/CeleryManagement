@@ -108,7 +108,7 @@ def get_throughput_data(request, taskname=None):
     
     now = datetime.datetime.now()
     timerange = (now-datetime.timedelta(seconds=120), now)
-    interval = 15
+    interval = 2
     throughputs = calculate_throughputs(taskname, timerange, interval)
     
     for i, p in enumerate(throughputs):
