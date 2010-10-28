@@ -14,6 +14,8 @@ from celeryconfig import *
 if CELERYMANAGEMENT_USING_HUDSON:
     TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
     INSTALLED_APPS = INSTALLED_APPS + ('django_nose',)
+    CELERY_RESULT_BACKEND = "database"
+    CELERY_RESULT_DBURI = "sqlite:///celery.db"
 
 # Make sure CELERY_IMPORTS is defined.  Then add test tasks module to it.
 CELERY_IMPORTS = globals().get('CELERY_IMPORTS',())
