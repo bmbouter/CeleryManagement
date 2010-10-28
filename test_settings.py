@@ -12,6 +12,7 @@ from celeryconfig import *
 #==============================================================================#
 
 if CELERYMANAGEMENT_USING_HUDSON:
+    print "CeleryManagement: Configuring for Hudson tests..."
     TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
     INSTALLED_APPS = INSTALLED_APPS + ('django_nose',)
     CELERY_RESULT_BACKEND = "database"
