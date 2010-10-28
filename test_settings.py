@@ -1,4 +1,23 @@
+"""
+    Settings for tests which do not require external Celery processes like 
+    celeryd and celeryev.
+"""
+
 from settings import *
 from celeryconfig import *
 
-# This is included in version control.  Do not add sensitive information here.
+#==============================================================================#
+# This file is included in version control.  Do not add sensitive information  #
+# here.                                                                        #
+#==============================================================================#
+
+if CELERYMANAGEMENT_USING_HUDSON:
+    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+    INSTALLED_APPS = INSTALLED_APPS + ('django_nose',)
+
+# Make sure CELERY_IMPORTS is defined.  Then add test tasks module to it.
+CELERY_IMPORTS = globals().get('CELERY_IMPORTS',())
+CELERY_IMPORTS = CELERY_IMPORTS + ('celerymanagementapp.testutil.tasks',)
+
+CELERY_ALWAYS_EAGER = True
+

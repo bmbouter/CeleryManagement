@@ -1,7 +1,13 @@
+import os
+CELERYMANAGEMENT_USING_HUDSON = bool(os.environ.get('CELERYMANAGEMENT_USING_HUDSON',False))
+
 import djcelery
 djcelery.setup_loader()
 
-# Django settings for daveday1 project.
+#==============================================================================#
+# This file is included in version control.  Do not add sensitive information  #
+# here.                                                                        #
+#==============================================================================#
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
