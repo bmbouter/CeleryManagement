@@ -2,6 +2,7 @@ import time
 import random
 
 from celery.task import control
+from celery.task.base import Task as CeleryTask
 
 
 class LoadGenerator(object):
@@ -59,6 +60,54 @@ class LoadGenerator(object):
 
 
 def generate_load(tasks, expected_rate, burst_size, runtime):
+    """
+        Dispatches tasks at a specified throughput and runtime.
+        
+        tasks: 
+            A single task or an iterable of tasks.  
+            
+            If it is an iterable, each time a task is to be dispatched, one 
+            will be chosen at random.
+            
+        expected_rate: 
+            The expected throughput (tasks/sec).  
+            
+            The resulting average throughput will be approximately this value, 
+            unless it is unable to launch tasks at a sufficient frequency in 
+            which case the resulting throughput will be less.
+            
+        burst_size:
+            The number of tasks to be launched between checking the throughput.
+            
+            A larger burst_size usually means that a higher throughput will be 
+            achieved.  After a burst has completed, if the actual throughput is 
+            higher than the expected, it will wait until such time has elapsed 
+            to decrease the throughput to the desired level.
+            
+        runtime:
+            The total time in seconds over which to generate the load.
+            
+            Basically, it will continue to fire bursts of tasks until this 
+            runtime has been reached.  
+            The actual runtime is always at least this value and sometimes a 
+            good deal more.  When a burst finishes just short of this expected 
+            time, it will launch another full burst, and this will result in an 
+            elapsed time greater than the expected value.
+        
+        return value:
+            A tuple: (total_tasks, elapsed_time).  Calculating the actual 
+            throughput is simple: total_tasks / elapsed_time .
+            
+        All tasks must have the attribute Task.ignore_result set to True.  If 
+        not, an exception will be thrown.  This is to prevent buildup of unused 
+        task return values, which are otherwise saved by Celery.
+        
+        This function purges the task queue before returning.  This happens 
+        even in the face of exceptions.
+        
+    """
+    if isinstance(tasks, CeleryTask):
+        tasks = [tasks]
     with LoadGenerator(tasks, expected_rate, burst_size) as gen:
         return gen.run(runtime)
 

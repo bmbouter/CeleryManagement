@@ -81,6 +81,7 @@ def calculate_throughputs(taskname, timerange, interval=1):
     
     return throughputs
     
+    
 def test_view(request, taskname=None):
     now = datetime.datetime.now()
     timerange = (now-datetime.timedelta(seconds=120), now)
