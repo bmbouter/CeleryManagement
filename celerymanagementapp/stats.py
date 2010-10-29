@@ -116,7 +116,7 @@ def calculate_runtimes(taskname, search_range=(None,None), runtime_range=(0.,Non
     
     runtimes = _calculate_runtimes_filterobjects(taskname, runtime_range, 
                                                  search_range)
-    print 'len(runtimes): {0}'.format(len(runtimes))
+    ##print 'len(runtimes): {0}'.format(len(runtimes))
     ##print runtimes
     binmaxs = [((i+1)*bin_size+runtime_min) for i in range(bin_count)]
     bins = [0 for i in range(bin_count)]
