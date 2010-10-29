@@ -1,5 +1,6 @@
 import datetime
 import math
+import itertools
 
 from djcelery.models import WorkerState, TaskState
 
@@ -94,7 +95,8 @@ def calculate_runtimes(taskname, search_range=(None,None), runtime_range=(0.,Non
         bin_count:
             The number of bins to use.
             
-        Returns a list of counts.  Each count is one bin.
+        Returns a list of tuples where the ith tuple contains information about 
+        the ith bin.  The tuples contain: ((binmin,binmax),count).
     """
     runtime_min = runtime_range[0] if runtime_range[0]  else 0.
     runtime_max = runtime_range[1] if runtime_range[1]  else 0.
@@ -116,11 +118,12 @@ def calculate_runtimes(taskname, search_range=(None,None), runtime_range=(0.,Non
     
     runtimes = _calculate_runtimes_filterobjects(taskname, runtime_range, 
                                                  search_range)
-    ##print 'len(runtimes): {0}'.format(len(runtimes))
-    ##print runtimes
+    
+    binmins = [(i*bin_size+runtime_min) for i in range(bin_count)]
     binmaxs = [((i+1)*bin_size+runtime_min) for i in range(bin_count)]
     bins = [0 for i in range(bin_count)]
     
-    return _calculate_runtimes_fillbins(runtimes, bins, binmaxs)
+    bins = _calculate_runtimes_fillbins(runtimes, bins, binmaxs)
+    return [((a,b),count) for (a,b,count) in itertools.izip(binmins,binmaxs,bins)]
 
     
