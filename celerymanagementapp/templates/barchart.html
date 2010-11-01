@@ -7,7 +7,7 @@
   <script type="text/javascript">
 
   //Load the Visualization API and the ready-made Google annotated timeline visualization
-  google.load('visualization', '1', {'packages':['annotatedtimeline']});
+  google.load('visualization', '1', {'packages':['corechart']});
 
   // Set a callback to run when the API is loaded.
   google.setOnLoadCallback(init);
@@ -16,7 +16,7 @@
   function init() {
 
     // Specify the data source URL.
-    var url = "{% url celerymanagementapp.views.get_throughput_data taskname=task %}";
+    var url = "{% url celerymanagementapp.views.get_runtime_data taskname=task bin_count=bin_count bin_size=bin_size %}";
     var query = new google.visualization.Query(url);
 
     // Send the query with a callback function.
@@ -33,7 +33,7 @@
     // Draw the visualization.
     var data = response.getDataTable();
     // Instantiate and draw our chart, passing in some options.
-    var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));
+    var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
     chart.draw(data, {displayAnnotations: true});
   }
   </script>
