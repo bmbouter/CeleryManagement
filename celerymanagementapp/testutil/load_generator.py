@@ -1,5 +1,6 @@
 import time
 import random
+import sys
 
 from celery.task import control
 from celery.task.base import Task as CeleryTask
@@ -55,7 +56,10 @@ class LoadGenerator(object):
         while (time.time()-start) < runtime:
             self.burst(self.burst_size)
             count += self.burst_size
+            sys.stdout.write('.')
+            sys.stdout.flush()
         elapsed = time.time() - start
+        sys.stdout.write('\n')
         return count, elapsed
 
 
