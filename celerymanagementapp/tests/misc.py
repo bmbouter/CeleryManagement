@@ -1,7 +1,7 @@
 import datetime
 import time
 
-from celerymanagementapp.views import calculate_throughputs
+from celerymanagementapp.stats import calculate_throughputs
 
 from celerymanagementapp.tests import base
 
