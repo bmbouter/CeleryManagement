@@ -71,10 +71,10 @@ def get_runtime_data(request, taskname, search_range=(None,None), runtime_min=0.
     description['bin_name'] = ("string","bin_name")
     description['count'] = ("number", "count")
 
-    for r in runtimes:
+    for (runtime_min, runtime_max), count  in  runtimes:
         data = {}
-        data['bin_name'] = str(r[0][0])+" - " + str(r[0][1])
-        data['count'] = r[1]
+        data['bin_name'] = str(runtime_min)+" - " + str(runtime_max)
+        data['count'] = count
         all_data.append(data)
     
     data_table = gviz_api.DataTable(description)
@@ -89,7 +89,6 @@ req_id=reqId))
     return HttpResponse(data_table.ToJSonResponse(columns_order=("bin_name","count")))
 
 def visualize_runtimes(request, taskname, search_range=(None,None), runtime_min=0., bin_size=None, bin_count=None):
-    ##runtime_range = (runtime_min,None)
     return render_to_response('barchart.html',
             {'task': taskname, 'runtime_min':runtime_min, 'bin_size': bin_size, 'bin_count': bin_count},
             context_instance=RequestContext(request))
