@@ -63,7 +63,8 @@ def get_throughput_data(request, taskname=None):
         return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","tasks"),req_id=reqId))
     return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","tasks")))
 
-def get_runtime_data(request, taskname, search_range=(None,None), runtime_range=(0.,None), bin_size=None, bin_count=None):
+def get_runtime_data(request, taskname, search_range=(None,None), runtime_min=0., bin_size=None, bin_count=None):
+    runtime_range = (float(runtime_min),None)
     runtimes = calculate_runtimes(taskname, search_range=search_range, runtime_range=runtime_range, bin_size=float(bin_size), bin_count=int(bin_count))
     all_data = []
     description = {}
@@ -87,9 +88,10 @@ def get_runtime_data(request, taskname, search_range=(None,None), runtime_range=
 req_id=reqId))
     return HttpResponse(data_table.ToJSonResponse(columns_order=("bin_name","count")))
 
-def visualize_runtimes(request, taskname, search_range=(None,None), runtime_range=(0.,None), bin_size=None, bin_count=None):
+def visualize_runtimes(request, taskname, search_range=(None,None), runtime_min=0., bin_size=None, bin_count=None):
+    ##runtime_range = (runtime_min,None)
     return render_to_response('barchart.html',
-            {'task': taskname, 'bin_size': bin_size, 'bin_count': bin_count},
+            {'task': taskname, 'runtime_min':runtime_min, 'bin_size': bin_size, 'bin_count': bin_count},
             context_instance=RequestContext(request))
 
 def visualize_throughput(request, taskname=None):

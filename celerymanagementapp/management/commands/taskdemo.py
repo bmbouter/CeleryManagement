@@ -72,9 +72,14 @@ class Command(BaseCommand):
             tasks.append(getattr(tasksmod,taskname))
             qtaskname.append(tasksmod.__name__+'.'+taskname)
         
-        funcname = 'celerymanagementapp.views.visualize_throughput'
-        urls = [ urlreverse(funcname, kwargs={'taskname':taskname}) 
+        funcname1 = 'celerymanagementapp.views.visualize_throughput'
+        urls = [ urlreverse(funcname1, kwargs={'taskname':taskname}) 
                  for taskname in qtaskname ]
+        funcname2 = 'celerymanagementapp.views.visualize_runtimes'
+        urls += [ urlreverse(funcname2, 
+                  kwargs={'taskname':taskname, 'bin_count':20, 'bin_size':0.001, 
+                          'runtime_min':0.0}) 
+                  for taskname in qtaskname ]
         
         ##white = '\x1B[1;37m'
         ##yellow = '\x1B[1;33m'
@@ -88,6 +93,8 @@ class Command(BaseCommand):
         print 'The average throughput was {0:1.4} tasks/sec.'.format(count/secs)
         print '\nTo view the results, please use the following urls: '
         print '    {0}'.format('\n    '.join(urls))
-        print ''
+        print '(The last three items in the runtime visualization urls are for'
+        print 'the minimum-runtime, bin-count and bin-size.  These parameters'
+        print 'may be modified--the values shown are simply defaults.)\n'
         
 
