@@ -108,4 +108,19 @@ def view_defined_tasks(request):
     return render_to_response('tasklist.html',
             {'tasks':defined},
             context_instance=RequestContext(request))
+            
+
+def view_dispatched_tasks(request, taskname=None):
+    """View DispatchedTasks, possibly limited to those for a particular 
+       DefinedTask.
+    """
+    tasks = TaskState.objects.all()
+    if taskname:
+        tasks = tasks.filter(name=taskname)
+
+    return render_to_response('dispatched_tasklist.html',
+            {'tasks': tasks},
+            context_instance=RequestContext(request))
+    
+        
 
