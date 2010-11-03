@@ -18,6 +18,28 @@ from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes
 
 import gviz_api
 
+
+#==============================================================================#
+# regex corresponding to DATETIME_FMT:  '\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}'
+# YYYY-MM-DD-HH-MM-SS
+    
+DATETIME_FMT = '%Y-%m-%d-%H-%M-%S'
+
+def datestr_to_datetime(s):
+    if s is None:
+        return s
+    else:
+        return datetime.datetime.strptime(s, fmt)
+    
+def datetime_to_datestr(dt):
+    return dt.strftime(fmt)
+    
+def searchrange_from_post(post):
+    min = datestr_to_datetime(post.get('start_time',None))
+    max = datestr_to_datetime(post.get('end_time',None))
+    return (min,max)
+
+
 #==============================================================================#
 def test_view(request, taskname=None):
     now = datetime.datetime.now()
@@ -80,28 +102,20 @@ def get_runtime_data(request, taskname, search_range=(None,None), runtime_min=0.
     
     data_table = gviz_api.DataTable(description)
     data_table.LoadData(all_data)
-
+    
     if "tqx" in request.GET:        
         tqx = request.GET['tqx']
         params = dict([p.split(':') for p in tqx.split(';')])
         reqId = params['reqId']
-        return HttpResponse(data_table.ToJSonResponse(columns_order=("bin_name","count"),      
-req_id=reqId))
+        return HttpResponse(data_table.ToJSonResponse(columns_order=("bin_name","count"), req_id=reqId))
     return HttpResponse(data_table.ToJSonResponse(columns_order=("bin_name","count")))
+
 
 def visualize_runtimes(request, taskname, runtime_min=0., bin_count=None, 
                        bin_size=None):
     
     if "submit" in request.POST:
-        # Get the search_range:
-        search_range_min, search_range_max = None, None
-        if 'start_time' in request.POST:
-            search_range_min = datetime.datetime.strptime(request.POST['start_time'],"%m/%d/%Y %H:%M:%S")
-        if 'end_time' in request.POST:
-            search_range_max = datetime.datetime.strptime(request.POST['end_time'],"%m/%d/%Y %H:%M:%S")
-        search_range = (search_range_min, search_range_max)
-        
-        # Get other params:
+        search_range = searchrange_from_post(request.POST)
         runtime_min = float(request.POST.get('runtime_min', runtime_min))
         bin_count = int(request.POST.get('bin_count', bin_count))
         bin_size = float(request.POST.get('bin_size', bin_size))
