@@ -16,7 +16,7 @@
   function init() {
 
     // Specify the data source URL.
-    var url = "{% url celerymanagementapp.views.get_runtime_data taskname=task runtime_min=runtime_min bin_count=bin_count bin_size=bin_size %}";
+      var url = "{{url}}";
     var query = new google.visualization.Query(url);
 
     // Send the query with a callback function.
@@ -42,6 +42,18 @@
   <body>
     <!--Div that will hold the pie chart-->
     <div id="chart_div" style='width: 600px; height: 300px;'></div>
+    <form action="{% url celerymanagementapp.views.visualize_runtimes taskname=taskname%}">
+        Start date/time: <br/>
+        <input type="text" name="start_time"><br/>
+        End date/time: <br/>
+        <input type="text" name="end_time"><br/>
+        Number of bins: <br/>
+        <input type="text" name="bin_count"><br/>
+        Bin size:<br/>
+         <input type="text" name="bin_size"><br/>
+        <input type="submit" name="submit" value="Submit me">
+    </form>
+
   </body>
 </html>
  

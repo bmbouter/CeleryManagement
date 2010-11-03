@@ -8,6 +8,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 
 from djcelery.models import WorkerState, TaskState
 from celery.registry import TaskRegistry, tasks
@@ -88,9 +89,27 @@ def get_runtime_data(request, taskname, search_range=(None,None), runtime_min=0.
 req_id=reqId))
     return HttpResponse(data_table.ToJSonResponse(columns_order=("bin_name","count")))
 
-def visualize_runtimes(request, taskname, search_range=(None,None), runtime_min=0., bin_size=None, bin_count=None):
+def visualize_runtimes(request, taskname):
+    kwargs = {}
+    kwargs['taskname'] = taskname
+    if "submit" in request.POST:
+        #check for errors in all parameters
+        try:
+            start = datetime.datetime(*time.strptime(request.POST['start_time'],"%m/%d/%Y %H:%M:%S")[0:6])
+            end = datetime.datetime(*time.strptime(request.POST['end_time'],"%m/%d/%Y %H:%M:%S")[0:6])
+            kwargs['search_range'] = (start, end)
+            kwargs['bin_size'] = request.POST['bin_size']
+            kwargs['bin_count'] = request.POST['bin_count']
+        except Exception:
+            kwargs['search_range'] = (None,None)
+            kwargs['bin_size'] = .01
+            kwargs['bin_count'] = 20
+    else:
+        kwargs['bin_size'] = .01
+        kwargs['bin_count'] = 20
+    url = reverse("celerymanagementapp.views.get_runtime_data", kwargs=kwargs)
     return render_to_response('barchart.html',
-            {'task': taskname, 'runtime_min':runtime_min, 'bin_size': bin_size, 'bin_count': bin_count},
+            {'url':url,'taskname':taskname},
             context_instance=RequestContext(request))
 
 def visualize_throughput(request, taskname=None):

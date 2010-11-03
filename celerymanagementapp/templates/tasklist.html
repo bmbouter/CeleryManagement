@@ -7,7 +7,8 @@
 
   <body>
       {% for t in tasks %}
-      {{t}}<br/>
+      {{t}} <a href="{% url celerymanagementapp.views.visualize_runtimes taskname=t %}">Runtimes</a>
+      | <a href="{% url celerymanagementapp.views.visualize_throughput taskname=t  %}">Throughput</a><br/>
       {% endfor  %}
   </body>
 </html>
