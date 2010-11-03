@@ -89,24 +89,31 @@ def get_runtime_data(request, taskname, search_range=(None,None), runtime_min=0.
 req_id=reqId))
     return HttpResponse(data_table.ToJSonResponse(columns_order=("bin_name","count")))
 
-def visualize_runtimes(request, taskname):
-    kwargs = {}
-    kwargs['taskname'] = taskname
+def visualize_runtimes(request, taskname, runtime_min=0., bin_count=None, 
+                       bin_size=None):
+    
     if "submit" in request.POST:
-        #check for errors in all parameters
-        try:
-            start = datetime.datetime(*time.strptime(request.POST['start_time'],"%m/%d/%Y %H:%M:%S")[0:6])
-            end = datetime.datetime(*time.strptime(request.POST['end_time'],"%m/%d/%Y %H:%M:%S")[0:6])
-            kwargs['search_range'] = (start, end)
-            kwargs['bin_size'] = request.POST['bin_size']
-            kwargs['bin_count'] = request.POST['bin_count']
-        except Exception:
-            kwargs['search_range'] = (None,None)
-            kwargs['bin_size'] = .01
-            kwargs['bin_count'] = 20
+        # Get the search_range:
+        search_range_min, search_range_max = None, None
+        if 'start_time' in request.POST:
+            search_range_min = datetime.datetime.strptime(request.POST['start_time'],"%m/%d/%Y %H:%M:%S")
+        if 'end_time' in request.POST:
+            search_range_max = datetime.datetime.strptime(request.POST['end_time'],"%m/%d/%Y %H:%M:%S")
+        search_range = (search_range_min, search_range_max)
+        
+        # Get other params:
+        runtime_min = float(request.POST.get('runtime_min', runtime_min))
+        bin_count = int(request.POST.get('bin_count', bin_count))
+        bin_size = float(request.POST.get('bin_size', bin_size))
     else:
-        kwargs['bin_size'] = .01
-        kwargs['bin_count'] = 20
+        search_range = (None,None)
+    
+    kwargs = {'taskname': taskname,
+              'runtime_min': runtime_min,
+              'bin_count': bin_count,
+              'bin_size': bin_size,
+              }
+                
     url = reverse("celerymanagementapp.views.get_runtime_data", kwargs=kwargs)
     return render_to_response('barchart.html',
             {'url':url,'taskname':taskname},
