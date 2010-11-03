@@ -25,17 +25,24 @@ class ProcessSet(object):
     def __len__(self):
         return len(self.procs)
         
-    def poll(self):
-        return any(p.poll() for p in self.procs)
+    def all_stopped(self):
+        """Return True if all processes poll() methods return true.  In other 
+           words, if they are all stopped.
+        """
+        return all(p.poll() for p in self.procs)
+        
+    def all_running(self):
+        return not any(p.poll() for p in self.procs)
         
     def terminate(self):
         print 'ProcessSet: Terminating processes...'
         for proc in self.procs:
             if not proc.poll():
                 proc.terminate()
+                proc.wait()
                 
     def kill(self):
-        if self.poll():
+        if not self.all_stopped():
             print 'ProcessSet: Killing processes...'
             for proc in self.procs:
                 if not proc.poll():
@@ -44,7 +51,7 @@ class ProcessSet(object):
     def loop(self, interval=1.0):
         print 'ProcessSet: Entering loop...'
         try:
-            while not self.poll():
+            while self.all_running():
                 time.sleep(1.0)
                 
         except:
@@ -58,7 +65,7 @@ class ProcessSet(object):
     def cleanup(self, waittime=2.0):
         print 'ProcessSet: Cleaning up...'
         i = 0
-        while i<10 and self.poll():
+        while i<10 and not self.all_stopped():
             self.terminate()
             time.sleep(0.5)
             i+=1

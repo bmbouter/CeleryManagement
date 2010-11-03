@@ -78,7 +78,7 @@ class Command(BaseCommand):
         funcname2 = 'celerymanagementapp.views.visualize_runtimes'
         urls += [ urlreverse(funcname2, 
                   kwargs={'taskname':taskname, 'bin_count':20, 'bin_size':0.001, 
-                          'runtime_min':0.0}) 
+                          })##'runtime_min':0.0}) 
                   for taskname in qtaskname ]
         
         ##white = '\x1B[1;37m'
