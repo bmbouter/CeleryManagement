@@ -1,0 +1,24 @@
+
+{% block content %}
+<html>
+<head>
+  <title>Dispatched Tasks</title>
+</head>
+
+  <body>
+    <table>
+    <tr>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+    {% for t in tasks %}
+    {{t}}<br/>
+    {% endfor  %}
+    </table>
+  </body>
+</html>
+ 
+{% endblock %}
+
