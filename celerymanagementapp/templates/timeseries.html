@@ -1,7 +1,8 @@
-{% block content %}
-<html>
-<head>
-  <title>Getting Started Example</title>
+{% extends "base.html" %}
+
+{% block title %}Task Throughput{% endblock %}
+
+{% block head_xtra %}
   <!--Load the AJAX API-->
   <script type="text/javascript" src="http://www.google.com/jsapi"></script>
   <script type="text/javascript">
@@ -37,13 +38,11 @@
     chart.draw(data, {displayAnnotations: true});
   }
   </script>
-</head>
-
-  <body>
-    <!--Div that will hold the pie chart-->
-    <div id="chart_div" style='width: 600px; height: 300px;'></div>
-  </body>
-</html>
- 
 {% endblock %}
+
+{% block content %}
+  <!--Div that will hold the pie chart-->
+  <div id="chart_div" style='width: 600px; height: 300px;'></div>
+{% endblock %}
+ 
 

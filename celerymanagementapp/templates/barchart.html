@@ -1,7 +1,8 @@
-{% block content %}
-<html>
-<head>
-  <title>Getting Started Example</title>
+{% extends "base.html" %}
+
+{% block title %}Runtime Distribution{% endblock %}
+
+{% block head_xtra %}
   <!--Load the AJAX API-->
   <script type="text/javascript" src="http://www.google.com/jsapi"></script>
   <script type="text/javascript">
@@ -40,9 +41,10 @@
                      });
   }
   </script>
-</head>
+{% endblock %}
 
-<body>
+
+{% block content %}
   <!--Div that will hold the pie chart-->
   <div id="chart_div" style='width: 600px; height: 300px;'>
     Loading graph...
@@ -58,9 +60,6 @@
        <input type="text" name="bin_size"><br/>
       <input type="submit" name="submit" value="Submit me">
   </form>
-
-</body>
-</html>
- 
 {% endblock %}
+ 
 
