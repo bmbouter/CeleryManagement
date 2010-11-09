@@ -10,6 +10,7 @@ from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.core.context_processors import csrf
 
 from djcelery.models import WorkerState, TaskState
 from celery.registry import TaskRegistry, tasks
@@ -30,7 +31,7 @@ def datestr_to_datetime(s):
     """Convienence function to convert from a string as passed in a URL to a 
        datetime.datetime object.
     """
-    if s is None:
+    if not s:
         return s
     else:
         return datetime.datetime.strptime(s, DATETIME_FMT)
@@ -230,8 +231,8 @@ def visualize_runtimes(request, taskname, runtime_min=0., bin_count=None,
     
     url = reverse("celerymanagementapp.views.get_runtime_data", kwargs=kwargs)
     url += qsbuilder.to_querystring()
-    return render_to_response('barchart.html',
-            {'url':url, 'taskname':taskname},
+    params = {'url':url, 'taskname':taskname}
+    return render_to_response('barchart.html', params,
             context_instance=RequestContext(request))
 
 def visualize_throughput(request, taskname=None):
@@ -262,6 +263,3 @@ def view_dispatched_tasks(request, taskname=None):
     return render_to_response('dispatched_tasklist.html',
             {'tasks': tasks},
             context_instance=RequestContext(request))
-    
-        
-
