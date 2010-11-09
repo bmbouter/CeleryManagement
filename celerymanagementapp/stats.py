@@ -166,7 +166,7 @@ def calculate_runtimes(taskname, search_range=(None,None),
         bin_size:
             The size of a bin, in seconds.
         bin_count:
-            The number of bins to use.
+            The number of bins to use.  Required if auto_runtime_range is given.
         auto_runtime_range:
             Set the runtime_range automatically absed on other parameters.
             

@@ -1,0 +1,174 @@
+[
+  {
+    "pk": 1, 
+    "model": "djcelery.taskstate", 
+    "fields": {
+      "expires": null, 
+      "name": "task1", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f81", 
+      "traceback": null, 
+      "args": "[]", 
+      "worker": 1, 
+      "tstamp": "2010-01-01 12:00:00", 
+      "state": "SUCCESS", 
+      "eta": null, 
+      "result": "None", 
+      "kwargs": "{}", 
+      "hidden": false, 
+      "runtime": 1.0
+    }
+  },
+  {
+    "pk": 2, 
+    "model": "djcelery.taskstate", 
+    "fields": {
+      "expires": null, 
+      "name": "task2", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f82", 
+      "traceback": null, 
+      "args": "[]", 
+      "worker": 1, 
+      "tstamp": "2010-01-01 12:00:00", 
+      "state": "SUCCESS", 
+      "eta": null, 
+      "result": "None", 
+      "kwargs": "{}", 
+      "hidden": false, 
+      "runtime": 2.0
+    }
+  },
+  {
+    "pk": 3, 
+    "model": "djcelery.taskstate", 
+    "fields": {
+      "expires": null, 
+      "name": "task1", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f83", 
+      "traceback": null, 
+      "args": "[]", 
+      "worker": 1, 
+      "tstamp": "2010-01-01 13:00:00", 
+      "state": "SUCCESS", 
+      "eta": null, 
+      "result": "None", 
+      "kwargs": "{}", 
+      "hidden": false, 
+      "runtime": 3.0
+    }
+  },
+  {
+    "pk": 4, 
+    "model": "djcelery.taskstate", 
+    "fields": {
+      "expires": null, 
+      "name": "task2", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f84", 
+      "traceback": null, 
+      "args": "[]", 
+      "worker": 1, 
+      "tstamp": "2010-01-01 13:00:00", 
+      "state": "SUCCESS", 
+      "eta": null, 
+      "result": "None", 
+      "kwargs": "{}", 
+      "hidden": false, 
+      "runtime": 1.0
+    }
+  },
+  
+  {
+    "pk": 5, 
+    "model": "djcelery.taskstate", 
+    "fields": {
+      "expires": null, 
+      "name": "task1", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f85", 
+      "traceback": null, 
+      "args": "[]", 
+      "worker": 1, 
+      "tstamp": "2010-01-01 14:00:00", 
+      "state": "SUCCESS", 
+      "eta": null, 
+      "result": "None", 
+      "kwargs": "{}", 
+      "hidden": false, 
+      "runtime": 2.0
+    }
+  },
+  {
+    "pk": 6, 
+    "model": "djcelery.taskstate", 
+    "fields": {
+      "expires": null, 
+      "name": "task2", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f86", 
+      "traceback": null, 
+      "args": "[]", 
+      "worker": 1, 
+      "tstamp": "2010-01-01 14:00:00", 
+      "state": "SUCCESS", 
+      "eta": null, 
+      "result": "None", 
+      "kwargs": "{}", 
+      "hidden": false, 
+      "runtime": 3.0
+    }
+  },
+  {
+    "pk": 7, 
+    "model": "djcelery.taskstate", 
+    "fields": {
+      "expires": null, 
+      "name": "task1", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f87", 
+      "traceback": null, 
+      "args": "[]", 
+      "worker": 1, 
+      "tstamp": "2010-01-01 15:00:00", 
+      "state": "SUCCESS", 
+      "eta": null, 
+      "result": "None", 
+      "kwargs": "{}", 
+      "hidden": false, 
+      "runtime": 4.0
+    }
+  },
+  {
+    "pk": 8, 
+    "model": "djcelery.taskstate", 
+    "fields": {
+      "expires": null, 
+      "name": "task2", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f88", 
+      "traceback": null, 
+      "args": "[]", 
+      "worker": 1, 
+      "tstamp": "2010-01-01 15:00:00", 
+      "state": "SUCCESS", 
+      "eta": null, 
+      "result": "None", 
+      "kwargs": "{}", 
+      "hidden": false, 
+      "runtime": 4.0
+    }
+  },
+  {
+    "pk": 9, 
+    "model": "djcelery.taskstate", 
+    "fields": {
+      "expires": null, 
+      "name": "task1", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f89", 
+      "traceback": null, 
+      "args": "[]", 
+      "worker": 1, 
+      "tstamp": "2010-01-01 15:00:00", 
+      "state": "SUCCESS", 
+      "eta": null, 
+      "result": "None", 
+      "kwargs": "{}", 
+      "hidden": false, 
+      "runtime": 3.0
+    }
+  }
+]
