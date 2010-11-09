@@ -38,15 +38,23 @@ class ProcessSet(object):
         print 'ProcessSet: Terminating processes...'
         for proc in self.procs:
             if not proc.poll():
-                proc.terminate()
-                proc.wait()
+                try:
+                    proc.terminate()
+                    proc.wait()
+                except OSError:
+                    # Ignore "No such process"
+                    pass
                 
     def kill(self):
         if not self.all_stopped():
             print 'ProcessSet: Killing processes...'
             for proc in self.procs:
                 if not proc.poll():
-                    proc.kill()
+                    try:
+                        proc.kill()
+                    except OSError:
+                        # Ignore "No such process"
+                        pass
                 
     def loop(self, interval=1.0):
         print 'ProcessSet: Entering loop...'
@@ -69,8 +77,9 @@ class ProcessSet(object):
             self.terminate()
             time.sleep(0.5)
             i+=1
+        print 'ProcessSet: Allowing extra time for processes to stop before killing them...'
+        time.sleep(2.0)
         self.kill()
-        print 'ProcessSet: Allowing extra time for processes to stop...'
         time.sleep(waittime)
 
            
