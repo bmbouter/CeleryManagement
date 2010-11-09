@@ -10,6 +10,7 @@ from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 from djcelery.models import WorkerState, TaskState
 from celery.registry import TaskRegistry, tasks
@@ -255,12 +256,23 @@ def view_dispatched_tasks(request, taskname=None):
     """View DispatchedTasks, possibly limited to those for a particular 
        DefinedTask.
     """
-    tasks = TaskState.objects.all()
+    alltasks = TaskState.objects.all()
     if taskname:
-        tasks = tasks.filter(name=taskname)
-
+        alltasks = alltasks.filter(name=taskname)
+    
+    pg = Paginator(alltasks, 50)
+    try:
+        page = int(request.GET.get('page','1'))
+    except ValueError:
+        page = 1
+        
+    try:
+        tasks = pg.page(page)
+    except (EmptyPage, InavlidPage):
+        tasks = pg.page(pg.num_pages)
+    
     return render_to_response('dispatched_tasklist.html',
-            {'tasks': tasks},
+            {'taskname':taskname, 'tasks': tasks},
             context_instance=RequestContext(request))
     
         
