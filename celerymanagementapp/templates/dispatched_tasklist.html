@@ -1,24 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Dispatched Tasks{% endblock %}
+  
+{% block head_xtra %}
+  <style type="text/css">
+  table.tasktable {
+    border-collapse: collapse;
+  }
+  .tasktable td, .tasktable th {
+    border: solid 1px black;
+    padding: 0 1em; 
+  }
+  .uuid {
+    font-family: monospace;
+  }
+  </style>
+{% endblock %}
+
 
 {% block content %}
-<html>
-<head>
-  <title>Dispatched Tasks</title>
-</head>
-
-  <body>
-    <table>
-    <tr>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-    {% for t in tasks %}
-    {{t}}<br/>
-    {% endfor  %}
-    </table>
-  </body>
-</html>
- 
+  <h2>Dispatched Tasks</h2>
+  <div>
+  {% if taskname %}
+    Showing dispatched tasks of defined task: <tt>{{ taskname }}</tt>.
+  {% else %}
+    Showing all dispatched tasks.
+  {% endif %}
+  </div>
+  <table class="datatable">
+  <tr>
+    <th>UUID</th>
+    <th>State</th>
+    <th>Name</th>
+    <th>ETA</th>
+    <th>When</th>
+    <th>Worker</th>
+  </tr>
+  {% for t in tasks.object_list %}
+  <tr>
+    <td class="uuid">{{ t.task_id }}</td>
+    <td>{{ t.state }}</td>
+    <td>{{ t.name }}</td>
+    <td>
+      {% if t.eta %}
+        {{ t.eta }}
+      {% else %}
+        ...
+      {% endif %}
+    </td>
+    <td>{{ t.tstamp|timesince }} ago</td>
+    <td>{{ t.worker }}</td>
+  </tr>
+  {% endfor  %}
+  </table>
+  <div>
+  {% if tasks.has_previous %}
+    <a href="?page={{ tasks.previous_page_number }}">previous</a>
+  {% endif %}
+  
+  Page {{ tasks.number }} of {{ tasks.paginator.num_pages }}.
+  
+  {% if tasks.has_next %}
+    <a href="?page={{ tasks.next_page_number }}">next</a>
+  {% endif %}
+  </div>
 {% endblock %}
+ 
 

@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.context_processors import csrf
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 from djcelery.models import WorkerState, TaskState
 from celery.registry import TaskRegistry, tasks
@@ -103,7 +104,7 @@ class QueryStringBuilder(object):
         self.args = {}
         for name in self.param_names:
             val = kwargs.get(name,'')
-            self.args[name] = str(val)
+            self.args[name] = str(val)  if val is not None else  None
     
     def add_querydict(self, pdict):
         """Add values from a request.GET or request.POST QueryDict.  Values 
@@ -177,7 +178,7 @@ def get_throughput_data(request, taskname=None):
     return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","tasks")))
 
 
-def get_runtime_data(request, taskname):
+def get_runtime_data(request, taskname=None):
     search_range =          searchrange_from_post(request.GET)
     runtime_range =         (get_postval(request.GET, 'runtime_min', float, 0.), None)
     bin_size =              get_postval(request.GET, 'bin_size', float, None)
@@ -186,8 +187,8 @@ def get_runtime_data(request, taskname):
                                         string_to_bool, False)
     runtimes = calculate_runtimes(taskname, search_range=search_range, 
                                   runtime_range=runtime_range, 
-                                  bin_size=float(bin_size), 
-                                  bin_count=int(bin_count),
+                                  bin_size=float(bin_size)  if bin_size is not None else  None, 
+                                  bin_count=int(bin_count)  if bin_count is not None else  None,
                                   auto_runtime_range=auto_runtime_range)
     all_data = []
     description = {
@@ -217,7 +218,7 @@ class RuntimeQueryStringBuilder(QueryStringBuilder):
                    'end_time','auto_runtime_range']
 
 
-def visualize_runtimes(request, taskname, runtime_min=0., bin_count=None, 
+def visualize_runtimes(request, taskname=None, runtime_min=0., bin_count=None, 
                        bin_size=None):
     
     qsbuilder = RuntimeQueryStringBuilder(runtime_min=runtime_min, 
@@ -227,7 +228,9 @@ def visualize_runtimes(request, taskname, runtime_min=0., bin_count=None,
         qsbuilder.add_querydict(request.POST)
     else:
         qsbuilder.add_querydict(request.GET)
-    kwargs = {'taskname': taskname}
+    kwargs = {}
+    if taskname:
+        kwargs['taskname'] = taskname
     
     url = reverse("celerymanagementapp.views.get_runtime_data", kwargs=kwargs)
     url += qsbuilder.to_querystring()
@@ -237,7 +240,7 @@ def visualize_runtimes(request, taskname, runtime_min=0., bin_count=None,
 
 def visualize_throughput(request, taskname=None):
     return render_to_response('timeseries.html',
-            {'task': taskname},
+            {'task': taskname, 'taskname': taskname },
             context_instance=RequestContext(request))
 
 def view_defined_tasks(request):
@@ -256,10 +259,21 @@ def view_dispatched_tasks(request, taskname=None):
     """View DispatchedTasks, possibly limited to those for a particular 
        DefinedTask.
     """
-    tasks = TaskState.objects.all()
+    alltasks = TaskState.objects.all()
     if taskname:
-        tasks = tasks.filter(name=taskname)
-
+        alltasks = alltasks.filter(name=taskname)
+    
+    pg = Paginator(alltasks, 50)
+    try:
+        page = int(request.GET.get('page','1'))
+    except ValueError:
+        page = 1
+        
+    try:
+        tasks = pg.page(page)
+    except (EmptyPage, InavlidPage):
+        tasks = pg.page(pg.num_pages)
+    
     return render_to_response('dispatched_tasklist.html',
-            {'tasks': tasks},
+            {'taskname':taskname, 'tasks': tasks},
             context_instance=RequestContext(request))

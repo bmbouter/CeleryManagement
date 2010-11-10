@@ -1,9 +1,6 @@
+{% extends "base.html" %}
 
-{% block content %}
-<html>
-<head>
-  <title>Defined Tasks</title>
-</head>
+{% block title %}Defined Tasks{% endblock %}
 
   <body>
       {% for t in tasks %}
@@ -13,5 +10,26 @@
   </body>
 </html>
  
+
+{% block head_xtra %}
+  <style type="text/css">
+  .datatable :link, .datatable :visited {
+    text-decoration: none;
+  }
+  </style>
 {% endblock %}
+
+
+{% block content %}
+  <table class="datatable">
+  {% for t in tasks %}
+    <tr>
+      <td><a href="{% url celerymanagementapp.views.view_dispatched_tasks taskname=t %}">{{t}}</a></td>
+      <td><a href="{% url celerymanagementapp.views.visualize_throughput taskname=t %}">Throughput</a></td>
+      <td><a href="{% url celerymanagementapp.views.visualize_runtimes taskname=t %}?bin_count=20&auto_runtime_range=1">Runtimes</a></td>
+    </tr>
+  {% endfor %}
+  </table>
+{% endblock %}
+ 
 

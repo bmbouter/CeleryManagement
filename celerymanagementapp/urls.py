@@ -13,13 +13,19 @@ urlpatterns = patterns('celerymanagementapp',
     (r'^view/tasks/$', 'views.view_defined_tasks'),
     (r'^view/throughputs/$', 'views.view_throughputs'),
     (r'^view/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.view_throughputs'),
+    
+    (r'^get/throughputs/$', 'views.get_throughput_data'),
     (r'^get/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.get_throughput_data'),
-    #(r'^get/runtimes/(?P<taskname>[-\w\d_.]+)/(?P<bin_count>[\d]+)/(?P<bin_size>[\d.]+)/$', 'views.get_runtime_data'),
-    #(r'^get/runtimes/(?P<taskname>[-\w\d_.]+)/(?P<runtime_min>[\d.]+)/(?P<bin_count>[\d]+)/(?P<bin_size>[\d.]+)/$', 'views.get_runtime_data'),
+    
+    (r'^get/runtimes/$', 'views.get_runtime_data'),
     (r'^get/runtimes/(?P<taskname>[-\w\d_.]+)/$', 'views.get_runtime_data'),
+    
+    (r'^visualize/throughputs/$', 'views.visualize_throughput'),
     (r'^visualize/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.visualize_throughput'),
     
+    (r'^visualize/runtimes/$', 'views.visualize_runtimes'),
     (r'^visualize/runtimes/(?P<taskname>[-\w\d_.]+)/$', 'views.visualize_runtimes'),
+    (r'^visualize/runtimes/(?P<taskname>[-\w\d_.]+)/(?P<bin_count>[\d]+)/$', 'views.visualize_runtimes'),
     (r'^visualize/runtimes/(?P<taskname>[-\w\d_.]+)/(?P<bin_count>[\d]+)/(?P<bin_size>[\d.]+)/$', 'views.visualize_runtimes'),
     (r'^visualize/runtimes/(?P<taskname>[-\w\d_.]+)/(?P<runtime_min>[\d.]+)/(?P<bin_count>[\d]+)/(?P<bin_size>[\d.]+)/$', 'views.visualize_runtimes'),
     
