@@ -17,7 +17,11 @@
   function init() {
 
     // Specify the data source URL.
-    var url = "{% url celerymanagementapp.views.get_throughput_data taskname=task %}";
+    {% if taskname %}
+      var url = "{% url celerymanagementapp.views.get_throughput_data taskname=task %}";
+    {% else %}
+      var url = "{% url celerymanagementapp.views.get_throughput_data %}";
+    {% endif %}
     var query = new google.visualization.Query(url);
 
     // Send the query with a callback function.
