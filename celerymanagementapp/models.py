@@ -1,6 +1,8 @@
 import datetime
 
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
+
 from djcelery.models import WorkerState, TaskState
 
 #==============================================================================#
@@ -12,4 +14,8 @@ from djcelery.models import WorkerState, TaskState
 #    name = models.CharField(max_length=512, editable=False)  # is 512 ok?
     
 #==============================================================================#
+
+class DispatchedTask(TaskState):
+    sent =      models.DateTimeField(_(u"sent time"), null=True)
+    waittime =  models.FloatField(_(u"wait elapsed time"), null=True)
 
