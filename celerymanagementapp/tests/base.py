@@ -5,7 +5,8 @@ import datetime
 from django.test import TestCase
 from django.contrib.auth.models import User
 
-from djcelery.models import WorkerState, TaskState
+from djcelery.models import WorkerState
+from celerymanagementapp.models import DispatchedTask
 
 # Disable Nose test autodiscovery for this module.
 __test__ = False
@@ -89,7 +90,7 @@ class CeleryManagement_DBTestCaseBase(CeleryManagement_TestCaseBase):
         #   MyModel.objects.all().delete()
         #
         WorkerState.objects.all().delete()
-        TaskState.objects.all().delete()
+        DispatchedTask.objects.all().delete()
         
         # delete all test users
         for user in self.users:

@@ -4,7 +4,8 @@ import itertools
 
 from django.db.models import Max, Min
 
-from djcelery.models import WorkerState, TaskState
+from djcelery.models import WorkerState
+from celerymanagementapp.models import DispatchedTask
 
 def calculate_throughputs(taskname, timerange, interval=1):
     """ Calculates the throughputs for a given task for each interval over the 
@@ -21,10 +22,10 @@ def calculate_throughputs(taskname, timerange, interval=1):
     start = timerange[0]
     stop = timerange[1]
     if taskname:
-        states_in_range = TaskState.objects.filter(name=taskname, state='SUCCESS', 
+        states_in_range = DispatchedTask.objects.filter(name=taskname, state='SUCCESS', 
                                                    tstamp__range=(start, stop))
     else:
-        states_in_range = TaskState.objects.filter(state='SUCCESS', 
+        states_in_range = DispatchedTask.objects.filter(state='SUCCESS', 
                                                    tstamp__range=(start, stop))
     
     # TODO: clean up the following code
@@ -68,13 +69,13 @@ def _calculate_runtimes_query(taskname, runtime_range=None, search_range=(None,N
     
     if runtime_range and runtime_range!=(None,None):
         if taskname:
-            qs = TaskState.objects.filter(state='SUCCESS', name=taskname, runtime__range=runtime_range)
+            qs = DispatchedTask.objects.filter(state='SUCCESS', name=taskname, runtime__range=runtime_range)
         else:
-            qs = TaskState.objects.filter(state='SUCCESS', runtime__range=runtime_range)
+            qs = DispatchedTask.objects.filter(state='SUCCESS', runtime__range=runtime_range)
     elif taskname:
-        qs = TaskState.objects.filter(state='SUCCESS', name=taskname)
+        qs = DispatchedTask.objects.filter(state='SUCCESS', name=taskname)
     else:
-        qs = TaskState.objects.filter(state='SUCCESS')
+        qs = DispatchedTask.objects.filter(state='SUCCESS')
     
     # limit results based on the time that the task ran
     if search_range[0] and search_range[1]:
