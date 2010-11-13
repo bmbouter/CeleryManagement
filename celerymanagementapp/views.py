@@ -180,7 +180,9 @@ def get_throughput_data(request, taskname=None):
 
 def get_runtime_data(request, taskname=None):
     search_range =          searchrange_from_post(request.GET)
-    runtime_range =         (get_postval(request.GET, 'runtime_min', float, 0.), None)
+    runtime_range_min =     get_postval(request.GET, 'runtime_min', float, 0.)
+    runtime_range_max =     get_postval(request.GET, 'runtime_max', float, None)
+    runtime_range =         (runtime_range_min, runtime_range_max)
     bin_size =              get_postval(request.GET, 'bin_size', float, None)
     bin_count =             get_postval(request.GET, 'bin_count', int, None)
     auto_runtime_range =    get_postval(request.GET, 'auto_runtime_range', 
@@ -214,7 +216,7 @@ def get_runtime_data(request, taskname=None):
     
 
 class RuntimeQueryStringBuilder(QueryStringBuilder):
-    param_names = ['runtime_min', 'bin_count', 'bin_size','start_time',
+    param_names = ['runtime_min', 'runtime_max', 'bin_count', 'bin_size','start_time',
                    'end_time','auto_runtime_range']
 
 
