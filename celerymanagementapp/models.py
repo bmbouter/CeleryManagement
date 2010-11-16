@@ -18,4 +18,15 @@ from djcelery.models import WorkerState, TaskState
 class DispatchedTask(TaskState):
     sent =      models.DateTimeField(_(u"sent time"), null=True)
     waittime =  models.FloatField(_(u"wait elapsed time"), null=True)
+    
+class TestModel(models.Model):
+    """A model solely for use in testing."""
+    date =      models.DateField(null=True)
+    floatval =  models.FloatField()
+    intval =    models.IntegerField()
+    charval =   models.CharField(max_length=128)
+    enumval =   models.CharField(max_length=1, 
+                                 choices=(('A','A'),('B','B'),
+                                          ('C','C'),('D','D'))
+                                )
 

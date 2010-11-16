@@ -1,0 +1,62 @@
+[
+  {
+    "pk": 1, "model": "celerymanagementapp.testmodel", 
+    "fields": {     
+        "date":       2010-01-01, 
+        "floatval":   1.0, 
+        "intval":     0, 
+        "charval":    "", 
+        "enumval":    "A"
+    }
+  },
+  {
+    "pk": 2, "model": "celerymanagementapp.testmodel", 
+    "fields": {     
+        "date":       2010-01-01, 
+        "floatval":   1.0, 
+        "intval":     0, 
+        "charval":    "", 
+        "enumval":    "B"
+    }
+  },
+  {
+    "pk": 3, "model": "celerymanagementapp.testmodel", 
+    "fields": {     
+        "date":       2010-01-01, 
+        "floatval":   1.0, 
+        "intval":     0, 
+        "charval":    "", 
+        "enumval":    "C"
+    }
+  },
+  {
+    "pk": 4, "model": "celerymanagementapp.testmodel", 
+    "fields": {     
+        "date":       2010-01-01, 
+        "floatval":   1.0, 
+        "intval":     0, 
+        "charval":    "", 
+        "enumval":    "A"
+    }
+  },
+  {
+    "pk": 5, "model": "celerymanagementapp.testmodel", 
+    "fields": {     
+        "date":       2010-01-01, 
+        "floatval":   1.0, 
+        "intval":     0, 
+        "charval":    "", 
+        "enumval":    "B"
+    }
+  },
+  {
+    "pk": 6, "model": "celerymanagementapp.testmodel", 
+    "fields": {     
+        "date":       2010-01-01, 
+        "floatval":   1.0, 
+        "intval":     0, 
+        "charval":    "", 
+        "enumval":    "C"
+    }
+  },
+]

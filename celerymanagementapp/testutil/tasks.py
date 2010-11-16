@@ -24,7 +24,7 @@ def simple_test():
 @task(ignore_result=True)
 def silly_loop():
     i = 0
-    while i<10**8:
+    while i<10**6:
         i+=1
     
 #@periodic_task(run_every=datetime.timedelta(minutes=2))    
