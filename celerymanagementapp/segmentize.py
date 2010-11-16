@@ -29,14 +29,14 @@ Example Usage:
     (assuming 'queryset' is given and is a django QuerySet.)
     
         states = ['GOOD','INUSE','ERROR']
-        segtzr = Segmentizer(basic_query_sequence('state',states))
-        segs = make_segments(queryset, segtzr, avg_aggregator('runtime'))
+        szr = Segmentizer(basic_query_sequence('state',states))
+        segs = make_segments(queryset, szr, avg_aggregator('runtime'))
     
     This produces a list of tuples.  Each tuple contains a label (from the 
     field 'state', which is one of 'GOOD','INUSE','ERROR') and an average of 
     the 'runtime' fields of the objects that have the label.
     
-    For instance:
+    One possible return value:
         [('GOOD',2.4),('INUSE',1.1),('ERROR',0.8)]
 
 """
@@ -61,24 +61,49 @@ def range_query_sequence(fieldname, range, interval_size):
         The first interval will begin at range[0].  The last interval will be 
         the last one which begins before range[1].  No interval will begin at
         or after range[1].
+        
+        Intervals include the low value but exclude the high value.
     """
-    queryname = '{0}__range'.format(fieldname)
+    queryname_gte = '{0}__gte'.format(fieldname)
+    queryname_lt =  '{0}__lt'.format(fieldname)
     range_min = range[0]
     range_max = range[1]
     range_next = range_min + interval_size
     
     while range_min < range_max:
         label = range_min + interval_size/2
-        yield (label, {queryname: (range_min, range_next)})
+        yield (label, {queryname_gte: range_min, queryname_lt: range_next })
         range_min = range_next
         range_next += interval_size
-        
+    
 def basic_query_sequence(fieldname, labels):
+    """ Creates a query_sequence over the items in the 'labels' parameter.  The 
+        return value is suitable for use as the query_sequence argument to the 
+        Segmentizer class.
+        
+        labels:
+            May either be a sequence of values which act both as the label and 
+            the value to search for, or a sequence of tuples, each of which 
+            contains a label and a value to search for.
+            [ label0, label1, label2, ... ]   
+              ...or...
+            [ (label0, value0), (label1, value1), (label2, value3), ... ]
+    """
     queryname = '{0}'.format(fieldname)
     if labels and isinstance(labels[0], tuple):
         return ((label, {queryname: val}) for (label,val) in labels)
     else:
         return ((label, {queryname: label}) for label in labels)
+    
+def autolabel_query_sequence(fieldname, queryset):
+    """ Creates a query_sequence over all the values for the given field in the 
+        given queryset.  The return value is suitable for use as the 
+        query_sequence argument to the Segmentizer class.
+    """
+    queryname = '{0}'.format(fieldname)
+    labels = set(queryset.values_list(fieldname, flat=True))
+    return ((label, {queryname: label}) for label in labels)
+
 
 class Segmentizer(object):
     """A function object which fulfills the segmentizer concept."""
@@ -91,11 +116,13 @@ class Segmentizer(object):
                 to the data that is returned by the filter method.
         """
         self.queryseq = query_sequence
-        
+    
     def __call__(self, queryset):
-        #for label,qargs in self.queryseq:
-        #    yield label, queryset.filter(**qargs)
-        return ((lbl, queryset.filter(**qargs)) for (lbl,qargs) in self.queryseq)
+        """Returns an iterator over tuples of (label, querysubset) pairs.  The 
+           'label' is the x-value which corresponds to every item in the 
+           'querysubset'."""
+        return ( (lbl, queryset.filter(**qargs)) 
+                 for (lbl,qargs) in self.queryseq )
 
 #==============================================================================#
 def avg_aggregator(fieldname):
@@ -121,3 +148,5 @@ def make_segments(queryset, segmentizer, aggregator):
     return [(label,aggregator(seg)) for (label,seg) in segmentizer(queryset)]
 
 #==============================================================================#
+
+
