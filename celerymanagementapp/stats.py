@@ -1,10 +1,13 @@
 import datetime
 import math
-import itertools
+import operator
 
 from django.db.models import Max, Min
 
 from djcelery.models import WorkerState, TaskState
+
+from celerymanagementapp.segmentize import make_segments, Segmentizer
+from celerymanagementapp.segmentize import range_query_sequence
 
 def calculate_throughputs(taskname, timerange, interval=1):
     """ Calculates the throughputs for a given task for each interval over the 
@@ -18,27 +21,24 @@ def calculate_throughputs(taskname, timerange, interval=1):
         given interval.  The throughputs collectively span the given time 
         range.
     """
-    start = timerange[0]
-    stop = timerange[1]
+    qargs = { 'state': 'SUCCESS', 'tstamp__range': timerange }
     if taskname:
-        states_in_range = TaskState.objects.filter(name=taskname, state='SUCCESS', 
-                                                   tstamp__range=(start, stop))
-    else:
-        states_in_range = TaskState.objects.filter(state='SUCCESS', 
-                                                   tstamp__range=(start, stop))
+        qargs['name'] = taskname
     
-    # TODO: clean up the following code
-    throughputs = []
-    finterval = float(interval)
+    states_in_range = TaskState.objects.filter(**qargs)
+    
+    def rate_aggregator(seconds_span):
+        def _rate_aggregator(seg):
+            return seg.count() / seconds_span
+        return _rate_aggregator
+    
     interval_secs = datetime.timedelta(seconds=interval)
-    mintime = start
-    while mintime < stop:
-        maxtime = mintime + interval_secs
-        qs = states_in_range.filter(tstamp__range=(mintime, maxtime))
-        throughputs.append(qs.count()/finterval)
-        mintime = maxtime
+    segmentizer = Segmentizer(range_query_sequence('tstamp', timerange, interval_secs))
+    aggregator = rate_aggregator(float(interval))
     
-    return throughputs
+    segments = make_segments(states_in_range, segmentizer, aggregator)
+    # segments contains tuple pairs: (label, value).  We only want the value...
+    return map(operator.itemgetter(1), segments)
     
 
 def _calculate_runtimes_fillbins(runtimes, runtime_min, bin_size, bin_count):
