@@ -44,9 +44,10 @@
 {% endblock %}
 
 
+<body>
 {% block content %}
   <!--Div that will hold the pie chart-->
-  <div id="chart_div" style='width: 600px; height: 300px;'>
+  <div id="chart_div" style='width: 600px; height: 300px;' method="GET">
     Loading graph...
   </div>
   <form action="{% url celerymanagementapp.views.visualize_runtimes taskname=taskname%}">
