@@ -10,6 +10,9 @@ from celerymanagementapp.segmentize import make_segments, Segmentizer
 from celerymanagementapp.segmentize import range_query_sequence
 
 
+from celerymanagementapp.segmentize import make_segments, Segmentizer
+from celerymanagementapp.segmentize import range_query_sequence
+
 def calculate_throughputs(taskname, timerange, interval=1):
     """ Calculates the throughputs for a given task for each interval over the 
         given timerange.
@@ -22,8 +25,6 @@ def calculate_throughputs(taskname, timerange, interval=1):
         given interval.  The throughputs collectively span the given time 
         range.
     """
-    start = timerange[0]
-    stop = timerange[1]
     qargs = { 'state': 'SUCCESS', 'tstamp__range': timerange }
     if taskname:
         qargs['name'] = taskname

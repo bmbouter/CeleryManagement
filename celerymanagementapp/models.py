@@ -29,4 +29,3 @@ class TestModel(models.Model):
                                  choices=(('A','A'),('B','B'),
                                           ('C','C'),('D','D'))
                                 )
-
