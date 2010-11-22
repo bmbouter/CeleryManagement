@@ -1,46 +1,13 @@
 import datetime
 import math
-import itertools
+import operator
 
 from django.db.models import Max, Min
 
 from djcelery.models import WorkerState, TaskState
 
-    
-def calculate_runtimes(taskname, search_range=(None,None), 
-                       runtime_range=(0.,None), bin_size=None, bin_count=None, 
-                       auto_runtime_range=False):
-    """
-        Calculate the number of tasks that executed within the given runtime_range.
-        
-        taskname: 
-            The name of the task to calculate for.  If it evaluates to false, 
-            all tasks are included.
-        search_range: 
-            Limit the tasks to those that completed within this range.  This 
-            should be a pair of datetime.datetime objects.  If either is None, 
-            then no limit is placed on that end of the range.
-        runtime_range:
-            The range of runtimes to include in the result.  If left at the 
-            default (with only a minimum given) then both bin_size and 
-            bin_count must be given.  If the range contains both the min and 
-            max, then only one of bin_size and bin_count must be given.
-            Runtimes are given in seconds, and may be floats.
-        bin_size:
-            The size of a bin, in seconds.
-        bin_count:
-            The number of bins to use.  Required if auto_runtime_range is given.
-        auto_runtime_range:
-            Set the runtime_range automatically absed on other parameters.
-            
-        Returns a list of tuples where the ith tuple contains information about 
-        the ith bin.  The tuples contain: ((binmin,binmax),count).
-    """
-    if auto_runtime_range:
-        return calculate_auto_runtimes(taskname, search_range, bin_count)
-    else:
-        return calculate_explicit_runtimes(taskname, search_range, runtime_range, bin_size, bin_count)
-
+from celerymanagementapp.segmentize import make_segments, Segmentizer
+from celerymanagementapp.segmentize import range_query_sequence
 
 def calculate_throughputs(taskname, timerange, interval=1):
     """ Calculates the throughputs for a given task for each interval over the 
@@ -54,27 +21,24 @@ def calculate_throughputs(taskname, timerange, interval=1):
         given interval.  The throughputs collectively span the given time 
         range.
     """
-    start = timerange[0]
-    stop = timerange[1]
+    qargs = { 'state': 'SUCCESS', 'tstamp__range': timerange }
     if taskname:
-        states_in_range = TaskState.objects.filter(name=taskname, state='SUCCESS', 
-                                                   tstamp__range=(start, stop))
-    else:
-        states_in_range = TaskState.objects.filter(state='SUCCESS', 
-                                                   tstamp__range=(start, stop))
+        qargs['name'] = taskname
     
-    # TODO: clean up the following code
-    throughputs = []
-    finterval = float(interval)
+    states_in_range = TaskState.objects.filter(**qargs)
+    
+    def rate_aggregator(seconds_span):
+        def _rate_aggregator(seg):
+            return seg.count() / seconds_span
+        return _rate_aggregator
+    
     interval_secs = datetime.timedelta(seconds=interval)
-    mintime = start
-    while mintime < stop:
-        maxtime = mintime + interval_secs
-        qs = states_in_range.filter(tstamp__range=(mintime, maxtime))
-        throughputs.append(qs.count()/finterval)
-        mintime = maxtime
+    segmentizer = Segmentizer(range_query_sequence('tstamp', timerange, interval_secs))
+    aggregator = rate_aggregator(float(interval))
     
-    return throughputs
+    segments = make_segments(states_in_range, segmentizer, aggregator)
+    # segments contains tuple pairs: (label, value).  We only want the value...
+    return map(operator.itemgetter(1), segments)
     
 
 def _calculate_runtimes_fillbins(runtimes, runtime_min, bin_size, bin_count):
