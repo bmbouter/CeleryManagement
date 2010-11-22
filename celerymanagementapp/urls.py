@@ -19,6 +19,7 @@ urlpatterns = patterns('celerymanagementapp',
     
     (r'^get/runtimes/$', 'views.get_runtime_data'),
     (r'^get/runtimes/(?P<taskname>[-\w\d_.]+)/$', 'views.get_runtime_data'),
+    (r'^get/systemdata/$', 'views.get_system_data'),
     
     (r'^visualize/throughputs/$', 'views.visualize_throughput'),
     (r'^visualize/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.visualize_throughput'),

@@ -3,6 +3,7 @@ import calendar
 import time
 import itertools
 import urllib
+import sys
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -17,10 +18,12 @@ from djcelery.models import WorkerState, TaskState
 from celery.registry import TaskRegistry, tasks
 from celery.task.control import inspect
 
-from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes
+#import celery.app
+
+from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes, CeleryStats
 
 import gviz_api
-
+import json
 
 #==============================================================================#
 # DATETIME_FMT is used by the datestr_to_datetime() and datetime_to_datestr() 
@@ -279,3 +282,62 @@ def view_dispatched_tasks(request, taskname=None):
     return render_to_response('dispatched_tasklist.html',
             {'taskname':taskname, 'tasks': tasks},
             context_instance=RequestContext(request))
+
+def get_runtimes_new(request, taskname=None, interval=0):
+    if taskname is None:
+        dataset = TaskState.objects.all()
+    else:
+        dataset = TaskState.objects.filter(name=taskname)
+    stats = CeleryStats(dataset)
+    if interval is 0:
+        runtimes = stats.calculate_runtimes()
+    else:
+        runtimes = stats.calculate_runtimes(datetime.timedelta(seconds=interval))
+
+    all_data = [] 
+    description = {}
+    description['timestamp'] = ("DateTime","timestamp")
+    description['runtime'] = ("number","runtime")
+    
+    for i in runtimes:
+        data = {}
+        data['timestamp'] = i[0]
+        data['runtime'] = i[1]
+        all_data.append(data)
+
+    data_table = gviz_api.DataTable(description)
+    data_table.LoadData(all_data)
+
+    if "tqx" in request.GET:
+        tqx = request.GET['tqx']
+        params = dict([p.split(':') for p in tqx.split(';')])
+        reqId = params['reqId'] 
+        return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","runtime"),req_id=reqId))
+    return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","runtime")))
+
+def visualize_runtimes_new(request, taskname=None, interval=0):
+    return render_to_response('runtime_timeseries.html',
+            {'task': taskname, 'taskname': taskname },
+            context_instance=RequestContext(request))
+
+
+def get_system_data(request):
+    data = {}
+    i = inspect()  
+    workers = i.registered_tasks()
+    defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
+    defined = list(defined)
+    defined.sort()
+
+    data['tasks'] = defined
+    
+    worker_dict = {}
+    workers = WorkerState.objects.all()
+    for w in workers:
+        worker_dict[w.__str__()] = w.is_alive()
+    data['workers'] = worker_dict
+    #app = celery.app.app_or_default()
+
+    #queues = app.amqp.queues
+
+    return HttpResponse(json.dumps(data))
