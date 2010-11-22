@@ -20,7 +20,7 @@ from celery.task.control import inspect
 
 #import celery.app
 
-from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes, CeleryStats
+from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes#, CeleryStats
 
 import gviz_api
 import json
