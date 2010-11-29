@@ -1,55 +1,28 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" xml:lang="en-us" >
     <head>
-        <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}" rel="stylesheet" type="text/css" />
-        {% block extracss %}{ endblock extracss %}
+        <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/reset-min.css" rel="stylesheet" type="text/css" />
+        <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/core.less" rel="stylesheet/less" type="text/css" />
+        <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/fluid_grid.css" rel="stylesheet" type="text/css" />
+        <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/south-street/jquery-ui.css" rel="stylesheet" type="text/css" />
+        
+        {% block extracss %}
+        { endblock extracss %}
 
-        <script type"text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}" ></script>
-        {% block extrajs %}{% endblock extrajs %}
+        <script type"text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/less.js" ></script>
+        <script type"text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.js" ></script>
+        <script type"text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery-ui.js" ></script>
+        <script type"text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/core.js" ></script>
+        
+        {% block extrajs %}
+        {% endblock extrajs %}
 
         <title>{% block title %}{% endblock %}</title>
-        <style type="text/css" media="screen">
-            body {
-              padding: 0;
-              margin: 0;
-            }
-            
-            .formtable th { text-align: right; vertical-align: top; }
-            .datatable {
-              border: solid 1px gray;
-              border-collapse: collapse;
-            }
-            .datatable th, .datatable td { 
-              border-top: solid 1px gray;     padding: 0 1em;
-              border-bottom: solid 1px gray;  padding: 0 1em;
-            }
-            .datatable th {
-              background: rgb(215,235,205);
-            }
-            
-            #topmenu {
-              font-family: sans-serif;
-              font-size: 0.8em;
-              padding: 0.3em 1em;
-              margin: 0;
-              background: rgb(215,235,205);
-              border-bottom: 1px solid rgb(90,140,70);
-            }
-            #taskmenu {
-              font-family: sans-serif;
-              font-size: 0.8em;
-              padding: 0.3em 1em;
-              margin: 0;
-              background: rgb(215,235,205);
-              border-bottom: 1px solid rgb(90,140,70);
-            }
-            #content {
-              padding: 0.5em 1em;
-            }
-          </style>
-          {% block head_xtra %}
-          {% endblock %}
-        </head>
+        
+        {% block head_xtra %}
+        {% endblock %}
+        
+    </head>
 
     <body>
       <div id="topmenu">
