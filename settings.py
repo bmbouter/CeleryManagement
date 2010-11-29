@@ -1,4 +1,6 @@
 import os
+import sys
+
 CELERYMANAGEMENT_USING_HUDSON = bool(os.environ.get('CELERYMANAGEMENT_USING_HUDSON',False))
 
 import djcelery
@@ -104,4 +106,10 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 )
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CELERYMANAGEMENTAPP_MEDIA_PREFIX = "/celerymanagementapp/site_media/"
 
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
+TEMPLATE_CONTEXT_PROCESSORS += (
+    'celerymanagementapp.context_processors.context_processor',
+)
