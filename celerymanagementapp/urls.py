@@ -1,6 +1,7 @@
 import datetime
 from django.conf.urls.defaults import *
 
+
 DATEMIN = r'(?P<datemin>\d{4}-\d{2}-\d{2})'
 DATEMAX = r'(?P<datemax>\d{4}-\d{2}-\d{2})'
 # accepts:  date_date   or   date_   or   _date
@@ -34,5 +35,8 @@ urlpatterns = patterns('celerymanagementapp',
     
     (r'^test/$', 'views.test_view'),
     #(r'^test/(?P<taskname>[-\w\d_.]+)/$', 'views.test_view'),
+    
+    (r'^test_xy_query/$', 'dataviews.task_xy_dataview'),  
+    
     )
 

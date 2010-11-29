@@ -57,21 +57,37 @@ class Command(BaseCommand):
     args = '<task task ...>'
     help = 'Launches several tasks, the results of which can be viewed using CeleryManagement'
     
-    available_tasks = ['simple_test','print_time','silly_loop']
+    #available_tasks = ['simple_test','print_time','silly_loop']
+    
+    def _get_available_task_names(self):
+        import celery.task
+        task_names = []
+        names = [s for s in tasksmod.__dict__]
+        for s in names:
+            if isinstance(tasksmod.__dict__[s], celery.task.Task):
+                task_names.append(s)
+        return task_names
     
     def handle(self, *args, **options):
         tasks = []
         qtaskname = []
+        
+        # Get name of task(s) to execute.
         if len(args)==0:
             args = ['simple_test']
+        available_tasks = self._get_available_task_names()
         for taskname in args:
-            if taskname not in Command.available_tasks:
-                msg = '"{0}" is not a legal task.  Please choose one of: {1}'
-                msg = msg.format(taskname, ', '.join(Command.available_tasks))
+            # TODO: allow importing of arbitrary tasks if the name contains a period.
+            if taskname not in available_tasks:
+                msg = '"{name}" is not a legal task.\n'
+                msg += 'Please enter a fully-qualified task name, '
+                msg += 'or one of the following built-in test tasks:\n  {tasks}'
+                msg = msg.format(name=taskname, tasks=', '.join(available_tasks))
                 raise CommandError(msg)
             tasks.append(getattr(tasksmod,taskname))
             qtaskname.append(tasksmod.__name__+'.'+taskname)
         
+        # Determine urls of views.
         funcname1 = 'celerymanagementapp.views.visualize_throughput'
         urls = [ urlreverse(funcname1, kwargs={'taskname':taskname}) 
                  for taskname in qtaskname ]
@@ -81,9 +97,7 @@ class Command(BaseCommand):
                           })##'runtime_min':0.0}) 
                   for taskname in qtaskname ]
         
-        ##white = '\x1B[1;37m'
-        ##yellow = '\x1B[1;33m'
-        ##normal = '\x1B[m'
+        # Run the tasks
         print 'Launching tasks... (this may take a while)'
         count, secs = generate_load(tasks, options['expectedrate'],
                                     options['burstsize'], options['runtime'])
