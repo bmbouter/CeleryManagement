@@ -6,46 +6,22 @@ from celerymanagementapp.jsonquery.xyquery import JsonXYQuery
 from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 
 
+def _get_json(request):
+    rawjson = request.raw_post_data
+    return json.loads(rawjson)
+    
+def _json_response(jsondata):
+    rawjson = json.dumps(jsondata)
+    return HttpResponse(rawjson, mimetype='application/json')
+
+
 def task_xy_dataview(request):
-    #mimetype = 'application/json'
-    mimetype = 'text/plain'
-    #rawjson = request.POST['query']
+    json_request = _get_json(request)
     
-    query = {
-        #'segmentize': {
-        #    'field': 'state',
-        #    'method': ['all'],
-        #},
-        'segmentize': {
-            'field': 'runtime',
-            'method': ['range',{'min': 0.00002, 'max': 0.0006, 'interval':0.00005}]
-        },
-        #'aggregate': [
-        #    {
-        #        'field' : 'count',
-        #    },
-        #],
-        'aggregate': [
-            {
-                'field' : 'count',
-            },
-            #{
-            #    'field' : 'waittime',
-            #    'methods': ['average']
-            #},
-        ],
-    }
+    xyquery = JsonXYQuery(JsonTaskModelMap(), json_request)
+    json_result = xyquery.do_query()
     
-    rawjson = json.dumps(query)
-    
-    jsondata = json.loads(rawjson)
-    
-    xyquery = JsonXYQuery(JsonTaskModelMap(), jsondata)
-    qs = xyquery.do_filter()
-    jsondata = xyquery.build_json_result(qs)
-    
-    rawjson = json.dumps(jsondata, indent=2)  # remove 'indent' when done testing
-    return HttpResponse(rawjson, mimetype=mimetype)
+    return _json_response(json_result)
 
 
 

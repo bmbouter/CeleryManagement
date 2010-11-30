@@ -64,5 +64,15 @@ class JsonQuery(object):
         
     def build_json_result(self, queryset):
         raise NotImplementedError
+        
+    def do_query(self, queryset=None):
+        qs = self.do_filter(queryset)
+        return self.build_json_result(qs)
 
 #==============================================================================#
+
+    
+
+#==============================================================================#
+
+

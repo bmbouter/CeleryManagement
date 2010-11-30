@@ -1,4 +1,3 @@
-
 from celerymanagementapp import segmentize
 from celerymanagementapp.jsonquery.base import JsonQuery
 from celerymanagementapp.jsonquery.exception import JsonQueryError
@@ -6,6 +5,7 @@ from celerymanagementapp.jsonquery import util
 
 #==============================================================================#
 class SegmentizeSpec(object):
+    """Represents the 'segmentize' portion of the json query."""
     _query_name = False
     _method_spec = False
     
@@ -44,6 +44,7 @@ class SegmentizeSpec(object):
 
 #==============================================================================#
 class AggregateSpec(object):
+    """Represents a single aggregation item."""
     _query_name = False
     _method_specs = False
         
@@ -77,6 +78,7 @@ class AggregateSpec(object):
     
     
 class AggregateSpecList(object):
+    """Represents the 'aggregate' portion of the json query."""
     def __init__(self, jsondata):
         self.spec_list = self._extract_spec_list(jsondata)
     
@@ -108,7 +110,8 @@ class JsonXYQuery(JsonQuery):
     def build_json_result(self, queryset):
         seg = self._build_segmentizer()
         agg = self._build_aggregator()
-        return segmentize.make_segments(queryset, seg, agg)
+        data = segmentize.make_segments(queryset, seg, agg)
+        return { 'data': data }
         
     def _get_segmentizer_factory(self, segname):
         # TODO
@@ -121,9 +124,11 @@ class JsonXYQuery(JsonQuery):
     def _build_segmentizer(self):
         method_spec = self.segspec.method_spec
         fieldname = self.modelmap.get_fieldname(self.segspec.query_name)
+        to_python = self.modelmap.get_conv_to_python(fieldname)
+        from_python = self.modelmap.get_conv_from_python(fieldname)
         segmentizer_factory = self._get_segmentizer_factory(method_spec[0])
         method_args = []  if len(method_spec)==1 else  method_spec[1]
-        segmentizer = segmentizer_factory(fieldname, method_args)
+        segmentizer = segmentizer_factory(fieldname, method_args, to_python, from_python)
         return segmentizer
         
     def _get_aggregator_factory(self, aggname):

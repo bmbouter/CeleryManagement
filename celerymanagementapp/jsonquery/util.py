@@ -1,7 +1,36 @@
+import datetime
+import calendar
+
 from django.db.models import Avg, Max, Min, Sum, Variance
 
 from celerymanagementapp import segmentize
 from celerymanagementapp.jsonquery.exception import JsonQueryError
+
+#==============================================================================#
+# Conversions
+
+def noop_conv(x):
+    return x
+    
+def date_to_python(val):
+    # takes a float and converts it to a python datetime.datetime
+    return datetime.date.fromtimestamp(val)
+
+def datetime_to_python(val):
+    # takes a float and converts it to a python datetime.datetime
+    return datetime.datetime.fromtimestamp(val)
+    
+def date_from_python(val):
+    # takes a python datetime.date and converts it to a float
+    tt = val.timetuple()
+    unixtime = calendar.timegm(tt)
+    return unixtime
+    
+def datetime_from_python(val):
+    # takes a python datetime.datetime and converts it to a float
+    tt = val.utctimetuple()
+    unixtime = calendar.timegm(tt)
+    return unixtime
 
 #==============================================================================#
 # Query ops:
@@ -55,8 +84,9 @@ ops_dict = {
 # Segmentizer stuff:
 
 class AutoLabelSegmentizer(object):
-    def __init__(self, fieldname):
+    def __init__(self, fieldname, from_python=noop_conv):
         self.fieldname = fieldname
+        self.from_python = from_python
         
     def _make_query_sequence(self, queryset):
         queryseq = segmentize.autolabel_query_sequence(self.fieldname, queryset)
@@ -64,27 +94,42 @@ class AutoLabelSegmentizer(object):
         
     def __call__(self, queryset):
         queryseq = self._make_query_sequence(queryset)
-        return ( (lbl, queryset.filter(**qargs)) 
+        conv = self.from_python
+        return ( (conv(lbl), queryset.filter(**qargs)) 
                  for (lbl,qargs) in queryseq )
 
+class EachSegmentizer(object):
+    def __init__(self, fieldname, from_python=noop_conv):
+        self.fieldname = fieldname
+        self.from_python = from_python
+        
+    def _iter_objects(self, queryset):
+        return ((getattr(o,self.fieldname), o.pk) for o in queryset)
+        
+    def __call__(self, queryset):
+        it = self._iter_objects(queryset)
+        conv = self.from_python
+        return ( (conv(lbl), queryset.filter(pk=k)) for (lbl,k) in it )
 
-def segmentizer_method_range(fieldname, args):
-    query_range = (args['min'],args['max'])
-    interval = args['interval']
-    query_sequence = segmentize.range_query_sequence(fieldname, query_range, interval)
+
+def segmentizer_method_range(fieldname, args, to_python=noop_conv, from_python=noop_conv):
+    query_range = (to_python(args['min']), to_python(args['max']))
+    interval = to_python(args['interval'])
+    query_sequence = segmentize.range_query_sequence(fieldname, query_range, interval, from_python)
     return segmentize.Segmentizer(query_sequence)
     
-def segmentizer_method_values(fieldname, args):
+def segmentizer_method_values(fieldname, args, to_python=noop_conv, from_python=noop_conv):
     query_sequence = segmentize.basic_query_sequence(fieldname, args)
     return segmentize.Segmentizer(query_sequence)
     
-def segmentizer_method_all(fieldname, args):
-    segmentizer = AutoLabelSegmentizer(fieldname)
+def segmentizer_method_all(fieldname, args, to_python=noop_conv, from_python=noop_conv):
+    segmentizer = AutoLabelSegmentizer(fieldname, from_python)
     return segmentizer
     
-def segmentizer_method_each(fieldname, args):
-    # TODO: implement me
-    pass
+def segmentizer_method_each(fieldname, args, to_python=noop_conv, from_python=noop_conv):
+    segmentizer = EachSegmentizer(fieldname, from_python)
+    return segmentizer
+    
 
 _segmentizer_method_dict = {
     'range':    segmentizer_method_range,
@@ -166,5 +211,6 @@ _aggregator_method_dict = {
 def get_aggmethod_dict():
     return _aggregator_method_dict.copy()
 
+#==============================================================================#
 
 
