@@ -17,9 +17,8 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from djcelery.models import WorkerState, TaskState
 from celery.registry import TaskRegistry, tasks
 from celery.task.control import inspect
-
-#import celery.app
-
+from celery.task.control import Control
+from celery.app import app_or_default
 from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes#, CeleryStats
 
 import gviz_api
@@ -260,6 +259,37 @@ def view_defined_tasks(request):
             context_instance=RequestContext(request))
             
 
+def get_defined_tasks(request):
+    i = inspect()  
+    workers = i.registered_tasks()
+    defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
+    defined = list(defined)
+    defined.sort()
+
+    return HttpResponse(json.dumps(defined))
+
+def get_dispatched_tasks(request, taskname=None):
+    """View DispatchedTasks, possibly limited to those for a particular 
+       DefinedTask.
+    """
+    alltasks = TaskState.objects.all()
+    if taskname:
+        alltasks = alltasks.filter(name=taskname)
+    
+    pg = Paginator(alltasks, 50)
+    try:
+        page = int(request.GET.get('page','1'))
+    except ValueError:
+       page = 1
+        
+    try:
+        tasks = pg.page(page)
+    except (EmptyPage, InavlidPage):
+        tasks = pg.page(pg.num_pages)
+    
+    return HttpResponse(tasks)
+
+
 def view_dispatched_tasks(request, taskname=None):
     """View DispatchedTasks, possibly limited to those for a particular 
        DefinedTask.
@@ -278,7 +308,7 @@ def view_dispatched_tasks(request, taskname=None):
         tasks = pg.page(page)
     except (EmptyPage, InavlidPage):
         tasks = pg.page(pg.num_pages)
-    
+     
     return render_to_response('celerymanagementapp/dispatched_tasklist.html',
             {'taskname':taskname, 'tasks': tasks},
             context_instance=RequestContext(request))
@@ -336,8 +366,5 @@ def get_system_data(request):
     for w in workers:
         worker_dict[w.__str__()] = w.is_alive()
     data['workers'] = worker_dict
-    #app = celery.app.app_or_default()
-
-    #queues = app.amqp.queues
-
-    return HttpResponse(json.dumps(data))
+    stats = i.active_queues()
+    return HttpResponse(stats)
