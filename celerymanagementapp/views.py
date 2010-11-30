@@ -240,11 +240,11 @@ def visualize_runtimes(request, taskname=None, runtime_min=0., bin_count=None,
     url = reverse("celerymanagementapp.views.get_runtime_data", kwargs=kwargs)
     url += qsbuilder.to_querystring()
     params = {'url':url, 'taskname':taskname}
-    return render_to_response('barchart.html', params,
+    return render_to_response('celerymanagementapp/barchart.html', params,
             context_instance=RequestContext(request))
 
 def visualize_throughput(request, taskname=None):
-    return render_to_response('timeseries.html',
+    return render_to_response('celerymanagementapp/timeseries.html',
             {'task': taskname, 'taskname': taskname },
             context_instance=RequestContext(request))
 
@@ -255,7 +255,7 @@ def view_defined_tasks(request):
     defined = list(defined)
     defined.sort()
 
-    return render_to_response('tasklist.html',
+    return render_to_response('celerymanagementapp/tasklist.html',
             {'tasks':defined},
             context_instance=RequestContext(request))
             
@@ -279,7 +279,7 @@ def view_dispatched_tasks(request, taskname=None):
     except (EmptyPage, InavlidPage):
         tasks = pg.page(pg.num_pages)
     
-    return render_to_response('dispatched_tasklist.html',
+    return render_to_response('celerymanagementapp/dispatched_tasklist.html',
             {'taskname':taskname, 'tasks': tasks},
             context_instance=RequestContext(request))
 
@@ -316,7 +316,7 @@ def get_runtimes_new(request, taskname=None, interval=0):
     return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","runtime")))
 
 def visualize_runtimes_new(request, taskname=None, interval=0):
-    return render_to_response('runtime_timeseries.html',
+    return render_to_response('celerymanagementapp/runtime_timeseries.html',
             {'task': taskname, 'taskname': taskname },
             context_instance=RequestContext(request))
 
