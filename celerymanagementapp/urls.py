@@ -38,7 +38,7 @@ urlpatterns = patterns('celerymanagementapp',
     (r'^test/$', 'views.test_view'),
     #(r'^test/(?P<taskname>[-\w\d_.]+)/$', 'views.test_view'),
     
-    (r'^test_xy_query/$', 'dataviews.task_xy_dataview'),  
+    (r'^xy_query/dispatched_tasks/$', 'dataviews.task_xy_dataview'),  
     
     )
 

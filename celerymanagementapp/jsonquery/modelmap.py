@@ -3,6 +3,9 @@ try:
 except ImportError:
     from djcelery.models import TaskState as DispatchedTask
 
+from celerymanagementapp.models import TestModel
+
+from celerymanagementapp.jsonquery import util
 from celerymanagementapp.jsonquery.exception import JsonQueryError
 
 
@@ -21,17 +24,29 @@ class JsonModelMap(object):
         self.conv_to_python = dict((r[0],r[2]) for r in self.field_info if r[2] is not None)
         self.conv_from_python = dict((r[0],r[3]) for r in self.field_info if r[3] is not None)
     
-    def to_python(self, field, val):
-        conv = self.conv_to_python.get(field, None)
-        if conv:
-            return conv(val)
-        return val
+    # def to_python(self, field, val):
+        # conv = self.conv_to_python.get(field, None)
+        # if conv:
+            # return conv(val)
+        # return val
     
-    def from_python(self, field, val):
-        conv = self.conv_from_python.get(field, None)
-        if conv:
-            return conv(val)
-        return val
+    # def from_python(self, field, val):
+        # conv = self.conv_from_python.get(field, None)
+        # if conv:
+            # return conv(val)
+        # return val
+        
+    def get_conv_to_python(self, fieldname):
+        conv = self.conv_to_python.get(fieldname, None)
+        if not conv:
+            conv = util.noop_conv
+        return conv
+        
+    def get_conv_from_python(self, fieldname):
+        conv = self.conv_from_python.get(fieldname, None)
+        if not conv:
+            conv = util.noop_conv
+        return conv
         
     def get_fieldname(self, query_name):
         try:
@@ -52,7 +67,18 @@ class JsonTaskModelMap(JsonModelMap):
         ('runtime','runtime',None,None),
         ('state','state',None,None),
         ('worker','worker',None,None),
-        ('taskname','name',None,None),
+        ('name','taskname',None,None),
+        ]
+        
+#==============================================================================#
+class TestModelModelMap(JsonModelMap):
+    model = TestModel
+    field_info = [
+        ('date', 'date', util.date_to_python, util.date_from_python),
+        ('floatval','floatval',None,None),
+        ('intval','intval',None,None),
+        ('charval','charval',None,None),
+        ('enumval','enumval',None,None),
         ]
 
 #==============================================================================#

@@ -1,0 +1,173 @@
+
+/*  Simple query.  This asks for the count of DispatchedTasks for each state.  
+    Returned data: 
+        x-value: state, 
+        y-value: number of DispatchedTasks with that state. 
+*/
+{
+    "segmentize": {
+        "field": "state",
+        "method": [ "all" ]
+    },
+    "aggregate": [
+        {
+            "field": "count"
+        }
+    ]
+}
+
+/*  A variation of the previous query.  This explicitly lists the states it is 
+    interested in.
+    Returned data: 
+        x-value: state, 
+        y-value: number of DispatchedTasks with that state. 
+    Note: The "count" field is special, because it is not a *real* field.  All 
+          methods are ignored when the field is "count".
+*/
+{
+    "segmentize": {
+        "field": "state",
+        "method": [ 
+            "values", ["PENDING","STARTED","RECEIVED","SUCCESS"]
+        ]
+    },
+    "aggregate": [
+        {
+            "field": "count",
+            "methods": ["average"] /* When field is "count", "methods" is ignored. */
+        }
+    ]
+}
+
+
+/*  A simple range query.  This will group DispatchedTasks by runtime.  The 
+    runtimes queried are between 0 and 1 second, and the interval is 0.05 
+    seconds (for a total of 20 segments).  
+    Returned data:
+        x-value: runtime (the midpoint of the given segment)
+        y-value: number of DispatchedTasks with that state.
+*/
+{
+    "segmentize": {
+        "field": "runtime",
+        "method": [
+            "range", 
+            { "max": 1.0, "min": 0.0, "interval": 0.05 }
+        ]
+    },
+    "aggregate": [
+        {
+            "field": "count"
+        }
+    ]
+}
+
+/*  A query with a filter statement. This asks for the count of DispatchedTasks 
+    for each state.  However, the only tasks considered are those with runtimes 
+    between 0 and 1 second.
+    Returned data: 
+        x-value: state, 
+        y-value: number of DispatchedTasks with that state. 
+*/
+{
+    "filter" : {
+        ["runtime", "range", 0.0, 1.0]
+    },
+    "segmentize": {
+        "field": "state",
+        "method": [ "all" ]
+    },
+    "aggregate": [
+        {
+            "field": "count"
+        }
+    ]
+}
+
+/*  An AVG aggregation query. 
+    Returned data:
+        x-value: worker name
+        y-value: average runtime for DispatchedTasks sent to the given worker
+*/
+{
+    "segmentize": {
+        "field": "worker",
+        "method": [ "all" ]
+    },
+    "aggregate": [
+        {
+            "field": "runtime",
+            "methods": ["average"]
+        }
+    ]
+}
+
+/*  A better version of the previous AVG aggregation query.  Only 
+    DispatchedTasks with the "SUCCESS" state are considered.
+    Returned data:
+        x-value: worker name
+        y-value: average runtime for DispatchedTasks sent to the given worker
+*/
+{    
+    "filter" : {
+        ["state", "SUCCESS"]
+    },
+    "segmentize": {
+        "field": "worker",
+        "method": [ "all" ]
+    },
+    "aggregate": [
+        {
+            "field": "runtime",
+            "methods": ["average"]
+        }
+    ]
+}
+
+/*  What if we wanted the minimum and maximum runtimes in addition to the 
+    average runtime?  The following will do that.
+    Returned data:
+        x-value: worker name
+        y-value: average runtime for DispatchedTasks sent to the given worker
+*/
+{    
+    "filter" : {
+        ["state", "SUCCESS"]
+    },
+    "segmentize": {
+        "field": "worker",
+        "method": [ "all" ]
+    },
+    "aggregate": [
+        {
+            "field": "runtime",
+            "methods": ["average","max","min"]
+        }
+    ]
+}
+
+/*  What if we wanted the average waittime in addition to the average runtime?  
+    The following will do that.
+    Returned data:
+        x-value: worker name
+        y-value: average runtime for DispatchedTasks sent to the given worker
+*/
+{    
+    "filter" : {
+        ["state", "SUCCESS"]
+    },
+    "segmentize": {
+        "field": "worker",
+        "method": [ "all" ]
+    },
+    "aggregate": [
+        {
+            "field": "runtime",
+            "methods": ["average"]
+        },
+        {
+            "field": "waittime",
+            "methods": ["average"]
+        }
+    ]
+}
