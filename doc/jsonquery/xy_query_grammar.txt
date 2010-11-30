@@ -1,0 +1,112 @@
+#
+# EBNF Grammar for Json xy_query and Json xy output
+#
+# Created:  November 19, 2010
+# Modified: November 30, 2010
+#
+# This is not a complete description of the query format.  To (hopefully) 
+# increase clarity, some details have been omitted.
+#
+# Although the dictionary items specified in this grammar are given in a 
+# definite order, in actuality the order of those items does not matter, of 
+# course.
+
+
+#==============================================================================#
+# JSON Query
+
+# The number of arguments depends on the OP.
+FILTER_EXP ::=
+      '[' FIELDNAME ',' ARG ']'
+    | '[' FIELDNAME ',' OP ',' ARG ']'
+    | '[' FIELDNAME ',' OP ',' ARG1 ',' ARG2 ']' 
+    ;
+
+FILTER_EXP_LIST ::=
+    FILTER_EXP ( ',' FILTER_EXP )* 
+    ;
+    
+#------------------------------------------------------------------------------#
+SEG_METHOD_SPEC ::= 
+      '"range"' ',' '{' '"max"' ':' MAX ',' '"min"' ':' MIN ',' '"interval"' ':' INTERVAL '}'
+    | '"values"' ',' LIST
+    | '"all"'
+    | '"each"'
+    ;
+
+SEGMENTIZE_SPEC ::=
+    '"field"'  ':' FIELDNAME ','
+    '"method"' ':' '[' SEG_METHOD_SPEC ']'
+    ;
+
+#------------------------------------------------------------------------------#
+AGG_METHOD ::=
+    ( '"average"' | '"max"' | '"min"' | '"variance"' | '"enumerate"' | '"sum"' )+
+    ;
+    
+AGG_METHOD_LIST ::=
+    AGG_METHOD ( ',' AGG_METHOD )*
+    ;
+
+AGGREGATE_SPEC ::=
+    '{'
+        (
+          '"field"' ':' FIELDNAME  ',' '"methods"' ':' AGG_METHOD_LIST
+        | '"field"' ':' '"count"' (',' '"methods"' ':' AGG_METHOD_LIST )?
+        )
+    '}'
+    ;
+
+AGGREGATE_SPEC_LIST ::=
+    AGGREGATE_SPEC ( ',' AGGREGATE_SPEC )*
+    ;
+
+#------------------------------------------------------------------------------#
+# Start here.
+XY_QUERY ::=
+    '{'
+        '"filter"'  ':' '[' FILTER_EXP_LIST ']' ','
+        '"exclude"' ':' '[' FILTER_EXP_LIST ']' ','
+        
+        '"segmentize"' ':' '{' SEGMENTIZE_SPEC '}' ','
+        '"aggregate"'  ':' '[' AGGREGATE_SPEC_LIST ']'
+    '}'
+    ;
+
+
+#==============================================================================#
+# JSON Output
+
+Y_VALUE_ITEM ::=
+       '"count"' ':' VALUE 
+     | FIELDNAME ':' '{' ( METHODNAME ':' VALUE )+ '}'
+     ;
+
+Y_VALUE_SPEC ::=
+    '{'
+         Y_VALUE_ITEM ( ',' Y_VALUE_ITEM )*
+    '}'
+    ;
+
+#------------------------------------------------------------------------------#
+DATAPOINT ::=
+    '[' X_VALUE ',' Y_VALUE_SPEC ']'
+    ;
+   
+DATAPOINT_LIST ::=
+    DATAPOINT ( ',' DATAPOINT )*
+    ;
+    
+#------------------------------------------------------------------------------#
+# Start here.
+XY_RESPONSE ::=
+    '{'
+        '"data"' ':' '['
+            DATAPOINT_LIST+
+        ']'
+    '}'
+    ;
+
+#------------------------------------------------------------------------------#
+
+

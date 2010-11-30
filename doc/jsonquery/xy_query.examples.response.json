@@ -1,0 +1,62 @@
+/* Simple response.  Y-value is count. */
+{
+    "data": [
+        [ "SUCCESS", { "count": 10 } ],
+        [ "PENDING", { "count": 18 } ],
+        [ "STARTED", { "count":  2 } ]
+    ]
+}
+
+/*  Another simple response.  
+    x-value is runtime. 
+    Range query was: 
+        min: 0, max: 0.25, interval: 0.05. 
+*/
+{
+    "data": [
+        [0.025, { "count": 3 } ],
+        [0.075, { "count": 6 } ],
+        [0.125, { "count": 7 } ],
+        [0.175, { "count": 2 } ],
+        [0.225, { "count": 1 } ]
+    ]
+}
+
+/*  Simple response. Y-value is average runtime. */
+{
+    "data": [
+        [ "worker1", { "runtime": { "average": 1.1 } } ],
+        [ "worker2", { "runtime": { "average": 2.4 } } ],
+        [ "worker3", { "runtime": { "average": 0.7 } } ]
+    ]
+}
+
+/* Response with multiple aggregate methods.  */
+{
+    "data": [
+        [ "worker1", { "runtime": {"average": 1.1, "min": 0.9, "max": 1.4 } } ],
+        [ "worker2", { "runtime": {"average": 2.4, "min": 0.9, "max": 5.8 } } ],
+        [ "worker3", { "runtime": {"average": 0.7, "min": 0.6, "max": 0.9 } } ]
+    ]
+}
+
+/* Response with multiple aggregated fields.  */
+{
+    "data": [
+        [ "worker1", { "runtime": { "average": 1.1 }, "waittime": { "average": 0.44 } } ],
+        [ "worker2", { "runtime": { "average": 2.4 }, "waittime": { "average": 0.48 } } ],
+        [ "worker3", { "runtime": { "average": 0.7 }, "waittime": { "average": 0.72 } } ]
+    ]
+}
+
+/* Response with enumerate method.  */
+{
+    "data": [
+        [ "worker1", { "state": { "enumerate": [["STARTED",1],["RUNNING",1],["SUCCESS",25]] } } ],
+        [ "worker2", { "state": { "enumerate": [["STARTED",2],["RUNNING",1],["SUCCESS",29]] } } ],
+        [ "worker3", { "state": { "enumerate": [["STARTED",1],["RUNNING",0],["SUCCESS",18]] } } ]
+    ]
+}
+
+
+

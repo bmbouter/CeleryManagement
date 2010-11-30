@@ -1,0 +1,163 @@
+XY Query
+########
+
+To retrieve segmentized or x,y data from the database, use the xy_query url for 
+the particular model you are interested in.  For instance, for the 
+DispatchedTask model, use ``/celerymanagementapp/xy_query/dispatched_tasks/``.  The 
+query should be Json and given as POST data.  The response will also be Json.
+
+The Json Query:
+===============
+
+The Json query has four entries: "filter", "exclude", "segmentize", and 
+"aggregate".  (The first two are optional.)
+
+Filter and Exclude:
+~~~~~~~~~~~~~~~~~~~
+
+The optional "filter" and "exclude" entries limit the data considered for 
+processing.  For instance, if you only were interested in DispatchedTasks that 
+were successful, you would filter on ``["state", "SUCCESS"]``.  If you were not 
+interested in DispatchedTasks with runtimes below 0.01 seconds, you would 
+exclude ``["runtime","<",0.01]``.
+
+Other than the name ("filter" or "exclude"), these entries follow the same 
+format.  The difference in behavior being that "filter" includes only the data 
+that matches its expression(s), and "exclude" excludes any data that matches 
+its expression(s).
+
+The value of these entries is a list of filter expressions.  Each filter 
+expression is itself a list.  There are three acceptable formats for the filter 
+expression:
+
+::
+
+    [ FIELDNAME , ARG ]
+    [ FIELDNAME , OP , ARG ]
+    [ FIELDNAME , OP , ARG1 , ARG2 ]
+    
+The OP can be: "==", "!=", "<", ">", "<=", ">=", or "range".  The "range" OP 
+uses the two-argument form.  All others use the one-argument form.  If no OP is 
+given, it defaults to "==".  In other words, the expressions 
+``[ FIELDNAME , ARG ]`` and ``[ FIELDNAME , "==" , ARG ]`` are equivalent.
+
+Segmentize:
+~~~~~~~~~~~
+
+The "segmentize" entry determines the x coordinate in the returned data.  It 
+directs how the records are grouped--or segmented--according to some field.  
+
+For instance, one might segmentize on DispatchedTasks' state.  All tasks 
+matching a particular state would be grouped together in one segment--and there 
+would be one such segment for each state.  In such a case, the x-value would be 
+the name of the state.
+
+Another way to segmentize is based on a range broken up into adjacent 
+intervals.  Each interval would correspond to a segment.  This is particularly 
+suited to representing dates, times, and elapsed times.
+
+One other available segmentize method is to group each record in its own 
+segment.  This is for retrieving information on individual items in the 
+database--when no summarization is needed.
+
+The value of the "segmentize" entry is a dictionary with two items: "field" and 
+"method".
+
+Field:
+------
+
+The "field" entry specifies which field to segmentize on.  It must be a field 
+that is recognized by the jsonquery package.  (This is controlled by the 
+jsonquery.modelmap module.)
+
+Method:
+-------
+
+The "method" entry specifies how to segmentize the records.  Possible methods 
+are: "range", "values", "all", and "each".  The method is given as a list where 
+the first value is the name of the method and the second value specifies 
+arguments to pass to the method.  Methods that do not take arguments do not 
+take a second value.
+
+The "range" method takes three arguments, the minimum value, the maximum value, 
+and the interval length.  The arguments are given in a dictionary:
+
+::
+
+    [ "range", { "min": 0.0, "max": 1.0, "interval": 0.05 } ]
+
+The "all" method takes no arguments.  It collects all records with the same 
+value for the specified field into a single segment.  For instance, if you 
+wanted to group DispatchedTasks based on their current state, you might use 
+this method.
+
+The "values" method takes a single argument, a list of values.  It is like the 
+"all" method, except that only the given values are considered.  This is 
+helpful if you are only interested in certain values.  It is also helpful when 
+a value does not exist among the records in the database.  This cannot be done 
+with the "all" method because it only looks at values that are actually in the 
+database.
+
+The "each" method takes no arguments.  It places each record in its own 
+segment.
+
+Aggregate:
+~~~~~~~~~~
+
+The "aggregate" entry determines the y coordinate of the returned data.  It 
+directs how the segments produced via the "segmentize" entry are summarized.  
+Some summaries that are possible include "count" and "average".
+
+Like the "segmentize" entry, the "aggregate" entry takes fields and methods.  
+However, unlike the "segmentize" entry, the "aggregate" entry can handle 
+multiple items.  You can aggregate on multiple fields, with multiple methods 
+for a given field, or a combination of both.
+
+The value of the "aggregate" entry is a list of dictionaries; each of which 
+controls the aggregation of a specific field:
+    
+::
+    
+    "aggregate": [
+        { AGGREGATE_ITEM },
+        { AGGREGATE_ITEM },
+        { AGGREGATE_ITEM }
+    ]
+    
+To aggregate on only one field (probably the most common case), only include 
+one dictionary in the list.
+
+Each dictionary in the "aggregate" list has two entries: "field" and "methods".  
+Note that unlike in "segmentize", here "methods" is plural.
+
+Field:
+------
+
+The "field" entry specifies the field to aggregate.  There is a special field 
+called "count" which simply counts the number of records in a segment.  In this 
+case, the "methods" entry is ignored if present.
+
+Methods:
+--------
+
+The "methods" entry specifies how the segment is to be aggregated on the given 
+field.  The value is a list of method names.  Multiple methods may be given, 
+for instance to retrieve the min, max, and avg value:
+
+::
+
+    "methods": ["average","min","max"]
+
+The possible methods are: "average", "max", "min", "variance", "sum", and 
+"enumerate".  Except for the last method, they should be self explanatory.
+
+The "enumerate" method returns the number of occurences of each value within 
+the segment.  The result will be a dictionary with the keys being the 
+individual values.
+
+
+The Json Result:
+================
+
+
+
