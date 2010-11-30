@@ -9,10 +9,16 @@
 
 /* Containers
 ----------------------------------------------------------------------------------------------------*/
-.container_12 {
+.old_container_12 {
 	width: 92%;
 	margin-left: 4%;
 	margin-right: 4%;
+}
+
+.container_12 {
+    width: 100%;
+    margin-left: 0%;
+    margin-right: 0%;
 }
 
 /* Grid >> Global
