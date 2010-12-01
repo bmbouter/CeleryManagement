@@ -44,7 +44,7 @@ Example Usage:
 from django.db.models import Avg
 
 #==============================================================================#
-def range_query_sequence(fieldname, range, interval_size):
+def range_query_sequence(fieldname, range, interval_size, conv=lambda x: x):
     """ Creates a query_sequence over contiguous ranges.  The return value is 
         suitable for use as the query_sequence argument to the Segmentizer 
         class.
@@ -72,11 +72,11 @@ def range_query_sequence(fieldname, range, interval_size):
     
     while range_min < range_max:
         label = range_min + interval_size/2
-        yield (label, {queryname_gte: range_min, queryname_lt: range_next })
+        yield (conv(label), {queryname_gte: range_min, queryname_lt: range_next })
         range_min = range_next
         range_next += interval_size
     
-def basic_query_sequence(fieldname, labels):
+def basic_query_sequence(fieldname, labels, conv=lambda x: x):
     """ Creates a query_sequence over the items in the 'labels' parameter.  The 
         return value is suitable for use as the query_sequence argument to the 
         Segmentizer class.
@@ -91,18 +91,18 @@ def basic_query_sequence(fieldname, labels):
     """
     queryname = '{0}'.format(fieldname)
     if labels and isinstance(labels[0], tuple):
-        return ((label, {queryname: val}) for (label,val) in labels)
+        return ((conv(label), {queryname: val}) for (label,val) in labels)
     else:
-        return ((label, {queryname: label}) for label in labels)
+        return ((conv(label), {queryname: label}) for label in labels)
     
-def autolabel_query_sequence(fieldname, queryset):
+def autolabel_query_sequence(fieldname, queryset, conv=lambda x: x):
     """ Creates a query_sequence over all the values for the given field in the 
         given queryset.  The return value is suitable for use as the 
         query_sequence argument to the Segmentizer class.
     """
     queryname = '{0}'.format(fieldname)
     labels = set(queryset.values_list(fieldname, flat=True))
-    return ((label, {queryname: label}) for label in labels)
+    return ((conv(label), {queryname: label}) for label in labels)
 
 
 class Segmentizer(object):

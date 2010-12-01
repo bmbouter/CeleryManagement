@@ -3,6 +3,7 @@ import calendar
 import time
 import itertools
 import urllib
+import sys
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -17,11 +18,13 @@ from djcelery.models import WorkerState
 from celery.registry import TaskRegistry, tasks
 from celery.task.control import inspect
 
-from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes
+#from celery.task.control import Control
+#from celery.app import app_or_default
+from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes#, CeleryStats
 from celerymanagementapp.models import DispatchedTask
 
 import gviz_api
-
+import json
 
 #==============================================================================#
 # DATETIME_FMT is used by the datestr_to_datetime() and datetime_to_datestr() 
@@ -238,11 +241,11 @@ def visualize_runtimes(request, taskname=None, runtime_min=0., bin_count=None,
     url = reverse("celerymanagementapp.views.get_runtime_data", kwargs=kwargs)
     url += qsbuilder.to_querystring()
     params = {'url':url, 'taskname':taskname}
-    return render_to_response('barchart.html', params,
+    return render_to_response('celerymanagementapp/barchart.html', params,
             context_instance=RequestContext(request))
 
 def visualize_throughput(request, taskname=None):
-    return render_to_response('timeseries.html',
+    return render_to_response('celerymanagementapp/timeseries.html',
             {'task': taskname, 'taskname': taskname },
             context_instance=RequestContext(request))
 
@@ -253,10 +256,41 @@ def view_defined_tasks(request):
     defined = list(defined)
     defined.sort()
 
-    return render_to_response('tasklist.html',
+    return render_to_response('celerymanagementapp/tasklist.html',
             {'tasks':defined},
             context_instance=RequestContext(request))
             
+
+def get_defined_tasks(request):
+    i = inspect()  
+    workers = i.registered_tasks()
+    defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
+    defined = list(defined)
+    defined.sort()
+
+    return HttpResponse(json.dumps(defined))
+
+def get_dispatched_tasks(request, taskname=None):
+    """View DispatchedTasks, possibly limited to those for a particular 
+       DefinedTask.
+    """
+    alltasks = TaskState.objects.all()
+    if taskname:
+        alltasks = alltasks.filter(name=taskname)
+    
+    pg = Paginator(alltasks, 50)
+    try:
+        page = int(request.GET.get('page','1'))
+    except ValueError:
+       page = 1
+        
+    try:
+        tasks = pg.page(page)
+    except (EmptyPage, InavlidPage):
+        tasks = pg.page(pg.num_pages)
+    
+    return HttpResponse(tasks)
+
 
 def view_dispatched_tasks(request, taskname=None):
     """View DispatchedTasks, possibly limited to those for a particular 
@@ -276,7 +310,63 @@ def view_dispatched_tasks(request, taskname=None):
         tasks = pg.page(page)
     except (EmptyPage, InavlidPage):
         tasks = pg.page(pg.num_pages)
-    
-    return render_to_response('dispatched_tasklist.html',
+     
+    return render_to_response('celerymanagementapp/dispatched_tasklist.html',
             {'taskname':taskname, 'tasks': tasks},
             context_instance=RequestContext(request))
+
+def get_runtimes_new(request, taskname=None, interval=0):
+    if taskname is None:
+        dataset = TaskState.objects.all()
+    else:
+        dataset = TaskState.objects.filter(name=taskname)
+    stats = CeleryStats(dataset)
+    if interval is 0:
+        runtimes = stats.calculate_runtimes()
+    else:
+        runtimes = stats.calculate_runtimes(datetime.timedelta(seconds=interval))
+
+    all_data = [] 
+    description = {}
+    description['timestamp'] = ("DateTime","timestamp")
+    description['runtime'] = ("number","runtime")
+    
+    for i in runtimes:
+        data = {}
+        data['timestamp'] = i[0]
+        data['runtime'] = i[1]
+        all_data.append(data)
+
+    data_table = gviz_api.DataTable(description)
+    data_table.LoadData(all_data)
+
+    if "tqx" in request.GET:
+        tqx = request.GET['tqx']
+        params = dict([p.split(':') for p in tqx.split(';')])
+        reqId = params['reqId'] 
+        return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","runtime"),req_id=reqId))
+    return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","runtime")))
+
+def visualize_runtimes_new(request, taskname=None, interval=0):
+    return render_to_response('celerymanagementapp/runtime_timeseries.html',
+            {'task': taskname, 'taskname': taskname },
+            context_instance=RequestContext(request))
+
+
+def get_system_data(request):
+    data = {}
+    i = inspect()  
+    workers = i.registered_tasks()
+    defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
+    defined = list(defined)
+    defined.sort()
+
+    data['tasks'] = defined
+    
+    worker_dict = {}
+    workers = WorkerState.objects.all()
+    for w in workers:
+        worker_dict[w.__str__()] = w.is_alive()
+    data['workers'] = worker_dict
+    stats = i.active_queues()
+    return HttpResponse(stats)
