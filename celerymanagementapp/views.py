@@ -17,8 +17,8 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from djcelery.models import WorkerState, TaskState
 from celery.registry import TaskRegistry, tasks
 from celery.task.control import inspect
-from celery.task.control import Control
-from celery.app import app_or_default
+#from celery.task.control import Control
+#from celery.app import app_or_default
 from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes#, CeleryStats
 
 import gviz_api

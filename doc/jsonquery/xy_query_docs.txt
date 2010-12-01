@@ -6,20 +6,23 @@ the particular model you are interested in.  For instance, for the
 DispatchedTask model, use ``/celerymanagementapp/xy_query/dispatched_tasks/``.  The 
 query should be Json and given as POST data.  The response will also be Json.
 
-The Json Query:
-===============
+The Json Query
+==============
 
-The Json query has four entries: "filter", "exclude", "segmentize", and 
-"aggregate".  (The first two are optional.)
+The Json query has four entries: `filter`_, `exclude`_, `segmentize`_, and 
+`aggregate`_.  (The first two are optional.)
 
-Filter and Exclude:
-~~~~~~~~~~~~~~~~~~~
+.. _filter:
+.. _exclude:
+
+Filter and Exclude
+~~~~~~~~~~~~~~~~~~
 
 The optional "filter" and "exclude" entries limit the data considered for 
 processing.  For instance, if you only were interested in DispatchedTasks that 
-were successful, you would filter on ``["state", "SUCCESS"]``.  If you were not 
+were successful, you would filter on ``["state", "SUCCESS"]``.  If you were not 
 interested in DispatchedTasks with runtimes below 0.01 seconds, you would 
-exclude ``["runtime","<",0.01]``.
+exclude ``["runtime", "<", 0.01]``.
 
 Other than the name ("filter" or "exclude"), these entries follow the same 
 format.  The difference in behavior being that "filter" includes only the data 
@@ -28,27 +31,37 @@ its expression(s).
 
 The value of these entries is a list of filter expressions.  Each filter 
 expression is itself a list.  There are three acceptable formats for the filter 
-expression:
-
-::
+expression::
 
     [ FIELDNAME , ARG ]
     [ FIELDNAME , OP , ARG ]
     [ FIELDNAME , OP , ARG1 , ARG2 ]
     
-The OP can be: "==", "!=", "<", ">", "<=", ">=", or "range".  The "range" OP 
-uses the two-argument form.  All others use the one-argument form.  If no OP is 
-given, it defaults to "==".  In other words, the expressions 
-``[ FIELDNAME , ARG ]`` and ``[ FIELDNAME , "==" , ARG ]`` are equivalent.
+Available OPs::
+    
+    "=="
+    "!="
+    "<"
+    ">"
+    "<="
+    ">="
+    "range"
+    
+The ``"range"`` OP uses the two-argument form.  All others use the one-argument 
+form.  If no OP is given, it defaults to ``"=="``.  In other words, the 
+expressions ``[ FIELDNAME , ARG ]`` and ``[ FIELDNAME , "==" , ARG ]`` are 
+equivalent.
 
-Segmentize:
-~~~~~~~~~~~
+.. _segmentize:
+
+Segmentize
+~~~~~~~~~~
 
 The "segmentize" entry determines the x coordinate in the returned data.  It 
-directs how the records are grouped--or segmented--according to some field.  
+directs how the records are grouped—or segmented—according to some field.  
 
 For instance, one might segmentize on DispatchedTasks' state.  All tasks 
-matching a particular state would be grouped together in one segment--and there 
+matching a particular state would be grouped together in one segment—and there 
 would be one such segment for each state.  In such a case, the x-value would be 
 the name of the state.
 
@@ -58,20 +71,20 @@ suited to representing dates, times, and elapsed times.
 
 One other available segmentize method is to group each record in its own 
 segment.  This is for retrieving information on individual items in the 
-database--when no summarization is needed.
+database—when no summarization is needed.
 
 The value of the "segmentize" entry is a dictionary with two items: "field" and 
 "method".
 
-Field:
-------
+Field
+-----
 
 The "field" entry specifies which field to segmentize on.  It must be a field 
-that is recognized by the jsonquery package.  (This is controlled by the 
-jsonquery.modelmap module.)
+that is recognized by the ``jsonquery`` package.  (This is controlled by the 
+``jsonquery.modelmap`` module.)
 
-Method:
--------
+Method
+------
 
 The "method" entry specifies how to segmentize the records.  Possible methods 
 are: "range", "values", "all", and "each".  The method is given as a list where 
@@ -80,9 +93,7 @@ arguments to pass to the method.  Methods that do not take arguments do not
 take a second value.
 
 The "range" method takes three arguments, the minimum value, the maximum value, 
-and the interval length.  The arguments are given in a dictionary:
-
-::
+and the interval length.  The arguments are given in a dictionary::
 
     [ "range", { "min": 0.0, "max": 1.0, "interval": 0.05 } ]
 
@@ -101,11 +112,13 @@ database.
 The "each" method takes no arguments.  It places each record in its own 
 segment.
 
-Aggregate:
-~~~~~~~~~~
+.. _aggregate:
+
+Aggregate
+~~~~~~~~~
 
 The "aggregate" entry determines the y coordinate of the returned data.  It 
-directs how the segments produced via the "segmentize" entry are summarized.  
+directs how the segments produced via the `segmentize`_ entry are summarized.  
 Some summaries that are possible include "count" and "average".
 
 Like the "segmentize" entry, the "aggregate" entry takes fields and methods.  
@@ -114,9 +127,7 @@ multiple items.  You can aggregate on multiple fields, with multiple methods
 for a given field, or a combination of both.
 
 The value of the "aggregate" entry is a list of dictionaries; each of which 
-controls the aggregation of a specific field:
-    
-::
+controls the aggregation of a specific field::
     
     "aggregate": [
         { AGGREGATE_ITEM },
@@ -130,21 +141,19 @@ one dictionary in the list.
 Each dictionary in the "aggregate" list has two entries: "field" and "methods".  
 Note that unlike in "segmentize", here "methods" is plural.
 
-Field:
-------
+Field
+-----
 
 The "field" entry specifies the field to aggregate.  There is a special field 
 called "count" which simply counts the number of records in a segment.  In this 
 case, the "methods" entry is ignored if present.
 
-Methods:
---------
+Methods
+-------
 
 The "methods" entry specifies how the segment is to be aggregated on the given 
 field.  The value is a list of method names.  Multiple methods may be given, 
-for instance to retrieve the min, max, and avg value:
-
-::
+for instance to retrieve the min, max, and avg value::
 
     "methods": ["average","min","max"]
 
@@ -156,8 +165,66 @@ the segment.  The result will be a dictionary with the keys being the
 individual values.
 
 
-The Json Result:
-================
+The Json Result
+===============
 
+The query result is also formatted as Json data.  It is returned as a 
+dictionary containing a single entry: "data".  This entry's value is a list of 
+x,y data pairs—one for each segment generated by the "segmentize" entry in the 
+query.  The x value will always be a single value.   The y value is more 
+complicated since it may contain information for multiple fields and/or 
+multiple aggregation methods.
 
+Here is a high-level view of the returned data::
+
+    {
+        "data": [
+            [x0,y0],
+            [x1,y1],
+            [x2,y2],
+            ...
+        ]
+    }
+
+The y-value will be a dictionary where each entry corresponds to a field in the 
+"aggregate" entry in the original query.  If only one field was aggregated, 
+there will only be one entry.  The entry's value will be another dictionary 
+which contains one entry for each aggregation method used.  But, there is one 
+exception to this rule: if the field was "count", the corresponding value will 
+simply be an integer representing the count.  
+
+Hopefully the following examples will make this clearer (each shows a single 
+x,y data pair).
+
+    Data containing the count field::
+
+        [ "tasks.mytask", { "count": 10 } ]
+        
+    Typical single-value x,y data::
+
+        [ "tasks.mytask", { "runtime": { "average": 5.0 } } ]
+        
+    The enumerate method has more elaborate results::
+
+        [ "tasks.mytask", { "state": { "enumerate": [["STARTED",1],["RUNNING",1],["SUCCESS",25]] } } ]
+        
+    A multiple field result with count as one of those fields::
+
+        [ "tasks.mytask", { "runtime": { "average": 5.0 }, "count": 188 } ]
+        
+    A multiple field result with two "normal" fields::
+
+        [ "tasks.mytask", { "runtime": { "average": 5.0 }, "waittime": { "max": 0.08 } } ]
+        
+    A multiple method result::
+
+        [ "tasks.mytask", { "runtime": { "average": 5.0, "min": 1.9, "max": 18.4 } } ]
+        
+    A result showing both multiple fields and multiple methods::
+
+        [ "tasks.mytask", { 
+            "runtime": { "average": 5.0, "min": 1.9, "max": 18.4 }, 
+            "waittime": { "average": 0.05, "min": 0.01, "max": 0.08 } 
+            } 
+        ]
 
