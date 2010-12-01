@@ -4,15 +4,14 @@
         <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/reset-min.css" rel="stylesheet" type="text/css" />
         <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/core.less" rel="stylesheet/less" type="text/css" />
         <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/fluid_grid.css" rel="stylesheet" type="text/css" />
-        <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/south-street/jquery-ui.css" rel="stylesheet" type="text/css" />
         
         {% block extracss %}
         {% endblock extracss %}
 
-        <script type"text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/less.js" ></script>
-        <script type"text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.js" ></script>
-        <script type"text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery-ui.js" ></script>
-        <script type"text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/core.js" ></script>
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/less.js" ></script>
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.js" ></script>
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery-ui.js" ></script>
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/core.js" ></script>
         
         {% block extrajs %}
         {% endblock extrajs %}
@@ -26,31 +25,43 @@
 
     {% block body %}
     <body>
-        <div id="topmenu">
+        <div id="container" class="container_12">
+            <div id="header">
             {% block topmenu %}
-            <a href="{% url celerymanagementapp.views.view_defined_tasks %}">Defined Tasks</a>
-            | <a href="{% url celerymanagementapp.views.view_dispatched_tasks %}">Dispatched Tasks</a>
-            | <a href="{% url celerymanagementapp.views.visualize_throughput %}">All Throughput</a>
-            | <a href="{% url celerymanagementapp.views.visualize_runtimes %}?bin_count=20&auto_runtime_range=1">All Runtimes</a>
-            {% endblock %}
-        </div>
-    
-    {% if taskname %}
-        {% block taskmenu %}
-        <div id="taskmenu">
-            Task <tt style="font-size: 1.1em; font-weight: bold;">{{ taskname }}</tt>:
-            <a href="{% url celerymanagementapp.views.view_dispatched_tasks taskname=taskname %}">Dispatched Tasks</a>
-            | <a href="{% url celerymanagementapp.views.visualize_throughput taskname=taskname %}">Throughput</a>
-            | <a href="{% url celerymanagementapp.views.visualize_runtimes taskname=taskname %}?bin_count=20&auto_runtime_range=1">Runtimes</a>
-        </div>
-        {% endblock %}
-      {% endif %}
-  
-        <div id="content">
-        {% block content %}
-        {% endblock %}
+                <h1>Celery Management</h1>
+                
+                <div class="menu grid_12">
+                    <ul>
+                        <li>
+                            <a href="" onclick="alert('Not implemented yet');" title="content">Dashboard</a>
+                        </li>
+                        <li>
+                            <a href="{% url celerymanagementapp.views.view_defined_tasks %}" title="content">Defined Tasks</a>
+                        </li>
+                        <li>
+                            <a href="{% url celerymanagementapp.views.view_dispatched_tasks %}" title="content">Dispatched Tasks</a>
+                        </li>
+                    </ul>
+                    {% endblock topmenu %}
+                </div>
+            </div>
+        
+        {% if taskname %}
+        	{% block taskmenu %}
+            <div id="taskmenu">
+                Task <tt style="font-size: 1.1em; font-weight: bold;">{{ taskname }}</tt>:
+                <a href="{% url celerymanagementapp.views.view_dispatched_tasks taskname=taskname %}">Dispatched Tasks</a>
+                | <a href="{% url celerymanagementapp.views.visualize_throughput taskname=taskname %}">Throughput</a>
+                | <a href="{% url celerymanagementapp.views.visualize_runtimes taskname=taskname %}?bin_count=20&auto_runtime_range=1">Runtimes</a>
+            </div>
+        	{% endblock %}
+        {% endif %}
+            
+	    <div id="content">
+		    {% block content %}
+		    {% endblock %}
+	    </div>
         </div>
     </body>
     {% endblock body %}
-
 </html>
