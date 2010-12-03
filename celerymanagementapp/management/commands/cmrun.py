@@ -10,7 +10,7 @@ from celery.bin import celeryev
 
 class CmEvCommand(celeryev.EvCommand):
     def run_evcam(self, *args, **kwargs):
-        from celerymanagementapp.camera import evcam
+        from celerymanagementapp.snapshot.snapshot import evcam
         self.set_process_status("cam")
         kwargs["app"] = self.app
         return evcam(*args, **kwargs)
@@ -24,7 +24,7 @@ class Command(BaseCommand):
     help = 'todo...'
     
     def handle(self, *args, **options):
-        options['camera'] = 'celerymanagementapp.camera.Camera'
+        options['camera'] = 'celerymanagementapp.snapshot.snapshot.Camera'
         ev = CmEvCommand(app=app)
         ev.run(*args, **options)
 

@@ -7,7 +7,7 @@ from celery.utils.timeutils import maybe_iso8601
 
 from djcelery.snapshot import Camera as DjCeleryCamera
 
-from celerymanagementapp.state import State
+from celerymanagementapp.snapshot.state import State
 from celerymanagementapp.models import DispatchedTask
 
 class Camera(DjCeleryCamera):
@@ -25,21 +25,34 @@ class Camera(DjCeleryCamera):
         if task.worker and task.worker.hostname:
             worker = self.handle_worker((task.worker.hostname, task.worker))
         #import pdb; pdb.set_trace()
-        return self.update_task(task.state, task_id=uuid,
-                defaults={"name": task.name,
-                          "args": task.args,
-                          "kwargs": task.kwargs,
-                          "eta": maybe_iso8601(task.eta),
-                          "expires": maybe_iso8601(task.expires),
-                          "state": task.state,
-                          "tstamp": datetime.fromtimestamp(task.timestamp),
-                          "result": task.result or task.exception,
-                          "traceback": task.traceback,
-                          "runtime": task.runtime,
-                          "worker": worker,
-                          "sent": task.sent and datetime.fromtimestamp(task.sent),
-                          "waittime": task.waittime,
-                          })
+        defaults = {
+            "name":     task.name,
+            "state":    task.state,
+
+            "worker":   worker,
+
+            "runtime":  task.runtime,
+            "waittime": task.waittime,
+            "totaltime": task.totaltime,
+
+            "tstamp":   datetime.fromtimestamp(task.timestamp),
+            "sent":     task.sent and datetime.fromtimestamp(task.sent),
+            "received": task.received and datetime.fromtimestamp(task.received),
+            "started":  task.started and datetime.fromtimestamp(task.started),
+            "succeeded": task.succeeded and datetime.fromtimestamp(task.succeeded),
+            "failed":   task.failed and datetime.fromtimestamp(task.failed),
+
+            "expires":  maybe_iso8601(task.expires),
+            "result":   task.result or task.exception,
+            "retries":  task.retries,
+            "eta":      maybe_iso8601(task.eta),
+            }
+        #print ','.join(str(field.name) for field in DispatchedTask._meta.fields)
+        import pprint
+        print pprint.pformat(defaults)
+        return self.update_task(task.state, task_id=uuid, defaults=defaults)
+                          
+
     
 
 # evcam function taken from celery.events.snapshot

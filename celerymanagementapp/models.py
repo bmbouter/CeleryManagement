@@ -3,7 +3,8 @@ import datetime
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from djcelery.models import WorkerState, TaskState
+from djcelery.models import WorkerState, TaskState, TASK_STATE_CHOICES
+from djcelery.managers import TaskStateManager
 
 #==============================================================================#
 #class DefinedTask(models.Model):
@@ -15,9 +16,45 @@ from djcelery.models import WorkerState, TaskState
     
 #==============================================================================#
 
-class DispatchedTask(TaskState):
-    sent =      models.DateTimeField(_(u"sent time"), null=True)
+class DispatchedTask(models.Model):
+    """A Celery Task that has been sent."""
+    name =      models.CharField(_(u"name"), max_length=200, null=True, 
+                                 db_index=True)
+    state =     models.CharField(_(u"state"), max_length=64, 
+                                 choices=TASK_STATE_CHOICES)
+    task_id =   models.CharField(_(u"UUID"), max_length=36, unique=True)
+    worker =    models.ForeignKey(WorkerState, null=True, 
+                                  verbose_name=_("worker"))
+    
+    runtime =   models.FloatField(_(u"execution time"), null=True, 
+                                  help_text=_(u"in seconds if task successful"))
     waittime =  models.FloatField(_(u"wait elapsed time"), null=True)
+    totaltime = models.FloatField(_(u"total lifetime"), null=True)
+    
+    tstamp =    models.DateTimeField(_(u"last event received at"), db_index=True)
+    sent =      models.DateTimeField(_(u"sent time"), null=True)
+    received =  models.DateTimeField(_(u"received time"), null=True)
+    started =   models.DateTimeField(_(u"started time"), null=True)
+    succeeded = models.DateTimeField(_(u"succeeded time"), null=True)
+    failed =    models.DateTimeField(_(u"failed time"), null=True)
+    
+    expires =   models.DateTimeField(_(u"expires"), null=True)
+    result =    models.TextField(_(u"result"), null=True)
+    retries =   models.IntegerField(_(u"number of retries"), default=0)
+    
+    eta =       models.DateTimeField(_(u"ETA"), null=True, 
+                                     help_text=u"date to execute")
+    
+    hidden =    models.BooleanField(editable=False, default=False)
+    
+    objects = TaskStateManager()
+    
+    class Meta:
+        """Model meta-data."""
+        verbose_name = _(u"task")
+        verbose_name_plural = _(u"tasks")
+        get_latest_by = "tstamp"
+        ordering = ["-tstamp"]
     
 class TestModel(models.Model):
     """A model solely for use in testing."""
