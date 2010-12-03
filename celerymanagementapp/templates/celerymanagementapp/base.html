@@ -10,10 +10,13 @@
 
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/less.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.js" ></script>
-        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery-ui.js" ></script>
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.flot.min.js" ></script>
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.flot.selection.min.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/core.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/ajax.js" ></script>
-        
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/json.js" ></script>
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/charts.js" ></script>
+
         {% block extrajs %}
         {% endblock extrajs %}
 
@@ -41,7 +44,8 @@
             </div>
 	    <div id="content">
                 {% block content %}
-                {% endblock %}
+	        <button onclick="json()"></button>
+		{% endblock %}
 	    </div>
     </body>
     {% endblock body %}

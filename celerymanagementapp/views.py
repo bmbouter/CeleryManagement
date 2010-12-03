@@ -366,8 +366,7 @@ def get_system_data(request):
     for w in workers:
         worker_dict[w.__str__()] = w.is_alive()
     data['workers'] = worker_dict
-    stats = i.active_queues()
-    return HttpResponse(stats)
+    return HttpResponse(json.dumps(data))
 
 def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
