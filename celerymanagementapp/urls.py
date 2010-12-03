@@ -35,6 +35,10 @@ urlpatterns = patterns('celerymanagementapp',
 )
 
 urlpatterns += patterns('celerymanagementapp',
+    url(r'^view/system/$', 'views.system_overview', name="system_overview_url"),
+)
+
+urlpatterns += patterns('celerymanagementapp',
     (r'^get/throughputs/$', 'views.get_throughput_data'),
     (r'^get/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.get_throughput_data'),
     

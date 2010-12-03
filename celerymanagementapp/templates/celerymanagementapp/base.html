@@ -26,7 +26,6 @@
 
     {% block body %}
     <body>
-        <div id="container" class="container_12">
             <div id="header">
                 {% block header %}
                 <div id="headerBarContainer" class="container_12">
@@ -40,23 +39,10 @@
                 </div>
             {% endblock header %}
             </div>
-        
-        {% if taskname %}
-        	{% block taskmenu %}
-            <div id="taskmenu">
-                Task <tt style="font-size: 1.1em; font-weight: bold;">{{ taskname }}</tt>:
-                <a href="{% url celerymanagementapp.views.view_dispatched_tasks taskname=taskname %}">Dispatched Tasks</a>
-                | <a href="{% url celerymanagementapp.views.visualize_throughput taskname=taskname %}">Throughput</a>
-                | <a href="{% url celerymanagementapp.views.visualize_runtimes taskname=taskname %}?bin_count=20&auto_runtime_range=1">Runtimes</a>
-            </div>
-        	{% endblock %}
-        {% endif %}
-            
 	    <div id="content">
-		    {% block content %}
-		    {% endblock %}
+                {% block content %}
+                {% endblock %}
 	    </div>
-        </div>
     </body>
     {% endblock body %}
 </html>
