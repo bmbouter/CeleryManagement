@@ -56,6 +56,7 @@ class DispatchedTask(models.Model):
         get_latest_by = "tstamp"
         ordering = ["-tstamp"]
     
+
 class TestModel(models.Model):
     """A model solely for use in testing."""
     date =      models.DateField(null=True)

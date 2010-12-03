@@ -1,246 +1,236 @@
 [
   {
     "pk": 1, 
-    "model": "djcelery.taskstate", 
+    "model": "celerymanagementapp.dispatchedtask", 
     "fields": {
-      "expires": null, 
       "name": "task1", 
+      "state": "SUCCESS", 
       "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f81", 
-      "traceback": null, 
-      "args": "[]", 
       "worker": 1, 
+      "runtime": 1.0,
+      "waittime": null,
+      "totaltime": null,
+      
       "tstamp": "2010-01-01 12:00:00", 
-      "state": "SUCCESS", 
-      "eta": null, 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
       "result": "None", 
-      "kwargs": "{}", 
-      "hidden": false, 
-      "runtime": 1.0
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
     }
   },
   {
-    "pk": 1, 
+    "pk": 2, 
     "model": "celerymanagementapp.dispatchedtask", 
     "fields": {
-      "waittime": null, 
-      "sent": null
-    }
-  }, 
-  {
-    "pk": 2, 
-    "model": "djcelery.taskstate", 
-    "fields": {
-      "expires": null, 
       "name": "task2", 
+      "state": "SUCCESS", 
       "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f82", 
-      "traceback": null, 
-      "args": "[]", 
       "worker": 1, 
+      "runtime": 2.0,
+      "waittime": null,
+      "totaltime": null,
+      
       "tstamp": "2010-01-01 12:00:00", 
-      "state": "SUCCESS", 
-      "eta": null, 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
       "result": "None", 
-      "kwargs": "{}", 
-      "hidden": false, 
-      "runtime": 2.0
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
     }
   },
   {
-    "pk": 2, 
+    "pk": 3, 
     "model": "celerymanagementapp.dispatchedtask", 
     "fields": {
-      "waittime": null, 
-      "sent": null
-    }
-  }, 
-  {
-    "pk": 3, 
-    "model": "djcelery.taskstate", 
-    "fields": {
-      "expires": null, 
       "name": "task1", 
+      "state": "SUCCESS", 
       "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f83", 
-      "traceback": null, 
-      "args": "[]", 
       "worker": 1, 
+      "runtime": 3.0,
+      "waittime": null,
+      "totaltime": null,
+      
       "tstamp": "2010-01-01 13:00:00", 
-      "state": "SUCCESS", 
-      "eta": null, 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
       "result": "None", 
-      "kwargs": "{}", 
-      "hidden": false, 
-      "runtime": 3.0
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
     }
   },
   {
-    "pk": 3, 
+    "pk": 4, 
     "model": "celerymanagementapp.dispatchedtask", 
     "fields": {
-      "waittime": null, 
-      "sent": null
-    }
-  }, 
-  {
-    "pk": 4, 
-    "model": "djcelery.taskstate", 
-    "fields": {
-      "expires": null, 
       "name": "task2", 
+      "state": "SUCCESS", 
       "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f84", 
-      "traceback": null, 
-      "args": "[]", 
       "worker": 1, 
+      "runtime": 1.0,
+      "waittime": null,
+      "totaltime": null,
+      
       "tstamp": "2010-01-01 13:00:00", 
-      "state": "SUCCESS", 
-      "eta": null, 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
       "result": "None", 
-      "kwargs": "{}", 
-      "hidden": false, 
-      "runtime": 1.0
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
     }
   },
   {
-    "pk": 4, 
+    "pk": 5, 
     "model": "celerymanagementapp.dispatchedtask", 
     "fields": {
-      "waittime": null, 
-      "sent": null
-    }
-  }, 
-  
-  {
-    "pk": 5, 
-    "model": "djcelery.taskstate", 
-    "fields": {
-      "expires": null, 
       "name": "task1", 
+      "state": "SUCCESS", 
       "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f85", 
-      "traceback": null, 
-      "args": "[]", 
       "worker": 1, 
+      "runtime": 2.0,
+      "waittime": null,
+      "totaltime": null,
+      
       "tstamp": "2010-01-01 14:00:00", 
-      "state": "SUCCESS", 
-      "eta": null, 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
       "result": "None", 
-      "kwargs": "{}", 
-      "hidden": false, 
-      "runtime": 2.0
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
     }
   },
   {
-    "pk": 5, 
+    "pk": 6, 
     "model": "celerymanagementapp.dispatchedtask", 
     "fields": {
-      "waittime": null, 
-      "sent": null
-    }
-  }, 
-  {
-    "pk": 6, 
-    "model": "djcelery.taskstate", 
-    "fields": {
-      "expires": null, 
       "name": "task2", 
+      "state": "SUCCESS", 
       "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f86", 
-      "traceback": null, 
-      "args": "[]", 
       "worker": 1, 
+      "runtime": 3.0,
+      "waittime": null,
+      "totaltime": null,
+      
       "tstamp": "2010-01-01 14:00:00", 
-      "state": "SUCCESS", 
-      "eta": null, 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
       "result": "None", 
-      "kwargs": "{}", 
-      "hidden": false, 
-      "runtime": 3.0
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
     }
   },
   {
-    "pk": 6, 
+    "pk": 7, 
     "model": "celerymanagementapp.dispatchedtask", 
     "fields": {
-      "waittime": null, 
-      "sent": null
-    }
-  }, 
-  {
-    "pk": 7, 
-    "model": "djcelery.taskstate", 
-    "fields": {
-      "expires": null, 
       "name": "task1", 
+      "state": "SUCCESS", 
       "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f87", 
-      "traceback": null, 
-      "args": "[]", 
       "worker": 1, 
+      "runtime": 4.0,
+      "waittime": null,
+      "totaltime": null,
+      
       "tstamp": "2010-01-01 15:00:00", 
-      "state": "SUCCESS", 
-      "eta": null, 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
       "result": "None", 
-      "kwargs": "{}", 
-      "hidden": false, 
-      "runtime": 4.0
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
     }
   },
   {
-    "pk": 7, 
+    "pk": 8, 
     "model": "celerymanagementapp.dispatchedtask", 
     "fields": {
-      "waittime": null, 
-      "sent": null
-    }
-  }, 
-  {
-    "pk": 8, 
-    "model": "djcelery.taskstate", 
-    "fields": {
-      "expires": null, 
       "name": "task2", 
+      "state": "SUCCESS", 
       "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f88", 
-      "traceback": null, 
-      "args": "[]", 
       "worker": 1, 
+      "runtime": 4.0,
+      "waittime": null,
+      "totaltime": null,
+      
       "tstamp": "2010-01-01 15:00:00", 
-      "state": "SUCCESS", 
-      "eta": null, 
-      "result": "None", 
-      "kwargs": "{}", 
-      "hidden": false, 
-      "runtime": 4.0
-    }
-  },
-  {
-    "pk": 8, 
-    "model": "celerymanagementapp.dispatchedtask", 
-    "fields": {
-      "waittime": null, 
-      "sent": null
-    }
-  }, 
-  {
-    "pk": 9, 
-    "model": "djcelery.taskstate", 
-    "fields": {
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
       "expires": null, 
-      "name": "task1", 
-      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f89", 
-      "traceback": null, 
-      "args": "[]", 
-      "worker": 1, 
-      "tstamp": "2010-01-01 15:00:00", 
-      "state": "SUCCESS", 
-      "eta": null, 
       "result": "None", 
-      "kwargs": "{}", 
-      "hidden": false, 
-      "runtime": 3.0
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
     }
   },
   {
     "pk": 9, 
     "model": "celerymanagementapp.dispatchedtask", 
     "fields": {
-      "waittime": null, 
-      "sent": null
+      "name": "task1", 
+      "state": "SUCCESS", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f89", 
+      "worker": 1, 
+      "runtime": 3.0,
+      "waittime": null,
+      "totaltime": null,
+      
+      "tstamp": "2010-01-01 15:00:00", 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
+      "result": "None", 
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
     }
   }
   
