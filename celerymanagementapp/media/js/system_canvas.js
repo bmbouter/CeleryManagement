@@ -1,38 +1,40 @@
 var CMASystem = (typeof CMASystem == "undefined" || !CMASystem) ? {} : CMASystem;
 
-CMASystem.Task = function(y, height, text){
+function Task(y, name){
     this.x = 200;
     this.y = y;
     this.width = 200;
-    this.height = height;
+    this.height = 40;
     this.fill = '#FFC028';
-    this.fullText = text;
-    if( text.length > 25 ){
-        this.text = text.substring(0, 22) + "...";
-    } else {
-        this.text = text;
-    }
+    this.fullName = name;
     this.xCenter = (this.width / 2) + this.x;
     this.yCenter = (height / 2) + y;
+    
+    if( name.length > 25 ){
+        this.displayName = name.substring(0, 22) + "...";
+    } else {
+        this.displayName = name;
+    }
 }
 
-CMASystem.Worker = function(y, height, text){
+function Worker(y, name){
     this.x = 1000;
     this.y = y;
     this.width = 200;
-    this.height = height;
+    this.height = 40;
     this.fill = '#FFC028';
-    this.fullText = text;
-    if( text.length > 25 ){
-        this.text = text.substring(0, 22) + "...";
-    } else {
-        this.text = text;
-    }
+    this.fullName = name;
     this.xCenter = (this.width / 2) + this.x;
     this.yCenter = (height / 2) + y;
+    
+    if( name.length > 25 ){
+        this.displayName = name.substring(0, 22) + "...";
+    } else {
+        this.displayName = name;
+    }
 }
 
-CMASystem.Connector = function(x1, y1, x2, y2){
+function Connector(x1, y1, x2, y2){
     this.x1 = x1;
     this.y1 = y1;
     this.x2 = x2;
@@ -81,8 +83,8 @@ function SystemRenderer(){
     this.createTasks = function(data){
         var y = 20;
         for( item in data ){
-            addTask(y, data[item].length*8, 40, '#FFC028', data[item]);
-            addWorker(y, data[item].length*8, 40, '#FFC028', data[item]);
+            addTask(new Task(y, data[item]));
+            addWorker(new Worker(y, data[item]));
             y += 60;
         }
         createConnector(tasks[2], workers[1]);
@@ -94,23 +96,19 @@ function SystemRenderer(){
     }
     
     function createConnector(task1, task2){
-        var connector = new CMASystem.Connector(task1.xCenter, task1.yCenter, task2.xCenter, task2.yCenter);
+        var connector = new Connector(task1.xCenter, task1.yCenter, task2.xCenter, task2.yCenter);
         connectors.push(connector);
     }
 
     function draw(){
-        drawConnectors();
+        for( var i = 0; i < connectors.length; i++){
+            drawConnector(connectors[i]);
+        }
         for( var i = 0; i < tasks.length; i++){
             drawShape(tasks[i]);
         }
         for( var i = 0; i < workers.length; i++){
             drawShape(workers[i]);
-        }
-    }
-
-    function drawConnectors(){
-        for( var i = 0; i < connectors.length; i++){
-            drawConnector(connectors[i]);
         }
     }
 
@@ -131,30 +129,19 @@ function SystemRenderer(){
         context.stroke();
     }
 
-    function clearLocation(shape){
-        context.fillStyle = "#FFF";
-        context.fillRect(shape.x, shape.y, shape.width*2, shape.height);
-    }
-
-    function addTask(y, width, height, fill, text){
-        var task = new CMASystem.Task(y, height, text);
-        task.fill = fill;
-        tasks.push(task);
-    }
-    
-    function addWorker(y, width, height, fill, text){
-        var worker = new CMASystem.Worker(y, height, text);
-        worker.fill = fill;
-        workers.push(worker);
+    function clearCanvas(){
+        canvas.width = $(window).width();
+        canvas.height = $(window).height();
+        context.clearRect(0, 0, canvas.width, canvas.height);
     }
 
     function expandTask(task, expand){
         if( expand ){
-            if( task.fullText != task.text ){
-                var newTask = new CMASystem.Task(task.y, 40, task.text);
-                newTask.width = task.fullText.length * 8;
+            if( task.fullName != task.displayName ){
+                var newTask = new Task(task.y, 40, task.displayName);
+                newTask.width = task.fullName.length * 8;
                 newTask.x = task.x - ((newTask.width - task.width) / 2);
-                newTask.text = task.fullText;
+                newTask.text = task.fullName;
                 drawShape(newTask);
                 expandedTask = newTask;
             }
@@ -162,8 +149,8 @@ function SystemRenderer(){
             console.log("unexpanding");
             console.log(task.width);
             console.log(expandedTask.width);
-            var newTask = new CMASystem.Task(task.y, 40, task.text);
-            clearLocation(task);
+            var newTask = new Task(task.y, 40, task.displayName);
+            clearCanvas();
             draw();
             expandedTask = false;
         }
