@@ -351,20 +351,10 @@ def visualize_runtimes_new(request, taskname=None, interval=0):
             context_instance=RequestContext(request))
 
 
-def get_system_data(request):
-    data = {}
-    i = inspect()  
-    workers = i.registered_tasks()
-    defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
-    defined = list(defined)
-    defined.sort()
-
-    data['tasks'] = defined
-    
+def get_worker_data(request):
     worker_dict = {}
     workers = WorkerState.objects.all()
     for w in workers:
         worker_dict[w.__str__()] = w.is_alive()
-    data['workers'] = worker_dict
     
-    return HttpResponse(json.dumps(data))
+    return HttpResponse(json.dumps(worker_dict))
