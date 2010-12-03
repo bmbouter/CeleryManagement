@@ -13,59 +13,40 @@
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.flot.min.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.flot.selection.min.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/core.js" ></script>
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/ajax.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/json.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/charts.js" ></script>
 
-        
         {% block extrajs %}
         {% endblock extrajs %}
 
-        <title>{% block title %}{% endblock %}</title>
+        <title>{% block title %}System Overview{% endblock %}</title>
         
-        {% block head_xtra %}
+        {% block extra_head %}
         {% endblock %}
         
     </head>
 
-	<body>
-        <div id="container" class="container_12">
+    {% block body %}
+    <body>
             <div id="header">
-            {% block topmenu %}
-                <h1>Celery Management</h1>
-                
-                <div class="menu grid_12">
-                    <ul>
-                        <li>
-                            <a href="" onclick="alert('Not implemented yet');" title="content">Dashboard</a>
-                        </li>
-                        <li>
-                            <a href="{% url celerymanagementapp.views.view_defined_tasks %}" title="content">Defined Tasks</a>
-                        </li>
-                        <li>
-                            <a href="{% url celerymanagementapp.views.view_dispatched_tasks %}" title="content">Dispatched Tasks</a>
-                        </li>
-                    </ul>
-                </div>
-            {% endblock %}
-            </div>
-        
-        {% if taskname %}
-        	{% block taskmenu %}
-            <div id="taskmenu">
-                Task <tt style="font-size: 1.1em; font-weight: bold;">{{ taskname }}</tt>:
-                <a href="{% url celerymanagementapp.views.view_dispatched_tasks taskname=taskname %}">Dispatched Tasks</a>
-                | <a href="{% url celerymanagementapp.views.visualize_throughput taskname=taskname %}">Throughput</a>
-                | <a href="{% url celerymanagementapp.views.visualize_runtimes taskname=taskname %}?bin_count=20&auto_runtime_range=1">Runtimes</a>
-            </div>
-        	{% endblock %}
-        {% endif %}
-            
-	    <div id="content">
-	        <button onclick="json()"></button>
-		    {% block content %}
-		    {% endblock %}
-	    </div>
-    </div>
-</body>
+                {% block header %}
+                <div id="headerBarContainer" class="container_12">
+                    <h1 class="grid_10 push_1">Celery Management</h1>
+               </div>
 
+               <div id="breadCrumbsContainer" class="container_12">
+                   <div id="breadCrumbs" class="grid_10 push_1">
+                       <h2>System</h2>
+                   </div>
+                </div>
+            {% endblock header %}
+            </div>
+	    <div id="content">
+                {% block content %}
+	        <button onclick="json()"></button>
+		{% endblock %}
+	    </div>
+    </body>
+    {% endblock body %}
 </html>

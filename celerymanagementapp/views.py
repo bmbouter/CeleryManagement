@@ -356,5 +356,8 @@ def get_worker_data(request):
     workers = WorkerState.objects.all()
     for w in workers:
         worker_dict[w.__str__()] = w.is_alive()
-    
     return HttpResponse(json.dumps(worker_dict))
+
+def system_overview(request):
+    return render_to_response('celerymanagementapp/system.html',
+            context_instance=RequestContext(request))

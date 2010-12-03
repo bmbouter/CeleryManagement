@@ -1,0 +1,13 @@
+{% extends "celerymanagementapp/base.html" %}
+
+{% block extrajs %}
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/system_canvas.js" ></script>
+{% endblock extrajs %}
+
+{% block content %}
+<div id="system">
+    <canvas id="systemCanvas" width="1905">
+
+    </cavas>
+</div>
+{% endblock content %}

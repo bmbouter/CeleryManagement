@@ -16,16 +16,6 @@ urlpatterns = patterns('celerymanagementapp',
     (r'^view/throughputs/$', 'views.view_throughputs'),
     (r'^view/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.view_throughputs'),
     
-    (r'^get/throughputs/$', 'views.get_throughput_data'),
-    (r'^get/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.get_throughput_data'),
-    
-    (r'^get/runtimes/$', 'views.get_runtime_data'),
-    (r'^get/runtimes/(?P<taskname>[-\w\d_.]+)/$', 'views.get_runtime_data'),
-    (r'^get/workers/$', 'views.get_worker_data'),
-    (r'^get/tasks/$', 'views.get_defined_tasks'),
-    (r'^get/dispatched_tasks/$', 'views.get_dispatched_tasks'),
-    (r'^get/dispatched_tasks/(?P<taskname>[-\w\d_.]+)/$', 'views.get_dispatched_tasks'),
-    
     (r'^visualize/throughputs/$', 'views.visualize_throughput'),
     (r'^visualize/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.visualize_throughput'),
     
@@ -42,8 +32,23 @@ urlpatterns = patterns('celerymanagementapp',
     #(r'^test/(?P<taskname>[-\w\d_.]+)/$', 'views.test_view'),
     
     (r'^xy_query/dispatched_tasks/$', 'dataviews.task_xy_dataview'),  
+)
+
+urlpatterns += patterns('celerymanagementapp',
+    url(r'^view/system/$', 'views.system_overview', name="system_overview_url"),
+)
+
+urlpatterns += patterns('celerymanagementapp',
+    (r'^get/throughputs/$', 'views.get_throughput_data'),
+    (r'^get/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.get_throughput_data'),
     
-    )
+    (r'^get/runtimes/$', 'views.get_runtime_data'),
+    (r'^get/runtimes/(?P<taskname>[-\w\d_.]+)/$', 'views.get_runtime_data'),
+    (r'^get/workers/$', 'views.get_worker_data'),
+    (r'^get/tasks/$', 'views.get_defined_tasks'),
+    (r'^get/dispatched_tasks/$', 'views.get_dispatched_tasks'),
+    (r'^get/dispatched_tasks/(?P<taskname>[-\w\d_.]+)/$', 'views.get_dispatched_tasks'),   
+)
 
 if settings.DEBUG:
     urlpatterns += patterns('',

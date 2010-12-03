@@ -1,6 +1,14 @@
+var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
+var CMASystem = (typeof CMASystem == "undefined" || !CMASystem) ? {} : CMASystem;
+
 var tasksUrl = '../../get/tasks';
 
 $(document).ready(function() {
+    
+    var systemRenderer = new SystemRenderer();
+    systemRenderer.init();
+    CMACore.getTasks(systemRenderer.createTasks);
+    
     var xhr = jQuery.getJSON(tasksUrl);
 	var obj = jQuery.parseJSON(xhr.responseText);
 	
