@@ -44,7 +44,7 @@ urlpatterns += patterns('celerymanagementapp',
     
     (r'^get/runtimes/$', 'views.get_runtime_data'),
     (r'^get/runtimes/(?P<taskname>[-\w\d_.]+)/$', 'views.get_runtime_data'),
-    (r'^get/systemdata/$', 'views.get_system_data'),
+    (r'^get/workers/$', 'views.get_worker_data'),
     (r'^get/tasks/$', 'views.get_defined_tasks'),
     (r'^get/dispatched_tasks/$', 'views.get_dispatched_tasks'),
     (r'^get/dispatched_tasks/(?P<taskname>[-\w\d_.]+)/$', 'views.get_dispatched_tasks'),   
