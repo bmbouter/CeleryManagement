@@ -19,6 +19,10 @@ def date_to_python(val):
 def datetime_to_python(val):
     # takes a float and converts it to a python datetime.datetime
     return datetime.datetime.fromtimestamp(val)
+
+def datetime_to_python(val):
+    # takes a float and converts it to a python datetime.datetime
+    return datetime.datetime.fromtimestamp(val)
     
 def date_from_python(val):
     # takes a python datetime.date and converts it to a float
