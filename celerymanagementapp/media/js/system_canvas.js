@@ -261,6 +261,8 @@ function SystemViewer(){
         for( connector in connectors ){
             if( connectors[connector].task.fullName == task.fullName ){
                 systemRenderer.highlightConnector(connectors[connector]);
+            } else {
+                systemRenderer.dimConnector(connectors[connector]);
             }
         }
     }
@@ -269,6 +271,8 @@ function SystemViewer(){
         for( connector in connectors ){
             if( connectors[connector].worker.fullName == worker.fullName ){
                 systemRenderer.highlightConnector(connectors[connector]);
+            } else {
+                systemRenderer.dimConnector(connectors[connector]);
             }
         }
     }
@@ -298,7 +302,6 @@ function SystemRenderer(height){
         context.stroke();
     }
 
-    
     this.highlightConnector = function(connector){
         context.lineCap = "round";
         context.lineWidth = 4;
@@ -311,6 +314,15 @@ function SystemRenderer(height){
         context.font = "15px sans-serif";
         context.fillStyle = "black";
         context.fillText(connector.text, connector.xCenter+10, connector.yCenter+1);
+    }
+
+    this.dimConnector = function(connector){
+        context.lineCap = "round";
+        context.lineWidth = 0.5;
+        context.moveTo(connector.x1, connector.y1);
+        context.lineTo(connector.x2, connector.y2);
+        context.strokeStyle = connector.getFill();
+        context.stroke();
     }
     
     this.clearCanvas = function(){
