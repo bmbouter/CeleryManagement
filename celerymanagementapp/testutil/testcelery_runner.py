@@ -20,28 +20,38 @@ except ImportError:
     import unittest
     
 import subprocess
+import os
     
 from django.core.management.commands import syncdb
 from django.test.simple import DjangoTestSuiteRunner
 from django.conf import settings
 
 
-CMDBASE = 'django-admin.py'
-SETTINGS = '--settings=testcelery_settings'
-PYPATH = "--pythonpath=."
-CAMERA = 'djcelery.snapshot.Camera'
 CAMFREQ = '0.1'
 CELERYDLOG='celeryd.log.txt'
 CELERYEVLOG='celeryev.log.txt'
 
-ARGS_CELERYD = [CMDBASE, 'celeryd', '-E','-B','-f', CELERYDLOG, SETTINGS, PYPATH]
-ARGS_CELERYEV = [CMDBASE, 'celeryev', '-c',CAMERA, '--frequency={0}'.format(CAMFREQ),'-f',CELERYEVLOG, SETTINGS, PYPATH]
+#ARGS_CELERYD = [CMDBASE, 'celeryd', '-E','-B','-f', CELERYDLOG, SETTINGS, PYPATH]
+#ARGS_CELERYEV = [CMDBASE, 'celeryev', '-c',CAMERA, '--frequency={0}'.format(CAMFREQ),'-f',CELERYEVLOG, SETTINGS, PYPATH]
+
+DEFAULT_SETTINGS = 'testcelery_settings'
+DEFAULT_PYPATH = '.'
+DEFAULT_CMDBASE = 'django-admin.py'
+PYTHON_PATH = '/home/dpwhite2/CeleryManagementEnv/python_libs'
+
+ENV = os.environ
+oldpypath = ENV.get('PYTHONPATH','')
+if oldpypath:
+    oldpypath += ':'
+    
+ENV['PYTHONPATH'] = oldpypath + '/home/dpwhite2/CeleryManagementEnv/python_libs'
 
 
 class TestRunner(DjangoTestSuiteRunner):
-    def __init__(self, verbosity=1, interactive=True, failfast=True, tests=[], **kwargs):
+    def __init__(self, verbosity=1, interactive=True, failfast=True, tests=[], options={}, **kwargs):
         super(TestRunner,self).__init__(verbosity, interactive, failfast, **kwargs)
         self.testlist = tests
+        self.options = options
     
     def build_suite(self):
         suite = unittest.TestSuite()
@@ -59,9 +69,12 @@ class TestRunner(DjangoTestSuiteRunner):
         return suite
         
     def run_tests(self):
+        options = {
+            'settings': self.options.get('settings',None),
+            }
         with DBContextManager(self):
             suite = self.build_suite()
-            with CeleryContextManager():
+            with CeleryContextManager(**options):
                 result = self.run_suite(suite)
         return self.suite_result(suite, result)
         
@@ -80,9 +93,29 @@ class DBContextManager(object):
         
         
 class CeleryContextManager(object):
-    def __init__(self, settings):
+    def __init__(self, settings=None, pythonpath=None, cmdbase=None):
         self.celeryd = None
         self.celeryev = None
+        self.settings = settings or DEFAULT_SETTINGS
+        self.pythonpath = pythonpath or DEFAULT_PYPATH
+        self.cmdbase = cmdbase or DEFAULT_CMDBASE
+        
+    def _launch_celeryd(self):
+        args = [self.cmdbase, 'celeryd', '-E','-B',
+                '-f', CELERYDLOG, 
+                '--settings={0}'.format(self.settings),
+                '--pythonpath={0}'.format(self.pythonpath),
+               ]
+        return subprocess.Popen(args, env=ENV)
+        
+    def _launch_celeryev(self):
+        args = [self.cmdbase, 'cmrun',
+                '-f', CELERYEVLOG,
+                '--frequency={0}'.format(CAMFREQ),
+                '--settings={0}'.format(self.settings),
+                '--pythonpath={0}'.format(self.pythonpath),
+               ]
+        return subprocess.Popen(args, env=ENV)
         
     def terminate(self):
         if self.celeryd and not self.celeryd.poll():
@@ -97,9 +130,9 @@ class CeleryContextManager(object):
     def __enter__(self):
         try:
             print 'Launching celeryd...'
-            self.celeryd = subprocess.Popen(ARGS_CELERYD)
+            self.celeryd = self._launch_celeryd()
             print 'Launching celeryev...'
-            self.celeryev = subprocess.Popen(ARGS_CELERYEV)
+            self.celeryev = self._launch_celeryev()
         except Exception:
             print '...Error encountered launching celery processes!'
             self.terminate()
@@ -121,7 +154,7 @@ def get_test_cases():
     return [suite]
 
 
-def main():
+def main(*args, **options):
     defaultdb = settings.DATABASES['default']
     if not defaultdb.get('TEST_NAME',None):
         raise RuntimeError('The setting DATABASES.TEST_NAME must be defined.')
