@@ -48,13 +48,16 @@ function Worker(y, name, active){
     }
 }
 
-function Connector(task, worker){
+function Connector(task, worker, text){
     this.task = task;
     this.worker = worker;
     this.x1 = task.xCenter + (task.width / 2);
     this.y1 = task.yCenter;
     this.x2 = worker.xCenter - (worker.width / 2);
     this.y2 = worker.yCenter;
+    this.text = text;
+    this.xCenter = (this.x2 - ((this.x2 - this.x1) / 2));
+    this.yCenter = (this.y2 - ((this.y2 - this.y1) / 2));
     
     this.getFill = function(){
         return "red";
@@ -92,8 +95,7 @@ function SystemRenderer(){
         }
         tasksSet = true;
         if( workersSet ){
-            createConnectors();
-            draw();
+            CMACore.getTasksPerWorker(createConnectors);
         }
     }
 
@@ -105,26 +107,28 @@ function SystemRenderer(){
         }
         workersSet = true;
         if( tasksSet ){
-            createConnectors();
-            draw();
+            CMACore.getTasksPerWorker(createConnectors);
         }
     }
     
-    function createConnectors(){
-        createConnector(tasks[2], workers[0]);
-        createConnector(tasks[2], workers[0]);
-        createConnector(tasks[6], workers[0]);
-        createConnector(tasks[3], workers[0]);
-        createConnector(tasks[4], workers[0]);
+    function createConnectors(data){
+        for( task in tasks ){
+            for( worker in workers ){
+                var num = data[tasks[task].fullName][workers[worker].fullName];
+                if( num ){
+                    createConnector(tasks[task], workers[worker], num);
+                }
+            }
+        }
+        draw();
     }
 
-    function createConnector(task, worker){
-        var connector = new Connector(task, worker);
+    function createConnector(task, worker, text){
+        var connector = new Connector(task, worker, text);
         connectors.push(connector);
     }
 
     function draw(){
-        context.lineWidth = 2;
         for( var i = 0; i < connectors.length; i++){
             drawConnector(connectors[i]);
         }
@@ -137,6 +141,7 @@ function SystemRenderer(){
     }
     
     function drawShape(shape){
+        context.lineWidth = 1;
         context.fillStyle = shape.getFill();
         context.fillRect(shape.x, shape.y, shape.width, shape.height);
         context.textBaseline = "middle";
@@ -151,6 +156,20 @@ function SystemRenderer(){
         context.lineTo(connector.x2, connector.y2);
         context.strokeStyle = connector.getFill();
         context.stroke();
+    }
+
+    function highlightConnector(connector){
+        console.log("highlighting connector");
+        context.lineWidth = 4;
+        context.moveTo(connector.x1, connector.y1);
+        context.lineTo(connector.x2, connector.y2);
+        context.strokeStyle = connector.getFill();
+        context.stroke();
+        context.textBaseline = "middle";
+        context.textAlign = "left";
+        context.font = "15px sans-serif";
+        context.fillStyle = "black";
+        context.fillText(connector.text, connector.xCenter+10, connector.yCenter+1);
     }
 
     function clearCanvas(){
@@ -168,6 +187,7 @@ function SystemRenderer(){
             for( item in tasks ){
                 if( xMousePos < (tasks[item].x + tasks[item].width) && xMousePos > tasks[item].x ){
                     if( yMousePos < (tasks[item].y + tasks[item].height) && yMousePos > tasks[item].y ){
+                        showConnectors(tasks[item]);
                         expandTask(tasks[item], true);
                     }
                 }
@@ -197,6 +217,14 @@ function SystemRenderer(){
             clearCanvas();
             draw();
             expandedTask = false;
+        }
+    }
+
+    function showConnectors(task){
+        for( connector in connectors ){
+            if( connectors[connector].task.fullName == task.fullName ){
+                highlightConnector(connectors[connector]);
+            }
         }
     }
 }
