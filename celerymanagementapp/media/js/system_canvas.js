@@ -72,8 +72,8 @@ function SystemViewer(){
     var expandedWorker = false;
     var tasksSet = false;
     var workersSet = false;
-    var systemRenderer = new SystemRenderer();
-    
+    var systemRenderer; 
+
     this.init = function(){
         $('#systemCanvas').mousemove(handleHover);
         $('#systemCanvas').click(handleClick);
@@ -122,6 +122,12 @@ function SystemViewer(){
     }
     
     function draw(){
+        if( workers.length > tasks.length ){
+            var height = workers.length * 60 + 20;
+        } else {
+            var height = tasks.length * 60 + 20;
+        }
+        systemRenderer = new SystemRenderer(height);
         for( var i = 0; i < connectors.length; i++){
             systemRenderer.drawConnector(connectors[i]);
         }
@@ -268,11 +274,11 @@ function SystemViewer(){
     }
 }
 
-function SystemRenderer(){
+function SystemRenderer(height){
     var canvas = $('#systemCanvas')[0];
     var context = canvas.getContext("2d");
     canvas.width = $(window).width();
-    canvas.height = $(window).height();
+    canvas.height = height;
     var drawShapes = new DrawShapes(context);
    
     this.drawEntity = function(shape){
