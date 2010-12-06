@@ -64,22 +64,19 @@ function Connector(task, worker, text){
     }
 }
 
-function SystemRenderer(){
+function SystemViewer(){
     var tasks = [];
     var workers = [];
     var connectors = [];
-    var canvas = $('#systemCanvas')[0];
-    var context = canvas.getContext("2d");
     var expandedTask = false;
     var expandedWorker = false;
     var tasksSet = false;
     var workersSet = false;
+    var systemRenderer = new SystemRenderer();
     
     this.init = function(){
-        canvas.width = $(window).width();
-        canvas.height = $(window).height();
-        canvas.onselectstart = function() { return false; }
         $('#systemCanvas').mousemove(handleHover);
+        $('#systemCanvas').click(handleClick);
         this.refresh();
     }
 
@@ -117,68 +114,25 @@ function SystemRenderer(){
             for( worker in workers ){
                 var num = data[tasks[task].fullName][workers[worker].fullName];
                 if( num ){
-                    createConnector(tasks[task], workers[worker], num);
+                    connectors.push(new Connector(tasks[task], workers[worker], num));
                 }
             }
         }
         draw();
     }
-
-    function createConnector(task, worker, text){
-        var connector = new Connector(task, worker, text);
-        connectors.push(connector);
-    }
-
+    
     function draw(){
         for( var i = 0; i < connectors.length; i++){
-            drawConnector(connectors[i]);
+            systemRenderer.drawConnector(connectors[i]);
         }
         for( var i = 0; i < tasks.length; i++){
-            drawShape(tasks[i]);
+            systemRenderer.drawEntity(tasks[i]);
         }
         for( var i = 0; i < workers.length; i++){
-            drawShape(workers[i]);
+            systemRenderer.drawEntity(workers[i]);
         }
     }
     
-    function drawShape(shape){
-        context.lineWidth = 1;
-        context.fillStyle = shape.getFill();
-        context.fillRect(shape.x, shape.y, shape.width, shape.height);
-        context.textBaseline = "middle";
-        context.textAlign = "center";
-        context.font = "15px sans-serif";
-        context.fillStyle = "black";
-        context.fillText(shape.displayName, shape.xCenter, shape.yCenter);
-    }
-    
-    function drawConnector(connector){
-        context.moveTo(connector.x1, connector.y1);
-        context.lineTo(connector.x2, connector.y2);
-        context.strokeStyle = connector.getFill();
-        context.stroke();
-    }
-
-    function highlightConnector(connector){
-        context.lineCap = "round";
-        context.lineWidth = 4;
-        context.moveTo(connector.x1, connector.y1);
-        context.lineTo(connector.x2, connector.y2);
-        context.strokeStyle = connector.getFill();
-        context.stroke();
-        context.textBaseline = "middle";
-        context.textAlign = "left";
-        context.font = "15px sans-serif";
-        context.fillStyle = "black";
-        context.fillText(connector.text, connector.xCenter+10, connector.yCenter+1);
-    }
-
-    function clearCanvas(){
-        canvas.width = $(window).width();
-        canvas.height = $(window).height();
-        context.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
     function handleHover(e){
         var xOffset = 0;
         var yOffset = 115;
@@ -188,6 +142,18 @@ function SystemRenderer(){
         handleWorkerHover(xMousePos, yMousePos);
     }
 
+    function handleClick(e){
+        var xOffset = 0;
+        var yOffset = 115;
+        var xMousePos = e.pageX - xOffset;
+        var yMousePos = e.pageY - yOffset;
+        var entity = getEntity(xMousePos, yMousePos);
+        if( entity != undefined ){
+            console.log(entity.fullName);
+            window.location = CMACore.task_url + entity.fullName + "/";
+        }
+    }
+
     function handleTaskHover(xMousePos, yMousePos){
         if( !expandedTask ){
             for( item in tasks ){
@@ -195,6 +161,8 @@ function SystemRenderer(){
                     if( yMousePos < (tasks[item].y + tasks[item].height) && yMousePos > tasks[item].y ){
                         showTaskConnectors(tasks[item]);
                         expandTask(tasks[item], true);
+                        $('#systemCanvas').css("cursor", "pointer");
+                        $('#systemCanvas').css("cursor", "hand");
                     }
                 }
             }
@@ -203,6 +171,7 @@ function SystemRenderer(){
                 || !((yMousePos < (expandedTask.y + expandedTask.height)) && (yMousePos > expandedTask.y)) ){
                 
                     expandTask(expandedTask, false);
+                    $('#systemCanvas').css("cursor", "auto");
             }
         }
     }
@@ -225,6 +194,23 @@ function SystemRenderer(){
         }
     }
 
+    function getEntity(xMousePos, yMousePos){
+        for( item in tasks ){
+            if( xMousePos < (tasks[item].x + tasks[item].width) && xMousePos > tasks[item].x ){
+                if( yMousePos < (tasks[item].y + tasks[item].height) && yMousePos > tasks[item].y ){
+                    return tasks[item];
+                }
+            }
+        }
+        for( item in workers ){
+            if( xMousePos < (workers[item].x + workers[item].width) && xMousePos > workers[item].x ){
+                if( yMousePos < (workers[item].y + workers[item].height) && yMousePos > workers[item].y ){
+                    return workers[item];
+                }
+            }
+        }
+    }
+
     function expandTask(task, expand){
         if( expand ){
             if( task.fullName != task.displayName ){
@@ -232,14 +218,14 @@ function SystemRenderer(){
                 newTask.width = task.fullName.length * 8;
                 newTask.x = task.x - ((newTask.width - task.width) / 2);
                 newTask.displayName = task.fullName;
-                drawShape(newTask);
+                systemRenderer.drawEntity(newTask);
                 expandedTask = newTask;
             } else {
                 expandedTask = task;
             }
         } else {
             var newTask = new Task(task.y, task.displayName);
-            clearCanvas();
+            systemRenderer.clearCanvas();
             draw();
             expandedTask = false;
         }
@@ -252,14 +238,14 @@ function SystemRenderer(){
                 newWorker.width = worker.fullName.length * 8;
                 newWorker.x = worker.x - ((newWorker.width - worker.width) / 2);
                 newWorker.displayName = worker.fullName;
-                drawShape(newWorker);
+                systemRenderer.drawEntity(newWorker);
                 expandedWorker = newWorker;
             } else {
                 expandedWorker = worker;
             }
         } else {
             var newWorker = new Worker(worker.y, worker.displayName, worker.active);
-            clearCanvas();
+            systemRenderer.clearCanvas();
             draw();
             expandedWorker = false;
         }
@@ -268,7 +254,7 @@ function SystemRenderer(){
     function showTaskConnectors(task){
         for( connector in connectors ){
             if( connectors[connector].task.fullName == task.fullName ){
-                highlightConnector(connectors[connector]);
+                systemRenderer.highlightConnector(connectors[connector]);
             }
         }
     }
@@ -276,8 +262,86 @@ function SystemRenderer(){
     function showWorkerConnectors(worker){
         for( connector in connectors ){
             if( connectors[connector].worker.fullName == worker.fullName ){
-                highlightConnector(connectors[connector]);
+                systemRenderer.highlightConnector(connectors[connector]);
             }
+        }
+    }
+}
+
+function SystemRenderer(){
+    var canvas = $('#systemCanvas')[0];
+    var context = canvas.getContext("2d");
+    canvas.width = $(window).width();
+    canvas.height = $(window).height();
+    var drawShapes = new DrawShapes(context);
+   
+    this.drawEntity = function(shape){
+        context.lineWidth = 1;
+        drawShapes.roundedRect(shape.x, shape.y, shape.width, shape.height, shape.getFill());
+        context.textBaseline = "middle";
+        context.textAlign = "center";
+        context.font = "15px sans-serif";
+        context.fillStyle = "black";
+        context.fillText(shape.displayName, shape.xCenter, shape.yCenter);
+    }
+    
+    this.drawConnector = function(connector){
+        context.moveTo(connector.x1, connector.y1);
+        context.lineTo(connector.x2, connector.y2);
+        context.strokeStyle = connector.getFill();
+        context.stroke();
+    }
+
+    
+    this.highlightConnector = function(connector){
+        context.lineCap = "round";
+        context.lineWidth = 4;
+        context.moveTo(connector.x1, connector.y1);
+        context.lineTo(connector.x2, connector.y2);
+        context.strokeStyle = connector.getFill();
+        context.stroke();
+        context.textBaseline = "middle";
+        context.textAlign = "left";
+        context.font = "15px sans-serif";
+        context.fillStyle = "black";
+        context.fillText(connector.text, connector.xCenter+10, connector.yCenter+1);
+    }
+    
+    this.clearCanvas = function(){
+        canvas.width = $(window).width();
+        canvas.height = $(window).height();
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+}
+
+function DrawShapes(context){
+    
+    this.roundedRect = function(x, y, width, height, fill, radius, stroke) {
+        if( typeof stroke == "undefined" ){
+            stroke = false;
+        }
+        if( typeof radius == "undefined" ){
+            radius = 5;
+        }
+
+        context.beginPath();
+        context.moveTo(x + radius, y);
+        context.lineTo(x + width - radius, y);
+        context.quadraticCurveTo(x + width, y, x + width, y + radius);
+        context.lineTo(x + width, y + height - radius);
+        context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        context.lineTo(x + radius, y + height);
+        context.quadraticCurveTo(x, y + height, x, y + height - radius);
+        context.lineTo(x, y + radius);
+        context.quadraticCurveTo(x, y, x + radius, y);
+        context.closePath();
+        if( stroke ){
+            context.stroke();
+        }
+        if( fill ){
+            context.fillStyle = fill;
+            context.fill();
         }
     }
 }
