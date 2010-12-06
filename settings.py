@@ -107,7 +107,7 @@ INSTALLED_APPS = (
     'djcelery',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
-    'south',
+    #'south',
 )
 
 CELERYMANAGEMENTAPP_MEDIA_PREFIX = "/celerymanagementapp/site_media/"
