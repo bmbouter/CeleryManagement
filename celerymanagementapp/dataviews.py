@@ -13,16 +13,21 @@ from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 
 #==============================================================================#
 def _get_json(request, allow_empty=False):
+    """Return the json content of the given request.  The json must be in the 
+       request's POST data."""
     rawjson = request.raw_post_data
     if allow_empty and not rawjson:
         return None
     return json.loads(rawjson)
     
 def _json_response(jsondata, **kwargs):
+    """Convert a Python structure (such as dict, list, string, etc) into a json 
+       bystream which is then returned as a Django HttpResponse."""
     rawjson = json.dumps(jsondata, **kwargs)
     return HttpResponse(rawjson, mimetype='application/json')
     
 def get_defined_tasks():
+    """Get a list of the currently defined tasks."""
     i = inspect()
     workers = i.registered_tasks()
     defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
@@ -31,8 +36,10 @@ def get_defined_tasks():
     return defined
     
 def get_workers():
+    """Get a list of all workers that exist (running or not) in the database."""
     workers = WorkerState.objects.all()
     return [unicode(w) for w in workers]
+    
 
 #==============================================================================#
 def task_xy_dataview(request):
@@ -81,7 +88,7 @@ def pending_task_count_dataview(request):
     d = json_result['data']
     r = dict((row[0], row[1]['count']) for row in d)
     
-    return _json_response(r, indent=2)
+    return _json_response(r)
     
 def tasks_per_worker_dataview(request):
     """ Return the number of tasks of each DefinedTask dispatched to each 

@@ -52,7 +52,7 @@ class DispatchedTask(models.Model):
     
     class Meta:
         """Model meta-data."""
-        verbose_name = _(u"task")
+        verbose_name = _(u"Dispatched Task")
         verbose_name_plural = _(u"tasks")
         get_latest_by = "tstamp"
         ordering = ["-tstamp"]

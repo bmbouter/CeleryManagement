@@ -2,9 +2,10 @@ import subprocess
 import time
 import collections
 import sys
+import signal
 from optparse import OptionParser
 
-#from runall_config import process_arguments
+TERMINATE_ATTEMPTS_COUNT = 10
     
 class ProcessSet(object):
     def __init__(self, procsargs, init_delay=1.0):
@@ -12,18 +13,21 @@ class ProcessSet(object):
         self.procs = []
         try:
             for i,args in enumerate(procsargs):
-                print 'ProcessSet: Starting process #{0}'.format(i+1)
+                print 'ProcessSet: Starting process #{0}...  '.format(i+1),
                 if isinstance(args, collections.Sequence):
-                    proc = subprocess.Popen(args)
+                    proc = subprocess.Popen(args, close_fds=True)
                 elif isinstance(args, collections.Mapping):
+                    args['close_fds'] = True
                     proc = subprocess.Popen(**args)
                 else:
+                    print
                     msg = 'ProcessSet: Bad process arguments!\n'
                     msg += '  process_arguments in runall_config.py must contain lists and/or dicts.'
                     msg += '  process_arguments[{0}] is: {1}.'.format(i,type(args))
                     raise RuntimeError(msg)
-                time.sleep(init_delay)
                 self.procs.append(proc)
+                time.sleep(init_delay)
+                print 'pid: {0}'.format(proc.pid)
         except:
             self.terminate()
             raise
@@ -84,13 +88,13 @@ class ProcessSet(object):
     def cleanup(self, waittime=2.0):
         print 'ProcessSet: Cleaning up...'
         i = 0
-        while i<10 and not self.all_stopped():
+        while i<TERMINATE_ATTEMPTS_COUNT and not self.all_stopped():
             self.terminate()
             time.sleep(0.5)
             i+=1
         print 'ProcessSet: Allowing extra time for processes to stop before killing them...'
-        self.kill()
         time.sleep(waittime)
+        self.kill()
 
 def parse_options():
     parser = OptionParser()
