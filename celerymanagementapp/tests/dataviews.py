@@ -34,6 +34,12 @@ class XYDataView_TestCase(base.CeleryManagement_DBTestCaseBase):
         
         self.assertEquals(expected_output, output)
         
+# class WorkerSubprocessesDataview_TestCase(base.CeleryManagement_DBTestCaseBase):
+    # pass
         
-
+# class PendingTaskCountDataview_TestCase(base.CeleryManagement_DBTestCaseBase):
+    # pass
+        
+# class TasksPerWorkerDataview_TestCase(base.CeleryManagement_DBTestCaseBase):
+    # pass
 

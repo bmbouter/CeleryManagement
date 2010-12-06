@@ -80,7 +80,7 @@ class DBContextManager(object):
         
         
 class CeleryContextManager(object):
-    def __init__(self):
+    def __init__(self, settings):
         self.celeryd = None
         self.celeryev = None
         
