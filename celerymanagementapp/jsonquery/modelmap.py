@@ -79,6 +79,7 @@ class JsonTaskModelMap(JsonModelMap):
         ('succeeded','succeeded',None,None),
         ('failed','failed',None,None),
         
+        ('routing_key','routing_key',None,None),
         ('expires','expires',None,None),
         ('result','result',None,None),
         ('eta','eta',None,None),

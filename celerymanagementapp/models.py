@@ -28,8 +28,8 @@ class DispatchedTask(models.Model):
     
     runtime =   models.FloatField(_(u"execution time"), null=True, 
                                   help_text=_(u"in seconds if task successful"))
-    waittime =  models.FloatField(_(u"wait elapsed time"), null=True)
-    totaltime = models.FloatField(_(u"total lifetime"), null=True)
+    waittime =  models.FloatField(_(u"wait time"), null=True)
+    totaltime = models.FloatField(_(u"total time"), null=True)
     
     tstamp =    models.DateTimeField(_(u"last event received at"), db_index=True)
     sent =      models.DateTimeField(_(u"sent time"), null=True)
@@ -38,6 +38,7 @@ class DispatchedTask(models.Model):
     succeeded = models.DateTimeField(_(u"succeeded time"), null=True)
     failed =    models.DateTimeField(_(u"failed time"), null=True)
     
+    routing_key = models.CharField(_(u"routing key"), max_length=200, null=True)
     expires =   models.DateTimeField(_(u"expires"), null=True)
     result =    models.TextField(_(u"result"), null=True)
     retries =   models.IntegerField(_(u"number of retries"), default=0)

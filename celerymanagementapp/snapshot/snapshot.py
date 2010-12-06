@@ -47,9 +47,6 @@ class Camera(DjCeleryCamera):
             "retries":  task.retries,
             "eta":      maybe_iso8601(task.eta),
             }
-        #print ','.join(str(field.name) for field in DispatchedTask._meta.fields)
-        import pprint
-        print pprint.pformat(defaults)
         return self.update_task(task.state, task_id=uuid, defaults=defaults)
                           
 
