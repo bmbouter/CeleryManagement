@@ -7,7 +7,6 @@ $(document).ready(function() {
     
     var systemRenderer = new SystemRenderer();
     systemRenderer.init();
-    CMACore.getTasks(systemRenderer.createTasks);
     
     var xhr = jQuery.getJSON(tasksUrl);
 	var obj = jQuery.parseJSON(xhr.responseText);

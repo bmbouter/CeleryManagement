@@ -1,4 +1,4 @@
-var CMASystem = (typeof CMASystem == "undefined" || !CMASystem) ? {} : CMASystem;
+var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
 
 function Task(y, name){
     this.x = 200;
@@ -8,7 +8,7 @@ function Task(y, name){
     this.fill = '#FFC028';
     this.fullName = name;
     this.xCenter = (this.width / 2) + this.x;
-    this.yCenter = (height / 2) + y;
+    this.yCenter = (this.height / 2) + y;
     
     if( name.length > 25 ){
         this.displayName = name.substring(0, 22) + "...";
@@ -25,12 +25,18 @@ function Worker(y, name){
     this.fill = '#FFC028';
     this.fullName = name;
     this.xCenter = (this.width / 2) + this.x;
-    this.yCenter = (height / 2) + y;
+    this.yCenter = (this.height / 2) + y;
+    this.workerStatus = active;
     
     if( name.length > 25 ){
         this.displayName = name.substring(0, 22) + "...";
     } else {
         this.displayName = name;
+    }
+
+    this.getFill = function(){
+        if( this.active = true ){
+            return '#FFC028';
     }
 }
 
@@ -48,6 +54,8 @@ function SystemRenderer(){
     var canvas = $('#systemCanvas')[0];
     var context = canvas.getContext("2d");
     var expandedTask = false;
+    var tasksSet = false;
+    var workersSet = false;
     
     this.init = function(){
         canvas.width = $(window).width();
@@ -55,6 +63,8 @@ function SystemRenderer(){
         canvas.onselectstart = function() { return false; }
         context.lineWidth = 2;
         $('#systemCanvas').mousemove(showTaskName);
+        CMACore.getTasks(this.createTasks);
+        CMACore.getWorkers(this.createWorkers);
     }
 
     function showTaskName(e){
@@ -83,20 +93,42 @@ function SystemRenderer(){
     this.createTasks = function(data){
         var y = 20;
         for( item in data ){
-            addTask(new Task(y, data[item]));
-            addWorker(new Worker(y, data[item]));
+            tasks.push(new Task(y, data[item]));
             y += 60;
         }
-        createConnector(tasks[2], workers[1]);
-        createConnector(tasks[2], workers[3]);
-        createConnector(tasks[6], workers[4]);
-        createConnector(tasks[3], workers[6]);
-        createConnector(tasks[4], workers[6]);
-        draw();
+        console.log("tasks set");
+        tasksSet = true;
+        if( workersSet ){
+            createConnectors();
+            draw();
+        }
+    }
+
+    this.createWorkers = function(data){
+        var y = 20;
+        for( item in data ){
+            workers.push(new Worker(y, item));
+            y += 60;
+        }
+        console.log("workers set");
+        workersSet = true;
+        if( tasksSet ){
+            console.log(this);
+            createConnectors();
+            draw();
+        }
     }
     
+    function createConnectors(){
+        createConnector(tasks[2], workers[0]);
+        createConnector(tasks[2], workers[0]);
+        createConnector(tasks[6], workers[0]);
+        createConnector(tasks[3], workers[0]);
+        createConnector(tasks[4], workers[0]);
+    }
+
     function createConnector(task1, task2){
-        var connector = new Connector(task1.xCenter, task1.yCenter, task2.xCenter, task2.yCenter);
+        var connector = new Connector(task1.xCenter + (task1.width / 2), task1.yCenter, task2.xCenter - (task2.width / 2), task2.yCenter);
         connectors.push(connector);
     }
 
@@ -119,7 +151,7 @@ function SystemRenderer(){
         context.textAlign = "center";
         context.font = "15px sans-serif";
         context.fillStyle = "black";
-        context.fillText(shape.text, shape.xCenter, shape.yCenter);
+        context.fillText(shape.displayName, shape.xCenter, shape.yCenter);
     }
     
     function drawConnector(connector){
@@ -138,10 +170,10 @@ function SystemRenderer(){
     function expandTask(task, expand){
         if( expand ){
             if( task.fullName != task.displayName ){
-                var newTask = new Task(task.y, 40, task.displayName);
+                var newTask = new Task(task.y, task.fullName);
                 newTask.width = task.fullName.length * 8;
                 newTask.x = task.x - ((newTask.width - task.width) / 2);
-                newTask.text = task.fullName;
+                newTask.displayName = task.fullName;
                 drawShape(newTask);
                 expandedTask = newTask;
             }
@@ -149,7 +181,7 @@ function SystemRenderer(){
             console.log("unexpanding");
             console.log(task.width);
             console.log(expandedTask.width);
-            var newTask = new Task(task.y, 40, task.displayName);
+            var newTask = new Task(task.y, task.displayName);
             clearCanvas();
             draw();
             expandedTask = false;
