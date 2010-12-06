@@ -6,6 +6,7 @@ function Chart(loc, data, options) {
     var options = options; //The options used to display the data
     var plot = null; //A variable to hold the Flot object
     var overview = null; //A variable to hold the Flot object that displays an overview
+    this.test = null; //Test variable, not necessary for functioning class
     
     /**
      * Display the chart using the global data and options
@@ -91,6 +92,7 @@ function Chart(loc, data, options) {
         options.series.lines = {show: true};
 
         displayChart();
+        this.test = plot;
     }
     
     /**
@@ -274,49 +276,66 @@ function Chart(loc, data, options) {
 
         displayChart();
     }
-};
 
+    /**
+     * Enable an annotation on a point on a specific data plot
+     * 
+     * @param {String} label the label of the data plot containing the point
+     * @param {Double} point the x-value to add an annotation to
+     * @param {String} text the string of text to use in the annotation
+     */
+    this.addAnnotation = function(label, point, text) {
+        var value = null;
 
-//The following code can be used as a simple example and to test functionality
-//of the Flot abstraction script
-/*var data = [
-    {
-        label: "Data 1",
-        data: [[0.025, 3],[0.075, 6],[0.125, 7],[0.175, 2],[0.225, 1]]
-    },
-    {
-        label: "Data 2",
-        data: [[0.025, 2],[0.050, 8],[0.125, 3],[0.175, 4],[0.225, 2],[0.315, 4]]
-    },
-    {
-        label: "Data 3",
-        data: [[0.025, 5],[0.050, 6],[0.125, 10],[0.175, 6],[0.225, 4],[0.315, 5]]
+        $.each(data, function(i, obj) {
+            if(obj.label == label) {
+                $.each(obj.data, function(j, arr) {
+                    if(arr[0] == point) {
+                        value = arr[1];
+                        return;
+                    }
+                });
+
+                return;
+            }
+        });
+        
+        var pos = plot.pointOffset({x: point, y: value});
+        
+        var arrow = {left: pos.left - 4, top: pos.top - 4};
+        
+        var offset = 6;
+
+        var context = plot.getCanvas().getContext('2d');
+        context.moveTo(arrow.left, arrow.top);
+        context.lineTo(arrow.left - offset, arrow.top);
+        context.lineTo(arrow.left - offset/3, arrow.top - offset/3);
+        context.lineTo(arrow.left, arrow.top - offset);
+        //context.lineTo(arrow.left + 6, arrow.top);
+        context.lineTo(arrow.left, arrow.top);
+        context.fillStyle = '#222';
+        context.fill();
+
+        context.moveTo(arrow.left - offset/2 + 2, arrow.top - offset/2 + 2);
+        context.lineTo(arrow.left - offset*2, arrow.top - offset*2);
+        context.strokeStyle = '#222';
+        context.stroke();
+
+        /*$(chart).append('<div class="' + label + '_' + point +
+            '" style="position: absolute; left: ' + (pos.left + 16) + 'px; ' +
+            'top: ' + (pos.top + 16) + 'px; color: #000; font-size: smaller">' + 
+            text + '</div>');*/
+        
+        context.fillText(text, arrow.left - offset*4, arrow.top - offset*3 + offset/2);
     }
-];
-
-var options = {
-    series: {
-        lines: { show: true },
-        points: { show: true }
-    },
-    legend: { noColumns: 1 },
-    xaxis: { min: 0, autoscaleMargin: 0.1 },
-    yaxis: { min: 0 },
-    selection: { mode: "x" },
-    //grid: { hoverable: true, clickable: true }
+    
+    /**
+     * Remove an annotation that is on a point on a specific data plot
+     *
+     * @param {String} label the label of the data plot containing the point
+     * @param {Double} point the x-value the has the annotation
+     */
+    this.removeAnnotation = function(label, point) {
+        $('.' + label + '_' + point).remove();
+    }
 };
-
-var c1 = null;
-
-$(document).ready(function() {
-    //c1 = new Chart('#graph', data, options);
-    //c1.displayLineChart();
-    //c1.addSecondaryAxis({label: "Data 4", data: [[0.1, 2],[0.7, 1]]});
-    //c1.changePoint("Data 1", 0.025, 6);
-    //c1.displayBarChart();
-    //c1.displayLineChart();
-    //c1.disablePoints();
-    //c1.addDataPlot({label: "Data 4", data: [[0.1, 2],[0.7, 1]]});
-    //c1.changeDataPlot("Data 4", [[0.05, 2],[0.1, 4],[0.2, 9]]);
-    //c1.enableOverview();
-});*/
