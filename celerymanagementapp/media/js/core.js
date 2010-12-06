@@ -1,5 +1,4 @@
 var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
-var CMASystem = (typeof CMASystem == "undefined" || !CMASystem) ? {} : CMASystem;
 
 var tasksUrl = '../../get/tasks';
 

@@ -26,7 +26,7 @@ function Worker(y, name){
     this.fullName = name;
     this.xCenter = (this.width / 2) + this.x;
     this.yCenter = (this.height / 2) + y;
-    this.workerStatus = active;
+    this.active = true;
     
     if( name.length > 25 ){
         this.displayName = name.substring(0, 22) + "...";
@@ -35,16 +35,19 @@ function Worker(y, name){
     }
 
     this.getFill = function(){
-        if( this.active = true ){
-            return '#FFC028';
+        if( this.active ){
+            return this.activeFill;
+        }
     }
 }
 
-function Connector(x1, y1, x2, y2){
-    this.x1 = x1;
-    this.y1 = y1;
-    this.x2 = x2;
-    this.y2 = y2;
+function Connector(task, worker){
+    this.task = task;
+    this.worker = worker;
+    this.x1 = task.xCenter + (task.width / 2);
+    this.y1 = task.yCenter;
+    this.x2 = worker.xCenter - (worker.width / 2);
+    this.y2 = worker.yCenter;
 }
 
 function SystemRenderer(){
@@ -127,8 +130,8 @@ function SystemRenderer(){
         createConnector(tasks[4], workers[0]);
     }
 
-    function createConnector(task1, task2){
-        var connector = new Connector(task1.xCenter + (task1.width / 2), task1.yCenter, task2.xCenter - (task2.width / 2), task2.yCenter);
+    function createConnector(task, worker){
+        var connector = new Connector(task, worker);
         connectors.push(connector);
     }
 
@@ -143,7 +146,7 @@ function SystemRenderer(){
             drawShape(workers[i]);
         }
     }
-
+    
     function drawShape(shape){
         context.fillStyle = shape.fill;
         context.fillRect(shape.x, shape.y, shape.width, shape.height);
@@ -188,4 +191,3 @@ function SystemRenderer(){
         }
     }
 }
-
