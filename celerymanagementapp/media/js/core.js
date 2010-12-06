@@ -4,8 +4,8 @@ var tasksUrl = '../../get/tasks';
 
 $(document).ready(function() {
     
-    var systemRenderer = new SystemRenderer();
-    systemRenderer.init();
+    var systemViewer = new SystemViewer();
+    systemViewer.init();
     
     var xhr = jQuery.getJSON(tasksUrl);
 	var obj = jQuery.parseJSON(xhr.responseText);
