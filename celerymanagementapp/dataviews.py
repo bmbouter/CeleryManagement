@@ -81,7 +81,7 @@ def pending_task_count_dataview(request):
     d = json_result['data']
     r = dict((row[0], row[1]['count']) for row in d)
     
-    return _json_response(r)
+    return _json_response(r, indent=2)
     
 def tasks_per_worker_dataview(request):
     """ Return the number of tasks of each DefinedTask dispatched to each 
@@ -123,7 +123,7 @@ def tasks_per_worker_dataview(request):
             if taskname not in r:
                 r[taskname] = {}
             r[taskname][wname] = n
-    return _json_response(r, indent=4)
+    return _json_response(r)
 
 #==============================================================================#
 

@@ -6,6 +6,6 @@ class Command(BaseCommand):
     help = 'Runs tests that require a separate celeryd process.'
 
     def handle(self, *args, **options):
-        main()
+        main(*args, **options)
 
 
