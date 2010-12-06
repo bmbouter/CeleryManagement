@@ -71,6 +71,7 @@ function SystemRenderer(){
     var canvas = $('#systemCanvas')[0];
     var context = canvas.getContext("2d");
     var expandedTask = false;
+    var expandedWorker = false;
     var tasksSet = false;
     var workersSet = false;
     
@@ -78,7 +79,7 @@ function SystemRenderer(){
         canvas.width = $(window).width();
         canvas.height = $(window).height();
         canvas.onselectstart = function() { return false; }
-        $('#systemCanvas').mousemove(handleTaskHover);
+        $('#systemCanvas').mousemove(handleHover);
         this.refresh();
     }
 
@@ -159,7 +160,7 @@ function SystemRenderer(){
     }
 
     function highlightConnector(connector){
-        console.log("highlighting connector");
+        context.lineCap = "round";
         context.lineWidth = 4;
         context.moveTo(connector.x1, connector.y1);
         context.lineTo(connector.x2, connector.y2);
@@ -178,16 +179,21 @@ function SystemRenderer(){
         context.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    function handleTaskHover(e){
+    function handleHover(e){
         var xOffset = 0;
         var yOffset = 115;
         var xMousePos = e.pageX - xOffset;
         var yMousePos = e.pageY - yOffset;
+        handleTaskHover(xMousePos, yMousePos);
+        handleWorkerHover(xMousePos, yMousePos);
+    }
+
+    function handleTaskHover(xMousePos, yMousePos){
         if( !expandedTask ){
             for( item in tasks ){
                 if( xMousePos < (tasks[item].x + tasks[item].width) && xMousePos > tasks[item].x ){
                     if( yMousePos < (tasks[item].y + tasks[item].height) && yMousePos > tasks[item].y ){
-                        showConnectors(tasks[item]);
+                        showTaskConnectors(tasks[item]);
                         expandTask(tasks[item], true);
                     }
                 }
@@ -196,9 +202,26 @@ function SystemRenderer(){
             if( !((xMousePos < (expandedTask.x + expandedTask.width)) && (xMousePos > expandedTask.x)) 
                 || !((yMousePos < (expandedTask.y + expandedTask.height)) && (yMousePos > expandedTask.y)) ){
                 
-                expandTask(expandedTask, false);
+                    expandTask(expandedTask, false);
             }
-        
+        }
+    }
+
+    function handleWorkerHover(xMousePos, yMousePos){
+        if( !expandedWorker ){
+            for( item in workers ){
+                if( xMousePos < (workers[item].x + workers[item].width) && xMousePos > workers[item].x ){
+                    if( yMousePos < (workers[item].y + workers[item].height) && yMousePos > workers[item].y ){
+                        showWorkerConnectors(workers[item]);
+                        expandWorker(workers[item], true);
+                    }
+                }
+            }
+        } else {
+            if( !((xMousePos < (expandedWorker.x + expandedWorker.width)) && (xMousePos > expandedWorker.x)) 
+                || !((yMousePos < (expandedWorker.y + expandedWorker.height)) && (yMousePos > expandedWorker.y)) ){
+                expandWorker(expandedWorker, false);
+            }
         }
     }
 
@@ -211,6 +234,8 @@ function SystemRenderer(){
                 newTask.displayName = task.fullName;
                 drawShape(newTask);
                 expandedTask = newTask;
+            } else {
+                expandedTask = task;
             }
         } else {
             var newTask = new Task(task.y, task.displayName);
@@ -219,10 +244,38 @@ function SystemRenderer(){
             expandedTask = false;
         }
     }
+    
+    function expandWorker(worker, expand){
+        if( expand ){
+            if( worker.fullName != worker.displayName ){
+                var newWorker = new Worker(worker.y, worker.fullName, worker.active);
+                newWorker.width = worker.fullName.length * 8;
+                newWorker.x = worker.x - ((newWorker.width - worker.width) / 2);
+                newWorker.displayName = worker.fullName;
+                drawShape(newWorker);
+                expandedWorker = newWorker;
+            } else {
+                expandedWorker = worker;
+            }
+        } else {
+            var newWorker = new Worker(worker.y, worker.displayName, worker.active);
+            clearCanvas();
+            draw();
+            expandedWorker = false;
+        }
+    }
 
-    function showConnectors(task){
+    function showTaskConnectors(task){
         for( connector in connectors ){
             if( connectors[connector].task.fullName == task.fullName ){
+                highlightConnector(connectors[connector]);
+            }
+        }
+    }
+    
+    function showWorkerConnectors(worker){
+        for( connector in connectors ){
+            if( connectors[connector].worker.fullName == worker.fullName ){
                 highlightConnector(connectors[connector]);
             }
         }
