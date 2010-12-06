@@ -63,11 +63,26 @@ class JsonModelMap(object):
 class JsonTaskModelMap(JsonModelMap):
     model = DispatchedTask
     field_info = [
-        ('waittime','waittime',None,None),
-        ('runtime','runtime',None,None),
-        ('state','state',None,None),
-        ('worker','worker',None,None),
         ('name','taskname',None,None),
+        ('state','state',None,None),
+        ('task_id','task_id',None,None),
+        ('worker','worker',None,None),
+        
+        ('runtime','runtime',None,None),
+        ('waittime','waittime',None,None),
+        ('totaltime','totaltime',None,None),
+        
+        ('tstamp','tstamp',util.datetime_to_python,None),
+        ('sent','sent',util.datetime_to_python,None),
+        ('received','received',None,None),
+        ('started','started',None,None),
+        ('succeeded','succeeded',None,None),
+        ('failed','failed',None,None),
+        
+        ('routing_key','routing_key',None,None),
+        ('expires','expires',None,None),
+        ('result','result',None,None),
+        ('eta','eta',None,None),
         ]
         
 #==============================================================================#

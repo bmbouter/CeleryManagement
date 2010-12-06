@@ -131,9 +131,9 @@
         y-value: average runtime for DispatchedTasks sent to the given worker
 */
 {    
-    "filter" : {
+    "filter" : [
         ["state", "SUCCESS"]
-    },
+    ],
     "segmentize": {
         "field": "worker",
         "method": [ "all" ]

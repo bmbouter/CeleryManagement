@@ -1,6 +1,12 @@
+var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
+
 var tasksUrl = '../../get/tasks';
 
 $(document).ready(function() {
+    
+    var systemRenderer = new SystemRenderer();
+    systemRenderer.init();
+    
     var xhr = jQuery.getJSON(tasksUrl);
 	var obj = jQuery.parseJSON(xhr.responseText);
 	
