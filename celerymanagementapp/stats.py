@@ -4,7 +4,11 @@ import operator
 
 from django.db.models import Max, Min
 
-from djcelery.models import WorkerState, TaskState
+from djcelery.models import WorkerState
+from celerymanagementapp.models import DispatchedTask
+from celerymanagementapp.segmentize import make_segments, Segmentizer
+from celerymanagementapp.segmentize import range_query_sequence
+
 
 from celerymanagementapp.segmentize import make_segments, Segmentizer
 from celerymanagementapp.segmentize import range_query_sequence
@@ -25,7 +29,7 @@ def calculate_throughputs(taskname, timerange, interval=1):
     if taskname:
         qargs['name'] = taskname
     
-    states_in_range = TaskState.objects.filter(**qargs)
+    states_in_range = DispatchedTask.objects.filter(**qargs)
     
     def rate_aggregator(seconds_span):
         def _rate_aggregator(seg):
@@ -68,13 +72,13 @@ def _calculate_runtimes_query(taskname, runtime_range=None, search_range=(None,N
     
     if runtime_range and runtime_range!=(None,None):
         if taskname:
-            qs = TaskState.objects.filter(state='SUCCESS', name=taskname, runtime__range=runtime_range)
+            qs = DispatchedTask.objects.filter(state='SUCCESS', name=taskname, runtime__range=runtime_range)
         else:
-            qs = TaskState.objects.filter(state='SUCCESS', runtime__range=runtime_range)
+            qs = DispatchedTask.objects.filter(state='SUCCESS', runtime__range=runtime_range)
     elif taskname:
-        qs = TaskState.objects.filter(state='SUCCESS', name=taskname)
+        qs = DispatchedTask.objects.filter(state='SUCCESS', name=taskname)
     else:
-        qs = TaskState.objects.filter(state='SUCCESS')
+        qs = DispatchedTask.objects.filter(state='SUCCESS')
     
     # limit results based on the time that the task ran
     if search_range[0] and search_range[1]:

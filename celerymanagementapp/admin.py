@@ -1,0 +1,81 @@
+from celery import states
+
+from django.contrib import admin
+from django.utils.translation import ugettext_lazy as _
+
+from djcelery.admin import TaskMonitor, fixedwidth
+
+from celerymanagementapp.models import DispatchedTask
+
+# 'TASK_STATE_COLORS' and 'colored_state()' from djcelery.admin
+TASK_STATE_COLORS = {states.SUCCESS: "green",
+                     states.FAILURE: "red",
+                     states.REVOKED: "magenta",
+                     states.STARTED: "yellow",
+                     states.RETRY: "orange",
+                     "RECEIVED": "blue"}
+
+def format_seconds(val):
+    return '{0:.6f}'.format(val)
+    
+def display_field(name, allow_tags=False):
+    def _inner(func):
+        func.short_description = name
+        func.allow_tags = allow_tags
+        return func
+    return _inner
+    
+@display_field('Runtime')
+def runtime_field(obj):
+    return format_seconds(obj.runtime)
+    
+@display_field('Wait Time')
+def waittime_field(obj):
+    return format_seconds(obj.waittime)
+    
+@display_field('Total Time')
+def totaltime_field(obj):
+    return format_seconds(obj.totaltime)
+    
+@display_field('Name')
+def name_field(obj):
+    name = obj.name
+    if len(name) > 20:
+        head,sep,tail = name.rpartition('.')
+        hlen = max(20 - len(tail), 8)
+        head = head[:hlen]
+        name = '{0}[.]{1}'.format(head,tail)
+    return name
+    
+@display_field('State', allow_tags=True)
+def colored_state_field(obj):
+    color = TASK_STATE_COLORS.get(obj.state, "black")
+    return """<b><span style="color: %s;">%s</span></b>""" % (color, obj.state)
+
+
+class DispatchedTaskAdmin(admin.ModelAdmin):
+    date_heirarchy = 'tstamp'
+    list_display = ('task_id', name_field, colored_state_field, 'worker', 
+                    'tstamp', runtime_field, waittime_field, totaltime_field, 
+                    'routing_key')
+    list_filter = ('name', 'state', 'worker', 'routing_key', 'tstamp')
+    # fieldsets = (
+            # (None, {
+                # "fields": ("state", "task_id", "name", "args", "kwargs",
+                           # "eta", "runtime", "worker", "tstamp", "waittime", "sent"),
+                # "classes": ("extrapretty", ),
+            # }),
+            # ("Details", {
+                # "classes": ("collapse", "extrapretty"),
+                # "fields": ("result", "traceback", "expires"),
+            # }),
+    # )
+    
+    # list_display = TaskMonitor.list_display + (
+                    # 'waittime',
+                    # 'sent')
+                    
+#    list_display = ('name','open_date','close_date')
+    
+admin.site.register(DispatchedTask, DispatchedTaskAdmin)
+#admin.site.register(DispatchedTask)

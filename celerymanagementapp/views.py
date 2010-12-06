@@ -14,12 +14,14 @@ from django.core.urlresolvers import reverse
 from django.core.context_processors import csrf
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
-from djcelery.models import WorkerState, TaskState
+from djcelery.models import WorkerState
 from celery.registry import TaskRegistry, tasks
 from celery.task.control import inspect
+
 #from celery.task.control import Control
 #from celery.app import app_or_default
 from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes#, CeleryStats
+from celerymanagementapp.models import DispatchedTask
 
 import gviz_api
 import json
@@ -139,7 +141,7 @@ def test_view(request, taskname=None):
     timerange = (now-datetime.timedelta(seconds=120), now)
     start = timerange[0]
     stop = timerange[1]
-    states_in_range = TaskState.objects.filter(state='SUCCESS', tstamp__range=(start, stop))
+    states_in_range = DispatchedTask.objects.filter(state='SUCCESS', tstamp__range=(start, stop))
     return HttpResponse(states_in_range)
     
 #==============================================================================#
@@ -294,7 +296,7 @@ def view_dispatched_tasks(request, taskname=None):
     """View DispatchedTasks, possibly limited to those for a particular 
        DefinedTask.
     """
-    alltasks = TaskState.objects.all()
+    alltasks = DispatchedTask.objects.all()
     if taskname:
         alltasks = alltasks.filter(name=taskname)
     
