@@ -15,18 +15,23 @@ function Task(y, name){
     } else {
         this.displayName = name;
     }
+
+    this.getFill = function(){
+        return this.fill;
+    }
 }
 
-function Worker(y, name){
+function Worker(y, name, active){
     this.x = 1000;
     this.y = y;
     this.width = 200;
     this.height = 40;
-    this.fill = '#FFC028';
+    this.activeFill = '#FFC028';
+    this.inactiveFill = '#CCC';
     this.fullName = name;
     this.xCenter = (this.width / 2) + this.x;
     this.yCenter = (this.height / 2) + y;
-    this.active = true;
+    this.active = active;
     
     if( name.length > 25 ){
         this.displayName = name.substring(0, 22) + "...";
@@ -37,6 +42,8 @@ function Worker(y, name){
     this.getFill = function(){
         if( this.active ){
             return this.activeFill;
+        } else {
+            return this.inactiveFill;
         }
     }
 }
@@ -48,6 +55,10 @@ function Connector(task, worker){
     this.y1 = task.yCenter;
     this.x2 = worker.xCenter - (worker.width / 2);
     this.y2 = worker.yCenter;
+    
+    this.getFill = function(){
+        return "red";
+    }
 }
 
 function SystemRenderer(){
@@ -64,13 +75,91 @@ function SystemRenderer(){
         canvas.width = $(window).width();
         canvas.height = $(window).height();
         canvas.onselectstart = function() { return false; }
-        context.lineWidth = 2;
-        $('#systemCanvas').mousemove(showTaskName);
+        $('#systemCanvas').mousemove(handleTaskHover);
+        this.refresh();
+    }
+
+    this.refresh = function(){
         CMACore.getTasks(this.createTasks);
         CMACore.getWorkers(this.createWorkers);
     }
 
-    function showTaskName(e){
+    this.createTasks = function(data){
+        var y = 20;
+        for( item in data ){
+            tasks.push(new Task(y, data[item]));
+            y += 60;
+        }
+        tasksSet = true;
+        if( workersSet ){
+            createConnectors();
+            draw();
+        }
+    }
+
+    this.createWorkers = function(data){
+        var y = 20;
+        for( item in data ){
+            workers.push(new Worker(y, item, true));
+            y += 60;
+        }
+        workersSet = true;
+        if( tasksSet ){
+            createConnectors();
+            draw();
+        }
+    }
+    
+    function createConnectors(){
+        createConnector(tasks[2], workers[0]);
+        createConnector(tasks[2], workers[0]);
+        createConnector(tasks[6], workers[0]);
+        createConnector(tasks[3], workers[0]);
+        createConnector(tasks[4], workers[0]);
+    }
+
+    function createConnector(task, worker){
+        var connector = new Connector(task, worker);
+        connectors.push(connector);
+    }
+
+    function draw(){
+        context.lineWidth = 2;
+        for( var i = 0; i < connectors.length; i++){
+            drawConnector(connectors[i]);
+        }
+        for( var i = 0; i < tasks.length; i++){
+            drawShape(tasks[i]);
+        }
+        for( var i = 0; i < workers.length; i++){
+            drawShape(workers[i]);
+        }
+    }
+    
+    function drawShape(shape){
+        context.fillStyle = shape.getFill();
+        context.fillRect(shape.x, shape.y, shape.width, shape.height);
+        context.textBaseline = "middle";
+        context.textAlign = "center";
+        context.font = "15px sans-serif";
+        context.fillStyle = "black";
+        context.fillText(shape.displayName, shape.xCenter, shape.yCenter);
+    }
+    
+    function drawConnector(connector){
+        context.moveTo(connector.x1, connector.y1);
+        context.lineTo(connector.x2, connector.y2);
+        context.strokeStyle = connector.getFill();
+        context.stroke();
+    }
+
+    function clearCanvas(){
+        canvas.width = $(window).width();
+        canvas.height = $(window).height();
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function handleTaskHover(e){
         var xOffset = 0;
         var yOffset = 115;
         var xMousePos = e.pageX - xOffset;
@@ -93,83 +182,6 @@ function SystemRenderer(){
         }
     }
 
-    this.createTasks = function(data){
-        var y = 20;
-        for( item in data ){
-            tasks.push(new Task(y, data[item]));
-            y += 60;
-        }
-        console.log("tasks set");
-        tasksSet = true;
-        if( workersSet ){
-            createConnectors();
-            draw();
-        }
-    }
-
-    this.createWorkers = function(data){
-        var y = 20;
-        for( item in data ){
-            workers.push(new Worker(y, item));
-            y += 60;
-        }
-        console.log("workers set");
-        workersSet = true;
-        if( tasksSet ){
-            console.log(this);
-            createConnectors();
-            draw();
-        }
-    }
-    
-    function createConnectors(){
-        createConnector(tasks[2], workers[0]);
-        createConnector(tasks[2], workers[0]);
-        createConnector(tasks[6], workers[0]);
-        createConnector(tasks[3], workers[0]);
-        createConnector(tasks[4], workers[0]);
-    }
-
-    function createConnector(task, worker){
-        var connector = new Connector(task, worker);
-        connectors.push(connector);
-    }
-
-    function draw(){
-        for( var i = 0; i < connectors.length; i++){
-            drawConnector(connectors[i]);
-        }
-        for( var i = 0; i < tasks.length; i++){
-            drawShape(tasks[i]);
-        }
-        for( var i = 0; i < workers.length; i++){
-            drawShape(workers[i]);
-        }
-    }
-    
-    function drawShape(shape){
-        context.fillStyle = shape.fill;
-        context.fillRect(shape.x, shape.y, shape.width, shape.height);
-        context.textBaseline = "middle";
-        context.textAlign = "center";
-        context.font = "15px sans-serif";
-        context.fillStyle = "black";
-        context.fillText(shape.displayName, shape.xCenter, shape.yCenter);
-    }
-    
-    function drawConnector(connector){
-        context.moveTo(connector.x1, connector.y1);
-        context.lineTo(connector.x2, connector.y2);
-        context.strokeStyle = "red";
-        context.stroke();
-    }
-
-    function clearCanvas(){
-        canvas.width = $(window).width();
-        canvas.height = $(window).height();
-        context.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
     function expandTask(task, expand){
         if( expand ){
             if( task.fullName != task.displayName ){
@@ -181,9 +193,6 @@ function SystemRenderer(){
                 expandedTask = newTask;
             }
         } else {
-            console.log("unexpanding");
-            console.log(task.width);
-            console.log(expandedTask.width);
             var newTask = new Task(task.y, task.displayName);
             clearCanvas();
             draw();
