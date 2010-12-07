@@ -3,6 +3,7 @@ import time
 import collections
 import sys
 import signal
+import traceback
 from optparse import OptionParser
 
 TERMINATE_ATTEMPTS_COUNT = 10
@@ -49,6 +50,17 @@ class ProcessSet(object):
     def all_running(self):
         return all((p.poll() is None) for p in self.procs)
         
+    def good(self):
+        # every process is running or exited normally
+        return all((p.returncode is None or p.returncode==0) for p in self.procs)
+        
+    def print_caught_exception(self):
+        try:
+            print 'ProcessSet: Caught exception:'
+            traceback.print_exc()
+        except:
+            pass
+        
     def terminate(self):
         print 'ProcessSet: Terminating processes...'
         for proc in self.procs:
@@ -74,10 +86,11 @@ class ProcessSet(object):
     def loop(self, interval=1.0):
         print 'ProcessSet: Entering loop...  (use CONTROL-C to quit)'
         try:
-            while self.all_running():
+            while self.good():
                 time.sleep(interval)
                 
         except:
+            self.print_caught_exception()
             print 'ProcessSet: Leaving loop on exception...'
             self.terminate()
             raise
@@ -116,7 +129,7 @@ def main():
         ps.loop()
     except:
         pass
-    ps.cleanup(waittime=1.0)
+    ps.cleanup()
     print 'ProcessSet: Completed!'
 
 

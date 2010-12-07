@@ -380,6 +380,8 @@ def kill_worker(request, name=None):
     else:
         name = _resolve_name_param(name)
         dest = name and [name]  # dest will be None or a list of a single name
+        print 'name: {0}'.format(name)
+        print 'dest: {0}'.format(dest)
         broadcast('shutdown', destination=dest)
         return HttpResponse('')
 
