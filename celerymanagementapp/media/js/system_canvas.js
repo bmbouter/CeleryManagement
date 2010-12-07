@@ -120,9 +120,24 @@ function SystemViewer(){
                 }
             }
         }
-        draw();
+        CMACore.getPendingTasks(setPendingTasks);
+        CMACore.getWorkerProcesses(setWorkerProcesses);
     }
     
+    function setPendingTasks(data){
+        for( task in tasks ){
+            tasks[task].pending = data[tasks[task].fullName];
+        }
+        draw();
+    }
+
+    function setWorkerProcesses(data){
+        for( worker in workers ){
+            workers[worker].processes = data[workers[worker].fullName];
+        }
+        draw();
+    }
+
     function draw(){
         if( workers.length > tasks.length ){
             var height = workers.length * 60 + 20;
@@ -226,6 +241,7 @@ function SystemViewer(){
                 newTask.width = task.fullName.length * 7;
                 newTask.x = task.x - ((newTask.width - task.width) / 2);
                 newTask.displayName = task.fullName;
+                newTask.pending = task.pending;
                 systemRenderer.drawTask(newTask);
                 expandedTask = newTask;
             } else {
@@ -246,6 +262,7 @@ function SystemViewer(){
                 newWorker.width = worker.fullName.length * 7;
                 newWorker.x = worker.x - ((newWorker.width - worker.width) / 2);
                 newWorker.displayName = worker.fullName;
+                newWorker.processes = worker.processes;
                 systemRenderer.drawWorker(newWorker);
                 expandedWorker = newWorker;
             } else {
