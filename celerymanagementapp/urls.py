@@ -29,12 +29,19 @@ urlpatterns = patterns('celerymanagementapp',
     (r'^view/dispatched_tasks/(?P<taskname>[-\w\d_.]+)/$', 'views.view_dispatched_tasks'),
     
     (r'^test/$', 'views.test_view'),
-    #(r'^test/(?P<taskname>[-\w\d_.]+)/$', 'views.test_view'),
-    
+)
+
+# Data retrieval URLs
+urlpatterns += patterns('celerymanagementapp',    
     (r'^xy_query/dispatched_tasks/$', 'dataviews.task_xy_dataview'),
-    (r'^worker_subprocesses/$', 'dataviews.worker_subprocesses_dataview'),
-    (r'^pending_task_count/$', 'dataviews.pending_task_count_dataview'),
-    (r'^tasks_per_worker/$', 'dataviews.tasks_per_worker_dataview'),
+    
+    # For the following urls, the *name* may be a task or worker name (whichever 
+    # is appropriate) or 'all' which returns information on all items.
+    (r'^worker/all/list/$', 'dataviews.worker_list_dataview'),
+    (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/count/$', 'dataviews.worker_subprocesses_dataview'),
+    (r'^task/all/list/$', 'dataviews.definedtask_list_dataview'),
+    (r'^task/(?P<name>[-\w\d_.]+)/dispatched/pending/count/$', 'dataviews.pending_task_count_dataview'),
+    (r'^task/(?P<name>[-\w\d_.]+)/dispatched/byworker/count/$', 'dataviews.tasks_per_worker_dataview'),
 )
 
 urlpatterns += patterns('celerymanagementapp',
@@ -47,8 +54,8 @@ urlpatterns += patterns('celerymanagementapp',
     
     (r'^get/runtimes/$', 'views.get_runtime_data'),
     (r'^get/runtimes/(?P<taskname>[-\w\d_.]+)/$', 'views.get_runtime_data'),
-    (r'^get/workers/$', 'views.get_worker_data'),
-    (r'^get/tasks/$', 'views.get_defined_tasks'),
+    #(r'^get/workers/$', 'views.get_worker_data'),
+    #(r'^get/tasks/$', 'views.get_defined_tasks'),
     (r'^get/dispatched_tasks/$', 'views.get_dispatched_tasks'),
     (r'^get/dispatched_tasks/(?P<taskname>[-\w\d_.]+)/$', 'views.get_dispatched_tasks'),   
 )

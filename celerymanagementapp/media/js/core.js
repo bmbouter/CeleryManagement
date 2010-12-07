@@ -1,6 +1,6 @@
 var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
 
-var tasksUrl = '../../get/tasks';
+var tasksUrl = '../../task/all/list/';
 
 $(document).ready(function() {
     

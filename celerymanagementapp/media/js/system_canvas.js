@@ -99,8 +99,8 @@ function SystemViewer(){
 
     this.createWorkers = function(data){
         var y = 20;
-        for( item in data ){
-            workers.push(new Worker(y, item, true));
+        for ( item in data ){
+            workers.push(new Worker(y, data[item], true));
             y += 60;
         }
         workersSet = true;

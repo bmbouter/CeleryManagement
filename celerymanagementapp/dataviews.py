@@ -12,7 +12,7 @@ from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 
 
 #==============================================================================#
-def _get_json(request, allow_empty=False):
+def _json_from_post(request, allow_empty=False):
     """Return the json content of the given request.  The json must be in the 
        request's POST data."""
     rawjson = request.raw_post_data
@@ -24,7 +24,27 @@ def _json_response(jsondata, **kwargs):
     """Convert a Python structure (such as dict, list, string, etc) into a json 
        bystream which is then returned as a Django HttpResponse."""
     rawjson = json.dumps(jsondata, **kwargs)
-    return HttpResponse(rawjson, mimetype='application/json')
+    return HttpResponse(rawjson, content_type='application/json')
+    
+def _resolve_name(name):
+    """If name is None or 'all', return None.  Otherwise, returns name."""
+    if not name or name.lower() == 'all':
+        name = None
+    return name
+    
+def _update_json_request(json_request, **kwargs):
+    if 'filter' in kwargs:
+        filter = json_request.get('filter',[])
+        filter.extend(kwargs.pop('filter'))
+        json_request['filter'] = filter
+    if 'exclude' in kwargs:
+        exclude = json_request.get('exclude',[])
+        exclude.extend(kwargs.pop('exclude'))
+        json_request['exclude'] = exclude
+    json_request.update(dict((k,v) for k,v in kwargs if v is not None))
+    return json_request
+        
+        
     
 def get_defined_tasks():
     """Get a list of the currently defined tasks."""
@@ -35,27 +55,35 @@ def get_defined_tasks():
     defined.sort()
     return defined
     
-def get_workers():
+def get_workers_from_database():
     """Get a list of all workers that exist (running or not) in the database."""
     workers = WorkerState.objects.all()
     return [unicode(w) for w in workers]
     
+def get_workers_live():
+    i = inspect()
+    workers = i.ping()
+    workers = list(workers.iterkeys())
+    return workers
+    
 
 #==============================================================================#
 def task_xy_dataview(request):
-    json_request = _get_json(request)
+    json_request = _json_from_post(request)
     
     xyquery = JsonXYQuery(JsonTaskModelMap(), json_request)
     json_result = xyquery.do_query()
     
     return _json_response(json_result)
 
-def worker_subprocesses_dataview(request):
+def worker_subprocesses_dataview(request, name=None):
     """ Return the number of sub processes for each worker as a json 
         dictionary.
     """
+    name = _resolve_name(name)
     stats = {}
-    for x in broadcast("stats", reply=True):
+    dest = name and [name]
+    for x in broadcast("stats", desination=dest, reply=True):
         stats.update(x)
     
     workercounts = {}
@@ -65,22 +93,23 @@ def worker_subprocesses_dataview(request):
         
     return _json_response(workercounts)
     
-def pending_task_count_dataview(request):
+def pending_task_count_dataview(request, name=None):
     """ Return the number of pending DispatchedTasks for each defined task.  
         The return value is a json dicitonary with task names as the keys.
     """
-    
-    json_request = _get_json(request, allow_empty=True) or {}
+    name = _resolve_name(name)
+    json_request = _json_from_post(request, allow_empty=True) or {}
     tasknames = get_defined_tasks()
     
-    filterexp = ['state','PENDING']
+    filterexp = [['state','PENDING']]
+    if name:
+        filterexp.append(['name',name])
     segmentize = {'field': 'taskname', 'method': ['values', tasknames],}
     aggregate = [{'field': 'count'}]
     
-    json_request['filter'] = json_request.get('filter',[])
-    json_request['filter'].append(filterexp)
-    json_request['segmentize'] = segmentize
-    json_request['aggregate'] = aggregate
+    json_request = _update_json_request(json_request, filter=filterexp, 
+                                        segmentize=segmentize, 
+                                        aggregate=aggregate)
     
     xyquery = JsonXYQuery(JsonTaskModelMap(), json_request)
     json_result = xyquery.do_query()
@@ -90,7 +119,7 @@ def pending_task_count_dataview(request):
     
     return _json_response(r)
     
-def tasks_per_worker_dataview(request):
+def tasks_per_worker_dataview(request, name=None):
     """ Return the number of tasks of each DefinedTask dispatched to each 
         worker.  The return value is a two-level json dictionary where the 
         top-level keys are the task names and the second-level keys are the 
@@ -110,8 +139,13 @@ def tasks_per_worker_dataview(request):
             }
         
     """
+    name = _resolve_name(name)
+    json_request = _json_from_post(request, allow_empty=True) or {}
     
-    json_request = _get_json(request, allow_empty=True) or {}
+    filterexp = []
+    if name:
+        filterexp.append(['name',name])
+    json_request = _update_json_request(json_request, filter=filterexp)
     
     modelmap = JsonTaskModelMap()
     jfilter = JsonFilter(modelmap, json_request)
@@ -131,6 +165,23 @@ def tasks_per_worker_dataview(request):
                 r[taskname] = {}
             r[taskname][wname] = n
     return _json_response(r)
+    
+def definedtask_list_dataview(request):
+    tasknames = get_defined_tasks()
+    return _json_response(tasknames)
+    
+def worker_list_dataview(request):
+    workernames = get_workers_live()
+    return _json_response(workernames)
+    
+def worker_info_dataview(request, name=None):
+    name = _resolve_name(name)
+    if name:
+        workers = WorkerState.objects.all(hostname=name)
+    else:
+        workers = WorkerState.objects.all()
+    d = dict((unicode(w), {'is_alive': w.is_alive()}) for w in workers)
+    return _json_response(d)
 
 #==============================================================================#
 

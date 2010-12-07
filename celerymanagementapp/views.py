@@ -261,14 +261,14 @@ def view_defined_tasks(request):
             context_instance=RequestContext(request))
             
 
-def get_defined_tasks(request):
-    i = inspect()  
-    workers = i.registered_tasks()
-    defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
-    defined = list(defined)
-    defined.sort()
+# def get_defined_tasks(request):
+    # i = inspect()  
+    # workers = i.registered_tasks()
+    # defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
+    # defined = list(defined)
+    # defined.sort()
 
-    return HttpResponse(json.dumps(defined))
+    # return HttpResponse(json.dumps(defined))
 
 def get_dispatched_tasks(request, taskname=None):
     """View DispatchedTasks, possibly limited to those for a particular 
@@ -353,12 +353,12 @@ def visualize_runtimes_new(request, taskname=None, interval=0):
             context_instance=RequestContext(request))
 
 
-def get_worker_data(request):
-    worker_dict = {}
-    workers = WorkerState.objects.all()
-    for w in workers:
-        worker_dict[w.__str__()] = w.is_alive()
-    return HttpResponse(json.dumps(worker_dict))
+# def get_worker_data(request):
+    # worker_dict = {}
+    # workers = WorkerState.objects.all()
+    # for w in workers:
+        # worker_dict[w.__str__()] = w.is_alive()
+    # return HttpResponse(json.dumps(worker_dict))
 
 def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',

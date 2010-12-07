@@ -1,9 +1,9 @@
 var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
 
 CMACore.root_url = "/celerymanagementapp/";
-CMACore.get_tasks_url = CMACore.root_url + "get/tasks/";
-CMACore.workers_url = CMACore.root_url + "get/workers/";
-CMACore.tasks_per_worker_url = CMACore.root_url + "tasks_per_worker/";
+CMACore.get_tasks_url = CMACore.root_url + "task/all/list/";
+CMACore.workers_url = CMACore.root_url + "worker/all/list/";
+CMACore.tasks_per_worker_url = CMACore.root_url + "task/all/dispatched/byworker/count/";
 CMACore.task_url = CMACore.root_url + "view/dispatched_tasks/";
 
 CMACore.getTasks = function(callbackFunction){
