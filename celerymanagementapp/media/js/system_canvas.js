@@ -60,7 +60,7 @@ function Connector(task, worker, text){
     this.yCenter = (this.y2 - ((this.y2 - this.y1) / 2));
     
     this.getFill = function(){
-        return "red";
+        return "#CCC";
     }
 }
 
@@ -128,14 +128,14 @@ function SystemViewer(){
             var height = tasks.length * 60 + 20;
         }
         systemRenderer = new SystemRenderer(height);
-        for( var i = 0; i < connectors.length; i++){
-            systemRenderer.drawConnector(connectors[i]);
+        for( connector in connectors ){
+            systemRenderer.drawConnector(connectors[connector]);
         }
-        for( var i = 0; i < tasks.length; i++){
-            systemRenderer.drawEntity(tasks[i]);
+        for( task in tasks ){
+            systemRenderer.drawEntity(tasks[task]);
         }
-        for( var i = 0; i < workers.length; i++){
-            systemRenderer.drawEntity(workers[i]);
+        for( worker in workers ){
+            systemRenderer.drawEntity(workers[worker]);
         }
     }
     
@@ -258,22 +258,30 @@ function SystemViewer(){
     }
 
     function showTaskConnectors(task){
+        var active_connectors = [];
         for( connector in connectors ){
             if( connectors[connector].task.fullName == task.fullName ){
-                systemRenderer.highlightConnector(connectors[connector]);
+                active_connectors.push(connectors[connector]);
             } else {
-                //systemRenderer.dimConnector(connectors[connector]);
+                systemRenderer.dimConnector(connectors[connector]);
             }
+        }
+        for( connector in active_connectors ){
+            systemRenderer.highlightConnector(active_connectors[connector]);
         }
     }
     
     function showWorkerConnectors(worker){
+        var active_connectors = [];
         for( connector in connectors ){
             if( connectors[connector].worker.fullName == worker.fullName ){
-                systemRenderer.highlightConnector(connectors[connector]);
+                active_connectors.push(connectors[connector]);
             } else {
-                //systemRenderer.dimConnector(connectors[connector]);
+                systemRenderer.dimConnector(connectors[connector]);
             }
+        }
+        for( connector in active_connectors ){
+            systemRenderer.highlightConnector(active_connectors[connector]);
         }
     }
 }
@@ -283,10 +291,10 @@ function SystemRenderer(height){
     var context = canvas.getContext("2d");
     canvas.width = $(window).width();
     canvas.height = height;
+    context.lineJoin = "bevel";
     var drawShapes = new DrawShapes(context);
    
     this.drawEntity = function(shape){
-        context.lineWidth = 1;
         drawShapes.roundedRect(shape.x, shape.y, shape.width, shape.height, shape.getFill());
         context.textBaseline = "middle";
         context.textAlign = "center";
@@ -296,8 +304,11 @@ function SystemRenderer(height){
     }
     
     this.drawConnector = function(connector){
+        context.lineWidth = 1;
+        context.beginPath();
         context.moveTo(connector.x1, connector.y1);
         context.lineTo(connector.x2, connector.y2);
+        context.closePath();
         context.strokeStyle = connector.getFill();
         context.stroke();
     }
@@ -305,9 +316,11 @@ function SystemRenderer(height){
     this.highlightConnector = function(connector){
         context.lineCap = "butt";
         context.lineWidth = 6;
+        context.beginPath();
         context.moveTo(connector.x1, connector.y1);
         context.lineTo(connector.x2, connector.y2);
-        context.strokeStyle = connector.getFill();
+        context.closePath();
+        context.strokeStyle = "red";
         context.stroke();
         context.textBaseline = "middle";
         context.textAlign = "left";
@@ -318,13 +331,23 @@ function SystemRenderer(height){
 
     this.dimConnector = function(connector){
         context.lineCap = "butt";
-        context.lineWidth = 6;
+        context.lineWidth = 3;
+        context.beginPath();
         context.moveTo(connector.x1, connector.y1);
         context.lineTo(connector.x2, connector.y2);
+        context.closePath();
         context.strokeStyle = '#FFF';
         context.stroke();
         context.fillStyle = '#FFF';
         context.fill();
+        context.lineCap = "butt";
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(connector.x1, connector.y1);
+        context.lineTo(connector.x2, connector.y2);
+        context.closePath();
+        context.strokeStyle = '#CCC';
+        context.stroke();
     }
     
     this.clearCanvas = function(){
@@ -344,7 +367,7 @@ function DrawShapes(context){
         if( typeof radius == "undefined" ){
             radius = 5;
         }
-
+        
         context.beginPath();
         context.moveTo(x + radius, y);
         context.lineTo(x + width - radius, y);
