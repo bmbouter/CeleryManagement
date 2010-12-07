@@ -1,8 +1,10 @@
 import json
 import itertools
+import socket
 
 from django.http import HttpResponse
 
+from celery import signals
 from celery.task.control import broadcast, inspect
 from djcelery.models import WorkerState
 
@@ -45,23 +47,52 @@ def _resolve_name(name):
         name = None
     return name
         
+_taskname_cache = []
+_worker_started_stopped = True
+
+def _on_celery_worker_ready():
+    global _worker_started_stopped
+    _worker_started_stopped = True
+    
+def _on_celery_worker_stopping():
+    global _worker_started_stopped
+    _worker_started_stopped = True
+    
+signals.worker_ready.connect(
+                _on_celery_worker_ready, 
+                dispatch_uid='celerymanagementapp.dataviews.on_worker_ready'
+                )
+signals.worker_ready.connect(
+                _on_celery_worker_stopping, 
+                dispatch_uid='celerymanagementapp.dataviews.on_worker_stopping'
+                )
     
 def _get_tasknames_from_database():
-    qs = JsonTaskModelMap().get_queryset()
-    return qs.values_list('name', flat=True).distinct().order_by()
+    global _taskname_cache
+    global _worker_started_stopped
+    if _worker_started_stopped:
+        qs = JsonTaskModelMap().get_queryset()
+        r = list(qs.values_list('name', flat=True).distinct().order_by())
+        _taskname_cache = r
+        _worker_started_stopped = False
+    return _taskname_cache
     
 def get_defined_tasks():
     """Get a list of the currently defined tasks."""
-    global _taskname_cache
-    i = inspect()
-    workers = i.registered_tasks()
-    #defined = []
-    if workers:
-        defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
-        defined = list(defined)
-        defined.sort()
-        _taskname_cache = defined
-    return _taskname_cache
+    return _get_tasknames_from_database()
+    
+# def get_defined_tasks():
+    # """Get a list of the currently defined tasks."""
+    # global _taskname_cache
+    # i = inspect()
+    # workers = i.registered_tasks()
+    # #defined = []
+    # if workers:
+        # defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
+        # defined = list(defined)
+        # defined.sort()
+        # _taskname_cache = defined
+    # return _taskname_cache
     
 def get_workers_from_database():
     """Get a list of all workers that exist (running or not) in the database."""
@@ -70,8 +101,13 @@ def get_workers_from_database():
     
 def get_workers_live():
     i = inspect()
-    workers = i.ping()
-    workers = list(workers.iterkeys())  if workers else  []
+    workersdict = i.ping()
+    workers = []
+    if workersdict:
+        workers = set(workersdict.iterkeys())
+        workers.add(socket.gethostname())
+        workers = list(workers)
+        workers.sort()
     return workers
     
 

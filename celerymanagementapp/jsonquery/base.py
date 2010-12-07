@@ -40,7 +40,7 @@ class JsonFilter(object):
         
     def _build_exclude(self, jsondata):
         qargs = {}
-        filterexps = jsondata.get('filter', None)
+        filterexps = jsondata.get('exclude', None)
         if filterexps:
             for exp in filterexps:
                 qargs.update(self._build_query_kwarg(exp))

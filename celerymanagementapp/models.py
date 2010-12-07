@@ -58,22 +58,16 @@ class DispatchedTask(models.Model):
         ordering = ["-tstamp"]
         
         
-class DefinedTask(models.Model):
-    """A task type that has been defined."""
-    name =      models.CharField(_(u"name"), max_length=200, null=True, 
-                                 db_index=True)
-    worker =    models.CharField(_(u"worker"), max_length=200, null=True, 
-                                 db_index=True)
+# class DefinedTask(models.Model):
+    # """A task type that has been defined."""
+    # name =      models.CharField(_(u"name"), max_length=200, null=True, 
+                                 # db_index=True)
+    # worker =    models.CharField(_(u"worker"), max_length=200, null=True, 
+                                 # db_index=True)
     
-    class Meta:
-        unique_together = (('name','worker'),)
-        
-        
-def _on_celery_worker_ready():
-    pass
-    
-def _on_celery_worker_stopping():
-    pass
+    # class Meta:
+        # unique_together = (('name','worker'),)
+               
     
 
 class TestModel(models.Model):
