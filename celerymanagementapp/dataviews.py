@@ -26,12 +26,6 @@ def _json_response(jsondata, **kwargs):
     rawjson = json.dumps(jsondata, **kwargs)
     return HttpResponse(rawjson, content_type='application/json')
     
-def _resolve_name(name):
-    """If name is None or 'all', return None.  Otherwise, returns name."""
-    if not name or name.lower() == 'all':
-        name = None
-    return name
-    
 def _update_json_request(json_request, **kwargs):
     if 'filter' in kwargs:
         filter = json_request.get('filter',[])
@@ -41,21 +35,33 @@ def _update_json_request(json_request, **kwargs):
         exclude = json_request.get('exclude',[])
         exclude.extend(kwargs.pop('exclude'))
         json_request['exclude'] = exclude
-    json_request.update(dict((k,v) for k,v in kwargs if v is not None))
+    json_request.update(dict((k,v) for k,v in kwargs.iteritems() if v is not None))
     return json_request
         
+    
+def _resolve_name(name):
+    """If name is None or 'all', return None.  Otherwise, returns name."""
+    if not name or name.lower() == 'all':
+        name = None
+    return name
         
+    
+def _get_tasknames_from_database():
+    qs = JsonTaskModelMap().get_queryset()
+    return qs.values_list('name', flat=True).distinct().order_by()
     
 def get_defined_tasks():
     """Get a list of the currently defined tasks."""
+    global _taskname_cache
     i = inspect()
     workers = i.registered_tasks()
-    defined = []
+    #defined = []
     if workers:
         defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
         defined = list(defined)
         defined.sort()
-    return defined
+        _taskname_cache = defined
+    return _taskname_cache
     
 def get_workers_from_database():
     """Get a list of all workers that exist (running or not) in the database."""
@@ -85,7 +91,7 @@ def worker_subprocesses_dataview(request, name=None):
     name = _resolve_name(name)
     stats = {}
     dest = name and [name]
-    for x in broadcast("stats", desination=dest, reply=True):
+    for x in broadcast("stats", destination=dest, reply=True):
         stats.update(x)
     
     workercounts = {}
