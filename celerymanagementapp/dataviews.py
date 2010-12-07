@@ -50,9 +50,11 @@ def get_defined_tasks():
     """Get a list of the currently defined tasks."""
     i = inspect()
     workers = i.registered_tasks()
-    defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
-    defined = list(defined)
-    defined.sort()
+    defined = []
+    if workers:
+        defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
+        defined = list(defined)
+        defined.sort()
     return defined
     
 def get_workers_from_database():
@@ -63,10 +65,7 @@ def get_workers_from_database():
 def get_workers_live():
     i = inspect()
     workers = i.ping()
-    if workers:
-        workers = list(workers.iterkeys())
-    else:
-        workers = []
+    workers = list(workers.iterkeys())  if workers else  []
     return workers
     
 
