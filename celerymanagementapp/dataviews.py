@@ -63,7 +63,10 @@ def get_workers_from_database():
 def get_workers_live():
     i = inspect()
     workers = i.ping()
-    workers = list(workers.iterkeys())
+    if workers:
+        workers = list(workers.iterkeys())
+    else:
+        workers = []
     return workers
     
 

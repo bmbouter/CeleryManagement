@@ -37,12 +37,24 @@ urlpatterns += patterns('celerymanagementapp',
     
     # For the following urls, the *name* may be a task or worker name (whichever 
     # is appropriate) or 'all' which returns information on all items.
+    # General url pattern: worker/NAME/...
     (r'^worker/all/list/$', 'dataviews.worker_list_dataview'),
     (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/count/$', 'dataviews.worker_subprocesses_dataview'),
+    
+    # General url pattern: task/NAME/...
     (r'^task/all/list/$', 'dataviews.definedtask_list_dataview'),
     (r'^task/(?P<name>[-\w\d_.]+)/dispatched/pending/count/$', 'dataviews.pending_task_count_dataview'),
     (r'^task/(?P<name>[-\w\d_.]+)/dispatched/byworker/count/$', 'dataviews.tasks_per_worker_dataview'),
 )
+
+# "Action" URLs (must use method POST)
+urlpatterns += patterns('celerymanagementapp',    
+    # General url pattern: worker/NAME/...
+    (r'^worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'views.kill_worker'),
+    (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/grow/$', 'views.grow_worker_pool'),
+    (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/shrink/$', 'views.shrink_worker_pool'),
+)
+
 
 urlpatterns += patterns('celerymanagementapp',
     url(r'^view/system/$', 'views.system_overview', name="system_overview_url"),

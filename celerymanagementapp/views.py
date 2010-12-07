@@ -6,6 +6,7 @@ import urllib
 import sys
 
 from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseNotAllowed
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
@@ -16,7 +17,7 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 from djcelery.models import WorkerState
 from celery.registry import TaskRegistry, tasks
-from celery.task.control import inspect
+from celery.task.control import inspect, broadcast
 
 #from celery.task.control import Control
 #from celery.app import app_or_default
@@ -224,6 +225,7 @@ class RuntimeQueryStringBuilder(QueryStringBuilder):
                    'end_time','auto_runtime_range']
 
 
+#==============================================================================#
 def visualize_runtimes(request, taskname=None, runtime_min=0., bin_count=None, 
                        bin_size=None):
     
@@ -363,3 +365,46 @@ def visualize_runtimes_new(request, taskname=None, interval=0):
 def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
             context_instance=RequestContext(request))
+
+#==============================================================================#
+def _resolve_name_param(name):
+    """If name is None or 'all', return None.  Otherwise, returns name."""
+    if not name or name.lower() == 'all':
+        name = None
+    return name
+
+def kill_worker(request, name=None):
+    # if name is None or 'all'... this will shut down *ALL* workers!!!
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    else:
+        name = _resolve_name_param(name)
+        dest = name and [name]  # dest will be None or a list of a single name
+        broadcast('shutdown', destination=dest)
+        return HttpResponse('')
+
+def grow_worker_pool(request, name=None):
+    # if name is None or 'all'... this will affect *ALL* workers!!!
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    else:
+        name = _resolve_name_param(name)
+        dest = name and [name]  # dest will be None or a list of a single name
+        broadcast('pool_grow', destination=dest)
+        return HttpResponse('')
+
+def shrink_worker_pool(request, name=None):
+    # if name is None or 'all'... this will affect *ALL* workers!!!
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    else:
+        name = _resolve_name_param(name)
+        dest = name and [name]  # dest will be None or a list of a single name
+        broadcast('pool_shrink', destination=dest)
+        return HttpResponse('')
+
+
+
+
+
+
