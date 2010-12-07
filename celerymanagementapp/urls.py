@@ -58,6 +58,7 @@ urlpatterns += patterns('celerymanagementapp',
 
 urlpatterns += patterns('celerymanagementapp',
     url(r'^view/system/$', 'views.system_overview', name="system_overview_url"),
+    url(r'^view/system/test/$', 'views.system_overview', name="system_overview_url", kwargs={ "test" : "true" }),
 )
 
 urlpatterns += patterns('celerymanagementapp',

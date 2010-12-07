@@ -1,13 +1,12 @@
 var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
 
-var tasksUrl = '../../task/all/list/';
 
 $(document).ready(function() {
     
     var systemViewer = new SystemViewer();
     systemViewer.init();
     
-    var xhr = jQuery.getJSON(tasksUrl);
+    var xhr = jQuery.getJSON(CMACore.get_tasks_url);
 	var obj = jQuery.parseJSON(xhr.responseText);
 	
 	/*int length = obj.length;

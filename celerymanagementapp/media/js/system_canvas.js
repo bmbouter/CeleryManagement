@@ -262,7 +262,7 @@ function SystemViewer(){
             if( connectors[connector].task.fullName == task.fullName ){
                 systemRenderer.highlightConnector(connectors[connector]);
             } else {
-                systemRenderer.dimConnector(connectors[connector]);
+                //systemRenderer.dimConnector(connectors[connector]);
             }
         }
     }
@@ -272,7 +272,7 @@ function SystemViewer(){
             if( connectors[connector].worker.fullName == worker.fullName ){
                 systemRenderer.highlightConnector(connectors[connector]);
             } else {
-                systemRenderer.dimConnector(connectors[connector]);
+                //systemRenderer.dimConnector(connectors[connector]);
             }
         }
     }
@@ -303,8 +303,8 @@ function SystemRenderer(height){
     }
 
     this.highlightConnector = function(connector){
-        context.lineCap = "round";
-        context.lineWidth = 4;
+        context.lineCap = "butt";
+        context.lineWidth = 6;
         context.moveTo(connector.x1, connector.y1);
         context.lineTo(connector.x2, connector.y2);
         context.strokeStyle = connector.getFill();
@@ -317,12 +317,14 @@ function SystemRenderer(height){
     }
 
     this.dimConnector = function(connector){
-        context.lineCap = "round";
-        context.lineWidth = 0.5;
+        context.lineCap = "butt";
+        context.lineWidth = 6;
         context.moveTo(connector.x1, connector.y1);
         context.lineTo(connector.x2, connector.y2);
-        context.strokeStyle = connector.getFill();
+        context.strokeStyle = '#FFF';
         context.stroke();
+        context.fillStyle = '#FFF';
+        context.fill();
     }
     
     this.clearCanvas = function(){
