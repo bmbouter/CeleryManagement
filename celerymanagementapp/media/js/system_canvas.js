@@ -9,9 +9,10 @@ function Task(y, name){
     this.fullName = name;
     this.xCenter = (this.width / 2) + this.x;
     this.yCenter = (this.height / 2) + y;
+    this.pending = 0;
     
-    if( name.length > 25 ){
-        this.displayName = name.substring(0, 22) + "...";
+    if( name.length > 30 ){
+        this.displayName = name.substring(0, 27) + "...";
     } else {
         this.displayName = name;
     }
@@ -32,9 +33,10 @@ function Worker(y, name, active){
     this.xCenter = (this.width / 2) + this.x;
     this.yCenter = (this.height / 2) + y;
     this.active = active;
+    this.processes = 0;
     
-    if( name.length > 25 ){
-        this.displayName = name.substring(0, 22) + "...";
+    if( name.length > 30 ){
+        this.displayName = name.substring(0, 27) + "...";
     } else {
         this.displayName = name;
     }
@@ -118,9 +120,24 @@ function SystemViewer(){
                 }
             }
         }
-        draw();
+        CMACore.getPendingTasks(setPendingTasks);
+        CMACore.getWorkerProcesses(setWorkerProcesses);
     }
     
+    function setPendingTasks(data){
+        for( task in tasks ){
+            tasks[task].pending = data[tasks[task].fullName];
+        }
+        draw();
+    }
+
+    function setWorkerProcesses(data){
+        for( worker in workers ){
+            workers[worker].processes = data[workers[worker].fullName];
+        }
+        draw();
+    }
+
     function draw(){
         if( workers.length > tasks.length ){
             var height = workers.length * 60 + 20;
@@ -132,10 +149,10 @@ function SystemViewer(){
             systemRenderer.drawConnector(connectors[connector]);
         }
         for( task in tasks ){
-            systemRenderer.drawEntity(tasks[task]);
+            systemRenderer.drawTask(tasks[task]);
         }
         for( worker in workers ){
-            systemRenderer.drawEntity(workers[worker]);
+            systemRenderer.drawWorker(workers[worker]);
         }
     }
     
@@ -221,10 +238,11 @@ function SystemViewer(){
         if( expand ){
             if( task.fullName != task.displayName ){
                 var newTask = new Task(task.y, task.fullName);
-                newTask.width = task.fullName.length * 8;
+                newTask.width = task.fullName.length * 7;
                 newTask.x = task.x - ((newTask.width - task.width) / 2);
                 newTask.displayName = task.fullName;
-                systemRenderer.drawEntity(newTask);
+                newTask.pending = task.pending;
+                systemRenderer.drawTask(newTask);
                 expandedTask = newTask;
             } else {
                 expandedTask = task;
@@ -241,10 +259,11 @@ function SystemViewer(){
         if( expand ){
             if( worker.fullName != worker.displayName ){
                 var newWorker = new Worker(worker.y, worker.fullName, worker.active);
-                newWorker.width = worker.fullName.length * 8;
+                newWorker.width = worker.fullName.length * 7;
                 newWorker.x = worker.x - ((newWorker.width - worker.width) / 2);
                 newWorker.displayName = worker.fullName;
-                systemRenderer.drawEntity(newWorker);
+                newWorker.processes = worker.processes;
+                systemRenderer.drawWorker(newWorker);
                 expandedWorker = newWorker;
             } else {
                 expandedWorker = worker;
@@ -292,15 +311,33 @@ function SystemRenderer(height){
     canvas.width = $(window).width();
     canvas.height = height;
     context.lineJoin = "bevel";
+    $('#systemCanvas').bind("contextmenu", function(e){
+        return false;
+    });
     var drawShapes = new DrawShapes(context);
    
-    this.drawEntity = function(shape){
-        drawShapes.roundedRect(shape.x, shape.y, shape.width, shape.height, shape.getFill());
+    this.drawTask = function(task){
+        drawShapes.roundedRect(task.x, task.y, task.width, task.height, task.getFill());
         context.textBaseline = "middle";
-        context.textAlign = "center";
-        context.font = "15px sans-serif";
+        context.textAlign = "start";
+        context.font = "13px sans-serif";
         context.fillStyle = "black";
-        context.fillText(shape.displayName, shape.xCenter, shape.yCenter);
+        context.fillText(task.displayName, task.x + 5, task.y + 12);
+        context.font = "11px sans-serif";
+        context.fillStyle = "black";
+        context.fillText("Pending: " + task.pending, task.x + 5, task.y + 12 + 15);
+    }
+    
+    this.drawWorker = function(worker){
+        drawShapes.roundedRect(worker.x, worker.y, worker.width, worker.height, worker.getFill());
+        context.textBaseline = "middle";
+        context.textAlign = "start";
+        context.font = "13px sans-serif";
+        context.fillStyle = "black";
+        context.fillText(worker.displayName, worker.x + 5, worker.y + 12);
+        context.font = "11px sans-serif";
+        context.fillStyle = "black";
+        context.fillText("Worker Processes: " + worker.processes, worker.x + 5, worker.y + 12 + 15);
     }
     
     this.drawConnector = function(connector){
@@ -315,7 +352,7 @@ function SystemRenderer(height){
 
     this.highlightConnector = function(connector){
         context.lineCap = "butt";
-        context.lineWidth = 6;
+        context.lineWidth = 4;
         context.beginPath();
         context.moveTo(connector.x1, connector.y1);
         context.lineTo(connector.x2, connector.y2);
@@ -362,7 +399,7 @@ function DrawShapes(context){
     
     this.roundedRect = function(x, y, width, height, fill, radius, stroke) {
         if( typeof stroke == "undefined" ){
-            stroke = false;
+            stroke = true;
         }
         if( typeof radius == "undefined" ){
             radius = 5;
@@ -380,6 +417,8 @@ function DrawShapes(context){
         context.quadraticCurveTo(x, y, x + radius, y);
         context.closePath();
         if( stroke ){
+            context.lineWidth = 3;
+            context.strokeStyle = '#A6790D';
             context.stroke();
         }
         if( fill ){
