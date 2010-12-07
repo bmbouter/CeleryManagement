@@ -1,5 +1,5 @@
-{
-    "opus-dev.cnl.ncsu.edu" : true,
-    "opus-dev.cnl.ncsu.edu-FakeTest1" : true,
-    "opus-dev.cnl.ncsu.edu-FakeTest2" : true
-}
+[
+    "opus-dev.cnl.ncsu.edu",
+    "opus-dev.cnl.ncsu.edu-FakeTest1",
+    "opus-dev.cnl.ncsu.edu-FakeTest2"
+]
