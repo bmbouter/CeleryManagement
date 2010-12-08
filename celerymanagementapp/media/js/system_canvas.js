@@ -74,9 +74,44 @@ function SystemViewer(){
     var expandedWorker = false;
     var tasksSet = false;
     var workersSet = false;
-    var systemRenderer; 
+    var systemRenderer;
+    var systemEventHandler;
+    var xOffset = 0;
+    var yOffset = 115;
+    var clickedEntity = false;
+
+    $('#systemCanvas').bind("contextmenu", function(e){
+        var xMousePos = e.pageX - xOffset;
+        var yMousePos = e.pageY - yOffset;
+        var entity = getEntity(xMousePos, yMousePos);
+        clickedEntity = entity;
+
+        if( typeof entity != "undefined"  && entity.constructor.name == "Worker" ){
+            $('#workerMenu').css({
+                top: e.pageY + 'px',
+                left: e.pageX + 'px'
+            }).show();
+        }
+        return false;
+    });
+
+    $('#deactivateWorker').click(function (){
+        if( typeof clickedEntity != "undefined"  && clickedEntity.constructor.name == "Worker" ){
+            CMACore.postShutdownWorker(clickedEntity.fullName, this.shutdownWorker);
+            clickedEntity = false;
+        }
+    });
+
+    this.shutdownWorker = function(data){
+        console.log(data);
+        if( data == "success" ){
+            console.log("worker shutdown");
+            draw();
+        }
+    }
 
     this.init = function(){
+        systemEventHandler = new SystemEventHandler();
         $('#systemCanvas').mousemove(handleHover);
         $('#systemCanvas').click(handleClick);
         this.refresh();
@@ -157,8 +192,6 @@ function SystemViewer(){
     }
     
     function handleHover(e){
-        var xOffset = 0;
-        var yOffset = 115;
         var xMousePos = e.pageX - xOffset;
         var yMousePos = e.pageY - yOffset;
         handleTaskHover(xMousePos, yMousePos);
@@ -238,7 +271,7 @@ function SystemViewer(){
         if( expand ){
             if( task.fullName != task.displayName ){
                 var newTask = new Task(task.y, task.fullName);
-                newTask.width = task.fullName.length * 7;
+                newTask.width = task.fullName.length * 6.8;
                 newTask.x = task.x - ((newTask.width - task.width) / 2);
                 newTask.displayName = task.fullName;
                 newTask.pending = task.pending;
@@ -305,15 +338,23 @@ function SystemViewer(){
     }
 }
 
+function SystemEventHandler(){
+    $(document).ready(function() {
+        $('#workerMenu').click(function() {
+            $('#workerMenu').hide();
+        });
+        $(document).click(function() {
+            $('#workerMenu').hide();
+        });
+    });
+}
+
 function SystemRenderer(height){
     var canvas = $('#systemCanvas')[0];
     var context = canvas.getContext("2d");
     canvas.width = $(window).width();
     canvas.height = height;
     context.lineJoin = "bevel";
-    $('#systemCanvas').bind("contextmenu", function(e){
-        return false;
-    });
     var drawShapes = new DrawShapes(context);
    
     this.drawTask = function(task){
@@ -352,7 +393,7 @@ function SystemRenderer(height){
 
     this.highlightConnector = function(connector){
         context.lineCap = "butt";
-        context.lineWidth = 4;
+        context.lineWidth = 3;
         context.beginPath();
         context.moveTo(connector.x1, connector.y1);
         context.lineTo(connector.x2, connector.y2);

@@ -384,7 +384,7 @@ def kill_worker(request, name=None):
         print 'name: {0}'.format(name)
         print 'dest: {0}'.format(dest)
         broadcast('shutdown', destination=dest)
-        return HttpResponse('')
+        return HttpResponse('success')
 
 def grow_worker_pool(request, name=None):
     # if name is None or 'all'... this will affect *ALL* workers!!!
