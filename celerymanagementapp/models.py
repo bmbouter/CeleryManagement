@@ -58,15 +58,27 @@ class DispatchedTask(models.Model):
         ordering = ["-tstamp"]
         
         
-# class DefinedTask(models.Model):
-    # """A task type that has been defined."""
-    # name =      models.CharField(_(u"name"), max_length=200, null=True, 
-                                 # db_index=True)
-    # worker =    models.CharField(_(u"worker"), max_length=200, null=True, 
-                                 # db_index=True)
+class RegisteredTaskType(models.Model):
+    """ A task type that has been registered with a worker.  This is *not* the 
+        same as a DefinedTask.
+    """
+    name =      models.CharField(_(u"name"), max_length=200)
+    # The worker that the task is registered with.
+    worker =    models.CharField(_(u"worker"), max_length=200)
     
-    # class Meta:
-        # unique_together = (('name','worker'),)
+    class Meta:
+        unique_together = (('name','worker'),)
+        
+    @staticmethod
+    def clear_tasks(workername):
+        RegisteredTaskType.objects.filter(worker=workername).delete()
+        
+    @staticmethod
+    def add_task(taskname, workername):
+        RegisteredTaskType.objects.get_or_create(name=taskname, worker=workername)
+        
+    def __unicode__(self):
+        return u'{0} --- {1}'.format(self.name, self.worker)
                
     
 
