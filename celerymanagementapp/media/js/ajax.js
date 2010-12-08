@@ -8,6 +8,7 @@ CMACore.loadUrls = function() {
     CMACore.task_url = CMACore.root_url + "view/dispatched_tasks/";
     CMACore.pending_tasks_url = CMACore.root_url + "task/all/dispatched/pending/count/";
     CMACore.worker_processes_url = CMACore.root_url + "worker/all/subprocess/count/";
+    CMACore.shutdown_worker_url = CMACore.root_url + "worker/<placeHolder>/shutdown/";
 }
 
 CMACore.loadTestUrls = function(){
@@ -18,6 +19,7 @@ CMACore.loadTestUrls = function(){
     CMACore.pending_tasks_url = CMACore.root_url + "tasks_pending.json";
     CMACore.worker_processes_url = CMACore.root_url + "worker_processes.json";
     CMACore.task_url = CMACore.root_url + "/celerymanagementapp/view/dispatched_tasks/";
+    CMACore.shutdown_worker_url = CMACore.root_url + "successful_worker_shutdown.json";
 }
 
 CMACore.getTasks = function(callbackFunction){
@@ -38,4 +40,8 @@ CMACore.getPendingTasks = function(callbackFunction){
 
 CMACore.getWorkerProcesses = function(callbackFunction){
     $.getJSON(CMACore.worker_processes_url, callbackFunction);
+}
+
+CMACore.postShutdownWorker = function(workerName, callbackFunction){
+    $.post(CMACore.shutdown_worker_url.replace("<placeHolder>", workerName), callbackFunction);
 }
