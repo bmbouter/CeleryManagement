@@ -1,0 +1,8 @@
+[
+    "celery.ping",
+    "celery.task.base.Task",
+    "celerymanagementapp.testutil.tasks.print_time",
+    "celerymanagementapp.testutil.tasks.silly_loop",
+    "celerymanagementapp.testutil.tasks.simple_test",
+    "celerymanagementapp.testutil.tasks.sum_numbers"
+]

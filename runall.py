@@ -2,9 +2,11 @@ import subprocess
 import time
 import collections
 import sys
+import signal
+import traceback
 from optparse import OptionParser
 
-#from runall_config import process_arguments
+TERMINATE_ATTEMPTS_COUNT = 10
     
 class ProcessSet(object):
     def __init__(self, procsargs, init_delay=1.0):
@@ -12,18 +14,21 @@ class ProcessSet(object):
         self.procs = []
         try:
             for i,args in enumerate(procsargs):
-                print 'ProcessSet: Starting process #{0}'.format(i+1)
+                print 'ProcessSet: Starting process #{0}...  '.format(i+1),
                 if isinstance(args, collections.Sequence):
-                    proc = subprocess.Popen(args)
+                    proc = subprocess.Popen(args, close_fds=True)
                 elif isinstance(args, collections.Mapping):
+                    args['close_fds'] = True
                     proc = subprocess.Popen(**args)
                 else:
+                    print
                     msg = 'ProcessSet: Bad process arguments!\n'
                     msg += '  process_arguments in runall_config.py must contain lists and/or dicts.'
                     msg += '  process_arguments[{0}] is: {1}.'.format(i,type(args))
                     raise RuntimeError(msg)
-                time.sleep(init_delay)
                 self.procs.append(proc)
+                time.sleep(init_delay)
+                print 'pid: {0}'.format(proc.pid)
         except:
             self.terminate()
             raise
@@ -44,6 +49,17 @@ class ProcessSet(object):
         
     def all_running(self):
         return all((p.poll() is None) for p in self.procs)
+        
+    def good(self):
+        # every process is running or exited normally
+        return all((p.returncode is None or p.returncode==0) for p in self.procs)
+        
+    def print_caught_exception(self):
+        try:
+            print 'ProcessSet: Caught exception:'
+            traceback.print_exc()
+        except:
+            pass
         
     def terminate(self):
         print 'ProcessSet: Terminating processes...'
@@ -70,10 +86,11 @@ class ProcessSet(object):
     def loop(self, interval=1.0):
         print 'ProcessSet: Entering loop...  (use CONTROL-C to quit)'
         try:
-            while self.all_running():
+            while self.good():
                 time.sleep(interval)
                 
         except:
+            self.print_caught_exception()
             print 'ProcessSet: Leaving loop on exception...'
             self.terminate()
             raise
@@ -84,13 +101,13 @@ class ProcessSet(object):
     def cleanup(self, waittime=2.0):
         print 'ProcessSet: Cleaning up...'
         i = 0
-        while i<10 and not self.all_stopped():
+        while i<TERMINATE_ATTEMPTS_COUNT and not self.all_stopped():
             self.terminate()
             time.sleep(0.5)
             i+=1
         print 'ProcessSet: Allowing extra time for processes to stop before killing them...'
-        self.kill()
         time.sleep(waittime)
+        self.kill()
 
 def parse_options():
     parser = OptionParser()
@@ -112,7 +129,7 @@ def main():
         ps.loop()
     except:
         pass
-    ps.cleanup(waittime=1.0)
+    ps.cleanup()
     print 'ProcessSet: Completed!'
 
 

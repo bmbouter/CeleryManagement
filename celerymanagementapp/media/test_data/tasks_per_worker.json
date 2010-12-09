@@ -1,0 +1,31 @@
+{
+    "celerymanagementapp.testutil.tasks.print_time": {
+        "opus-dev.cnl.ncsu.edu": 6,
+        "opus-dev.cnl.ncsu.edu-FakeTest1" : 4
+    }, 
+
+    "celerymanagementapp.testutil.tasks.simple_test": {
+        "opus-dev.cnl.ncsu.edu": 150
+    }, 
+
+    "celerymanagementapp.testutil.tasks.silly_loop": {
+        "opus-dev.cnl.ncsu.edu": 5
+    }, 
+
+    "celery.backend_cleanup": {
+        "opus-dev.cnl.ncsu.edu": 10
+    }, 
+    
+    "celery.task.base.Task": {
+        "opus-dev.cnl.ncsu.edu": 20
+    }, 
+
+    "celerymanagementapp.testutil.tasks.sum_numbers": {
+        "opus-dev.cnl.ncsu.edu": 0
+    }, 
+
+    "celery.ping": {
+        "opus-dev.cnl.ncsu.edu-FakeTest1" : 19,
+        "opus-dev.cnl.ncsu.edu": 0
+    }
+}

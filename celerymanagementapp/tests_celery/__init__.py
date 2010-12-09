@@ -18,10 +18,10 @@ from celerymanagementapp.tests_celery import base
 
 #==============================================================================#
 # Test modules...
-from celerymanagementapp.tests_celery import misc
+from celerymanagementapp.tests_celery import misc, dataviews
 
 # List of all test modules containing tests.  
-_testmodules = [misc]
+_testmodules = [misc, dataviews]
 
 # Import all test cases so they appear in this module.  This appears to be 
 # needed for Hudson automated testing.  Do this instead of just: 

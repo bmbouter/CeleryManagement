@@ -18,13 +18,30 @@ class CmEvCommand(celeryev.EvCommand):
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
+        make_option('-F', '--frequency', '--freq',
+                   action="store", dest="frequency",
+                   type="float", default=1.0,
+                   help="Recording: Snapshot frequency."),
+        make_option('-r', '--maxrate',
+                   action="store", dest="maxrate", default=None,
+                   help="Recording: Shutter rate limit (e.g. 10/m)"),
+        make_option('-l', '--loglevel',
+                    action="store", dest="loglevel", default="INFO",
+                    help="Loglevel. Default is WARNING."),
+        make_option('-f', '--logfile',
+                   action="store", dest="logfile", default=None,
+                   help="Log file. Default is <stderr>"),
         )
     
-    args = '<...>'
-    help = 'todo...'
+    args = ''
+    help = '''The CeleryManagement event handler that records Celery events in 
+the database.'''
     
     def handle(self, *args, **options):
         options['camera'] = 'celerymanagementapp.snapshot.snapshot.Camera'
+        options['dump'] = False
+        options['prog_name'] = 'cmrun'
+            
         ev = CmEvCommand(app=app)
         ev.run(*args, **options)
 

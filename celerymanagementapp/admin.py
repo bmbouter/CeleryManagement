@@ -16,7 +16,10 @@ TASK_STATE_COLORS = {states.SUCCESS: "green",
                      "RECEIVED": "blue"}
 
 def format_seconds(val):
-    return '{0:.6f}'.format(val)
+    if val:
+        return '{0:.6f}'.format(val)
+    else:
+        return ''
     
 def display_field(name, allow_tags=False):
     def _inner(func):

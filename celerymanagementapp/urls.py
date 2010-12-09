@@ -29,16 +29,44 @@ urlpatterns = patterns('celerymanagementapp',
     (r'^view/dispatched_tasks/(?P<taskname>[-\w\d_.]+)/$', 'views.view_dispatched_tasks'),
     
     (r'^test/$', 'views.test_view'),
-    #(r'^test/(?P<taskname>[-\w\d_.]+)/$', 'views.test_view'),
-    
-    (r'^xy_query/dispatched_tasks/$', 'dataviews.task_xy_dataview'),
-    (r'^worker_subprocesses/$', 'dataviews.worker_subprocesses_dataview'),
-    (r'^pending_task_count/$', 'dataviews.pending_task_count_dataview'),
-    (r'^tasks_per_worker/$', 'dataviews.tasks_per_worker_dataview'),
 )
+
+# Data retrieval URLs
+urlpatterns += patterns('celerymanagementapp',    
+    (r'^xy_query/dispatched_tasks/$', 'dataviews.task_xy_dataview'),
+    
+    # For the following urls, the *name* may be a task or worker name (whichever 
+    # is appropriate) or 'all' which returns information on all items.
+    # General url pattern: worker/NAME/...
+    (r'^worker/all/list/$', 'dataviews.worker_list_dataview'),
+    (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/count/$', 'dataviews.worker_subprocesses_dataview'),
+    
+    # General url pattern: task/NAME/...
+    (r'^task/all/list/$', 'dataviews.definedtask_list_dataview'),
+    (r'^task/(?P<name>[-\w\d_.]+)/dispatched/pending/count/$', 'dataviews.pending_task_count_dataview'),
+    (r'^task/(?P<name>[-\w\d_.]+)/dispatched/byworker/count/$', 'dataviews.tasks_per_worker_dataview'),
+)
+
+# "Action" URLs (must use method POST)
+urlpatterns += patterns('celerymanagementapp',
+    # For the following URLs, if 'all' is given instead of a worker name, *all* 
+    # workers will be affected.
+    # General url pattern: worker/NAME/...
+    (r'^worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'views.kill_worker'),
+    (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/grow/$', 'views.grow_worker_pool'),
+    (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/shrink/$', 'views.shrink_worker_pool'),
+    # The following allow an explicit number of worker subprocess to be added/removed
+    (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/grow/(?P<num>\d+)/$', 'views.grow_worker_pool'),
+    (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/shrink/(?P<num>\d+)/$', 'views.shrink_worker_pool'),
+    
+    # for manual testing...
+    (r'^worker/(?P<name>[-\w\d_.]+)/test_commands/$', 'views.worker_commands_test_view'),
+)
+
 
 urlpatterns += patterns('celerymanagementapp',
     url(r'^view/system/$', 'views.system_overview', name="system_overview_url"),
+    url(r'^view/system/test/$', 'views.system_overview', name="system_overview_url", kwargs={ "test" : "true" }),
 )
 
 urlpatterns += patterns('celerymanagementapp',
@@ -47,8 +75,8 @@ urlpatterns += patterns('celerymanagementapp',
     
     (r'^get/runtimes/$', 'views.get_runtime_data'),
     (r'^get/runtimes/(?P<taskname>[-\w\d_.]+)/$', 'views.get_runtime_data'),
-    (r'^get/workers/$', 'views.get_worker_data'),
-    (r'^get/tasks/$', 'views.get_defined_tasks'),
+    #(r'^get/workers/$', 'views.get_worker_data'),
+    #(r'^get/tasks/$', 'views.get_defined_tasks'),
     (r'^get/dispatched_tasks/$', 'views.get_dispatched_tasks'),
     (r'^get/dispatched_tasks/(?P<taskname>[-\w\d_.]+)/$', 'views.get_dispatched_tasks'),   
 )

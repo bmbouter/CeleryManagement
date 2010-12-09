@@ -1,7 +1,15 @@
 {% extends "celerymanagementapp/base.html" %}
 
 {% block extrajs %}
-        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/system_canvas.js" ></script>
+    <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/system_canvas.js" ></script>
+    
+    <script>
+        if( {{ load_test_data }} ){
+            CMACore.loadTestUrls();
+        } else {
+            CMACore.loadUrls();
+        }
+    </script>
 {% endblock extrajs %}
 
 {% block content %}
@@ -10,4 +18,9 @@
 
     </cavas>
 </div>
+    <div id="workerMenu">
+        <ul>
+            <li><a id="deactivateWorker">Deactivate Worker</a></li>
+        </ul>
+    </div>
 {% endblock content %}

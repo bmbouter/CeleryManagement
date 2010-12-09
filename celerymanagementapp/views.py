@@ -6,6 +6,7 @@ import urllib
 import sys
 
 from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseNotAllowed
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
@@ -16,7 +17,7 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 from djcelery.models import WorkerState
 from celery.registry import TaskRegistry, tasks
-from celery.task.control import inspect
+from celery.task.control import inspect, broadcast
 
 #from celery.task.control import Control
 #from celery.app import app_or_default
@@ -224,6 +225,7 @@ class RuntimeQueryStringBuilder(QueryStringBuilder):
                    'end_time','auto_runtime_range']
 
 
+#==============================================================================#
 def visualize_runtimes(request, taskname=None, runtime_min=0., bin_count=None, 
                        bin_size=None):
     
@@ -261,14 +263,14 @@ def view_defined_tasks(request):
             context_instance=RequestContext(request))
             
 
-def get_defined_tasks(request):
-    i = inspect()  
-    workers = i.registered_tasks()
-    defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
-    defined = list(defined)
-    defined.sort()
+# def get_defined_tasks(request):
+    # i = inspect()  
+    # workers = i.registered_tasks()
+    # defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
+    # defined = list(defined)
+    # defined.sort()
 
-    return HttpResponse(json.dumps(defined))
+    # return HttpResponse(json.dumps(defined))
 
 def get_dispatched_tasks(request, taskname=None):
     """View DispatchedTasks, possibly limited to those for a particular 
@@ -353,13 +355,127 @@ def visualize_runtimes_new(request, taskname=None, interval=0):
             context_instance=RequestContext(request))
 
 
-def get_worker_data(request):
-    worker_dict = {}
-    workers = WorkerState.objects.all()
-    for w in workers:
-        worker_dict[w.__str__()] = w.is_alive()
-    return HttpResponse(json.dumps(worker_dict))
+# def get_worker_data(request):
+    # worker_dict = {}
+    # workers = WorkerState.objects.all()
+    # for w in workers:
+        # worker_dict[w.__str__()] = w.is_alive()
+    # return HttpResponse(json.dumps(worker_dict))
 
-def system_overview(request):
+def system_overview(request, test="false"):
     return render_to_response('celerymanagementapp/system.html',
+            { "load_test_data" : test },
             context_instance=RequestContext(request))
+
+#==============================================================================#
+def _resolve_name_param(name):
+    """If name is None or 'all', return None.  Otherwise, returns name."""
+    if not name or name.lower() == 'all':
+        name = None
+    return name
+
+def kill_worker(request, name=None):
+    """ Kills a running worker (celeryd).  However, no action will be taken 
+        unless the request method is 'POST'.
+        
+        name:
+            The name of the worker to stop.  The special value 'all' will stop 
+            *all* workers.
+    """
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    else:
+        name = _resolve_name_param(name)
+        dest = name and [name]  # dest will be None or a list of a single name
+        print 'name: {0}'.format(name)
+        print 'dest: {0}'.format(dest)
+        broadcast('shutdown', destination=dest)
+        return HttpResponse('success')
+
+def grow_worker_pool(request, name=None, num=1):
+    """ Kills a running worker (celeryd).  However, no action will be taken 
+        unless the request method is 'POST'.
+        
+        name:
+            The name of the worker to stop.  The special value 'all' will stop 
+            *all* workers.
+    """
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    else:
+        name = _resolve_name_param(name)
+        dest = name and [name]  # dest will be None or a list of a single name
+        broadcast('pool_grow', destination=dest, arguments={'n':num})
+        return HttpResponse('')
+
+def shrink_worker_pool(request, name=None, num=1):
+    """ Kills a running worker (celeryd).  However, no action will be taken 
+        unless the request method is 'POST'.
+        
+        name:
+            The name of the worker to stop.  The special value 'all' will stop 
+            *all* workers.
+    """
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    else:
+        name = _resolve_name_param(name)
+        dest = name and [name]  # dest will be None or a list of a single name
+        broadcast('pool_shrink', destination=dest, arguments={'n':num})
+        return HttpResponse('')
+    
+
+@login_required
+def worker_commands_test_view(request, name=None):
+    from django.template import Template
+    
+    from celerymanagementapp.dataviews import get_worker_subprocesses
+    import pprint
+    workername = name or 'all'
+    kill = reverse( 'celerymanagementapp.views.kill_worker', 
+                    kwargs={'name':workername} )
+    grow = reverse( 'celerymanagementapp.views.grow_worker_pool', 
+                    kwargs={'name':workername} )
+    shrink = reverse('celerymanagementapp.views.shrink_worker_pool', 
+                     kwargs={'name':workername} )
+    subprocs = '{0}'.format(pprint.pformat(get_worker_subprocesses(),indent=4))
+    
+    html = """\
+    <html>
+    <body>
+    <table>
+      <tr><td>
+        <form action="{kill}" method="POST">
+        {{% csrf_token %}}
+        <input type="submit" value="Kill Worker"/>
+        </form>
+      </td></tr>
+      <tr><td>
+        <form action="{grow}" method="POST">
+        {{% csrf_token %}}
+        <input type="submit" value="Grow Subprocesses"/>
+        </form>
+      </td></tr>
+      <tr><td>
+        <form action="{shrink}" method="POST">
+        {{% csrf_token %}}
+        <input type="submit" value="Shrink Subprocesses"/>
+        </form>
+      </td></tr>
+    </table>
+    <pre>
+    {data}
+    </pre>
+    </body>
+    </html>
+    """
+    html = html.format(kill=kill, grow=grow, shrink=shrink, data=subprocs)
+    t = Template(html)
+    c = RequestContext(request)
+    return HttpResponse(t.render(c))
+
+
+
+
+
+

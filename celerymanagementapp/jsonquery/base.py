@@ -3,6 +3,7 @@ from celerymanagementapp.jsonquery.exception import JsonQueryError
 
 #==============================================================================#
 class JsonFilter(object):
+    """Filter a """
     def __init__(self, modelmap, jsondata):
         self.modelmap = modelmap
         self.filter_args = self._build_filter(jsondata)
@@ -39,7 +40,7 @@ class JsonFilter(object):
         
     def _build_exclude(self, jsondata):
         qargs = {}
-        filterexps = jsondata.get('filter', None)
+        filterexps = jsondata.get('exclude', None)
         if filterexps:
             for exp in filterexps:
                 qargs.update(self._build_query_kwarg(exp))
