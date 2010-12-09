@@ -1,3 +1,7 @@
+"""
+    Django view functions that return Json data.
+"""
+
 import json
 import itertools
 import socket
@@ -31,6 +35,14 @@ def _json_response(jsondata, **kwargs):
     return HttpResponse(rawjson, content_type='application/json')
     
 def _update_json_request(json_request, **kwargs):
+    """ Merges the keyword arguments with the contents on the json_request 
+        dict.  
+        
+        If 'filter' or 'exclude' are given (whose values should be a list of 
+        lists), their values are appended to the values of the same name in the 
+        json dict.  Other arguments replace the corresponding values in the 
+        dict.
+    """
     if 'filter' in kwargs:
         filter = json_request.get('filter',[])
         filter.extend(kwargs.pop('filter'))
@@ -52,69 +64,74 @@ def _resolve_name(name):
 
 # Store the list of defined tasks for easy retrieval.  It is updated when a 
 # worker starts and when a worker stops.  
-_taskname_cache = []
-_worker_status_changed = True
 
-def _update_registered_task_types():
-    """Update the model of the currently registered task types."""
-    i = inspect()
-    workers = i.registered_tasks()
-    if workers:
-        for workername, tasks in workers.iteritems():
-            RegisteredTaskType.clear_tasks(workername)
-            for taskname in tasks:
-                RegisteredTaskType.add_task(taskname, workername)
-
-def _get_registered_task_types():
-    qs = RegisteredTaskType.objects.all()
-    names = list(set(x.name for x in qs))
-    names.sort()
-    return names
-
-
-def _on_celery_worker_ready():
-    global _worker_status_changed
-    _worker_status_changed = True
+class TasknameCache(object):
+    """ Cache the list of task names.  The names are also stored in the 
+        database.
+    """
+    RegisteredTaskType = RegisteredTaskType
+    def __init__(self):
+        self._taskname_cache = []
+        self._worker_status_changed = True
+        
+    def _getnames(self):
+        """ Retieve the currently cached list of task names.  If a worker has 
+            been started or stopped since the last time this was called, the 
+            cache will be refreshed. 
+        """
+        if self._worker_status_changed:
+            self._worker_status_changed = False
+            self._update_database()
+            self._taskname_cache = self._get_names_from_database()
+        return self._taskname_cache
     
-def _on_celery_worker_stopping():
-    global _worker_status_changed
-    _worker_status_changed = True
+    names = property(_getnames)
     
+    def _update_database(self):
+        """ Update the RegisteredTaskType model with data from the currently 
+            running Celery workers. 
+        """
+        i = inspect()
+        workers = i.registered_tasks()
+        if workers:
+            for workername, tasks in workers.iteritems():
+                self.RegisteredTaskType.clear_tasks(workername)
+                for taskname in tasks:
+                    self.RegisteredTaskType.add_task(taskname, workername)
+                    
+    def _get_names_from_database(self):
+        """ Retrieve the list of task names from the RegisteredTaskType model. 
+        """
+        qs = self.RegisteredTaskType.objects.all()
+        names = list(set(x.name for x in qs))
+        names.sort()
+        return names
+    
+    def _on_celery_worker_ready(self):
+        """Celery signal handler."""
+        self._worker_status_changed = True
+        
+    def _on_celery_worker_stopping(self):
+        """Celery signal handler."""
+        self._worker_status_changed = True
+    
+    
+_taskname_cache = TasknameCache()
+
+# Register Celery signal handlers.  This keeps the TasknameCache up-to-date.
 signals.worker_ready.connect(
-                _on_celery_worker_ready, 
+                _taskname_cache._on_celery_worker_ready, 
                 dispatch_uid='celerymanagementapp.dataviews.on_worker_ready'
                 )
 signals.worker_shutdown.connect(
-                _on_celery_worker_stopping, 
+                _taskname_cache._on_celery_worker_stopping, 
                 dispatch_uid='celerymanagementapp.dataviews.on_worker_stopping'
                 )
-    
-def _get_tasknames_from_database():
-    global _taskname_cache
-    global _worker_status_changed
-    if _worker_status_changed:
-        _worker_status_changed = False
-        _update_registered_task_types()
-        names = _get_registered_task_types()
-        _taskname_cache = names
-    return _taskname_cache
+
     
 def get_defined_tasks():
     """Get a list of the currently defined tasks."""
-    return _get_tasknames_from_database()
-    
-# def get_defined_tasks():
-    # """Get a list of the currently defined tasks."""
-    # global _taskname_cache
-    # i = inspect()
-    # workers = i.registered_tasks()
-    # #defined = []
-    # if workers:
-        # defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
-        # defined = list(defined)
-        # defined.sort()
-        # _taskname_cache = defined
-    # return _taskname_cache
+    return _taskname_cache.names
     
 def get_workers_from_database():
     """Get a list of all workers that exist (running or not) in the database."""
@@ -122,6 +139,7 @@ def get_workers_from_database():
     return [unicode(w) for w in workers]
     
 def get_workers_live():
+    """ Get the list of workers as reported by Celery right now. """
     i = inspect()
     workersdict = i.ping()
     workers = []
@@ -133,6 +151,10 @@ def get_workers_live():
     return workers
     
 def get_worker_subprocesses(dest=None):
+    """ Retrieve the number of subprocesses for each worker.  The return value 
+        is a dict where the keys are worker names and the values are the number 
+        of subprocesses. 
+    """
     stats = {}
     for x in broadcast("stats", destination=dest, reply=True):
         stats.update(x)
