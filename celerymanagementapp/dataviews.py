@@ -12,7 +12,7 @@ from celery import signals
 from celery.task.control import broadcast, inspect
 from djcelery.models import WorkerState
 
-from celerymanagementapp.jsonquery.base import JsonFilter
+from celerymanagementapp.jsonquery.filter import JsonFilter
 from celerymanagementapp.jsonquery.xyquery import JsonXYQuery
 from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 

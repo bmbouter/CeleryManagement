@@ -28,10 +28,10 @@ def sort_result(resdict):
     return resdict
     
 def date_timestamp(y,m,d):
-    # takes a python datetime.date and converts it to a float
+    # takes a python datetime.date and converts into a timestamp in milliseconds
     tt = datetime.date(y,m,d).timetuple()
-    unixtime = calendar.timegm(tt)
-    return unixtime
+    unixtime = time.mktime(tt)
+    return unixtime*1000
 
 #==============================================================================#
 class JsonQuery_SimpleSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
@@ -164,6 +164,39 @@ class JsonQuery_DateSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
         self.assertEquals(expected_output, output)
     
     
-    
-    
+class JsonQuery_UtilConv_TestCase(base.CeleryManagement_TestCaseBase):
+    def test_date_to_python(self):
+        from celerymanagementapp.jsonquery.util import date_to_python
+        today = datetime.date.today()
+        ms = int(time.mktime(today.timetuple()) * 1000)
+        
+        self.assertEquals(today, date_to_python(ms))
+        
+        
+    def test_datetime_to_python(self):
+        from celerymanagementapp.jsonquery.util import datetime_to_python
+        now = datetime.datetime.now()
+        now = now.replace(microsecond=0)
+        ms = int(time.mktime(now.timetuple()) * 1000)
+        
+        self.assertEquals(now, datetime_to_python(ms))
+        
+        
+    def test_date_from_python(self):
+        from celerymanagementapp.jsonquery.util import date_from_python
+        today = datetime.date.today()
+        ms = int(time.mktime(today.timetuple()) * 1000)
+        
+        self.assertEquals(ms, date_from_python(today))
+        
+        
+    def test_datetime_from_python(self):
+        from celerymanagementapp.jsonquery.util import datetime_from_python
+        now = datetime.datetime.now()
+        now = now.replace(microsecond=0)
+        ms = int(time.mktime(now.timetuple()) * 1000)
+        
+        self.assertEquals(ms, datetime_from_python(now))
+        
+        
 

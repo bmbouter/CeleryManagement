@@ -67,14 +67,17 @@ class RegisteredTaskType(models.Model):
     worker =    models.CharField(_(u"worker"), max_length=200)
     
     class Meta:
+        """Model meta-data."""
         unique_together = (('name','worker'),)
         
     @staticmethod
     def clear_tasks(workername):
+        """Erase tasks registered with the given worker."""
         RegisteredTaskType.objects.filter(worker=workername).delete()
         
     @staticmethod
     def add_task(taskname, workername):
+        """Add a new task registered with the given worker."""
         RegisteredTaskType.objects.get_or_create(name=taskname, worker=workername)
         
     def __unicode__(self):
