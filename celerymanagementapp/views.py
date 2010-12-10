@@ -252,11 +252,13 @@ def visualize_throughput(request, taskname=None):
             context_instance=RequestContext(request))
 
 def view_defined_tasks(request):
-    i = inspect()  
+    i = inspect()
     workers = i.registered_tasks()
-    defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
-    defined = list(defined)
-    defined.sort()
+    defined = []
+    if workers:
+        defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
+        defined = list(defined)
+        defined.sort()
 
     return render_to_response('celerymanagementapp/tasklist.html',
             {'tasks':defined},

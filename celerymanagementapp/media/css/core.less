@@ -1,14 +1,12 @@
 @page_background: #FFFFFF;
 @header_background: #FFF;
 @headerBarContainer_background: #FF7400;
-@breadCrumbsContainer_background: #008500;
-@breadCrumbs_background: #269926;
+@navigation_background: #CCC;
 
 @text_color: #222222;
 
-@breadCrumbsContainer_height: 45px;
-@headerBar_height: 70px;
-@header_height: @breadCrumbsContainer_height + @headerBar_height;
+@breadCrumbsContainer_height: 700px;
+@header_height: 70px;
 
 .rounded_borders(@radius: 5px) {
     -moz-border-radius: @radius;
@@ -44,7 +42,7 @@ body {
     position: relative;
     
     #headerBarContainer {
-        height: @headerBar_height;
+        height: @header_height;
         background: @headerBarContainer_background;
         -webkit-box-shadow: inset 0px 0px 10px black;
 
@@ -57,48 +55,67 @@ body {
         }  
     }
 
-    #breadCrumbsContainer {
-        background: @breadCrumbsContainer_background;
-        height: @breadCrumbsContainer_height;
+}
 
-        #breadCrumbs {
-            background: @breadCrumbs_background;
-            height: @breadCrumbsContainer_height;
+#contentContainer {
+
+    #navigation {
+        background: @navigation_background;
+        float: left;
+        width: 150px;
+        -webkit-box-shadow: inset 0px 0px 10px black;
+
+        li {
+            margin: 10px 0 10px 10px;
+
+            a {
+                text-decoration: none;
+                color: white;
+            }
+
+            a:visited {
+                color: black;
+            }
+
+            a:hover {
+                color: yellow;
+            }
         }
     }
-}
 
-#system {
 
-    canvas {
+
+    #content {
+        float: right;
+        height: 400px;
+
+        #workerMenu {
+            display: none;
+            position: absolute;
+            background-color: #FFF;
+            border: 1px solid #CCC;
+            border-radius: 2px;
+            
+            li {
+                width: 250px;
+                margin: 10px 0 10px 0;
+
+                a {
+                    text-decoration: none;
+                    width: 250px;
+                    padding: 10px 80px 10px 34px;
+                }
+
+                a:visited {
+                    color: black;
+                }
+
+                a:hover {
+                    background: blue;
+                    color: white;
+                }
+            }
+
+        }
     }
-
-}
-#workerMenu {
-    display: none;
-    position: absolute;
-    background-color: #FFF;
-    border: 1px solid #CCC;
-    border-radius: 2px;
-    
-    li {
-        width: 200px;
-        margin: 10px 0 10px 0;
-    }
-
-    a {
-        text-decoration: none;
-        width: 200px;
-        padding: 10px 40px 10px 29px;
-    }
-
-    a:visited {
-        color: black;
-    }
-
-    a:hover {
-        background: blue;
-        color: white;
-    }
-
 }

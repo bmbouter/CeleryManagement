@@ -1,5 +1,23 @@
 var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
 
+var systemViewer;
+
+$(document).ready(function() {
+    
+    $('#systemCanvas')[0].width = $(window).width() - $('#navigation').css("width").split("px")[0];
+
+    systemViewer = new SystemViewer();
+    systemViewer.init();
+     
+});
+
+function refresh(){
+    systemViewer.refresh();
+}
+
+//setInterval(refresh, 10000);
+
+
 function Task(y, name){
     this.x = 200;
     this.y = y;
@@ -76,8 +94,8 @@ function SystemViewer(){
     var workersSet = false;
     var systemRenderer;
     var systemEventHandler;
-    var xOffset = 0;
-    var yOffset = 115;
+    var yOffset = $('#header').css("height").split("px")[0];
+    var xOffset = $('#navigation').css("width").split("px")[0];
     var clickedEntity = false;
 
     $('#systemCanvas').bind("contextmenu", function(e){
@@ -123,7 +141,7 @@ function SystemViewer(){
     }
 
     this.createTasks = function(data){
-        var y = 20;
+        var y = 40;
         for( item in data ){
             tasks.push(new Task(y, data[item]));
             y += 60;
@@ -135,7 +153,7 @@ function SystemViewer(){
     }
 
     this.createWorkers = function(data){
-        var y = 20;
+        var y = 40;
         for ( item in data ){
             workers.push(new Worker(y, data[item], true));
             y += 60;
@@ -175,9 +193,9 @@ function SystemViewer(){
 
     function draw(){
         if( workers.length > tasks.length ){
-            var height = workers.length * 60 + 20;
+            var height = workers.length * 60 + 60;
         } else {
-            var height = tasks.length * 60 + 20;
+            var height = tasks.length * 60 + 60;
         }
         systemRenderer = new SystemRenderer(height);
         for( connector in connectors ){
@@ -199,8 +217,6 @@ function SystemViewer(){
     }
 
     function handleClick(e){
-        var xOffset = 0;
-        var yOffset = 115;
         var xMousePos = e.pageX - xOffset;
         var yMousePos = e.pageY - yOffset;
         var entity = getEntity(xMousePos, yMousePos);
@@ -352,7 +368,6 @@ function SystemEventHandler(){
 function SystemRenderer(height){
     var canvas = $('#systemCanvas')[0];
     var context = canvas.getContext("2d");
-    canvas.width = $(window).width();
     canvas.height = height;
     context.lineJoin = "bevel";
     var drawShapes = new DrawShapes(context);
@@ -429,8 +444,8 @@ function SystemRenderer(height){
     }
     
     this.clearCanvas = function(){
-        canvas.width = $(window).width();
-        canvas.height = $(window).height();
+        $('#systemCanvas')[0].width = $(window).width() - $('#navigation').css("width").split("px")[0];
+        canvas.height = height;
         context.clearRect(0, 0, canvas.width, canvas.height);
     }
 
