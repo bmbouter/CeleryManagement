@@ -4,6 +4,7 @@ from celerymanagementapp.jsonquery.exception import JsonQueryError
 #==============================================================================#
 class JsonQuery(object):
     """ Base class for performing queries with and returning json data. """
+    
     def __init__(self, modelmap, jsondata):
         self.modelmap = modelmap
         self.filter = filter.JsonFilter(modelmap, jsondata)
