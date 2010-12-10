@@ -12,7 +12,7 @@ function Chart(loc, data, options) {
      * Display the chart using the global data and options
      * This should be called whenever changes are made to the chart
      */
-    function displayChart() {
+    this.displayChart = function() {
         plot = $.plot(chart, data, options);
     }
     

@@ -1,3 +1,7 @@
+"""
+    Django view functions that return Json data.
+"""
+
 import json
 import itertools
 import socket
@@ -8,10 +12,11 @@ from celery import signals
 from celery.task.control import broadcast, inspect
 from djcelery.models import WorkerState
 
-from celerymanagementapp.jsonquery.base import JsonFilter
+from celerymanagementapp.jsonquery.filter import JsonFilter
 from celerymanagementapp.jsonquery.xyquery import JsonXYQuery
 from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 from celerymanagementapp.models import OutOfBandWorkerNode 
+from celerymanagementapp.models import RegisteredTaskType
 
 #==============================================================================#
 def _json_from_post(request, allow_empty=False):
@@ -29,6 +34,14 @@ def _json_response(jsondata, **kwargs):
     return HttpResponse(rawjson, content_type='application/json')
     
 def _update_json_request(json_request, **kwargs):
+    """ Merges the keyword arguments with the contents on the json_request 
+        dict.  
+        
+        If 'filter' or 'exclude' are given (whose values should be a list of 
+        lists), their values are appended to the values of the same name in the 
+        json dict.  Other arguments replace the corresponding values in the 
+        dict.
+    """
     if 'filter' in kwargs:
         filter = json_request.get('filter',[])
         filter.extend(kwargs.pop('filter'))
@@ -47,52 +60,77 @@ def _resolve_name(name):
         name = None
     return name
         
-_taskname_cache = []
-_worker_started_stopped = True
 
-def _on_celery_worker_ready():
-    global _worker_started_stopped
-    _worker_started_stopped = True
+# Store the list of defined tasks for easy retrieval.  It is updated when a 
+# worker starts and when a worker stops.  
+
+class TasknameCache(object):
+    """ Cache the list of task names.  The names are also stored in the 
+        database.
+    """
+    RegisteredTaskType = RegisteredTaskType
+    def __init__(self):
+        self._taskname_cache = []
+        self._worker_status_changed = True
+        
+    def _getnames(self):
+        """ Retieve the currently cached list of task names.  If a worker has 
+            been started or stopped since the last time this was called, the 
+            cache will be refreshed. 
+        """
+        if self._worker_status_changed:
+            self._worker_status_changed = False
+            self._update_database()
+            self._taskname_cache = self._get_names_from_database()
+        return self._taskname_cache
     
-def _on_celery_worker_stopping():
-    global _worker_started_stopped
-    _worker_started_stopped = True
+    names = property(_getnames)
     
+    def _update_database(self):
+        """ Update the RegisteredTaskType model with data from the currently 
+            running Celery workers. 
+        """
+        i = inspect()
+        workers = i.registered_tasks()
+        if workers:
+            for workername, tasks in workers.iteritems():
+                self.RegisteredTaskType.clear_tasks(workername)
+                for taskname in tasks:
+                    self.RegisteredTaskType.add_task(taskname, workername)
+                    
+    def _get_names_from_database(self):
+        """ Retrieve the list of task names from the RegisteredTaskType model. 
+        """
+        qs = self.RegisteredTaskType.objects.all()
+        names = list(set(x.name for x in qs))
+        names.sort()
+        return names
+    
+    def _on_celery_worker_ready(self):
+        """Celery signal handler."""
+        self._worker_status_changed = True
+        
+    def _on_celery_worker_stopping(self):
+        """Celery signal handler."""
+        self._worker_status_changed = True
+    
+    
+_taskname_cache = TasknameCache()
+
+# Register Celery signal handlers.  This keeps the TasknameCache up-to-date.
 signals.worker_ready.connect(
-                _on_celery_worker_ready, 
+                _taskname_cache._on_celery_worker_ready, 
                 dispatch_uid='celerymanagementapp.dataviews.on_worker_ready'
                 )
-signals.worker_ready.connect(
-                _on_celery_worker_stopping, 
+signals.worker_shutdown.connect(
+                _taskname_cache._on_celery_worker_stopping, 
                 dispatch_uid='celerymanagementapp.dataviews.on_worker_stopping'
                 )
-    
-def _get_tasknames_from_database():
-    global _taskname_cache
-    global _worker_started_stopped
-    if _worker_started_stopped:
-        qs = JsonTaskModelMap().get_queryset()
-        r = list(qs.values_list('name', flat=True).distinct().order_by())
-        _taskname_cache = r
-        _worker_started_stopped = False
-    return _taskname_cache
+
     
 def get_defined_tasks():
     """Get a list of the currently defined tasks."""
-    return _get_tasknames_from_database()
-    
-# def get_defined_tasks():
-    # """Get a list of the currently defined tasks."""
-    # global _taskname_cache
-    # i = inspect()
-    # workers = i.registered_tasks()
-    # #defined = []
-    # if workers:
-        # defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
-        # defined = list(defined)
-        # defined.sort()
-        # _taskname_cache = defined
-    # return _taskname_cache
+    return _taskname_cache.names
     
 def get_workers_from_database():
     """Get a list of all workers that exist (running or not) in the database."""
@@ -100,6 +138,7 @@ def get_workers_from_database():
     return [unicode(w) for w in workers]
     
 def get_workers_live():
+    """ Get the list of workers as reported by Celery right now. """
     i = inspect()
     workersdict = i.ping()
     workers = []
@@ -110,9 +149,32 @@ def get_workers_live():
         workers.sort()
     return workers
     
+def get_worker_subprocesses(dest=None):
+    """ Retrieve the number of subprocesses for each worker.  The return value 
+        is a dict where the keys are worker names and the values are the number 
+        of subprocesses. 
+    """
+    stats = {}
+    for x in broadcast("stats", destination=dest, reply=True):
+        stats.update(x)
+    
+    workercounts = {}
+    for workername in stats.iterkeys():
+        procs = stats[workername]['pool']['processes']
+        workercounts[workername] = len(procs)
+    
+    return workercounts
+    
 
 #==============================================================================#
 def task_xy_dataview(request):
+    """ Performs a database query and returns the results of that query.  The 
+        result is formatted as json.  The query must be contained in the 
+        request's POST content and it must be fin json format.  
+        
+        See the docs directory form more information on the format of the query 
+        and result.
+    """
     json_request = _json_from_post(request)
     
     xyquery = JsonXYQuery(JsonTaskModelMap(), json_request)
@@ -125,15 +187,8 @@ def worker_subprocesses_dataview(request, name=None):
         dictionary.
     """
     name = _resolve_name(name)
-    stats = {}
     dest = name and [name]
-    for x in broadcast("stats", destination=dest, reply=True):
-        stats.update(x)
-    
-    workercounts = {}
-    for workername in stats.iterkeys():
-        procs = stats[workername]['pool']['processes']
-        workercounts[workername] = len(procs)
+    workercounts = get_worker_subprocesses(dest=dest)
         
     return _json_response(workercounts)
 
@@ -150,8 +205,10 @@ def worker_start(request):
     return HttpResponse('womp')
     
 def pending_task_count_dataview(request, name=None):
-    """ Return the number of pending DispatchedTasks for each defined task.  
-        The return value is a json dicitonary with task names as the keys.
+    """ Return the number of pending DispatchedTasks for each defined task.  An 
+        optional filter and/or exclude may be provided in the POST data as a 
+        json query.  The return value is a json dicitonary with task names as 
+        the keys.
     """
     name = _resolve_name(name)
     json_request = _json_from_post(request, allow_empty=True) or {}
@@ -193,7 +250,9 @@ def tasks_per_worker_dataview(request, name=None):
                     worker2: 9
                 }
             }
-        
+            
+        An optional filter and/or exclude may be provided in the POST data as a 
+        json query.  
     """
     name = _resolve_name(name)
     json_request = _json_from_post(request, allow_empty=True) or {}
@@ -223,10 +282,12 @@ def tasks_per_worker_dataview(request, name=None):
     return _json_response(r)
     
 def definedtask_list_dataview(request):
+    """ Returns a list of DefinedTasks names, formatted as json. """
     tasknames = get_defined_tasks()
     return _json_response(tasknames)
     
 def worker_list_dataview(request):
+    """ Returns a list of worker names, formatted as json. """
     workernames = get_workers_live()
     return _json_response(workernames)
     

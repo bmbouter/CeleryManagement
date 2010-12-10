@@ -49,17 +49,31 @@ urlpatterns += patterns('celerymanagementapp',
 )
 
 # "Action" URLs (must use method POST)
-urlpatterns += patterns('celerymanagementapp',    
+urlpatterns += patterns('celerymanagementapp',
+    # For the following URLs, if 'all' is given instead of a worker name, *all* 
+    # workers will be affected.
     # General url pattern: worker/NAME/...
     (r'^worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'views.kill_worker'),
     (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/grow/$', 'views.grow_worker_pool'),
     (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/shrink/$', 'views.shrink_worker_pool'),
+    # The following allow an explicit number of worker subprocess to be added/removed
+    (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/grow/(?P<num>\d+)/$', 'views.grow_worker_pool'),
+    (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/shrink/(?P<num>\d+)/$', 'views.shrink_worker_pool'),
+    
+    # for manual testing...
+    (r'^worker/(?P<name>[-\w\d_.]+)/test_commands/$', 'views.worker_commands_test_view'),
 )
 
 
 urlpatterns += patterns('celerymanagementapp',
     url(r'^view/system/$', 'views.system_overview', name="system_overview_url"),
     url(r'^view/system/test/$', 'views.system_overview', name="system_overview_url", kwargs={ "test" : "true" }),
+)
+
+urlpatterns += patterns('celerymanagementapp',
+    #url(r'^view/system/$', 'views.system_overview', name="system_overview_url"),
+    #url(r'^view/system/test/$', 'views.system_overview', name="system_overview_url", kwargs={ "test" : "true" }),
+    url(r'^test/post/xy_query/dispatched_tasks/$', 'test_views.get_dispatched_tasks_data', name='get_dispatched_tasks_url'),
 )
 
 urlpatterns += patterns('celerymanagementapp',

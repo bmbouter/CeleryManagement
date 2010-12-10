@@ -374,7 +374,13 @@ def _resolve_name_param(name):
     return name
 
 def kill_worker(request, name=None):
-    # if name is None or 'all'... this will shut down *ALL* workers!!!
+    """ Kills a running worker (celeryd).  However, no action will be taken 
+        unless the request method is 'POST'.
+        
+        name:
+            The name of the worker to stop.  The special value 'all' will stop 
+            *all* workers.
+    """
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
     else:
@@ -385,25 +391,88 @@ def kill_worker(request, name=None):
         broadcast('shutdown', destination=dest)
         return HttpResponse('success')
 
-def grow_worker_pool(request, name=None):
-    # if name is None or 'all'... this will affect *ALL* workers!!!
+def grow_worker_pool(request, name=None, num=1):
+    """ Kills a running worker (celeryd).  However, no action will be taken 
+        unless the request method is 'POST'.
+        
+        name:
+            The name of the worker to stop.  The special value 'all' will stop 
+            *all* workers.
+    """
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
     else:
         name = _resolve_name_param(name)
         dest = name and [name]  # dest will be None or a list of a single name
-        broadcast('pool_grow', destination=dest)
+        broadcast('pool_grow', destination=dest, arguments={'n':num})
         return HttpResponse('')
 
-def shrink_worker_pool(request, name=None):
-    # if name is None or 'all'... this will affect *ALL* workers!!!
+def shrink_worker_pool(request, name=None, num=1):
+    """ Kills a running worker (celeryd).  However, no action will be taken 
+        unless the request method is 'POST'.
+        
+        name:
+            The name of the worker to stop.  The special value 'all' will stop 
+            *all* workers.
+    """
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
     else:
         name = _resolve_name_param(name)
         dest = name and [name]  # dest will be None or a list of a single name
-        broadcast('pool_shrink', destination=dest)
+        broadcast('pool_shrink', destination=dest, arguments={'n':num})
         return HttpResponse('')
+    
+
+@login_required
+def worker_commands_test_view(request, name=None):
+    """ Simple interface to test worker control commands. For testing only. """
+    from django.template import Template
+    
+    from celerymanagementapp.dataviews import get_worker_subprocesses
+    import pprint
+    workername = name or 'all'
+    kill = reverse( 'celerymanagementapp.views.kill_worker', 
+                    kwargs={'name':workername} )
+    grow = reverse( 'celerymanagementapp.views.grow_worker_pool', 
+                    kwargs={'name':workername} )
+    shrink = reverse('celerymanagementapp.views.shrink_worker_pool', 
+                     kwargs={'name':workername} )
+    subprocs = '{0}'.format(pprint.pformat(get_worker_subprocesses(),indent=4))
+    
+    html = """\
+    <html>
+    <body>
+    <table>
+      <tr><td>
+        <form action="{kill}" method="POST">
+        {{% csrf_token %}}
+        <input type="submit" value="Kill Worker"/>
+        </form>
+      </td></tr>
+      <tr><td>
+        <form action="{grow}" method="POST">
+        {{% csrf_token %}}
+        <input type="submit" value="Grow Subprocesses"/>
+        </form>
+      </td></tr>
+      <tr><td>
+        <form action="{shrink}" method="POST">
+        {{% csrf_token %}}
+        <input type="submit" value="Shrink Subprocesses"/>
+        </form>
+      </td></tr>
+    </table>
+    <pre>
+    {data}
+    </pre>
+    </body>
+    </html>
+    """
+    html = html.format(kill=kill, grow=grow, shrink=shrink, data=subprocs)
+    t = Template(html)
+    c = RequestContext(request)
+    return HttpResponse(t.render(c))
 
 
 

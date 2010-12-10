@@ -17,9 +17,30 @@
   </style>
 {% endblock %}
 
+{% block extrajs %}
+<script type="text/javascript">
+    var c1;
+    
+    xhr = $.post('../../../test/post/xy_query/dispatched_tasks/', "");
+    data = $.parseJSON(xhr.response);
+    
+    options = {
+        bars: { show: true, barWidth: 0.5 },
+        xaxis: { min: 0 },
+        yaxis: { min: 0 }
+    };
+    
+    $(document).ready(function() {
+        $('#content').append('<div id="chart" style="width: 600px; height: 300px"></div>');
+        c1 = new Chart('#chart', data, options);
+        c1.displayChart();
+    });
+</script>
+{% endblock %}
+
 
 {% block content %}
-  <h2>Dispatched Tasks</h2>
+  <!--<h2>Dispatched Tasks</h2>
   <div>
   {% if taskname %}
     Showing dispatched tasks of defined task: <tt>{{ taskname }}</tt>.
@@ -63,7 +84,6 @@
   {% if tasks.has_next %}
     <a href="?page={{ tasks.next_page_number }}">next</a>
   {% endif %}
-  </div>
+  </div>-->
 {% endblock %}
- 
 
