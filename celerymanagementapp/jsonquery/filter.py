@@ -2,6 +2,9 @@ from celerymanagementapp.jsonquery.exception import JsonQueryError
 
 #==============================================================================#
 class BadFilterOpArguments(JsonQueryError):
+    """ Exception which indicates there was an error in the number of 
+        arguments. 
+    """
     def __init__(self, fieldname):
         msg = 'Incorrect number of arguments for filtering on "{0}".'.format(fieldname)
         super(BadFilterOpArguments, self).__init__(msg)
