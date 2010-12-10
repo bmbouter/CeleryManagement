@@ -54,6 +54,7 @@ class NodeUtil(object):
                 "-i", self.key,
                 "-o", "StrictHostKeyChecking=no",
                 "-o","UserKnownHostsFile=/dev/null",
+                "-o","LogLevel=ERROR",
                 self.ip,
                 ]
         command.extend(cmd)

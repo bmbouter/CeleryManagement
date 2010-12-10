@@ -197,12 +197,10 @@ def worker_start(request):
     active_nodes = OutOfBandWorkerNode.objects.filter(active=True)
     for node in active_nodes:
         output = node.celeryd_status()
-        print output
-        import pdb;pdb.set_trace()
-        if output == '':
+        if not output.strip('\n').isdigit():
             node.celeryd_start()
-            print 'starting'
-    return HttpResponse('womp')
+            return _json_response({'status': 'success'})
+    return _json_response({'status': 'failure', 'message': 'No Available Worker Nodes'})
     
 def pending_task_count_dataview(request, name=None):
     """ Return the number of pending DispatchedTasks for each defined task.  An 
