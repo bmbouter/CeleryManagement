@@ -8,6 +8,10 @@ CELERYMANAGEMENT_USING_HUDSON = bool(os.environ.get('CELERYMANAGEMENT_USING_HUDS
 import djcelery
 djcelery.setup_loader()
 
+#This location should be replaced with a secure location
+FILE_UPLOAD_PERMISSIONS = 0600
+SECURE_UPLOADS = '/tmp/'
+
 #==============================================================================#
 # This file is included in version control.  Do not add sensitive information  #
 # here.                                                                        #

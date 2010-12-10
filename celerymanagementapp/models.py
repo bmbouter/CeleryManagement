@@ -6,6 +6,12 @@ from django.utils.translation import ugettext_lazy as _
 from djcelery.models import WorkerState, TaskState, TASK_STATE_CHOICES
 from djcelery.managers import TaskStateManager
 
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+fs = FileSystemStorage(location=settings.SECURE_UPLOADS)
+
+from celerymanagementapp.ssh_tools import NodeUtil
+
 #==============================================================================#
 #class DefinedTask(models.Model):
 #    """Represents a task class, that is, a subclass of celery.task.base.Task, 
@@ -57,7 +63,48 @@ class DispatchedTask(models.Model):
         get_latest_by = "tstamp"
         ordering = ["-tstamp"]
         
-        
+class OutOfBandWorkerNode(models.Model):
+    """An out-of-band Worker Node"""
+    ip = models.IPAddressField(_(u"IP address"), unique=True)
+    username = models.CharField(_(u"username"),
+            max_length=64)
+    ssh_key = models.FileField("SSH key", upload_to='sshkeys', storage=fs)
+    celeryd_start_cmd = models.TextField(_(u"commands to start celeryd"),
+            max_length=1024)
+    celeryd_stop_cmd = models.TextField(_(u"commands to stop celeryd"),
+            max_length=1024)
+    celeryd_status_cmd = models.TextField(
+            _(u"commands to report celeryd status"), max_length=1024)
+    active = models.BooleanField(_(u"currently active"), default=True)
+
+    def __unicode__(self):
+        return self.ip
+
+    def clean(self):
+        ssh = self._get_SSH_Object()
+        if not ssh.ssh_avail():
+            from django.core.exceptions import ValidationError
+            raise ValidationError("SSH does not seem to be available on %s" % self.ip)
+
+    def _get_SSH_Object(self):
+        return NodeUtil(self.ip, settings.SECURE_UPLOADS + str(self.ssh_key),
+            self.username)
+
+    def celeryd_start(self):
+        """SSH's to the Node and runs the celeryd_start commands"""
+        ssh = self._get_SSH_Object()
+        return ssh.ssh_run_command(self.celeryd_start_cmd.split(' '))
+
+    def celeryd_stop(self):
+        """SSH's to the Node and runs the celeryd_stop commands"""
+        ssh = self._get_SSH_Object()
+        return ssh.ssh_run_command(self.celeryd_stop_cmd.split(' '))
+
+    def celeryd_status(self):
+        """SSH's to the Node and runs the celeryd_stop commands"""
+        ssh = self._get_SSH_Object()
+        return ssh.ssh_run_command(self.celeryd_status_cmd.split(' '))
+
 # class DefinedTask(models.Model):
     # """A task type that has been defined."""
     # name =      models.CharField(_(u"name"), max_length=200, null=True, 

@@ -11,7 +11,7 @@ from djcelery.models import WorkerState
 from celerymanagementapp.jsonquery.base import JsonFilter
 from celerymanagementapp.jsonquery.xyquery import JsonXYQuery
 from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
-
+from celerymanagementapp.models import OutOfBandWorkerNode 
 
 #==============================================================================#
 def _json_from_post(request, allow_empty=False):
@@ -136,6 +136,18 @@ def worker_subprocesses_dataview(request, name=None):
         workercounts[workername] = len(procs)
         
     return _json_response(workercounts)
+
+def worker_start(request):
+    """Find an available node and start a worker process"""
+    active_nodes = OutOfBandWorkerNode.objects.filter(active=True)
+    for node in active_nodes:
+        output = node.celeryd_status()
+        print output
+        import pdb;pdb.set_trace()
+        if output == '':
+            node.celeryd_start()
+            print 'starting'
+    return HttpResponse('womp')
     
 def pending_task_count_dataview(request, name=None):
     """ Return the number of pending DispatchedTasks for each defined task.  

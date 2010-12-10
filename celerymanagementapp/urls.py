@@ -39,6 +39,7 @@ urlpatterns += patterns('celerymanagementapp',
     # is appropriate) or 'all' which returns information on all items.
     # General url pattern: worker/NAME/...
     (r'^worker/all/list/$', 'dataviews.worker_list_dataview'),
+    (r'^worker/start/$', 'dataviews.worker_start'),
     (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/count/$', 'dataviews.worker_subprocesses_dataview'),
     
     # General url pattern: task/NAME/...
