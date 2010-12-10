@@ -1,7 +1,7 @@
 from celerymanagementapp import segmentize
 from celerymanagementapp.jsonquery.base import JsonQuery
 from celerymanagementapp.jsonquery.exception import JsonQueryError
-from celerymanagementapp.jsonquery import util
+from celerymanagementapp.jsonquery import segmentizer, aggregator
 
 #==============================================================================#
 class SegmentizeSpec(object):
@@ -99,8 +99,8 @@ class AggregateSpecList(object):
 
 #==============================================================================#
 class JsonXYQuery(JsonQuery):
-    segmentizer_method_dict = util.get_segmethod_dict()
-    aggregator_method_dict =  util.get_aggmethod_dict()
+    segmentizer_method_dict = segmentizer.method_dict()
+    aggregator_method_dict =  aggregator.method_dict()
     
     def __init__(self, modelmap, jsondata):
         super(JsonXYQuery, self).__init__(modelmap, jsondata)
@@ -128,8 +128,8 @@ class JsonXYQuery(JsonQuery):
         from_python = self.modelmap.get_conv_from_python(fieldname)
         segmentizer_factory = self._get_segmentizer_factory(method_spec[0])
         method_args = []  if len(method_spec)==1 else  method_spec[1]
-        segmentizer = segmentizer_factory(fieldname, method_args, to_python, from_python)
-        return segmentizer
+        seg = segmentizer_factory(fieldname, method_args, to_python, from_python)
+        return seg
         
     def _get_aggregator_factory(self, aggname):
         # TODO
@@ -140,18 +140,18 @@ class JsonXYQuery(JsonQuery):
         return aggregator_factory
         
     def _build_method_aggregator(self, fieldname, method_specs):
-        method_agg = util.CompoundAggregator()
+        method_agg = aggregator.CompoundAggregator()
         for method_spec in method_specs:
             aggregator_factory = self._get_aggregator_factory(method_spec)
-            aggregator = aggregator_factory(fieldname)
-            method_agg[method_spec] = aggregator
+            agg = aggregator_factory(fieldname)
+            method_agg[method_spec] = agg
         return method_agg
         
     def _build_aggregator(self):        
-        field_agg = util.CompoundAggregator()
+        field_agg = aggregator.CompoundAggregator()
         for aggspec in self.aggspeclist:
             if aggspec.query_name=='count':
-                field_agg['count'] = util.aggregator_method_count()
+                field_agg['count'] = aggregator.count()
             else:
                 fieldname = self.modelmap.get_fieldname(aggspec.query_name)
                 field_agg[fieldname] = self._build_method_aggregator(fieldname, aggspec.method_specs)
