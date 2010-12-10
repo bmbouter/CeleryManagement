@@ -24,8 +24,8 @@ class XYDataView_TestCase(base.CeleryManagement_DBTestCaseBase):
         }
         expected_output = {
             'data': [
-                [u'task1', {'runtime': {'average': 2.6} }],
-                [u'task2', {'runtime': {'average': 2.5} }],
+                [u'task1', [{'fieldname': 'runtime', 'methods': [{'name': 'average', 'value': 2.6}] }] ],
+                [u'task2', [{'fieldname': 'runtime', 'methods': [{'name': 'average', 'value': 2.5}] }] ],
                 ]
             }
         rawjson = json.dumps(json_request)
