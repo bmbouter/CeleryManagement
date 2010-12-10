@@ -8,15 +8,7 @@ $(document).ready(function() {
     var xhr = jQuery.getJSON(CMACore.get_tasks_url);
 	var obj = jQuery.parseJSON(xhr.responseText);
 	
-	/*int length = obj.length;
-	
-	for(int i = 0; i < length; i++) {
-	    
-	}
-	
-	$('.content').html();*/
-	
-	//createTable(obj);
+	/*int length = obj.length;*/
 });
 
 function createTable(data) {

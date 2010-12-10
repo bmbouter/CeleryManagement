@@ -70,6 +70,12 @@ urlpatterns += patterns('celerymanagementapp',
 )
 
 urlpatterns += patterns('celerymanagementapp',
+    #url(r'^view/system/$', 'views.system_overview', name="system_overview_url"),
+    #url(r'^view/system/test/$', 'views.system_overview', name="system_overview_url", kwargs={ "test" : "true" }),
+    url(r'^test/post/xy_query/dispatched_tasks/$', 'test_views.get_dispatched_tasks_data', name='get_dispatched_tasks_url'),
+)
+
+urlpatterns += patterns('celerymanagementapp',
     (r'^get/throughputs/$', 'views.get_throughput_data'),
     (r'^get/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.get_throughput_data'),
     
