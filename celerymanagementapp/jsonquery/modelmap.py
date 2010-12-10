@@ -1,7 +1,4 @@
-try:
-    from celerymanagementapp.models import DispatchedTask
-except ImportError:
-    from djcelery.models import TaskState as DispatchedTask
+from celerymanagementapp.models import DispatchedTask
 
 from celerymanagementapp.models import TestModel
 
@@ -11,6 +8,9 @@ from celerymanagementapp.jsonquery.exception import JsonQueryError
 
 #==============================================================================#
 class JsonModelMap(object):
+    """ A class which defines the names of a model's fields as well as 
+        functions for converting each field's value between Json and Python. 
+    """
     model = None
     fieldname_map = {}
     conv_to_python = {}

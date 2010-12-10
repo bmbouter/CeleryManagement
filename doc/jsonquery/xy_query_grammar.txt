@@ -77,20 +77,35 @@ XY_QUERY ::=
 #==============================================================================#
 # JSON Output
 
-Y_VALUE_ITEM ::=
-       '"count"' ':' VALUE 
-     | FIELDNAME ':' '{' ( METHODNAME ':' VALUE )+ '}'
-     ;
-
-Y_VALUE_SPEC ::=
+Y_VALUE_METHOD ::=
     '{'
-         Y_VALUE_ITEM ( ',' Y_VALUE_ITEM )*
+        '"name"' ':'  METHODNAME,
+        '"value"' ':' VALUE
     '}'
+    ;
+
+Y_VALUE_METHOD_LIST ::=
+    '['
+        Y_VALUE_METHOD ( ',' Y_VALUE_METHOD )*
+    ']'
+    ;
+
+Y_VALUE_ITEM ::=
+    '{'
+       '"fieldname"' ':' FIELDNAME,
+       '"methods"' ':'   Y_VALUE_METHOD_LIST
+    '}'
+    ;
+
+Y_VALUE_LIST ::=
+    '['
+        Y_VALUE_ITEM ( ',' Y_VALUE_ITEM )*
+    ']'
     ;
 
 #------------------------------------------------------------------------------#
 DATAPOINT ::=
-    '[' X_VALUE ',' Y_VALUE_SPEC ']'
+    '[' X_VALUE ',' Y_VALUE_LIST ']'
     ;
    
 DATAPOINT_LIST ::=

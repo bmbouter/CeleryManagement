@@ -1,9 +1,9 @@
 /* Simple response.  Y-value is count. */
 {
     "data": [
-        [ "SUCCESS", { "count": 10 } ],
-        [ "PENDING", { "count": 18 } ],
-        [ "STARTED", { "count":  2 } ]
+        [ "SUCCESS", [ { "fieldname": "count", "methods": [ { "name": "count", "value": 10 } ] } ] ],
+        [ "PENDING", [ { "fieldname": "count", "methods": [ { "name": "count", "value": 18 } ] } ] ],
+        [ "STARTED", [ { "fieldname": "count", "methods": [ { "name": "count", "value":  2 } ] } ] ]
     ]
 }
 
@@ -14,47 +14,47 @@
 */
 {
     "data": [
-        [0.025, { "count": 3 } ],
-        [0.075, { "count": 6 } ],
-        [0.125, { "count": 7 } ],
-        [0.175, { "count": 2 } ],
-        [0.225, { "count": 1 } ]
+        [0.025, [ { "fieldname": "count", "methods": [ { "name": "count", "value": 3 } ] } ] ],
+        [0.075, [ { "fieldname": "count", "methods": [ { "name": "count", "value": 6 } ] } ] ],
+        [0.125, [ { "fieldname": "count", "methods": [ { "name": "count", "value": 7 } ] } ] ],
+        [0.175, [ { "fieldname": "count", "methods": [ { "name": "count", "value": 2 } ] } ] ],
+        [0.225, [ { "fieldname": "count", "methods": [ { "name": "count", "value": 1 } ] } ] ]
     ]
 }
 
 /*  Simple response. Y-value is average runtime. */
 {
     "data": [
-        [ "worker1", { "runtime": { "average": 1.1 } } ],
-        [ "worker2", { "runtime": { "average": 2.4 } } ],
-        [ "worker3", { "runtime": { "average": 0.7 } } ]
+        [ "worker1", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 1.1 } ] } ] ],
+        [ "worker2", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 2.4 } ] } ] ],
+        [ "worker3", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 0.7 } ] } ] ]
     ]
 }
 
 /* Response with multiple aggregate methods.  */
 {
     "data": [
-        [ "worker1", { "runtime": {"average": 1.1, "min": 0.9, "max": 1.4 } } ],
-        [ "worker2", { "runtime": {"average": 2.4, "min": 0.9, "max": 5.8 } } ],
-        [ "worker3", { "runtime": {"average": 0.7, "min": 0.6, "max": 0.9 } } ]
+        [ "worker1", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 1.1 }, { "name": "min", "value": 0.9 }, { "name": "max", "value": 1.4 } ] } ] ],
+        [ "worker2", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 2.4 }, { "name": "min", "value": 0.9 }, { "name": "max", "value": 5.8 } ] } ] ],
+        [ "worker3", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 0.7 }, { "name": "min", "value": 0.6 }, { "name": "max", "value": 0.9 } ] } ] ],
     ]
 }
 
 /* Response with multiple aggregated fields.  */
 {
     "data": [
-        [ "worker1", { "runtime": { "average": 1.1 }, "waittime": { "average": 0.44 } } ],
-        [ "worker2", { "runtime": { "average": 2.4 }, "waittime": { "average": 0.48 } } ],
-        [ "worker3", { "runtime": { "average": 0.7 }, "waittime": { "average": 0.72 } } ]
+        [ "worker1", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 1.1 } ] }, { "fieldname": "waittime", "methods": [ { "name": "average", "value": 0.44 } ] } ] ],
+        [ "worker2", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 2.4 } ] }, { "fieldname": "waittime", "methods": [ { "name": "average", "value": 0.48 } ] } ] ],
+        [ "worker3", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 0.7 } ] }, { "fieldname": "waittime", "methods": [ { "name": "average", "value": 0.72 } ] } ] ]
     ]
 }
 
 /* Response with enumerate method.  */
 {
     "data": [
-        [ "worker1", { "state": { "enumerate": [["STARTED",1],["RUNNING",1],["SUCCESS",25]] } } ],
-        [ "worker2", { "state": { "enumerate": [["STARTED",2],["RUNNING",1],["SUCCESS",29]] } } ],
-        [ "worker3", { "state": { "enumerate": [["STARTED",1],["RUNNING",0],["SUCCESS",18]] } } ]
+        [ "worker1", [ { "fieldname": "state", "methods": [ { "name": "enumerate", "value": [["STARTED",1],["RUNNING",1],["SUCCESS",25]] } ] } ] ],
+        [ "worker2", [ { "fieldname": "state", "methods": [ { "name": "enumerate", "value": [["STARTED",2],["RUNNING",1],["SUCCESS",29]] } ] } ] ],
+        [ "worker3", [ { "fieldname": "state", "methods": [ { "name": "enumerate", "value": [["STARTED",1],["RUNNING",0],["SUCCESS",18]] } ] } ] ]
     ]
 }
 

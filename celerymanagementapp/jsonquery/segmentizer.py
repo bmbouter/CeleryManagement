@@ -40,6 +40,7 @@ class EachSegmentizer(object):
 
 
 def range(fieldname, args, to_python=noop_conv, from_python=noop_conv):
+    """ Segmentizer """
     query_range = (to_python(args['min']), to_python(args['max']))
     interval = to_python(args['interval'])
     query_sequence = segmentize.range_query_sequence(fieldname, query_range, interval, from_python)
