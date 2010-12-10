@@ -427,6 +427,7 @@ def shrink_worker_pool(request, name=None, num=1):
 
 @login_required
 def worker_commands_test_view(request, name=None):
+    """ Simple interface to test worker control commands. For testing only. """
     from django.template import Template
     
     from celerymanagementapp.dataviews import get_worker_subprocesses

@@ -6,6 +6,10 @@ the particular model you are interested in.  For instance, for the
 DispatchedTask model, use ``/celerymanagementapp/xy_query/dispatched_tasks/``.  The 
 query should be Json and given as POST data.  The response will also be Json.
 
+
+.. contents::
+
+
 The Json Query
 ==============
 
@@ -227,4 +231,40 @@ x,y data pair).
             "waittime": { "average": 0.05, "min": 0.01, "max": 0.08 } 
             } 
         ]
+        
+        
+Fields
+======
+
+The following describes what fields are available for each model.  The expected 
+Json type (or types) is also listed.
+
+DispatchedTask model
+~~~~~~~~~~~~~~~~~~~~
+
+All timestamps are in UTC as milliseconds since the UNIX epoch--Jan 1, 1970.
+
+:taskname:   string 
+:state:      string 
+:task_id:    string (a uuid with dashes: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
+:worker:     string 
+
+:runtime:    float (in seconds)
+:waittime:   float (in seconds)
+:totaltime:  float (in seconds)
+
+:tstamp:     integer 
+:sent:       null or integer
+:received:   null or integer
+:started:    null or integer
+:succeeded:  null or integer
+:failed:     null or integer
+
+:routing_key:    integer 
+:expires:        null or integer (milliseconds since UNIX epoch--Jan 1, 1970)
+:result:         integer 
+:eta:            null or integer (milliseconds since UNIX epoch--Jan 1, 1970)
+
+
+
 
