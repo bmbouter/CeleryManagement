@@ -16,7 +16,6 @@
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/ajax.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/json.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/charts.js" ></script>
-		<script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/formatter.js" ></script>
 
         {% block extrajs %}
         {% endblock extrajs %}
@@ -36,18 +35,22 @@
                     <h1 class="grid_10 push_1">Celery Management</h1>
                </div>
 
-               <div id="breadCrumbsContainer" class="container_12">
-                   <div id="breadCrumbs" class="grid_10 push_1">
-                       <h2>System</h2>
-                   </div>
-                </div>
             {% endblock header %}
             </div>
-	    <div id="content">
-                {% block content %}
-	        <button onclick="json()"></button>
-		{% endblock %}
-	    </div>
+            <div id="contentContainer" class="container_12">
+                <div id="navigation" class="grid_1">
+                    <ul>
+                        <li><a href="/celerymanagementapp/view/system/test/">System</a></li>
+                        <li><a href="/celerymanagementapp/view/system/test/">+ Tasks</a></li>
+                        <li><a href="/celerymanagementapp/view/system/test/">+ Workers</a></li>
+                    </ul>
+                </div>
+                <div id="content">
+                    {% block content %}
+                    <button onclick="json()"></button>
+                    {% endblock %}
+                </div>
+            </div>
     </body>
     {% endblock body %}
 </html>

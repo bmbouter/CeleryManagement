@@ -1,11 +1,9 @@
 var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
 
-var systemViewer;
 
 $(document).ready(function() {
     
-    systemViewer = new SystemViewer();
-    systemViewer.init();
+    $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0]) + "px");
     
     var xhr = jQuery.getJSON(CMACore.get_tasks_url);
 	var obj = jQuery.parseJSON(xhr.responseText);
@@ -31,10 +29,4 @@ function createTable(data) {
         alert(i + " " + e);
     });
 }
-
-function refresh(){
-    systemViewer.refresh();
-}
-
-//setInterval(refresh, 10000);
 

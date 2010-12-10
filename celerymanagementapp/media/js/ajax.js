@@ -18,7 +18,7 @@ CMACore.loadTestUrls = function(){
     CMACore.tasks_per_worker_url = CMACore.root_url + "tasks_per_worker.json";
     CMACore.pending_tasks_url = CMACore.root_url + "tasks_pending.json";
     CMACore.worker_processes_url = CMACore.root_url + "worker_processes.json";
-    CMACore.task_url = CMACore.root_url + "/celerymanagementapp/view/dispatched_tasks/";
+    CMACore.task_url = "/celerymanagementapp/view/dispatched_tasks/";
     CMACore.shutdown_worker_url = CMACore.root_url + "successful_worker_shutdown.json";
 }
 
