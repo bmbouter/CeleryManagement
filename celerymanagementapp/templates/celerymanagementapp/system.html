@@ -1,15 +1,7 @@
 {% extends "celerymanagementapp/base.html" %}
 
 {% block extrajs %}
-    <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/system_canvas.js" ></script>
-    
-    <script>
-        if( {{ load_test_data }} ){
-            CMACore.loadTestUrls();
-        } else {
-            CMACore.loadUrls();
-        }
-    </script>
+    <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/system_canvas.js" ></script>   
 {% endblock extrajs %}
 
 {% block content %}

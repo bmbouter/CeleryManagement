@@ -364,9 +364,8 @@ def visualize_runtimes_new(request, taskname=None, interval=0):
         # worker_dict[w.__str__()] = w.is_alive()
     # return HttpResponse(json.dumps(worker_dict))
 
-def system_overview(request, test="false"):
+def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
-            { "load_test_data" : test },
             context_instance=RequestContext(request))
 
 #==============================================================================#

@@ -17,6 +17,22 @@
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/json.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/charts.js" ></script>
 
+        <script>
+            {% if load_test_data %}
+               CMACore.loadTestUrls();
+            {% else %}
+                CMACore.loadUrls();
+            {% endif %}
+
+            {% if taskname %}
+                CMACore.taskname = "{{ taskname }}";
+            {% endif %}
+            {% if workername %}
+                CMACore.workername = "{{ workername }}";
+            {% endif %}
+
+        </script>
+
         {% block extrajs %}
         {% endblock extrajs %}
 
@@ -34,16 +50,27 @@
                 <div id="headerBarContainer" class="container_12">
                     <h1 class="grid_10 push_1">Celery Management</h1>
                </div>
-
             {% endblock header %}
             </div>
             <div id="contentContainer" class="container_12">
-                <div id="navigation" class="grid_1">
-                    <ul>
-                        <li><a href="/celerymanagementapp/view/system/test/">System</a></li>
-                        <li><a href="/celerymanagementapp/view/system/test/">+ Tasks</a></li>
-                        <li><a href="/celerymanagementapp/view/system/test/">+ Workers</a></li>
-                    </ul>
+                <div class="grid_2">
+                    <div id="navigation">
+                        <ul>
+                            {% if load_test_data %}
+                            <li><a href="/celerymanagementapp/test/view/system/">Dashboard</a></li>
+                            <li><a href="/celerymanagementapp/test/view/system/">Realtime View</a></li>
+                            {% else %}
+                            <li><a href="/celerymanagementapp/test/view/system/">Dashboard</a></li>
+                            <li><a href="/celerymanagementapp/view/system/">Realtime View</a></li>
+                            {% endif %}
+                            <li><a id="taskNavigationMaster">+ Tasks</a></li>
+                            <ul id="taskNavigation">
+                            </ul>
+                            <li><a id="workerNavigationMaster">+ Workers</a></li>
+                            <ul id="workerNavigation">
+                            </ul>
+                        </ul>
+                    </div>
                 </div>
                 <div id="content">
                     {% block content %}

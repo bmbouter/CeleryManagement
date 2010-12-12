@@ -4,8 +4,7 @@ var systemViewer;
 
 $(document).ready(function() {
     
-    $('#systemCanvas')[0].width = $(window).width() - $('#navigation').css("width").split("px")[0];
-
+    $('#systemCanvas')[0].width = $(window).width() - $('.grid_2').css("width").split("px")[0];
     systemViewer = new SystemViewer();
     systemViewer.init();
      
@@ -15,7 +14,7 @@ function refresh(){
     systemViewer.refresh();
 }
 
-//setInterval(refresh, 10000);
+//setInterval(refresh, refreshRate);
 
 
 function Task(y, name){
@@ -95,7 +94,7 @@ function SystemViewer(){
     var systemRenderer;
     var systemEventHandler;
     var yOffset = $('#header').css("height").split("px")[0];
-    var xOffset = $('#navigation').css("width").split("px")[0];
+    var xOffset = $('.grid_2').css("width").split("px")[0];
     var clickedEntity = false;
 
     $('#systemCanvas').bind("contextmenu", function(e){
@@ -444,7 +443,7 @@ function SystemRenderer(height){
     }
     
     this.clearCanvas = function(){
-        $('#systemCanvas')[0].width = $(window).width() - $('#navigation').css("width").split("px")[0];
+        $('#systemCanvas')[0].width = $(window).width() - $('.grid_2').css("width").split("px")[0];
         canvas.height = height;
         context.clearRect(0, 0, canvas.width, canvas.height);
     }
