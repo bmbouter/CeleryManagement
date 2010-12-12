@@ -1,7 +1,14 @@
 {% extends "celerymanagementapp/base.html" %}
 
 {% block extrajs %}
-    <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/system_canvas.js" ></script>   
+    <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/system_canvas.js" ></script>
+    
+    <script>
+        CMACore.refreshRate = {{ CELERYMANAGEMENTAPP_SYSTEMVIEW_REFRESH_RATE }};
+        if( CMACore.refreshRate != 0 ){
+            setInterval(refresh, CMACore.refreshRate * 1000);
+        }
+    </script>
 {% endblock extrajs %}
 
 {% block content %}

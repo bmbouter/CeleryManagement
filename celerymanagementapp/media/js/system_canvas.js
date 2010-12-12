@@ -12,10 +12,8 @@ $(document).ready(function() {
 
 function refresh(){
     systemViewer.refresh();
+    console.log("System Refreshed");
 }
-
-//setInterval(refresh, refreshRate);
-
 
 function Task(y, name){
     this.x = 200;
