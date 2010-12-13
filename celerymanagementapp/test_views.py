@@ -30,3 +30,9 @@ def worker_view(request, workername=None):
             { "load_test_data" : "true",
             "workername" : workername, },
             context_instance=RequestContext(request))
+
+def kill_worker(request, name=None):
+    if request.method == 'POST':
+        return HttpResponse(name)
+    else:
+        return HttpResponse("failed")
