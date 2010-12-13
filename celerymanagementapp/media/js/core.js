@@ -9,6 +9,8 @@ $(document).ready(function() {
         CMACore.loadTestUrls();
     }
     
+    //$('#statusText').hide();
+
     CMACore.expandedTasks = false;
     var expandedWorkers = false;
 

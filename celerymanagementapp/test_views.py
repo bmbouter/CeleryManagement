@@ -19,6 +19,11 @@ def dashboard(request):
             { "load_test_data" : "true" },
             context_instance=RequestContext(request))
 
+def configure(request):
+    return render_to_response('celerymanagementapp/configure.html',
+            { "load_test_data" : "true" },
+            context_instance=RequestContext(request))
+
 def task_view(request, taskname=None):
     return render_to_response('celerymanagementapp/task.html',
             { "load_test_data" : "true",

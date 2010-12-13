@@ -7,6 +7,7 @@
 
 @breadCrumbsContainer_height: 700px;
 @header_height: 70px;
+@statusUpdate_height: 50px;
 
 .rounded_borders(@radius: 5px) {
     -moz-border-radius: @radius;
@@ -50,12 +51,26 @@ body {
 
         h1 {
             margin: 0px;
-            padding: 15px 0px 0px 10px;
+            padding: 15px 0px 0px 40px;
             font-size: 1.7em;
             position: absolute;
             font-weight: bold;
             color: black;
         }  
+
+        #statusUpdate {
+            height: @statusUpdate_height;
+            margin: 10px 0 0 0;
+            
+            #statusText {
+                margin: 15px auto;
+                font-size: 1.0em;
+                padding: 0;
+                font-weight: normal;
+                width: 25%;
+                color: #FF7400;
+            }
+        }
     }
 
 }

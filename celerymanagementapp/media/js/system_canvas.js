@@ -12,7 +12,16 @@ $(document).ready(function() {
 
 function refresh(){
     systemViewer.refresh();
-    console.log("System Refreshed");
+    $('#statusText').text("Refreshing view...");
+    $('#statusText').fadeOut("slow", function() {});
+    $('#statusText').show();
+    $('#statusText').fadeIn("slow", function() {});
+    $('#statusText').fadeOut("slow", function() {});
+    $('#statusText').fadeIn("slow", function() {});
+    $('#statusText').fadeOut("slow", function() {});
+    $('#statusText').fadeIn("slow", function() {});
+    $('#statusText').fadeOut(2000, function() {});
+    console.log("refreshed");
 }
 
 function Task(y, name){
@@ -126,7 +135,7 @@ function SystemViewer(){
         if( data != "failed" || typeof data != "undefined" ){
             for( connector in connectors ){
                 if( connectors[connector].worker.fullName == data ){
-                    connectorWeight -= connectors[connector].text;
+                    connectorWeight -= connectors[connector].numTasks;
                     delete connectors[connector];
                 }
             }
@@ -148,6 +157,7 @@ function SystemViewer(){
     }
 
     this.createTasks = function(data){
+        tasks = {};
         var y = 40;
         for( item in data ){
             tasks[data[item]] = new Task(y, data[item]);
@@ -163,6 +173,7 @@ function SystemViewer(){
     }
 
     this.createWorkers = function(data){
+        workers = {};
         var y = 40;
         for ( item in data ){
             workers[data[item]] = new Worker(y, data[item], true);
@@ -178,6 +189,8 @@ function SystemViewer(){
     }
     
     function createConnectors(data){
+        connectors = [];
+        connectorWeight = 0;
         for( task in tasks ){
             for( worker in workers ){
                 var num = data[task][worker];
@@ -207,6 +220,7 @@ function SystemViewer(){
 
     function draw(){
         systemRenderer = new SystemRenderer(canvasHeight + 60);
+        console.log(connectorWeight);
         for( connector in connectors ){
             systemRenderer.drawConnector(connectors[connector], connectorWeightingFunction(connectors[connector].numTasks));
         }

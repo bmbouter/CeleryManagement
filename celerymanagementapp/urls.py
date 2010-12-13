@@ -80,6 +80,7 @@ urlpatterns += patterns('celerymanagementapp.views',
     url(r'^view/task/(?P<taskname>[-\w\d_.]+)/$', 'task_view', name="task_view_url"),
     url(r'^view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url"),
     url(r'^view/dashboard/$', 'dashboard', name="dashboard_url"),
+    url(r'^view/configure/$', 'configure', name="test_configure_url"),
 )
 
 if settings.DEBUG:
@@ -88,6 +89,7 @@ if settings.DEBUG:
         #url(r'^view/system/test/$', 'views.system_overview', name="system_overview_url", kwargs={ "test" : "true" }),
         url(r'^test/view/system/$', 'system_overview', name="test_system_overview_url"),
         url(r'^test/view/dashboard/$', 'dashboard', name="test_dashboard_url"),
+        url(r'^test/view/configure/$', 'configure', name="test_configure_url"),
         url(r'^test/view/task/(?P<taskname>[-\w\d_.]+)/$', 'task_view', name="task_view_url"),
         url(r'^test/view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url"),
         url(r'^test/post/worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'kill_worker', name="test_kill_worker_url"),
