@@ -65,14 +65,14 @@ function Worker(y, name, active){
     }
 }
 
-function Connector(task, worker, text){
+function Connector(task, worker, numTasks){
     this.task = task;
     this.worker = worker;
     this.x1 = task.xCenter + (task.width / 2);
     this.y1 = task.yCenter;
     this.x2 = worker.xCenter - (worker.width / 2);
     this.y2 = worker.yCenter;
-    this.text = text;
+    this.numTasks = numTasks;
     this.xCenter = (this.x2 - ((this.x2 - this.x1) / 2));
     this.yCenter = (this.y2 - ((this.y2 - this.y1) / 2));
     
@@ -98,7 +98,7 @@ function SystemViewer(){
     var connectorWeight = 0;
 
     function connectorWeightingFunction(size){
-        return (size / connectorWeight + 0.25) * 4;
+        return (size / connectorWeight + 0.30) * 4;
     }
 
     $('#systemCanvas').bind("contextmenu", function(e){
@@ -126,6 +126,7 @@ function SystemViewer(){
         if( data != "failed" || typeof data != "undefined" ){
             for( connector in connectors ){
                 if( connectors[connector].worker.fullName == data ){
+                    connectorWeight -= connectors[connector].text;
                     delete connectors[connector];
                 }
             }
@@ -207,7 +208,7 @@ function SystemViewer(){
     function draw(){
         systemRenderer = new SystemRenderer(canvasHeight + 60);
         for( connector in connectors ){
-            systemRenderer.drawConnector(connectors[connector], connectorWeightingFunction(connectors[connector].text));
+            systemRenderer.drawConnector(connectors[connector], connectorWeightingFunction(connectors[connector].numTasks));
         }
         for( task in tasks ){
             systemRenderer.drawTask(tasks[task]);
@@ -329,7 +330,7 @@ function SystemViewer(){
     function showTaskConnectors(task){
         for( connector in connectors ){
             if( connectors[connector].task.fullName == task.fullName ){
-                systemRenderer.highlightConnector(connectors[connector], connectorWeightingFunction(connectors[connector].text));
+                systemRenderer.highlightConnector(connectors[connector], connectorWeightingFunction(connectors[connector].numTasks));
             }
         }
     }
@@ -337,7 +338,7 @@ function SystemViewer(){
     function showWorkerConnectors(worker){
         for( connector in connectors ){
             if( connectors[connector].worker.fullName == worker.fullName ){
-                systemRenderer.highlightConnector(connectors[connector], connectorWeightingFunction(connectors[connector].text));
+                systemRenderer.highlightConnector(connectors[connector], connectorWeightingFunction(connectors[connector].numTasks));
             }
         }
     }
@@ -386,7 +387,6 @@ function SystemRenderer(height){
     }
     
     this.drawConnector = function(connector, weight){
-        console.log(weight);
         context.lineWidth = weight;
         context.beginPath();
         context.moveTo(connector.x1, connector.y1);
@@ -409,7 +409,7 @@ function SystemRenderer(height){
         context.textAlign = "left";
         context.font = "15px sans-serif";
         context.fillStyle = "black";
-        context.fillText(connector.text, connector.xCenter+10, connector.yCenter+1);
+        context.fillText(connector.numTasks, connector.xCenter+10, connector.yCenter+1);
     }
 
     this.dimConnector = function(connector){
