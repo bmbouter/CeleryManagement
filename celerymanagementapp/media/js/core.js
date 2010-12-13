@@ -2,6 +2,12 @@ var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
 
 
 $(document).ready(function() {
+
+    if( typeof CMACore.testUrls == "undefined" ){
+        CMACore.loadUrls();
+    } else {
+        CMACore.loadTestUrls();
+    }
     
     CMACore.expandedTasks = false;
     var expandedWorkers = false;

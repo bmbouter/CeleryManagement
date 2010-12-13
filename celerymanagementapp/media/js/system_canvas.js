@@ -405,7 +405,7 @@ function SystemRenderer(height){
 
     this.highlightConnector = function(connector){
         context.lineCap = "butt";
-        context.lineWidth = 3;
+        context.lineWidth = 2;
         context.beginPath();
         context.moveTo(connector.x1, connector.y1);
         context.lineTo(connector.x2, connector.y2);

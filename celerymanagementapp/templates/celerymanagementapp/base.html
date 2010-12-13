@@ -19,9 +19,7 @@
 
         <script>
             {% if load_test_data %}
-               CMACore.loadTestUrls();
-            {% else %}
-                CMACore.loadUrls();
+               CMACore.testUrls = true;
             {% endif %}
 
             {% if taskname %}
