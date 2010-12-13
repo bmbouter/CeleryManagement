@@ -82,13 +82,14 @@ function Connector(task, worker, text){
 }
 
 function SystemViewer(){
-    var tasks = [];
-    var workers = [];
+    var tasks = {};
+    var workers = {};
     var connectors = [];
     var expandedTask = false;
     var expandedWorker = false;
     var tasksSet = false;
     var workersSet = false;
+    var canvasHeight = 0;
     var systemRenderer;
     var systemEventHandler;
     var yOffset = $('#header').css("height").split("px")[0];
@@ -96,9 +97,7 @@ function SystemViewer(){
     var clickedEntity = false;
 
     $('#systemCanvas').bind("contextmenu", function(e){
-        var xMousePos = e.pageX - xOffset;
-        var yMousePos = e.pageY - yOffset;
-        var entity = getEntity(xMousePos, yMousePos);
+        var entity = getEntity(e.pageX, e.pageY);
         clickedEntity = entity;
 
         if( typeof entity != "undefined"  && entity.constructor.name == "Worker" ){
@@ -112,15 +111,20 @@ function SystemViewer(){
 
     $('#deactivateWorker').click(function (){
         if( typeof clickedEntity != "undefined"  && clickedEntity.constructor.name == "Worker" ){
-            CMACore.postShutdownWorker(clickedEntity.fullName, this.shutdownWorker);
+            CMACore.postShutdownWorker(clickedEntity.fullName, shutdownWorker);
+            console.log("deactivate clicked");
             clickedEntity = false;
         }
     });
 
-    this.shutdownWorker = function(data){
-        console.log(data);
-        if( data == "success" ){
-            console.log("worker shutdown");
+    function shutdownWorker(data){
+        if( data != "failed" || typeof data != "undefined" ){
+            for( connector in connectors ){
+                if( connectors[connector].worker.fullName == data ){
+                    delete connectors[connector];
+                }
+            }
+            delete workers[data];
             draw();
         }
     }
@@ -140,8 +144,11 @@ function SystemViewer(){
     this.createTasks = function(data){
         var y = 40;
         for( item in data ){
-            tasks.push(new Task(y, data[item]));
+            tasks[data[item]] = new Task(y, data[item]);
             y += 60;
+        }
+        if( y > canvasHeight ){
+            canvasHeight = y;
         }
         tasksSet = true;
         if( workersSet ){
@@ -152,8 +159,11 @@ function SystemViewer(){
     this.createWorkers = function(data){
         var y = 40;
         for ( item in data ){
-            workers.push(new Worker(y, data[item], true));
+            workers[data[item]] = new Worker(y, data[item], true);
             y += 60;
+        }
+        if( y > canvasHeight ){
+            canvasHeight = y;
         }
         workersSet = true;
         if( tasksSet ){
@@ -164,7 +174,7 @@ function SystemViewer(){
     function createConnectors(data){
         for( task in tasks ){
             for( worker in workers ){
-                var num = data[tasks[task].fullName][workers[worker].fullName];
+                var num = data[task][worker];
                 if( num ){
                     connectors.push(new Connector(tasks[task], workers[worker], num));
                 }
@@ -175,26 +185,21 @@ function SystemViewer(){
     }
     
     function setPendingTasks(data){
-        for( task in tasks ){
-            tasks[task].pending = data[tasks[task].fullName];
+        for( item in data ){
+            tasks[item].pending = data[item];
         }
         draw();
     }
 
     function setWorkerProcesses(data){
-        for( worker in workers ){
-            workers[worker].processes = data[workers[worker].fullName];
+        for( item in data ){
+            workers[item].processes = data[item];
         }
         draw();
     }
 
     function draw(){
-        if( workers.length > tasks.length ){
-            var height = workers.length * 60 + 60;
-        } else {
-            var height = tasks.length * 60 + 60;
-        }
-        systemRenderer = new SystemRenderer(height);
+        systemRenderer = new SystemRenderer(canvasHeight + 60);
         for( connector in connectors ){
             systemRenderer.drawConnector(connectors[connector]);
         }
@@ -206,75 +211,68 @@ function SystemViewer(){
         }
     }
     
-    function handleHover(e){
-        var xMousePos = e.pageX - xOffset;
-        var yMousePos = e.pageY - yOffset;
-        handleTaskHover(xMousePos, yMousePos);
-        handleWorkerHover(xMousePos, yMousePos);
-    }
-
     function handleClick(e){
-        var xMousePos = e.pageX - xOffset;
-        var yMousePos = e.pageY - yOffset;
-        var entity = getEntity(xMousePos, yMousePos);
-        if( entity != undefined ){
-            console.log(entity.fullName);
+        var entity = getEntity(e.pageX, e.pageY);
+        if( typeof entity != "undefined" && entity.constructor.name == "Task" ){
             window.location = CMACore.task_url + entity.fullName + "/";
+        } else if( typeof entity != "undefined" && entity.constructor.name == "Worker" ){
+            window.location = CMACore.worker_url + entity.fullName + "/";
+        }
+    }
+ 
+    function handleHover(e){
+        var entity = getEntity(e.pageX, e.pageY);
+        if( typeof entity != "undefined" && entity.constructor.name == "Task" ){
+            handleTaskHover(entity);
+        } else if( typeof entity != "undefined" && entity.constructor.name == "Worker" ){
+            handleWorkerHover(entity);
+        } else {
+            unexpandEntity();
         }
     }
 
-    function handleTaskHover(xMousePos, yMousePos){
+    function handleTaskHover(task){
         if( !expandedTask ){
-            for( item in tasks ){
-                if( xMousePos < (tasks[item].x + tasks[item].width) && xMousePos > tasks[item].x ){
-                    if( yMousePos < (tasks[item].y + tasks[item].height) && yMousePos > tasks[item].y ){
-                        showTaskConnectors(tasks[item]);
-                        expandTask(tasks[item], true);
-                        $('#systemCanvas').css("cursor", "pointer");
-                        $('#systemCanvas').css("cursor", "hand");
-                    }
-                }
-            }
-        } else {
-            if( !((xMousePos < (expandedTask.x + expandedTask.width)) && (xMousePos > expandedTask.x)) 
-                || !((yMousePos < (expandedTask.y + expandedTask.height)) && (yMousePos > expandedTask.y)) ){
-                
-                    expandTask(expandedTask, false);
-                    $('#systemCanvas').css("cursor", "auto");
-            }
+            showTaskConnectors(task);
+            expandTask(task, true);
+            $('#systemCanvas').css("cursor", "pointer");
+            $('#systemCanvas').css("cursor", "hand");
         }
     }
 
-    function handleWorkerHover(xMousePos, yMousePos){
+    function handleWorkerHover(worker){
         if( !expandedWorker ){
-            for( item in workers ){
-                if( xMousePos < (workers[item].x + workers[item].width) && xMousePos > workers[item].x ){
-                    if( yMousePos < (workers[item].y + workers[item].height) && yMousePos > workers[item].y ){
-                        showWorkerConnectors(workers[item]);
-                        expandWorker(workers[item], true);
-                    }
-                }
-            }
-        } else {
-            if( !((xMousePos < (expandedWorker.x + expandedWorker.width)) && (xMousePos > expandedWorker.x)) 
-                || !((yMousePos < (expandedWorker.y + expandedWorker.height)) && (yMousePos > expandedWorker.y)) ){
-                expandWorker(expandedWorker, false);
-            }
+            showWorkerConnectors(worker);
+            expandWorker(worker, true);
+            $('#systemCanvas').css("cursor", "pointer");
+            $('#systemCanvas').css("cursor", "hand");
         }
     }
 
-    function getEntity(xMousePos, yMousePos){
-        for( item in tasks ){
-            if( xMousePos < (tasks[item].x + tasks[item].width) && xMousePos > tasks[item].x ){
-                if( yMousePos < (tasks[item].y + tasks[item].height) && yMousePos > tasks[item].y ){
-                    return tasks[item];
+    function unexpandEntity(){
+        if( expandedTask ){
+            expandTask(expandedTask, false);   
+            $('#systemCanvas').css("cursor", "auto");
+        } else if( expandedWorker ){
+            expandWorker(expandedWorker, false);   
+            $('#systemCanvas').css("cursor", "auto");
+        }
+    }
+
+    function getEntity(xPos, yPos){
+        var xMousePos = xPos - xOffset;
+        var yMousePos = yPos - yOffset;
+        for( task in tasks ){
+            if( xMousePos < (tasks[task].x + tasks[task].width) && xMousePos > tasks[task].x ){
+                if( yMousePos < (tasks[task].y + tasks[task].height) && yMousePos > tasks[task].y ){
+                    return tasks[task];
                 }
             }
         }
-        for( item in workers ){
-            if( xMousePos < (workers[item].x + workers[item].width) && xMousePos > workers[item].x ){
-                if( yMousePos < (workers[item].y + workers[item].height) && yMousePos > workers[item].y ){
-                    return workers[item];
+        for( worker in workers ){
+            if( xMousePos < (workers[worker].x + workers[worker].width) && xMousePos > workers[worker].x ){
+                if( yMousePos < (workers[worker].y + workers[worker].height) && yMousePos > workers[worker].y ){
+                    return workers[worker];
                 }
             }
         }
@@ -323,30 +321,18 @@ function SystemViewer(){
     }
 
     function showTaskConnectors(task){
-        var active_connectors = [];
         for( connector in connectors ){
             if( connectors[connector].task.fullName == task.fullName ){
-                active_connectors.push(connectors[connector]);
-            } else {
-                systemRenderer.dimConnector(connectors[connector]);
+                systemRenderer.highlightConnector(connectors[connector]);
             }
-        }
-        for( connector in active_connectors ){
-            systemRenderer.highlightConnector(active_connectors[connector]);
         }
     }
     
     function showWorkerConnectors(worker){
-        var active_connectors = [];
         for( connector in connectors ){
             if( connectors[connector].worker.fullName == worker.fullName ){
-                active_connectors.push(connectors[connector]);
-            } else {
-                systemRenderer.dimConnector(connectors[connector]);
+                systemRenderer.highlightConnector(connectors[connector]);
             }
-        }
-        for( connector in active_connectors ){
-            systemRenderer.highlightConnector(active_connectors[connector]);
         }
     }
 }
@@ -405,7 +391,7 @@ function SystemRenderer(height){
 
     this.highlightConnector = function(connector){
         context.lineCap = "butt";
-        context.lineWidth = 3;
+        context.lineWidth = 2;
         context.beginPath();
         context.moveTo(connector.x1, connector.y1);
         context.lineTo(connector.x2, connector.y2);
