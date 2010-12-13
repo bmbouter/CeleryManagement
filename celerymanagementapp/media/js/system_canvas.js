@@ -27,7 +27,7 @@ function Task(y, name){
     this.pending = 0;
     
     if( name.length > 30 ){
-        this.displayName = name.substring(0, 27) + "...";
+        this.displayName = "..." +  name.substring(name.length-29, name.length);
     } else {
         this.displayName = name;
     }

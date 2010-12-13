@@ -368,6 +368,20 @@ def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
             context_instance=RequestContext(request))
 
+def task_view(request, taskname=None):
+    return render_to_response('celerymanagementapp/task.html',
+            { "taskname" : taskname, },
+            context_instance=RequestContext(request))
+
+def worker_view(request, workername=None):
+    return render_to_response('celerymanagementapp/worker.html',
+            { "workername" : workername, },
+            context_instance=RequestContext(request))
+
+def dashboard(request):
+    return render_to_response('celerymanagementapp/dashboard.html',
+            context_instance=RequestContext(request))
+
 #==============================================================================#
 def _resolve_name_param(name):
     """If name is None or 'all', return None.  Otherwise, returns name."""

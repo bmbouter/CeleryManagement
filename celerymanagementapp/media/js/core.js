@@ -66,9 +66,9 @@ function populateTaskNavigation(data){
         }
         if( data[item].length > 15 ){
             var task_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-            $('#taskNavigation').append("<li><a style='color: " + color  + ";' id='" + data[item] + "' href='/celerymanagementapp/test/view/task/" + data[item] + "'>" + task_text + "</a></li>");
+            $('#taskNavigation').append("<li><a style='color: " + color  + ";' id='" + data[item] + "' href='" + CMACore.task_url + data[item] + "/'>" + task_text + "</a></li>");
         } else {
-            $('#taskNavigation').append("<li><a style='color: " + color  + ";' id='" + data[item] + "' href='/celerymanagementapp/test/view/task/" + data[item] + "'>" + data[item] + "</a></li>");
+            $('#taskNavigation').append("<li><a style='color: " + color  + ";' id='" + data[item] + "' href='" + CMACore.task_url + data[item] + "/'>" + data[item] + "</a></li>");
         }
     }
 }
@@ -83,9 +83,9 @@ function populateWorkerNavigation(data){
         }
         if( data[item].length > 15 ){
             var worker_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-            $('#workerNavigation').append("<li><a  style='color: " + color  + ";' id='" + data[item] + "' href='/celerymanagementapp/test/view/worker/" + data[item] + "'>" + worker_text + "</a></li>");
+            $('#workerNavigation').append("<li><a  style='color: " + color  + ";' id='" + data[item] + "' href='" + CMACore.worker_url + data[item] + "/'>" + worker_text + "</a></li>");
         } else {
-            $('#workerNavigation').append("<li><a  style='color: " + color  + ";' id='" + data[item] + "' href='/celerymanagementapp/test/view/worker/" + data[item] + "'>" + data[item] + "</a></li>");
+            $('#workerNavigation').append("<li><a  style='color: " + color  + ";' id='" + data[item] + "' href='" + CMACore.worker_url + data[item] + "/'>" + data[item] + "</a></li>");
         }
     }
 }
