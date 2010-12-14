@@ -5,6 +5,8 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse as urlreverse
 from django.contrib.auth.decorators import login_required
 
+from celerymanagementapp.forms import OutOfBandWorkerNodeForm
+
 def get_dispatched_tasks_data(request, name=None):
     if request.method == 'POST':
         f = open(settings.BASE_DIR + '/celerymanagementapp/media/test_data/chart_data.json', "r")
@@ -22,8 +24,9 @@ def dashboard(request):
             context_instance=RequestContext(request))
 
 def configure(request):
+    out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
     return render_to_response('celerymanagementapp/configure.html',
-            { "load_test_data" : "true" },
+            {'outofbandworkernode_form': out_of_band_worker_node_form},
             context_instance=RequestContext(request))
 
 def task_view(request, taskname=None):

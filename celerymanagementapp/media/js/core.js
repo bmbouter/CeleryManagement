@@ -11,8 +11,17 @@ $(document).ready(function() {
     
     CMACore.expandedTasks = false;
     var expandedWorkers = false;
+    $('textarea').attr("rows", "3");
+    $('textarea').css("resize", "none");
+
 
     $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
+    $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 10) + "px");
+
+    $(window).resize(function() {
+        $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 10) + "px");
+        $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
+    });
     
     $('#taskNavigationMaster').click(function (){
         if( CMACore.expandedTasks ){

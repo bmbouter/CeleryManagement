@@ -6,7 +6,7 @@
         <div class="header">
             Out of Band
         </div>
-        <form method="POST" action="{% url celerymanagementapp.views.configure %}" id="campaignForm">
+        <form method="POST" id="outOfBandForm">
             {% for field in outofbandworkernode_form %}
             {% csrf_token %}
             <div class="fieldWrapper">
@@ -17,7 +17,7 @@
             </div>
             {% endfor %}
         </form>
-        <button id="submitButton" class="button">Submit</button>
+        <button id="submitOutOfBandButton" class="button">Submit</button>
     </div>
 </div>
 

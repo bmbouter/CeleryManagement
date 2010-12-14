@@ -56,3 +56,7 @@ CMACore.postShutdownWorker = function(workerName, callbackFunction){
 CMACore.getDispatchedTasksData = function(query, callbackFunction) {
     $.post(CMACore.query_dispatched_tasks_url, query, callbackFunction);
 }
+
+CMACore.postCreateOutOfBandWorkerNode = function(callbackFunction){
+    $.post(CMACore.create_out_of_band_worker_url, $('#outOfBandForm').serialize(), callbackFunction);
+}
