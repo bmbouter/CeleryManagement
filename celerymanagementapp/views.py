@@ -446,57 +446,6 @@ def shrink_worker_pool(request, name=None, num=1):
         return HttpResponse('')
     
 
-@login_required
-def worker_commands_test_view(request, name=None):
-    """ Simple interface to test worker control commands. For testing only. """
-    from django.template import Template
-    
-    from celerymanagementapp.dataviews import get_worker_subprocesses
-    import pprint
-    workername = name or 'all'
-    kill = reverse( 'celerymanagementapp.views.kill_worker', 
-                    kwargs={'name':workername} )
-    grow = reverse( 'celerymanagementapp.views.grow_worker_pool', 
-                    kwargs={'name':workername} )
-    shrink = reverse('celerymanagementapp.views.shrink_worker_pool', 
-                     kwargs={'name':workername} )
-    subprocs = '{0}'.format(pprint.pformat(get_worker_subprocesses(),indent=4))
-    
-    html = """\
-    <html>
-    <body>
-    <table>
-      <tr><td>
-        <form action="{kill}" method="POST">
-        {{% csrf_token %}}
-        <input type="submit" value="Kill Worker"/>
-        </form>
-      </td></tr>
-      <tr><td>
-        <form action="{grow}" method="POST">
-        {{% csrf_token %}}
-        <input type="submit" value="Grow Subprocesses"/>
-        </form>
-      </td></tr>
-      <tr><td>
-        <form action="{shrink}" method="POST">
-        {{% csrf_token %}}
-        <input type="submit" value="Shrink Subprocesses"/>
-        </form>
-      </td></tr>
-    </table>
-    <pre>
-    {data}
-    </pre>
-    </body>
-    </html>
-    """
-    html = html.format(kill=kill, grow=grow, shrink=shrink, data=subprocs)
-    t = Template(html)
-    c = RequestContext(request)
-    return HttpResponse(t.render(c))
-
-
 
 
 

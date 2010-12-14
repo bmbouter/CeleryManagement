@@ -61,13 +61,13 @@ urlpatterns += patterns('celerymanagementapp',
     (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/shrink/(?P<num>\d+)/$', 'views.shrink_worker_pool'),
     
     # for manual testing...
-    (r'^worker/(?P<name>[-\w\d_.]+)/test_commands/$', 'views.worker_commands_test_view'),
+    (r'^worker/(?P<name>[-\w\d_.]+)/test_commands/$', 'test_views.worker_commands_test_view'),
     
     (r'^taskdemo/launch/$', 'dataviews.task_demo_dataview'),
     (r'^taskdemo/status/(?P<uuid>[A-Fa-f0-9]{32})/$', 'dataviews.task_demo_status_dataview'),
     
     # for manual testing...
-    (r'^taskdemo/test/$', 'dataviews.task_demo_test_dataview'),
+    (r'^taskdemo/test/$', 'test_views.task_demo_test_dataview'),
 )
 
 urlpatterns += patterns('celerymanagementapp',
