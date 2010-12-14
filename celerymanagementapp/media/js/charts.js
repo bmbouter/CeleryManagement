@@ -6,13 +6,14 @@ function Chart(loc, data, options) {
     var options = options; //The options used to display the data
     var plot = null; //A variable to hold the Flot object
     var overview = null; //A variable to hold the Flot object that displays an overview
+    var typeOfChart = null;
     this.test = null; //Test variable, not necessary for functioning class
     
     /**
      * Display the chart using the global data and options
      * This should be called whenever changes are made to the chart
      */
-    this.displayChart = function() {
+    function displayChart() {
         plot = $.plot(chart, data, options);
     }
     
@@ -70,13 +71,27 @@ function Chart(loc, data, options) {
     
     /**
      * Displays a bar chart of the current data, using the current options
+     *
+     * @param {Boolean} stacking true if you want a stacking bar chart, false otherwise
      */
-    this.displayBarChart = function() {
+    this.displayBarChart = function(stacking) {
+        if(options.series == null) {
+            options.series = { };
+        }
+        
+        options.series.stack = stacking;
+
         if(options.series.lines != null) {
             options.series.lines.show = false;
+            
+            if(options.series.points != null) {
+                options.series.points.show = false;
+            }
         }
-
-        options.series.bars = {show: true};
+        
+        options.series.bars = {show: true, barWidth: 0.6};
+        
+        typeOfChart = 'bar';
 
         displayChart();
     }
@@ -85,14 +100,20 @@ function Chart(loc, data, options) {
      * Displays a line chart of the current data, using the current options
      */
     this.displayLineChart = function() {
+        if(options.series == null) {
+            options.series = { points: { show: true } };
+        }
+
         if(options.series.bars != null) {
             options.series.bars.show = false;
         }
 
         options.series.lines = {show: true};
+        options.series.points = {show: true};
+        
+        typeOfChart = 'line';
 
         displayChart();
-        this.test = plot;
     }
     
     /**
@@ -110,6 +131,28 @@ function Chart(loc, data, options) {
     this.disablePoints = function() {
         options.series.points = {show: false};
 
+        displayChart();
+    }
+    
+    this.enableLegend = function() {
+        if(options.legend != null) {
+            options.legend.show = true;
+        } else {
+            options.legend = { };
+            options.legend.show = true;
+        }
+        
+        displayChart();
+    }
+    
+    this.disableLegend = function() {
+        if(options.legend != null) {
+            options.legend.show = false;
+        } else {
+            options.legend = { };
+            options.legend.show = false;
+        }
+        
         displayChart();
     }
     
@@ -242,18 +285,23 @@ function Chart(loc, data, options) {
 
         $(chart).bind('plothover', function(event, pos, item) {
             if(item) {
-                if($('#tooltip').length != 0) {
+                if($('#tooltip').length != 0 && typeOfChart == 'line') {
                     //Do nothing if the tooltip is displayed on a point
                     //This makes the tooltip not redraw when we hover on the same point
+                    //Only enabled for line charts
                 } else if(previousPoint != item.datapoint) {
                     previousPoint = item.datapoint;
 
                     $('#tooltip').remove();
                     var x = item.datapoint[0].toFixed(2);
                     var y = item.datapoint[1].toFixed(2);
-
-                    showTooltip(item.pageX, item.pageY,
-                        item.series.label + ': (' + x + ', ' + y + ')');
+                    
+                    if(typeOfChart == 'line') {
+                        showTooltip(item.pageX, item.pageY,
+                            item.series.label + ': (' + x + ', ' + y + ')');
+                    } else {
+                        showTooltip(item.pageX, item.pageY, item.series.label + ': ' + y);
+                    }
                 } else {
                     $('#tooltip').remove();
                     previousPoint = null;
@@ -320,11 +368,6 @@ function Chart(loc, data, options) {
         context.lineTo(arrow.left - offset*2, arrow.top - offset*2);
         context.strokeStyle = '#222';
         context.stroke();
-
-        /*$(chart).append('<div class="' + label + '_' + point +
-            '" style="position: absolute; left: ' + (pos.left + 16) + 'px; ' +
-            'top: ' + (pos.top + 16) + 'px; color: #000; font-size: smaller">' + 
-            text + '</div>');*/
         
         context.fillText(text, arrow.left - offset*4, arrow.top - offset*3 + offset/2);
     }
@@ -337,5 +380,13 @@ function Chart(loc, data, options) {
      */
     this.removeAnnotation = function(label, point) {
         $('.' + label + '_' + point).remove();
+    }
+
+    this.getData = function() {
+        return data;
+    }
+
+    this.getPlot = function() {
+        return plot;
     }
 };

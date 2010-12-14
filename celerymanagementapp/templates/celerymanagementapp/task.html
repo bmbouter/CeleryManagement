@@ -1,5 +1,42 @@
 {% extends "celerymanagementapp/base.html" %}
 
-{% block content %}
+{% block extrajs %}
+{% if load_test_data %}
+    <script type="text/javascript">
+        CMACore.loadTestUrls();
+        
+        var c1 = null;
+        var data = null;
+        var options = { };
+        var json = null;
+        var formatter = null;
+        var query = null;
+        var xhr = null;
+        
+        $(document).ready(function() {
+            formatter = new Formatter();
+            
+            query = '{"filter" : {["state", "SUCCESS"]}, "segmentize": {"field": "worker", "method": [ "all" ]}, "aggregate": [{"field": "runtime", "methods": ["average"]}, {"field": "waittime", "methods": ["average"]}]}';
+            
+            xhr = $.getJSON(CMACore.chart_data_url, formatData);
+        });
+        
+        function formatData(response) {
+            data = formatter.formatData(response);
+            showChart();
+        }
+        
+        function showChart() {
+            c1 = new Chart("#chart", data, options);
+            c1.displayBarChart(true);
+            c1.enableTooltips();
+            c1.disableLegend();
+        }
+    </script>
+{% endif %}
 
+{% endblock extrajs %}
+
+{% block content %}
+<div id="chart" style="width: 600px; height: 500px; float: left; margin: 10px 10px"></div>
 {% endblock content %}

@@ -9,6 +9,8 @@
 @header_height: 70px;
 @statusUpdate_height: 50px;
 
+@navigation_width: 175px;
+
 .rounded_borders(@radius: 5px) {
     -moz-border-radius: @radius;
     -webkit-border-radius: @radius;
@@ -35,12 +37,15 @@ body {
 #container {
     background: @page_background;
     min-height: 600px;
+    margin: 0;
+    padding: 0;
 }
 
 #header {
     height: @header_height;
     background: @header_background;
     position: relative;
+    width: 100%;
     
     #headerBarContainer {
         height: @header_height;
@@ -60,12 +65,12 @@ body {
 
         #statusUpdate {
             height: @statusUpdate_height;
-            margin: 10px 0 0 0;
+            margin-left: 45%;
+            position: absolute;
             
             #statusText {
-                margin: 15px auto;
                 font-size: 1.0em;
-                padding: 0;
+                padding: 23px;
                 font-weight: normal;
                 width: 25%;
                 color: #FF7400;
@@ -76,17 +81,27 @@ body {
 }
 
 #contentContainer {
-
+    min-height: 400px;
+    
+    #dummy { 
+        width: @navigation_width + 10px;
+        float: left;
+    }
+    
     #navigation {
         background: @navigation_background;
-        float: left;
         margin: 2px 0px 0px 0px;
         border-right: 1px solid #873D00;
         -webkit-box-shadow: 1px 0px 4px #000;
-        width: 70%;
+        width: @navigation_width;
+
+        ul {
+            padding: 10px 0px 0px 0px;
+        }
 
         li {
-            margin: 10px 0 10px 10px;
+            margin: 0px 0 10px 10px;
+            font-size: 0.8em;
 
             a {
                 text-decoration: none;
@@ -101,6 +116,7 @@ body {
 
             a:hover {
                 color: black;
+                font-weight: bold;
             }
         }
         
@@ -116,8 +132,10 @@ body {
     }
 
     #content {
-        float: right;
-        height: 400px;
+        float: left;
+        position: relative;
+        min-height: 400px;
+        min-width: 600px;
 
         #workerMenu {
             display: none;
@@ -145,7 +163,22 @@ body {
                     color: white;
                 }
             }
+        }
+        
+        #system {
+            position: absolute;
+        }
 
+        #OutofBand {
+            .header {
+                border: 2px outset #383838;
+                height: 20px;
+                margin: 30px 0 0 0;
+                border-radius: 20px;
+                background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#383838), to(#383838), color-stop(.5,#575757)); //-webkit-gradient(linear, 0% 0%, 0% 100%, from(#5CCCCC), to(#5CCCCC), color-stop(.5,#6BEDED));
+                color: #FFF;  //#173333;
+                padding: 2px 0 0 10px;
+            }
         }
     }
 }

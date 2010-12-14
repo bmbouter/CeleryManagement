@@ -263,7 +263,6 @@ def view_defined_tasks(request):
     return render_to_response('celerymanagementapp/tasklist.html',
             {'tasks':defined},
             context_instance=RequestContext(request))
-            
 
 # def get_defined_tasks(request):
     # i = inspect()  

@@ -3,8 +3,34 @@ import sys
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-CELERYMANAGEMENT_USING_HUDSON = bool(os.environ.get('CELERYMANAGEMENT_USING_HUDSON',False))
+# List of modules to import when celery starts.
+CELERY_IMPORTS = ("tasks", )
 
+## Result store settings.
+CELERY_RESULT_BACKEND = "amqp"
+#CELERY_RESULT_DBURI = "celery.db"
+
+BROKER_HOST = "localhost"
+BROKER_PORT = 5672
+BROKER_USER = "guest"
+BROKER_PASSWORD = "guest"
+BROKER_VHOST = "/"
+
+## Worker settings
+## If you're doing mostly I/O you can have more processes,
+## but if mostly spending CPU, try to keep it close to the
+## number of CPUs on your machine. If not set, the number of CPUs/cores
+## available will be used.
+# CELERYD_CONCURRENCY = 10
+# CELERYD_LOG_FILE = "celeryd.log"
+# CELERYD_LOG_LEVEL = "INFO"
+
+## Time in seconds in which task results queues should expire.  Requires RabbitMQ 2.1+.
+CELERY_AMQP_TASK_RESULT_EXPIRES = 60*60  # one hour
+
+SECURE_UPLOADS = '/tmp/'
+FILE_UPLOAD_PERMISSIONS = 0600
+                              
 import djcelery
 djcelery.setup_loader()
 

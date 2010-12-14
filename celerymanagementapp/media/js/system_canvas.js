@@ -4,10 +4,16 @@ var systemViewer;
 
 $(document).ready(function() {
     
-    $('#systemCanvas')[0].width = $(window).width() - $('.grid_2').css("width").split("px")[0];
+    $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
     systemViewer = new SystemViewer();
     systemViewer.init();
      
+    $(window).resize(function() {
+        $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
+        console.log($('#systemCanvas')[0].width);
+        systemViewer.redraw();
+    });
+    
 });
 
 function refresh(){
@@ -25,7 +31,7 @@ function refresh(){
 }
 
 function Task(y, name){
-    this.x = 200;
+    this.x = 100;
     this.y = y;
     this.width = 200;
     this.height = 40;
@@ -47,10 +53,10 @@ function Task(y, name){
 }
 
 function Worker(y, name, active){
-    this.x = 1000;
-    this.y = y;
     this.width = 200;
     this.height = 40;
+    this.x = $('#systemCanvas')[0].width - this.width - 200;
+    this.y = y;
     this.activeFill = '#FFC028';
     this.inactiveFill = '#CCC';
     this.fullName = name;
@@ -102,7 +108,7 @@ function SystemViewer(){
     var systemRenderer;
     var systemEventHandler;
     var yOffset = $('#header').css("height").split("px")[0];
-    var xOffset = $('.grid_2').css("width").split("px")[0];
+    var xOffset = $('#dummy').css("width").split("px")[0];
     var clickedEntity = false;
     var connectorWeight = 0;
 
@@ -215,6 +221,12 @@ function SystemViewer(){
         for( item in data ){
             workers[item].processes = data[item];
         }
+        draw();
+    }
+    
+    this.redraw = function(){
+        console.log("redraw");
+        $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
         draw();
     }
 
@@ -389,6 +401,8 @@ function SystemRenderer(height){
     }
     
     this.drawWorker = function(worker){
+        worker.x = $('#systemCanvas')[0].width - worker.width - 200;
+        worker.xCenter = (worker.width / 2) + worker.x;
         drawShapes.roundedRect(worker.x, worker.y, worker.width, worker.height, worker.getFill());
         context.textBaseline = "middle";
         context.textAlign = "start";
@@ -401,6 +415,7 @@ function SystemRenderer(height){
     }
     
     this.drawConnector = function(connector, weight){
+        connector.x2 = connector.worker.xCenter - (connector.worker.width / 2);
         context.lineWidth = weight;
         context.beginPath();
         context.moveTo(connector.x1, connector.y1);
@@ -448,7 +463,7 @@ function SystemRenderer(height){
     }
     
     this.clearCanvas = function(){
-        $('#systemCanvas')[0].width = $(window).width() - $('.grid_2').css("width").split("px")[0];
+        $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
         canvas.height = height;
         context.clearRect(0, 0, canvas.width, canvas.height);
     }

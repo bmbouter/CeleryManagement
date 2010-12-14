@@ -26,6 +26,7 @@ CMACore.loadTestUrls = function(){
     CMACore.query_dispatched_tasks_url = CMACore.post_root_url + "xy_query/dispatched_tasks/";
     CMACore.task_url = "/celerymanagementapp/test/view/task/";
     CMACore.worker_url = "/celerymanagementapp/test/view/worker/";
+    CMACore.chart_data_url = CMACore.root_url + "chart/enumerate-1.json";
 }
 
 CMACore.getTasks = function(callbackFunction){

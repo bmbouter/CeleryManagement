@@ -25,8 +25,8 @@ from celerymanagementapp.jsonquery.xyquery import JsonXYQuery
 from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 
 from celerymanagementapp import tasks
+from celerymanagementapp.models import OutOfBandWorkerNode 
 from celerymanagementapp.models import RegisteredTaskType, TaskDemoGroup
-
 
 #==============================================================================#
 def _json_from_post(request, allow_empty=False):
@@ -212,6 +212,16 @@ def worker_subprocesses_dataview(request, name=None):
     workercounts = get_worker_subprocesses(dest=dest)
         
     return _json_response(workercounts)
+
+def worker_start(request):
+    """Find an available node and start a worker process"""
+    active_nodes = OutOfBandWorkerNode.objects.filter(active=True)
+    for node in active_nodes:
+        output = node.celeryd_status()
+        if not output.strip('\n').isdigit():
+            node.celeryd_start()
+            return _json_response({'status': 'success'})
+    return _json_response({'status': 'failure', 'message': 'No Available Worker Nodes'})
     
 def pending_task_count_dataview(request, name=None):
     """ Return the number of pending DispatchedTasks for each defined task.  An 
@@ -312,7 +322,9 @@ def worker_info_dataview(request, name=None):
     return _json_response(d)
     
 
+#==============================================================================#
 def validate_task_demo_request(json_request):
+    """ Helper to task_demo_dataview.  It validates the Json request. """
     # return (is_valid, msg)
     name = json_request.get('name', None)
     rate = json_request.get('rate', None)
@@ -340,8 +352,12 @@ def validate_task_demo_request(json_request):
     return True, ""
     
 
-
 def task_demo_dataview(request):
+    """ View that launches a single task several times.  This can be used to 
+        stress test a particular Celery configuration. 
+    
+        The request must include the Json request as POST data.
+    """
     json_request = _json_from_post(request)
     
     dispatchid = None
@@ -358,29 +374,9 @@ def task_demo_dataview(request):
         tmp.close()
         # generate id
         dispatchid = uuid.uuid4().hex
-        # get Django settings module name
-        #settings_module = settings.SETTINGS_MODULE
-        # prepare args
-        #args = ['--id={0}'.format(dispatchid), 
-        #        '--tmpfile={0}'.format(tmpname), 
-        #        '--settings={0}'.format(settings_module),
-        #        '--pythonpath=.']
-        # launch dispatcher
-        
-        # How to launch the dispatcher process...
-        # Celery is the obvious choice... but...
-        # The goal here is to measure performance.  If we run the process as a 
-        # Task, it will be run by a worker.  A worker will also be what runs 
-        # the individual demo tasks.  This is especially a problem if the same 
-        # worker that runs the process also runs the demo tasks.  This will 
-        # skew the results.  What we want to do is run the tasks from 
-        # "somewhere else".
-        #print 'Launching dispatcher process...'
-        #subprocess.Popen(['django-admin.py','cmtaskdemo']+args)
-        #print 'Dispatcher process launched.'
-        print 'Launching dispatcher task...'
+        ##print 'Launching dispatcher task...'
         tasks.launch_demotasks.apply_async(args=[dispatchid, tmpname])
-        print 'Dispatcher task launched.'
+        ##print 'Dispatcher task launched.'
         
     # prepare response
     response = {
@@ -418,6 +414,9 @@ def task_demo_status_dataview(request, uuid=None):
     
 @login_required
 def task_demo_test_dataview(request):
+    """ Very simple view for testing the task_demo_dataview function.  This is 
+        only for testing, not for production code. 
+    """
     from django.template import Template
     from django.template import RequestContext
     

@@ -5,17 +5,17 @@
     
     <script>
         {% if CELERYMANAGEMENTAPP_SYSTEMVIEW_REFRESH_RATE != 0 %}
-        setInterval(refresh, {{ CELERYMANAGEMENTAPP_SYSTEMVIEW_REFRESH_RATE }} * 1000);
+            setInterval(refresh, {{ CELERYMANAGEMENTAPP_SYSTEMVIEW_REFRESH_RATE }} * 1000);
         {% endif %}
     </script>
 {% endblock extrajs %}
 
 {% block content %}
-<div id="system">
-    <canvas id="systemCanvas">
+    <div id="system">
+        <canvas id="systemCanvas">
 
-    </cavas>
-</div>
+        </canvas>
+    </div>
     <div id="workerMenu">
         <ul>
             <li><a id="deactivateWorker">Deactivate Worker</a></li>
