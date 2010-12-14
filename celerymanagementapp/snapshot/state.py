@@ -33,14 +33,18 @@ class DispatchedTask(celery_state.Task):
         self.received = timestamp
         if self.sent:
             self.waittime = timestamp - self.sent
+        if self.succeeded:
+            self.runtime = self.succeeded - timestamp
         self.update(states.RECEIVED, timestamp, fields)
 
     def on_succeeded(self, timestamp=None, **fields):
         self.succeeded = timestamp
+        if self.received:
+            self.runtime = timestamp - self.received
         self.update(states.SUCCESS, timestamp, fields)
         self.totaltime = self.runtime
-        if self.waittime:
-            self.totaltime = self.totaltime + self.waittime
+        if self.sent:
+            self.totaltime = self.succeeded - self.sent
 
 
 class State(celery_state.State):

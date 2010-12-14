@@ -15,9 +15,9 @@ TASK_STATE_COLORS = {states.SUCCESS: "green",
                      states.RETRY: "orange",
                      "RECEIVED": "blue"}
 
-def format_seconds(val):
+def format_seconds(val, fracdigits=6):
     if val:
-        return '{0:.6f}'.format(val)
+        return '{0:.{flen}f}'.format(val,flen=fracdigits)
     else:
         return ''
     
@@ -30,15 +30,15 @@ def display_field(name, allow_tags=False):
     
 @display_field('Runtime')
 def runtime_field(obj):
-    return format_seconds(obj.runtime)
+    return format_seconds(obj.runtime, 6)
     
 @display_field('Wait Time')
 def waittime_field(obj):
-    return format_seconds(obj.waittime)
+    return format_seconds(obj.waittime, 2)
     
 @display_field('Total Time')
 def totaltime_field(obj):
-    return format_seconds(obj.totaltime)
+    return format_seconds(obj.totaltime, 2)
     
 @display_field('Name')
 def name_field(obj):

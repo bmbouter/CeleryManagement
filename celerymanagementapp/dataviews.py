@@ -24,7 +24,8 @@ from celerymanagementapp.jsonquery.filter import JsonFilter
 from celerymanagementapp.jsonquery.xyquery import JsonXYQuery
 from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 
-from celerymanagementapp.models import RegisteredTaskType
+from celerymanagementapp import tasks
+from celerymanagementapp.models import RegisteredTaskType, TaskDemoGroup
 
 
 #==============================================================================#
@@ -236,7 +237,9 @@ def pending_task_count_dataview(request, name=None):
     json_result = xyquery.do_query()
     
     d = json_result['data']
-    r = dict((row[0], row[1]['count']) for row in d)
+    
+    #r = dict((row[0], row[1]['count']) for row in d)
+    r = dict((row[0], row[1][0]['methods'][0]['value']) for row in d)
     
     return _json_response(r)
     
@@ -356,14 +359,28 @@ def task_demo_dataview(request):
         # generate id
         dispatchid = uuid.uuid4().hex
         # get Django settings module name
-        settings_module = settings.SETTINGS_MODULE
+        #settings_module = settings.SETTINGS_MODULE
         # prepare args
-        args = ['--id={0}'.format(dispatchid), 
-                '--tmpfile={0}'.format(tmpname), 
-                '--settings={0}'.format(settings_module),
-                '--pythonpath=.']
+        #args = ['--id={0}'.format(dispatchid), 
+        #        '--tmpfile={0}'.format(tmpname), 
+        #        '--settings={0}'.format(settings_module),
+        #        '--pythonpath=.']
         # launch dispatcher
-        subprocess.Popen(['django-admin.py','cmtaskdemo']+args)
+        
+        # How to launch the dispatcher process...
+        # Celery is the obvious choice... but...
+        # The goal here is to measure performance.  If we run the process as a 
+        # Task, it will be run by a worker.  A worker will also be what runs 
+        # the individual demo tasks.  This is especially a problem if the same 
+        # worker that runs the process also runs the demo tasks.  This will 
+        # skew the results.  What we want to do is run the tasks from 
+        # "somewhere else".
+        #print 'Launching dispatcher process...'
+        #subprocess.Popen(['django-admin.py','cmtaskdemo']+args)
+        #print 'Dispatcher process launched.'
+        print 'Launching dispatcher task...'
+        tasks.launch_demotasks.apply_async(args=[dispatchid, tmpname])
+        print 'Dispatcher task launched.'
         
     # prepare response
     response = {
@@ -386,7 +403,7 @@ def task_demo_status_dataview(request, uuid=None):
         }
     try:
         # get object from db
-        obj = Model.objects.get(uuid=uuid)
+        obj = TaskDemoGroup.objects.get(uuid=uuid)
         response = {
             'completed': obj.completed,
             'elapsed': obj.elapsed,
@@ -405,7 +422,7 @@ def task_demo_test_dataview(request):
     from django.template import RequestContext
     
     name = 'celerymanagementapp.testutil.tasks.simple_test'
-    rate = 0.5
+    rate = 2.0
     runfor = 10.0
     
     send = urlreverse('celerymanagementapp.dataviews.task_demo_dataview')
