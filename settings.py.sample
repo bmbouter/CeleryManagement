@@ -12,9 +12,9 @@ CELERY_RESULT_BACKEND = "amqp"
 
 BROKER_HOST = "localhost"
 BROKER_PORT = 5672
-BROKER_USER = "/"
+BROKER_USER = "guest"
 BROKER_PASSWORD = "guest"
-BROKER_VHOST = "guest"
+BROKER_VHOST = "/"
 
 ## Worker settings
 ## If you're doing mostly I/O you can have more processes,
