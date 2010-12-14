@@ -9,12 +9,12 @@ $(document).ready(function() {
         CMACore.loadTestUrls();
     }
     
-    //$('#statusText').hide();
-
     CMACore.expandedTasks = false;
     var expandedWorkers = false;
 
     $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
+    //$('#content').css("width", $(window).width() - $('.grid_2').css("width").split("px")[0]);
+    
     $('#taskNavigationMaster').click(function (){
         if( CMACore.expandedTasks ){
             $('#taskNavigationMaster').text("+ Tasks");
