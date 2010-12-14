@@ -1,0 +1,7 @@
+{
+    "data": [
+        [ "worker1", [ { "fieldname": "state", "methods": [ { "name": "enumerate", "value": [["STARTED",1],["RUNNING",1],["SUCCESS",25]] } ] } ] ],
+        [ "worker2", [ { "fieldname": "state", "methods": [ { "name": "enumerate", "value": [["STARTED",2],["RUNNING",1],["SUCCESS",29]] } ] } ] ],
+        [ "worker3", [ { "fieldname": "state", "methods": [ { "name": "enumerate", "value": [["STARTED",1],["RUNNING",0],["SUCCESS",18]] } ] } ] ]
+    ]
+}
