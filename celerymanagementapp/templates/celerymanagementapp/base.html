@@ -30,7 +30,6 @@
             {% if workername %}
                 CMACore.workername = "{{ workername }}";
             {% endif %}
-
         </script>
 
         {% block extrajs %}
@@ -45,44 +44,44 @@
 
     {% block body %}
     <body>
+        <div id="container">
             <div id="header">
-                {% block header %}
-                <div id="headerBarContainer" class="container_12">
-                    <h1 class="grid_2">Celery Management</h1>
-                    <div class="grid_4 push_4" id="statusUpdate">
+            {% block header %}
+                <div id="headerBarContainer">
+                    <h1>Celery Management</h1>
+                    <div id="statusUpdate">
                         <div id="statusText">
                         </div>
                     </div>
                </div>
             {% endblock header %}
             </div>
-            <div id="contentContainer" class="container_12">
-                <div class="grid_2">
-                    <div id="navigation">
-                        <ul>
-                            {% if load_test_data %}
-                            <li><a href="/celerymanagementapp/test/view/dashboard/">Dashboard</a></li>
-                            <li><a href="/celerymanagementapp/test/view/system/">Realtime View</a></li>
-                            <li><a href="/celerymanagementapp/test/view/configure/">Configuration</a></li>
-                            {% else %}
-                            <li><a href="/celerymanagementapp/view/dashboard/">Dashboard</a></li>
-                            <li><a href="/celerymanagementapp/view/system/">Realtime View</a></li>
-                            <li><a href="/celerymanagementapp/view/configure/">Configuration</a></li>
-                            {% endif %}
-                            <li><a id="taskNavigationMaster">+ Tasks</a></li>
-                            <ul id="taskNavigation">
-                            </ul>
-                            <li><a id="workerNavigationMaster">+ Workers</a></li>
-                            <ul id="workerNavigation">
-                            </ul>
+            <div id="contentContainer">
+                <div id="navigation">
+                    <ul>
+                        {% if load_test_data %}
+                        <li><a href="/celerymanagementapp/test/view/dashboard/">Dashboard</a></li>
+                        <li><a href="/celerymanagementapp/test/view/system/">Realtime View</a></li>
+                        <li><a href="/celerymanagementapp/test/view/configure/">Configuration</a></li>
+                        {% else %}
+                        <li><a href="/celerymanagementapp/view/dashboard/">Dashboard</a></li>
+                        <li><a href="/celerymanagementapp/view/system/">Realtime View</a></li>
+                        <li><a href="/celerymanagementapp/view/configure/">Configuration</a></li>
+                        {% endif %}
+                        <li><a id="taskNavigationMaster">+ Tasks</a></li>
+                        <ul id="taskNavigation">
                         </ul>
-                    </div>
+                        <li><a id="workerNavigationMaster">+ Workers</a></li>
+                        <ul id="workerNavigation">
+                        </ul>
+                    </ul>
                 </div>
-                <div id="content" class="grid_10">
+                <div id="content">
                     {% block content %}
                     {% endblock %}
                 </div>
             </div>
+        </div>
     </body>
     {% endblock body %}
 </html>

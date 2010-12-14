@@ -35,12 +35,15 @@ body {
 #container {
     background: @page_background;
     min-height: 600px;
+    margin: 0;
+    padding: 0;
 }
 
 #header {
     height: @header_height;
     background: @header_background;
     position: relative;
+    width: 100%;
     
     #headerBarContainer {
         height: @header_height;
@@ -60,12 +63,12 @@ body {
 
         #statusUpdate {
             height: @statusUpdate_height;
-            margin: 10px 0 0 0;
+            margin-left: 45%;
+            position: absolute;
             
             #statusText {
-                margin: 15px auto;
                 font-size: 1.0em;
-                padding: 0;
+                padding: 23px;
                 font-weight: normal;
                 width: 25%;
                 color: #FF7400;
@@ -76,14 +79,15 @@ body {
 }
 
 #contentContainer {
-
+    min-height: 400px;
+    
     #navigation {
         background: @navigation_background;
         float: left;
         margin: 2px 0px 0px 0px;
         border-right: 1px solid #873D00;
         -webkit-box-shadow: 1px 0px 4px #000;
-        width: 70%;
+        width: 175px;
 
         li {
             margin: 10px 0 10px 10px;
@@ -150,7 +154,6 @@ body {
         }
 
         #OutofBand {
-
             .header {
                 border: 2px outset #383838;
                 height: 20px;
