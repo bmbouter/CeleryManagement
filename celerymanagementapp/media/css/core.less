@@ -85,18 +85,22 @@ body {
     
     #dummy { 
         width: @navigation_width + 10px;
+        float: left;
     }
     
     #navigation {
         background: @navigation_background;
-        float: left;
         margin: 2px 0px 0px 0px;
         border-right: 1px solid #873D00;
         -webkit-box-shadow: 1px 0px 4px #000;
         width: @navigation_width;
 
+        ul {
+            padding: 10px 0px 0px 0px;
+        }
+
         li {
-            margin: 10px 0 10px 10px;
+            margin: 0px 0 10px 10px;
             font-size: 0.8em;
 
             a {
