@@ -368,6 +368,10 @@ def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
             context_instance=RequestContext(request))
 
+def configure(request):
+    return render_to_response('celerymanagementapp/configure.html',
+            context_instance=RequestContext(request))
+
 def task_view(request, taskname=None):
     return render_to_response('celerymanagementapp/task.html',
             { "taskname" : taskname, },
