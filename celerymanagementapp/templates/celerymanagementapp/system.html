@@ -5,7 +5,7 @@
     
     <script>
         {% if CELERYMANAGEMENTAPP_SYSTEMVIEW_REFRESH_RATE != 0 %}
-        setInterval(refresh, {{ CELERYMANAGEMENTAPP_SYSTEMVIEW_REFRESH_RATE }} * 1000);
+            setInterval(refresh, {{ CELERYMANAGEMENTAPP_SYSTEMVIEW_REFRESH_RATE }} * 1000);
         {% endif %}
     </script>
 {% endblock extrajs %}
