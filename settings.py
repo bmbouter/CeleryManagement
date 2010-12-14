@@ -116,6 +116,10 @@ INSTALLED_APPS = (
 
 CELERYMANAGEMENTAPP_MEDIA_PREFIX = "/celerymanagementapp/site_media/"
 
+# This represents how often the System View refreshes its data.  Given in
+# seconds.
+CELERYMANAGEMENTAPP_SYSTEMVIEW_REFRESH_RATE = 0;
+
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 TEMPLATE_CONTEXT_PROCESSORS += (
     'celerymanagementapp.context_processors.context_processor',

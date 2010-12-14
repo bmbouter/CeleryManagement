@@ -3,27 +3,29 @@ var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
 CMACore.loadUrls = function() {
     CMACore.root_url = "/celerymanagementapp/";
     CMACore.get_tasks_url = CMACore.root_url + "task/all/list/";
-    CMACore.workers_url = CMACore.root_url + "worker/all/list/";
+    CMACore.get_workers_url = CMACore.root_url + "worker/all/list/";
     CMACore.tasks_per_worker_url = CMACore.root_url + "task/all/dispatched/byworker/count/";
     CMACore.task_url = CMACore.root_url + "view/dispatched_tasks/";
     CMACore.pending_tasks_url = CMACore.root_url + "task/all/dispatched/pending/count/";
     CMACore.worker_processes_url = CMACore.root_url + "worker/all/subprocess/count/";
     CMACore.shutdown_worker_url = CMACore.root_url + "worker/<placeHolder>/shutdown/";
     CMACore.query_dispatched_tasks_url = CMACore.root_url + "xy_query/dispatched_tasks/";
+    CMACore.task_url = "/celerymanagementapp/view/task/";
+    CMACore.worker_url = "/celerymanagementapp/view/task/";
 }
 
 CMACore.loadTestUrls = function(){
     CMACore.root_url = "/celerymanagementapp/site_media/test_data/";
-    CMACore.get_root_url = "/celerymanagementapp/test/get/";
     CMACore.post_root_url = "/celerymanagementapp/test/post/";
     CMACore.get_tasks_url = CMACore.root_url + "tasks.json";
-    CMACore.workers_url = CMACore.root_url + "workers.json";
+    CMACore.get_workers_url = CMACore.root_url + "workers.json";
     CMACore.tasks_per_worker_url = CMACore.root_url + "tasks_per_worker.json";
     CMACore.pending_tasks_url = CMACore.root_url + "tasks_pending.json";
     CMACore.worker_processes_url = CMACore.root_url + "worker_processes.json";
-    CMACore.task_url = "/celerymanagementapp/view/dispatched_tasks/";
-    CMACore.shutdown_worker_url = CMACore.root_url + "successful_worker_shutdown.json";
+    CMACore.shutdown_worker_url = CMACore.post_root_url + "worker/<placeHolder>/shutdown/";
     CMACore.query_dispatched_tasks_url = CMACore.post_root_url + "xy_query/dispatched_tasks/";
+    CMACore.task_url = "/celerymanagementapp/test/view/task/";
+    CMACore.worker_url = "/celerymanagementapp/test/view/worker/";
 }
 
 CMACore.getTasks = function(callbackFunction){
@@ -31,7 +33,7 @@ CMACore.getTasks = function(callbackFunction){
 }
 
 CMACore.getWorkers = function(callbackFunction){
-    $.getJSON(CMACore.workers_url, callbackFunction);
+    $.getJSON(CMACore.get_workers_url, callbackFunction);
 }
 
 CMACore.getTasksPerWorker = function(callbackFunction){

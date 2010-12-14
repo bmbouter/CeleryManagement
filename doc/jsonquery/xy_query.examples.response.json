@@ -1,9 +1,19 @@
 /* Simple response.  Y-value is count. */
 {
     "data": [
-        [ "SUCCESS", [ { "fieldname": "count", "methods": [ { "name": "count", "value": 10 } ] } ] ],
-        [ "PENDING", [ { "fieldname": "count", "methods": [ { "name": "count", "value": 18 } ] } ] ],
-        [ "STARTED", [ { "fieldname": "count", "methods": [ { "name": "count", "value":  2 } ] } ] ]
+        [ "SUCCESS", 
+            [ { "fieldname": "count", 
+                "methods": [ { "name": "count", "value": 10 } ] 
+            } ] 
+        ],
+        [ "PENDING", 
+            [ { "fieldname": "count", 
+                "methods": [ { "name": "count", "value": 18 } ] } ] 
+        ],
+        [ "STARTED", 
+            [ { "fieldname": "count", 
+                "methods": [ { "name": "count", "value":  2 } ] } ] 
+        ]
     ]
 }
 

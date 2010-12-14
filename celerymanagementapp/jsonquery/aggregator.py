@@ -21,6 +21,20 @@ class CompoundAggregator(object):
         """ Add a new nested aggregator to the compound aggregator. """
         self.aggs.__setitem__(key, aggregator)
         
+class ListAggregator(object):
+    """ Aggregator that can own other aggregators.  This allows nesting. """
+    def __init__(self):
+        self.aggs = []
+        
+    def __call__(self, queryset):
+        return [agg(queryset) for agg in self.aggs]
+        
+    def append(self, aggregator):
+        self.aggs.append(aggregator)
+        
+    def extend(self, aggregators):
+        self.aggs.extend(aggregators)
+        
 
 def max(fieldname):
     """ Return a max value aggregator function.  The returned function can be 

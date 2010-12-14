@@ -1,11 +1,11 @@
 {
     "celerymanagementapp.testutil.tasks.print_time": {
-        "opus-dev.cnl.ncsu.edu": 6,
+        "opus-dev.cnl.ncsu.edu": 13,
         "opus-dev.cnl.ncsu.edu-FakeTest1" : 4
     }, 
 
     "celerymanagementapp.testutil.tasks.simple_test": {
-        "opus-dev.cnl.ncsu.edu": 150
+        "opus-dev.cnl.ncsu.edu": 60
     }, 
 
     "celerymanagementapp.testutil.tasks.silly_loop": {
@@ -25,7 +25,7 @@
     }, 
 
     "celery.ping": {
-        "opus-dev.cnl.ncsu.edu-FakeTest1" : 19,
+        "opus-dev.cnl.ncsu.edu-FakeTest1" : 12,
         "opus-dev.cnl.ncsu.edu": 0
     }
 }
