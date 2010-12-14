@@ -3,7 +3,8 @@ var CMAFormatter = (typeof CMAFormatter == 'undefined' || ! CMAFormatter) ? {} :
 function Formatter() {
     var formattedData = { };
 
-    this.formatData = function(data) {         
+    this.formatData = function(data) {
+        console.log(data);         
         var dataArray = data.data;
 
         console.log(dataArray);
