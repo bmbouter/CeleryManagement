@@ -1,0 +1,8 @@
+{
+    "data": [
+        [ "worker1", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 1.1 } ] } ] ],
+        [ "worker2", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 2.4 } ] } ] ],
+        [ "worker3", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 0.7 } ] } ] ]
+    ]
+}
+

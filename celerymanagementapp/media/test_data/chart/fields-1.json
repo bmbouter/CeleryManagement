@@ -1,0 +1,7 @@
+{
+    "data": [
+        [ "worker1", { "runtime": { "average": 1.1 }, "waittime": { "average": 0.44 } } ],
+        [ "worker2", { "runtime": { "average": 2.4 }, "waittime": { "average": 0.48 } } ],
+        [ "worker3", { "runtime": { "average": 0.7 }, "waittime": { "average": 0.72 } } ]
+    ]
+}

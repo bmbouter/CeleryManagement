@@ -1,0 +1,10 @@
+{
+    "data": [
+        [0.025, [ { "fieldname": "count", "methods": [ { "name": "count", "value": 3 } ] } ] ],
+        [0.075, [ { "fieldname": "count", "methods": [ { "name": "count", "value": 6 } ] } ] ],
+        [0.125, [ { "fieldname": "count", "methods": [ { "name": "count", "value": 7 } ] } ] ],
+        [0.175, [ { "fieldname": "count", "methods": [ { "name": "count", "value": 2 } ] } ] ],
+        [0.225, [ { "fieldname": "count", "methods": [ { "name": "count", "value": 1 } ] } ] ]
+    ]
+}
+
