@@ -1,0 +1,8 @@
+{
+    "data": [
+        [ "worker1", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 1.1 }, { "name": "min", "value": 0.9 }, { "name": "max", "value": 1.4 } ] } ] ],
+        [ "worker2", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 2.4 }, { "name": "min", "value": 0.9 }, { "name": "max", "value": 5.8 } ] } ] ],
+        [ "worker3", [ { "fieldname": "runtime", "methods": [ { "name": "average", "value": 0.7 }, { "name": "min", "value": 0.6 }, { "name": "max", "value": 0.9 } ] } ] ]
+    ]
+}
+
