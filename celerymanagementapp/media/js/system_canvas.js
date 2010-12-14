@@ -4,7 +4,7 @@ var systemViewer;
 
 $(document).ready(function() {
     
-    $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0] - 5;
+    $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
     systemViewer = new SystemViewer();
     systemViewer.init();
      
