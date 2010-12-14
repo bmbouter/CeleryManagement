@@ -87,6 +87,7 @@ body {
 
         li {
             margin: 10px 0 10px 10px;
+            font-size: 0.8em;
 
             a {
                 text-decoration: none;
@@ -101,6 +102,7 @@ body {
 
             a:hover {
                 color: black;
+                font-weight: bold;
             }
         }
         
@@ -116,7 +118,7 @@ body {
     }
 
     #content {
-        float: right;
+        float: left;
         height: 400px;
 
         #workerMenu {
@@ -145,7 +147,19 @@ body {
                     color: white;
                 }
             }
+        }
 
+        #OutofBand {
+
+            .header {
+                border: 2px outset #383838;
+                height: 20px;
+                margin: 30px 0 0 0;
+                border-radius: 20px;
+                background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#383838), to(#383838), color-stop(.5,#575757)); //-webkit-gradient(linear, 0% 0%, 0% 100%, from(#5CCCCC), to(#5CCCCC), color-stop(.5,#6BEDED));
+                color: #FFF;  //#173333;
+                padding: 2px 0 0 10px;
+            }
         }
     }
 }

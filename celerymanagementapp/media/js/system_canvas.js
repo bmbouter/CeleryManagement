@@ -25,7 +25,7 @@ function refresh(){
 }
 
 function Task(y, name){
-    this.x = 200;
+    this.x = 100;
     this.y = y;
     this.width = 200;
     this.height = 40;
@@ -47,7 +47,7 @@ function Task(y, name){
 }
 
 function Worker(y, name, active){
-    this.x = 1000;
+    this.x = 900;
     this.y = y;
     this.width = 200;
     this.height = 40;
