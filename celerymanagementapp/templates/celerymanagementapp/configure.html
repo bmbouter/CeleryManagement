@@ -2,10 +2,22 @@
 
 {% block content %}
 <div id="configurationManagement">
-    <div class= "grid_12" id="OutofBand">
-        <div class="header grid_10">
+    <div id="OutofBand">
+        <div class="header">
             Out of Band
         </div>
+        <form method="POST" action="{% url celerymanagementapp.views.configure %}" id="campaignForm">
+            {% for field in outofbandworkernode_form %}
+            {% csrf_token %}
+            <div class="fieldWrapper">
+                <div class="field">
+                    {{ field.label_tag }} {{ field }}
+                    <label id="{{ field.label }}_error"></label>
+                </div>
+            </div>
+            {% endfor %}
+        </form>
+        <button id="submitButton" class="button">Submit</button>
     </div>
 </div>
 
