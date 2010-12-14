@@ -134,6 +134,28 @@ function Chart(loc, data, options) {
         displayChart();
     }
     
+    this.enableLegend = function() {
+        if(options.legend != null) {
+            options.legend.show = true;
+        } else {
+            options.legend = { };
+            options.legend.show = true;
+        }
+        
+        displayChart();
+    }
+    
+    this.disableLegend = function() {
+        if(options.legend != null) {
+            options.legend.show = false;
+        } else {
+            options.legend = { };
+            options.legend.show = false;
+        }
+        
+        displayChart();
+    }
+    
     /**
      * Enable an overview chart at a certain location in the DOM
      * ZOOM CURRENTLY NOT WORKING
