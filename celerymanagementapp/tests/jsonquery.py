@@ -49,9 +49,9 @@ class JsonQuery_SimpleSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
             }
         expected_output = {
             'data': [
-                (u'A',{'count': 3}),
-                (u'B',{'count': 2}),
-                (u'C',{'count': 1}),
+                (u'A',[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 3}] }] ),
+                (u'B',[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 2}] }] ),
+                (u'C',[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
                 ]
             }
         #expected_output = {
@@ -76,9 +76,9 @@ class JsonQuery_SimpleSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
             }
         expected_output = {
             'data': [
-                (2,{'count': 2}), # 1..4
-                (5,{'count': 3}), # 4..7
-                (8,{'count': 1}), # 7..10
+                (2,[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 2}] }] ),
+                (5,[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 3}] }] ),
+                (8,[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
                 ]
             }
         query = JsonXYQuery(TestModelModelMap(), input)
@@ -98,10 +98,10 @@ class JsonQuery_SimpleSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
             }
         expected_output = {
             'data': [
-                (u'A',{'count': 3}),
-                (u'B',{'count': 2}),
-                (u'C',{'count': 1}),
-                (u'D',{'count': 0}),
+                (u'A',[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 3}] }] ),
+                (u'B',[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 2}] }] ),
+                (u'C',[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (u'D',[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 0}] }] ),
                 ]
             }
         query = JsonXYQuery(TestModelModelMap(), input)
@@ -121,12 +121,12 @@ class JsonQuery_SimpleSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
             }
         expected_output = {
             'data': [
-                (u'A',{'count': 1}),
-                (u'A',{'count': 1}),
-                (u'A',{'count': 1}),
-                (u'B',{'count': 1}),
-                (u'B',{'count': 1}),
-                (u'C',{'count': 1}),
+                (u'A',[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (u'A',[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (u'A',[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (u'B',[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (u'B',[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (u'C',[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
                 ]
             }
         query = JsonXYQuery(TestModelModelMap(), input)
@@ -151,11 +151,11 @@ class JsonQuery_DateSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
             }
         expected_output = {
             'data': [
-                (D(2010,1,4),{'count': 2}),
-                (D(2010,1,11),{'count': 1}),
-                (D(2010,1,13),{'count': 1}),
-                (D(2010,1,20),{'count': 1}),
-                (D(2010,1,24),{'count': 1}),
+                (D(2010,1,4), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 2}] }] ),
+                (D(2010,1,11),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,13),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,20),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,24),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
                 ]
             }
         query = JsonXYQuery(TestModelModelMap(), input)

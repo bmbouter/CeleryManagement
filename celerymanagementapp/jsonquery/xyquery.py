@@ -98,6 +98,37 @@ class AggregateSpecList(object):
             
 
 #==============================================================================#
+class MethodAggregator(object):
+    def __init__(self, methodname, agg_method):
+        self.methodname = methodname
+        self.agg = agg_method
+        
+    def __call__(self, queryset):
+        r = { 'name':    self.methodname,
+              'value':   self.agg(queryset),
+            }
+        return r
+
+
+class FieldAggregator(object):
+    def __init__(self, fieldname):
+        self.fieldname = fieldname
+        self.methods = aggregator.ListAggregator()
+        
+    def __call__(self, queryset):
+        r = { 'fieldname': self.fieldname,
+              'methods': self.methods(queryset),
+            }
+        return r
+    
+    def append(self, methodagg):
+        self.methods.append(methodagg)
+    
+    def extend(self, methodaggs):
+        self.methods.extend(methodaggs)
+
+
+#==============================================================================#
 class JsonXYQuery(JsonQuery):
     segmentizer_method_dict = segmentizer.method_dict()
     aggregator_method_dict =  aggregator.method_dict()
@@ -140,20 +171,31 @@ class JsonXYQuery(JsonQuery):
         return aggregator_factory
         
     def _build_method_aggregator(self, fieldname, method_specs):
-        method_agg = aggregator.CompoundAggregator()
+        methodlist_agg = aggregator.CompoundAggregator()
+        methodlist = []
         for method_spec in method_specs:
             aggregator_factory = self._get_aggregator_factory(method_spec)
             agg = aggregator_factory(fieldname)
-            method_agg[method_spec] = agg
-        return method_agg
+            method_agg = MethodAggregator(method_spec, agg)
+            methodlist.append(method_agg)
+        return methodlist
         
-    def _build_aggregator(self):        
-        field_agg = aggregator.CompoundAggregator()
+    def _build_aggregator(self):
+        fieldlist_agg = aggregator.ListAggregator()
         for aggspec in self.aggspeclist:
+            field_agg = FieldAggregator(aggspec.query_name)
             if aggspec.query_name=='count':
-                field_agg['count'] = aggregator.count()
+                method_agg = MethodAggregator('count', aggregator.count())
+                field_agg.append(method_agg)
             else:
                 fieldname = self.modelmap.get_fieldname(aggspec.query_name)
-                field_agg[fieldname] = self._build_method_aggregator(fieldname, aggspec.method_specs)
-        return field_agg
+                methodlist = self._build_method_aggregator(fieldname, aggspec.method_specs)
+                field_agg.extend(methodlist)
+            fieldlist_agg.append(field_agg)
+        return fieldlist_agg
         
+#==============================================================================#
+
+
+
+

@@ -4,11 +4,9 @@
     <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/system_canvas.js" ></script>
     
     <script>
-        if( {{ load_test_data }} ){
-            CMACore.loadTestUrls();
-        } else {
-            CMACore.loadUrls();
-        }
+        {% if CELERYMANAGEMENTAPP_SYSTEMVIEW_REFRESH_RATE != 0 %}
+        setInterval(refresh, {{ CELERYMANAGEMENTAPP_SYSTEMVIEW_REFRESH_RATE }} * 1000);
+        {% endif %}
     </script>
 {% endblock extrajs %}
 

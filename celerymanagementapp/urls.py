@@ -63,18 +63,6 @@ urlpatterns += patterns('celerymanagementapp',
     (r'^worker/(?P<name>[-\w\d_.]+)/test_commands/$', 'views.worker_commands_test_view'),
 )
 
-
-urlpatterns += patterns('celerymanagementapp',
-    url(r'^view/system/$', 'views.system_overview', name="system_overview_url"),
-    url(r'^view/system/test/$', 'views.system_overview', name="system_overview_url", kwargs={ "test" : "true" }),
-)
-
-urlpatterns += patterns('celerymanagementapp',
-    #url(r'^view/system/$', 'views.system_overview', name="system_overview_url"),
-    #url(r'^view/system/test/$', 'views.system_overview', name="system_overview_url", kwargs={ "test" : "true" }),
-    url(r'^test/post/xy_query/dispatched_tasks/$', 'test_views.get_dispatched_tasks_data', name='get_dispatched_tasks_url'),
-)
-
 urlpatterns += patterns('celerymanagementapp',
     (r'^get/throughputs/$', 'views.get_throughput_data'),
     (r'^get/throughputs/(?P<taskname>[-\w\d_.]+)/$', 'views.get_throughput_data'),
@@ -86,6 +74,27 @@ urlpatterns += patterns('celerymanagementapp',
     (r'^get/dispatched_tasks/$', 'views.get_dispatched_tasks'),
     (r'^get/dispatched_tasks/(?P<taskname>[-\w\d_.]+)/$', 'views.get_dispatched_tasks'),   
 )
+
+urlpatterns += patterns('celerymanagementapp.views',
+    url(r'^view/system/$', 'system_overview', name="system_overview_url"),
+    url(r'^view/task/(?P<taskname>[-\w\d_.]+)/$', 'task_view', name="task_view_url"),
+    url(r'^view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url"),
+    url(r'^view/dashboard/$', 'dashboard', name="dashboard_url"),
+    url(r'^view/configure/$', 'configure', name="test_configure_url"),
+)
+
+if settings.DEBUG:
+    urlpatterns += patterns('celerymanagementapp.test_views',
+        #url(r'^view/system/$', 'views.system_overview', name="system_overview_url"),
+        #url(r'^view/system/test/$', 'views.system_overview', name="system_overview_url", kwargs={ "test" : "true" }),
+        url(r'^test/view/system/$', 'system_overview', name="test_system_overview_url"),
+        url(r'^test/view/dashboard/$', 'dashboard', name="test_dashboard_url"),
+        url(r'^test/view/configure/$', 'configure', name="test_configure_url"),
+        url(r'^test/view/task/(?P<taskname>[-\w\d_.]+)/$', 'task_view', name="task_view_url"),
+        url(r'^test/view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url"),
+        url(r'^test/post/worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'kill_worker', name="test_kill_worker_url"),
+        url(r'^test/post/xy_query/dispatched_tasks/$', 'get_dispatched_tasks_data', name='test_get_dispatched_tasks_url'),
+    )
 
 if settings.DEBUG:
     urlpatterns += patterns('',

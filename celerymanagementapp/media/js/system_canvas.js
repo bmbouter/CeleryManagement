@@ -4,8 +4,7 @@ var systemViewer;
 
 $(document).ready(function() {
     
-    $('#systemCanvas')[0].width = $(window).width() - $('#navigation').css("width").split("px")[0];
-
+    $('#systemCanvas')[0].width = $(window).width() - $('.grid_2').css("width").split("px")[0];
     systemViewer = new SystemViewer();
     systemViewer.init();
      
@@ -13,10 +12,17 @@ $(document).ready(function() {
 
 function refresh(){
     systemViewer.refresh();
+    $('#statusText').text("Refreshing view...");
+    $('#statusText').fadeOut("slow", function() {});
+    $('#statusText').show();
+    $('#statusText').fadeIn("slow", function() {});
+    $('#statusText').fadeOut("slow", function() {});
+    $('#statusText').fadeIn("slow", function() {});
+    $('#statusText').fadeOut("slow", function() {});
+    $('#statusText').fadeIn("slow", function() {});
+    $('#statusText').fadeOut(2000, function() {});
+    console.log("refreshed");
 }
-
-//setInterval(refresh, 10000);
-
 
 function Task(y, name){
     this.x = 200;
@@ -30,7 +36,7 @@ function Task(y, name){
     this.pending = 0;
     
     if( name.length > 30 ){
-        this.displayName = name.substring(0, 27) + "...";
+        this.displayName = "..." +  name.substring(name.length-29, name.length);
     } else {
         this.displayName = name;
     }
@@ -68,14 +74,14 @@ function Worker(y, name, active){
     }
 }
 
-function Connector(task, worker, text){
+function Connector(task, worker, numTasks){
     this.task = task;
     this.worker = worker;
     this.x1 = task.xCenter + (task.width / 2);
     this.y1 = task.yCenter;
     this.x2 = worker.xCenter - (worker.width / 2);
     this.y2 = worker.yCenter;
-    this.text = text;
+    this.numTasks = numTasks;
     this.xCenter = (this.x2 - ((this.x2 - this.x1) / 2));
     this.yCenter = (this.y2 - ((this.y2 - this.y1) / 2));
     
@@ -85,23 +91,27 @@ function Connector(task, worker, text){
 }
 
 function SystemViewer(){
-    var tasks = [];
-    var workers = [];
+    var tasks = {};
+    var workers = {};
     var connectors = [];
     var expandedTask = false;
     var expandedWorker = false;
     var tasksSet = false;
     var workersSet = false;
+    var canvasHeight = 0;
     var systemRenderer;
     var systemEventHandler;
     var yOffset = $('#header').css("height").split("px")[0];
-    var xOffset = $('#navigation').css("width").split("px")[0];
+    var xOffset = $('.grid_2').css("width").split("px")[0];
     var clickedEntity = false;
+    var connectorWeight = 0;
+
+    function connectorWeightingFunction(size){
+        return (size / connectorWeight + 0.30) * 4;
+    }
 
     $('#systemCanvas').bind("contextmenu", function(e){
-        var xMousePos = e.pageX - xOffset;
-        var yMousePos = e.pageY - yOffset;
-        var entity = getEntity(xMousePos, yMousePos);
+        var entity = getEntity(e.pageX, e.pageY);
         clickedEntity = entity;
 
         if( typeof entity != "undefined"  && entity.constructor.name == "Worker" ){
@@ -115,15 +125,21 @@ function SystemViewer(){
 
     $('#deactivateWorker').click(function (){
         if( typeof clickedEntity != "undefined"  && clickedEntity.constructor.name == "Worker" ){
-            CMACore.postShutdownWorker(clickedEntity.fullName, this.shutdownWorker);
+            CMACore.postShutdownWorker(clickedEntity.fullName, shutdownWorker);
+            console.log("deactivate clicked");
             clickedEntity = false;
         }
     });
 
-    this.shutdownWorker = function(data){
-        console.log(data);
-        if( data == "success" ){
-            console.log("worker shutdown");
+    function shutdownWorker(data){
+        if( data != "failed" || typeof data != "undefined" ){
+            for( connector in connectors ){
+                if( connectors[connector].worker.fullName == data ){
+                    connectorWeight -= connectors[connector].numTasks;
+                    delete connectors[connector];
+                }
+            }
+            delete workers[data];
             draw();
         }
     }
@@ -141,10 +157,14 @@ function SystemViewer(){
     }
 
     this.createTasks = function(data){
+        tasks = {};
         var y = 40;
         for( item in data ){
-            tasks.push(new Task(y, data[item]));
+            tasks[data[item]] = new Task(y, data[item]);
             y += 60;
+        }
+        if( y > canvasHeight ){
+            canvasHeight = y;
         }
         tasksSet = true;
         if( workersSet ){
@@ -153,10 +173,14 @@ function SystemViewer(){
     }
 
     this.createWorkers = function(data){
+        workers = {};
         var y = 40;
         for ( item in data ){
-            workers.push(new Worker(y, data[item], true));
+            workers[data[item]] = new Worker(y, data[item], true);
             y += 60;
+        }
+        if( y > canvasHeight ){
+            canvasHeight = y;
         }
         workersSet = true;
         if( tasksSet ){
@@ -165,11 +189,14 @@ function SystemViewer(){
     }
     
     function createConnectors(data){
+        connectors = [];
+        connectorWeight = 0;
         for( task in tasks ){
             for( worker in workers ){
-                var num = data[tasks[task].fullName][workers[worker].fullName];
+                var num = data[task][worker];
                 if( num ){
                     connectors.push(new Connector(tasks[task], workers[worker], num));
+                    connectorWeight += num;
                 }
             }
         }
@@ -178,28 +205,24 @@ function SystemViewer(){
     }
     
     function setPendingTasks(data){
-        for( task in tasks ){
-            tasks[task].pending = data[tasks[task].fullName];
+        for( item in data ){
+            tasks[item].pending = data[item];
         }
         draw();
     }
 
     function setWorkerProcesses(data){
-        for( worker in workers ){
-            workers[worker].processes = data[workers[worker].fullName];
+        for( item in data ){
+            workers[item].processes = data[item];
         }
         draw();
     }
 
     function draw(){
-        if( workers.length > tasks.length ){
-            var height = workers.length * 60 + 60;
-        } else {
-            var height = tasks.length * 60 + 60;
-        }
-        systemRenderer = new SystemRenderer(height);
+        systemRenderer = new SystemRenderer(canvasHeight + 60);
+        console.log(connectorWeight);
         for( connector in connectors ){
-            systemRenderer.drawConnector(connectors[connector]);
+            systemRenderer.drawConnector(connectors[connector], connectorWeightingFunction(connectors[connector].numTasks));
         }
         for( task in tasks ){
             systemRenderer.drawTask(tasks[task]);
@@ -209,75 +232,68 @@ function SystemViewer(){
         }
     }
     
-    function handleHover(e){
-        var xMousePos = e.pageX - xOffset;
-        var yMousePos = e.pageY - yOffset;
-        handleTaskHover(xMousePos, yMousePos);
-        handleWorkerHover(xMousePos, yMousePos);
-    }
-
     function handleClick(e){
-        var xMousePos = e.pageX - xOffset;
-        var yMousePos = e.pageY - yOffset;
-        var entity = getEntity(xMousePos, yMousePos);
-        if( entity != undefined ){
-            console.log(entity.fullName);
+        var entity = getEntity(e.pageX, e.pageY);
+        if( typeof entity != "undefined" && entity.constructor.name == "Task" ){
             window.location = CMACore.task_url + entity.fullName + "/";
+        } else if( typeof entity != "undefined" && entity.constructor.name == "Worker" ){
+            window.location = CMACore.worker_url + entity.fullName + "/";
+        }
+    }
+ 
+    function handleHover(e){
+        var entity = getEntity(e.pageX, e.pageY);
+        if( typeof entity != "undefined" && entity.constructor.name == "Task" ){
+            handleTaskHover(entity);
+        } else if( typeof entity != "undefined" && entity.constructor.name == "Worker" ){
+            handleWorkerHover(entity);
+        } else {
+            unexpandEntity();
         }
     }
 
-    function handleTaskHover(xMousePos, yMousePos){
+    function handleTaskHover(task){
         if( !expandedTask ){
-            for( item in tasks ){
-                if( xMousePos < (tasks[item].x + tasks[item].width) && xMousePos > tasks[item].x ){
-                    if( yMousePos < (tasks[item].y + tasks[item].height) && yMousePos > tasks[item].y ){
-                        showTaskConnectors(tasks[item]);
-                        expandTask(tasks[item], true);
-                        $('#systemCanvas').css("cursor", "pointer");
-                        $('#systemCanvas').css("cursor", "hand");
-                    }
-                }
-            }
-        } else {
-            if( !((xMousePos < (expandedTask.x + expandedTask.width)) && (xMousePos > expandedTask.x)) 
-                || !((yMousePos < (expandedTask.y + expandedTask.height)) && (yMousePos > expandedTask.y)) ){
-                
-                    expandTask(expandedTask, false);
-                    $('#systemCanvas').css("cursor", "auto");
-            }
+            showTaskConnectors(task);
+            expandTask(task, true);
+            $('#systemCanvas').css("cursor", "pointer");
+            $('#systemCanvas').css("cursor", "hand");
         }
     }
 
-    function handleWorkerHover(xMousePos, yMousePos){
+    function handleWorkerHover(worker){
         if( !expandedWorker ){
-            for( item in workers ){
-                if( xMousePos < (workers[item].x + workers[item].width) && xMousePos > workers[item].x ){
-                    if( yMousePos < (workers[item].y + workers[item].height) && yMousePos > workers[item].y ){
-                        showWorkerConnectors(workers[item]);
-                        expandWorker(workers[item], true);
-                    }
-                }
-            }
-        } else {
-            if( !((xMousePos < (expandedWorker.x + expandedWorker.width)) && (xMousePos > expandedWorker.x)) 
-                || !((yMousePos < (expandedWorker.y + expandedWorker.height)) && (yMousePos > expandedWorker.y)) ){
-                expandWorker(expandedWorker, false);
-            }
+            showWorkerConnectors(worker);
+            expandWorker(worker, true);
+            $('#systemCanvas').css("cursor", "pointer");
+            $('#systemCanvas').css("cursor", "hand");
         }
     }
 
-    function getEntity(xMousePos, yMousePos){
-        for( item in tasks ){
-            if( xMousePos < (tasks[item].x + tasks[item].width) && xMousePos > tasks[item].x ){
-                if( yMousePos < (tasks[item].y + tasks[item].height) && yMousePos > tasks[item].y ){
-                    return tasks[item];
+    function unexpandEntity(){
+        if( expandedTask ){
+            expandTask(expandedTask, false);   
+            $('#systemCanvas').css("cursor", "auto");
+        } else if( expandedWorker ){
+            expandWorker(expandedWorker, false);   
+            $('#systemCanvas').css("cursor", "auto");
+        }
+    }
+
+    function getEntity(xPos, yPos){
+        var xMousePos = xPos - xOffset;
+        var yMousePos = yPos - yOffset;
+        for( task in tasks ){
+            if( xMousePos < (tasks[task].x + tasks[task].width) && xMousePos > tasks[task].x ){
+                if( yMousePos < (tasks[task].y + tasks[task].height) && yMousePos > tasks[task].y ){
+                    return tasks[task];
                 }
             }
         }
-        for( item in workers ){
-            if( xMousePos < (workers[item].x + workers[item].width) && xMousePos > workers[item].x ){
-                if( yMousePos < (workers[item].y + workers[item].height) && yMousePos > workers[item].y ){
-                    return workers[item];
+        for( worker in workers ){
+            if( xMousePos < (workers[worker].x + workers[worker].width) && xMousePos > workers[worker].x ){
+                if( yMousePos < (workers[worker].y + workers[worker].height) && yMousePos > workers[worker].y ){
+                    return workers[worker];
                 }
             }
         }
@@ -326,30 +342,18 @@ function SystemViewer(){
     }
 
     function showTaskConnectors(task){
-        var active_connectors = [];
         for( connector in connectors ){
             if( connectors[connector].task.fullName == task.fullName ){
-                active_connectors.push(connectors[connector]);
-            } else {
-                systemRenderer.dimConnector(connectors[connector]);
+                systemRenderer.highlightConnector(connectors[connector], connectorWeightingFunction(connectors[connector].numTasks));
             }
-        }
-        for( connector in active_connectors ){
-            systemRenderer.highlightConnector(active_connectors[connector]);
         }
     }
     
     function showWorkerConnectors(worker){
-        var active_connectors = [];
         for( connector in connectors ){
             if( connectors[connector].worker.fullName == worker.fullName ){
-                active_connectors.push(connectors[connector]);
-            } else {
-                systemRenderer.dimConnector(connectors[connector]);
+                systemRenderer.highlightConnector(connectors[connector], connectorWeightingFunction(connectors[connector].numTasks));
             }
-        }
-        for( connector in active_connectors ){
-            systemRenderer.highlightConnector(active_connectors[connector]);
         }
     }
 }
@@ -396,8 +400,8 @@ function SystemRenderer(height){
         context.fillText("Worker Processes: " + worker.processes, worker.x + 5, worker.y + 12 + 15);
     }
     
-    this.drawConnector = function(connector){
-        context.lineWidth = 1;
+    this.drawConnector = function(connector, weight){
+        context.lineWidth = weight;
         context.beginPath();
         context.moveTo(connector.x1, connector.y1);
         context.lineTo(connector.x2, connector.y2);
@@ -406,9 +410,9 @@ function SystemRenderer(height){
         context.stroke();
     }
 
-    this.highlightConnector = function(connector){
+    this.highlightConnector = function(connector, weight){
         context.lineCap = "butt";
-        context.lineWidth = 3;
+        context.lineWidth = weight;
         context.beginPath();
         context.moveTo(connector.x1, connector.y1);
         context.lineTo(connector.x2, connector.y2);
@@ -419,7 +423,7 @@ function SystemRenderer(height){
         context.textAlign = "left";
         context.font = "15px sans-serif";
         context.fillStyle = "black";
-        context.fillText(connector.text, connector.xCenter+10, connector.yCenter+1);
+        context.fillText(connector.numTasks, connector.xCenter+10, connector.yCenter+1);
     }
 
     this.dimConnector = function(connector){
@@ -444,7 +448,7 @@ function SystemRenderer(height){
     }
     
     this.clearCanvas = function(){
-        $('#systemCanvas')[0].width = $(window).width() - $('#navigation').css("width").split("px")[0];
+        $('#systemCanvas')[0].width = $(window).width() - $('.grid_2').css("width").split("px")[0];
         canvas.height = height;
         context.clearRect(0, 0, canvas.width, canvas.height);
     }
