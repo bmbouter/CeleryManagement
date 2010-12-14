@@ -82,6 +82,16 @@ class RegisteredTaskType(models.Model):
         
     def __unicode__(self):
         return u'{0} --- {1}'.format(self.name, self.worker)
+        
+        
+class TaskDemoGroup(models.Model):
+    uuid =              models.CharField(max_length=32)
+    elapsed =           models.FloatField(default=-1.0)
+    tasks_sent =        models.IntegerField(default=-1)
+    completed =         models.BooleanField(default=False)
+    errors_on_send =    models.IntegerField(default=0)
+    errors_on_result =  models.IntegerField(default=-1)
+    started =           models.DateTimeField(auto_now_add=True)
                
     
 

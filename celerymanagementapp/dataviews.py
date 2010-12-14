@@ -5,8 +5,16 @@
 import json
 import itertools
 import socket
+import uuid
+import tempfile
+import os
+import subprocess
 
 from django.http import HttpResponse
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse as urlreverse
 
 from celery import signals
 from celery.task.control import broadcast, inspect
@@ -132,6 +140,17 @@ signals.worker_shutdown.connect(
 def get_defined_tasks():
     """Get a list of the currently defined tasks."""
     return _taskname_cache.names
+    
+def get_defined_tasks_live():
+    """ Get the list of defined tasks as reported by Celery right now. """
+    i = inspect()
+    workers = i.registered_tasks()
+    defined = []
+    if workers:
+        defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
+        defined = list(defined)
+        defined.sort()
+    return defined
     
 def get_workers_from_database():
     """Get a list of all workers that exist (running or not) in the database."""
@@ -288,6 +307,149 @@ def worker_info_dataview(request, name=None):
         workers = WorkerState.objects.all()
     d = dict((unicode(w), {'is_alive': w.is_alive()}) for w in workers)
     return _json_response(d)
+    
+
+def validate_task_demo_request(json_request):
+    # return (is_valid, msg)
+    name = json_request.get('name', None)
+    rate = json_request.get('rate', None)
+    runfor = json_request.get('runfor', None)
+    if not name or not rate or not runfor:
+        return False, "The keys: 'name', 'rate', and 'runfor' are all required."
+    if not isinstance(rate, (int,float)) or not isinstance(runfor, (int,float)):
+        return False, "The keys: 'rate' and 'runfor' must be integers or floats."
+    
+    kwargs = json_request.get('kwargs', {})
+    args = json_request.get('args', [])
+    options = json_request.get('options', {})
+    
+    if not isinstance(kwargs, dict):
+        return False, "The key: 'kwargs', if present, must be a dictionary."
+    if not isinstance(args, list):
+        return False, "The key: 'args', if present, must be a list."
+    if not isinstance(options, dict):
+        return False, "The key: 'options', if present, must be a dictionary."
+    
+    defined = get_defined_tasks_live()
+    if name not in defined:
+        return False, "There is no task by the name: '{0}'.".format(name)
+    
+    return True, ""
+    
+
+
+def task_demo_dataview(request):
+    json_request = _json_from_post(request)
+    
+    dispatchid = None
+    
+    # validate request
+    is_valid, msg = validate_task_demo_request(json_request)
+    if is_valid:
+        # save json to temp file
+        rawjson = request.raw_post_data
+        fd, tmpname = tempfile.mkstemp()
+        os.close(fd)
+        tmp = open(tmpname, 'wb')
+        tmp.write(rawjson)
+        tmp.close()
+        # generate id
+        dispatchid = uuid.uuid4().hex
+        # get Django settings module name
+        settings_module = settings.SETTINGS_MODULE
+        # prepare args
+        args = ['--id={0}'.format(dispatchid), 
+                '--tmpfile={0}'.format(tmpname), 
+                '--settings={0}'.format(settings_module),
+                '--pythonpath=.']
+        # launch dispatcher
+        subprocess.Popen(['django-admin.py','cmtaskdemo']+args)
+        
+    # prepare response
+    response = {
+        'uuid': dispatchid,
+        'error': not is_valid,
+        'msg': msg,
+        }
+    
+    return _json_response(response)
+    
+def task_demo_status_dataview(request, uuid=None):
+    # default values
+    response = {
+        'completed': False,
+        'elapsed': -1.0,
+        'tasks_sent': -1,
+        'errors_on_send': -1,
+        'errors_on_result': -1,
+        'uuid_not_found': True,
+        }
+    try:
+        # get object from db
+        obj = Model.objects.get(uuid=uuid)
+        response = {
+            'completed': obj.completed,
+            'elapsed': obj.elapsed,
+            'tasks_sent': obj.tasks_sent,
+            'errors_on_send': obj.errors_on_send,
+            'errors_on_result': obj.errors_on_result,
+            'uuid_not_found': False,
+            }
+    except ObjectDoesNotExist:
+        pass
+    return _json_response(response)
+    
+@login_required
+def task_demo_test_dataview(request):
+    from django.template import Template
+    from django.template import RequestContext
+    
+    name = 'celerymanagementapp.testutil.tasks.simple_test'
+    rate = 0.5
+    runfor = 10.0
+    
+    send = urlreverse('celerymanagementapp.dataviews.task_demo_dataview')
+    
+    html = """\
+    <html>
+    <head>
+    <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/jquery.js" ></script>
+    <script>
+    
+    function json() {{
+    var query = '{{"name": "{name}", "rate":{rate}, "runfor":{runfor} }}';
+    
+    $.post(
+        '{send}',
+        query,
+        function(data) {{
+            //alert("Data loaded: " + data);
+            //alert(data.data);
+            //alert(data.data[0]);
+        }},
+        'json'
+    );
+    }}
+    
+    </script>
+    </head>
+    <body>
+    <table>
+      <tr><td>
+        <form action="{send}" method="POST">
+        {{% csrf_token %}}
+        <input type="button" value="Send" onclick="json();"/>
+        </form>
+      </td></tr>
+    </table>
+    </body>
+    </html>
+    """
+    html = html.format(send=send, name=name, rate=rate, runfor=runfor)
+    t = Template(html)
+    c = RequestContext(request)
+    return HttpResponse(t.render(c))
+
 
 #==============================================================================#
 
