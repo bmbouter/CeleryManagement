@@ -15,8 +15,7 @@ from djcelery.models import WorkerState
 from celerymanagementapp.jsonquery.filter import JsonFilter
 from celerymanagementapp.jsonquery.xyquery import JsonXYQuery
 from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
-from celerymanagementapp.models import OutOfBandWorkerNode 
-from celerymanagementapp.models import RegisteredTaskType
+from celerymanagementapp.models import OutOfBandWorkerNode, RegisteredTaskType
 
 #==============================================================================#
 def _json_from_post(request, allow_empty=False):
