@@ -9,6 +9,8 @@
 @header_height: 70px;
 @statusUpdate_height: 50px;
 
+@navigation_width: 175px;
+
 .rounded_borders(@radius: 5px) {
     -moz-border-radius: @radius;
     -webkit-border-radius: @radius;
@@ -81,13 +83,17 @@ body {
 #contentContainer {
     min-height: 400px;
     
+    #dummy { 
+        width: @navigation_width + 10px;
+    }
+    
     #navigation {
         background: @navigation_background;
         float: left;
         margin: 2px 0px 0px 0px;
         border-right: 1px solid #873D00;
         -webkit-box-shadow: 1px 0px 4px #000;
-        width: 175px;
+        width: @navigation_width;
 
         li {
             margin: 10px 0 10px 10px;

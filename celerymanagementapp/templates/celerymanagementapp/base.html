@@ -57,24 +57,26 @@
             {% endblock header %}
             </div>
             <div id="contentContainer">
-                <div id="navigation">
-                    <ul>
-                        {% if load_test_data %}
-                        <li><a href="/celerymanagementapp/test/view/dashboard/">Dashboard</a></li>
-                        <li><a href="/celerymanagementapp/test/view/system/">Realtime View</a></li>
-                        <li><a href="/celerymanagementapp/test/view/configure/">Configuration</a></li>
-                        {% else %}
-                        <li><a href="/celerymanagementapp/view/dashboard/">Dashboard</a></li>
-                        <li><a href="/celerymanagementapp/view/system/">Realtime View</a></li>
-                        <li><a href="/celerymanagementapp/view/configure/">Configuration</a></li>
-                        {% endif %}
-                        <li><a id="taskNavigationMaster">+ Tasks</a></li>
-                        <ul id="taskNavigation">
+                <div id="dummy">
+                    <div id="navigation">
+                        <ul>
+                            {% if load_test_data %}
+                            <li><a href="/celerymanagementapp/test/view/dashboard/">Dashboard</a></li>
+                            <li><a href="/celerymanagementapp/test/view/system/">Realtime View</a></li>
+                            <li><a href="/celerymanagementapp/test/view/configure/">Configuration</a></li>
+                            {% else %}
+                            <li><a href="/celerymanagementapp/view/dashboard/">Dashboard</a></li>
+                            <li><a href="/celerymanagementapp/view/system/">Realtime View</a></li>
+                            <li><a href="/celerymanagementapp/view/configure/">Configuration</a></li>
+                            {% endif %}
+                            <li><a id="taskNavigationMaster">+ Tasks</a></li>
+                            <ul id="taskNavigation">
+                            </ul>
+                            <li><a id="workerNavigationMaster">+ Workers</a></li>
+                            <ul id="workerNavigation">
+                            </ul>
                         </ul>
-                        <li><a id="workerNavigationMaster">+ Workers</a></li>
-                        <ul id="workerNavigation">
-                        </ul>
-                    </ul>
+                    </div>
                 </div>
                 <div id="content">
                     {% block content %}
