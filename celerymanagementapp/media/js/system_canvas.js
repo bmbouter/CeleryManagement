@@ -237,6 +237,7 @@ function SystemViewer(){
 
     function draw(){
         systemRenderer = new SystemRenderer(canvasHeight + 60);
+        $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
         console.log(connectorWeight);
         for( connector in connectors ){
             systemRenderer.drawConnector(connectors[connector], connectorWeightingFunction(connectors[connector].numTasks));
