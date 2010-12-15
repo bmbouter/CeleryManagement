@@ -69,78 +69,14 @@ def _resolve_name(name):
     if not name or name.lower() == 'all':
         name = None
     return name
-        
-
-# Store the list of defined tasks for easy retrieval.  It is updated when a 
-# worker starts and when a worker stops.  
-
-class TasknameCache(object):
-    """ Cache the list of task names.  The names are also stored in the 
-        database.
-    """
-    RegisteredTaskType = RegisteredTaskType
-    def __init__(self):
-        self._taskname_cache = []
-        self._worker_status_changed = True
-        
-    def _getnames(self):
-        """ Retieve the currently cached list of task names.  If a worker has 
-            been started or stopped since the last time this was called, the 
-            cache will be refreshed. 
-        """
-        if self._worker_status_changed:
-            self._worker_status_changed = False
-            self._update_database()
-            self._taskname_cache = self._get_names_from_database()
-        return self._taskname_cache
-    
-    names = property(_getnames)
-    
-    def _update_database(self):
-        """ Update the RegisteredTaskType model with data from the currently 
-            running Celery workers. 
-        """
-        i = inspect()
-        workers = i.registered_tasks()
-        if workers:
-            for workername, tasks in workers.iteritems():
-                self.RegisteredTaskType.clear_tasks(workername)
-                for taskname in tasks:
-                    self.RegisteredTaskType.add_task(taskname, workername)
-                    
-    def _get_names_from_database(self):
-        """ Retrieve the list of task names from the RegisteredTaskType model. 
-        """
-        qs = self.RegisteredTaskType.objects.all()
-        names = list(set(x.name for x in qs))
-        names.sort()
-        return names
-    
-    def _on_celery_worker_ready(self):
-        """Celery signal handler."""
-        self._worker_status_changed = True
-        
-    def _on_celery_worker_stopping(self):
-        """Celery signal handler."""
-        self._worker_status_changed = True
-    
-    
-_taskname_cache = TasknameCache()
-
-# Register Celery signal handlers.  This keeps the TasknameCache up-to-date.
-signals.worker_ready.connect(
-                _taskname_cache._on_celery_worker_ready, 
-                dispatch_uid='celerymanagementapp.dataviews.on_worker_ready'
-                )
-signals.worker_shutdown.connect(
-                _taskname_cache._on_celery_worker_stopping, 
-                dispatch_uid='celerymanagementapp.dataviews.on_worker_stopping'
-                )
 
     
 def get_defined_tasks():
     """Get a list of the currently defined tasks."""
-    return _taskname_cache.names
+    qs = RegisteredTaskType.objects.all()
+    names = list(set(obj.name for obj in qs))
+    names.sort()
+    return names
     
 def get_defined_tasks_live():
     """ Get the list of defined tasks as reported by Celery right now. """
@@ -358,36 +294,47 @@ def task_demo_dataview(request):
     
         The request must include the Json request as POST data.
     """
-    json_request = _json_from_post(request)
-    
-    dispatchid = None
-    
-    # validate request
-    is_valid, msg = validate_task_demo_request(json_request)
-    if is_valid:
-        # save json to temp file
-        rawjson = request.raw_post_data
-        fd, tmpname = tempfile.mkstemp()
-        os.close(fd)
-        tmp = open(tmpname, 'wb')
-        tmp.write(rawjson)
-        tmp.close()
-        # generate id
-        dispatchid = uuid.uuid4().hex
-        ##print 'Launching dispatcher task...'
-        tasks.launch_demotasks.apply_async(args=[dispatchid, tmpname])
-        ##print 'Dispatcher task launched.'
+    if request.method != 'POST':
+        response = {
+            'uuid': None,
+            'error': True,
+            'msg': "Http Request must use the POST method.",
+            }
+        return _json_response(response)
+    else:
+        json_request = _json_from_post(request)
         
-    # prepare response
-    response = {
-        'uuid': dispatchid,
-        'error': not is_valid,
-        'msg': msg,
-        }
-    
-    return _json_response(response)
+        dispatchid = None
+        
+        # validate request
+        is_valid, msg = validate_task_demo_request(json_request)
+        if is_valid:
+            # save json to temp file
+            rawjson = request.raw_post_data
+            fd, tmpname = tempfile.mkstemp()
+            os.close(fd)
+            tmp = open(tmpname, 'wb')
+            tmp.write(rawjson)
+            tmp.close()
+            # generate id
+            dispatchid = uuid.uuid4().hex
+            ##print 'Launching dispatcher task...'
+            tasks.launch_demotasks.apply_async(args=[dispatchid, tmpname])
+            ##print 'Dispatcher task launched.'
+            
+        # prepare response
+        response = {
+            'uuid': dispatchid,
+            'error': not is_valid,
+            'msg': msg,
+            }
+        
+        return _json_response(response)
     
 def task_demo_status_dataview(request, uuid=None):
+    """ Retrieve the status of the task demo with the given uuid.  The status 
+        is returned as Json data. 
+    """
     # default values
     response = {
         'name': '<invalid>',
