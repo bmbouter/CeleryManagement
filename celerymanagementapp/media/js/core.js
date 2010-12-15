@@ -15,22 +15,6 @@ $(document).ready(function() {
     $('textarea').css("resize", "none");
 
 
-    if( $(window).height() > $('#container').css("min-height").split("px")[0] ){
-        $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
-    } else {
-        $('#navigation').css("height", $('#container').css("min-height"));
-    }
-    $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 10) + "px");
-
-    $(window).resize(function() {
-        $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 10) + "px");
-        if( $(window).height() > $('#container').css("min-height").split("px")[0] ){
-            $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
-        } else {
-            $('#navigation').css("height", $('#container').css("min-height"));
-        }
-    });
-    
     $('#taskNavigationMaster').click(function (){
         if( CMACore.expandedTasks ){
             $('#taskNavigationMaster').text("+ Tasks");
@@ -90,7 +74,22 @@ $(document).ready(function() {
         );
     });
 
-	/*int length = obj.length;*/
+    $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 10) + "px");
+    if( $(window).height() > $('#container').css("min-height").split("px")[0] ){
+        $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
+    } else {
+        $('#navigation').css("height", $('#container').css("min-height"));
+    }
+
+    $(window).resize(function() {
+        $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 10) + "px");
+        if( $(window).height() > $('#container').css("min-height").split("px")[0] ){
+            $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
+        } else {
+            $('#navigation').css("height", $('#container').css("min-height"));
+        }
+    });
+    
 });
 
 function createTable(data) {
