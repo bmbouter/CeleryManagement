@@ -26,7 +26,8 @@ def dashboard(request):
 def configure(request):
     out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
     return render_to_response('celerymanagementapp/configure.html',
-            {'outofbandworkernode_form': out_of_band_worker_node_form},
+            {'outofbandworkernode_form': out_of_band_worker_node_form,
+            "load_test_data" : "true" },
             context_instance=RequestContext(request))
 
 def task_view(request, taskname=None):

@@ -99,9 +99,9 @@ function populateWorkerNavigation(data){
         }
         if( data[item].length > 15 ){
             var worker_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-            $('#workerNavigation').append("<li><a  style='color: " + color  + ";' id='" + data[item] + "' href='" + CMACore.worker_url + data[item] + "/'>" + worker_text + "</a></li>");
+            $('#workerNavigation').append("<li><a  title='" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMACore.worker_url + data[item] + "/'>" + worker_text + "</a></li>");
         } else {
-            $('#workerNavigation').append("<li><a  style='color: " + color  + ";' id='" + data[item] + "' href='" + CMACore.worker_url + data[item] + "/'>" + data[item] + "</a></li>");
+            $('#workerNavigation').append("<li><a title='" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMACore.worker_url + data[item] + "/'>" + data[item] + "</a></li>");
         }
     }
 }

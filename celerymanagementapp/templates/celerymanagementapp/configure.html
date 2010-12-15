@@ -2,6 +2,7 @@
 
 {% block content %}
 <div id="configurationManagement">
+    {% if CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static" %}
     <div id="OutofBand">
         <div class="header">
             Out of Band
@@ -19,6 +20,7 @@
         </form>
         <button id="submitOutOfBandButton" class="button">Submit</button>
     </div>
+    {% endif %}
 </div>
 
 {% endblock content %}

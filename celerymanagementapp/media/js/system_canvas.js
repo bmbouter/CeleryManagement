@@ -8,9 +8,8 @@ $(document).ready(function() {
     systemViewer = new SystemViewer();
     systemViewer.init();
      
-    $(window).resize(function() {
+    $(window).resize(function(e) {
         $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
-        console.log($('#systemCanvas')[0].width);
         systemViewer.redraw();
     });
     
