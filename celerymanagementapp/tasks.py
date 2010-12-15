@@ -4,6 +4,7 @@ import os
 from celery.decorators import task
 
 from celerymanagementapp.taskcontrol import demo_dispatch
+from celerymanagementapp import jsonutil
 
 @task(ignore_result=True)
 def launch_demotasks(dispatchid, tmpfilename):
@@ -22,7 +23,7 @@ def launch_demotasks(dispatchid, tmpfilename):
     f.close()
     os.remove(tmpfilename)
     
-    jsondata = json.loads(rawjson)
+    jsondata = jsonutil.loads(rawjson)
     
     taskname = jsondata['name']
     args = jsondata.get('args', [])

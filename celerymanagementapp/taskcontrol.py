@@ -11,6 +11,8 @@ from celery.exceptions import TimeoutError
 from celerymanagementapp.models import TaskDemoGroup
 
 #==============================================================================#
+DELETE_TASKDEMOGROUPS_AFTER = 1  # days
+
 def clear_results(results):
     """ Clear the results from the given iterable. Returns the number of 
         exceptions found.
@@ -23,7 +25,8 @@ def clear_results(results):
         try:
             r.get(timeout=1.0)
         except TimeoutError:
-            # AsyncReply.get() will timeout if the Task was defined with ignore_result=True
+            # AsyncReply.get() will timeout if the Task was defined with 
+            # ignore_result=True
             pass
         except Exception:
             errors += 1
@@ -39,23 +42,31 @@ def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, kwargs=No
     args = args or []
     kwargs = kwargs or {}
     
+    # Do not ignore results unless we are sure the task does not produce any.
+    task_ignores_results = False
+    
     # Try to get the Task class.  The class is required if we're to record 
     # 'sent' times.
     try:
         taskcls = registry.tasks[taskname]
         send_task = taskcls.apply_async
+        task_ignores_results = taskcls.ignore_result
     except registry.tasks.NotRegistered:
         print 'Unable to retrieve task class.  Using app.send_task method instead.'
         send_task = app_or_default().send_task
         send_task = functools.partial(send_task, taskname)
     
-    obj = TaskDemoGroup(uuid=id, completed=False, errors_on_send=0)
+    obj = TaskDemoGroup(uuid=id, name=taskname, completed=False, 
+                        errors_on_send=0, timestamp=datetime.datetime.now(),
+                        requested_rate=rate, requested_runfor=runfor)
     obj.save()
     
     commit_every = 25
     count = 0
     errors_on_send = 0
+    errors_on_result = 0
     results = []
+    sleep_fudge_factor = 0.1
     #publisher = 
     ##lambd = 1./rate
     start = time.time()  # minimize the code between this and the loop below
@@ -86,8 +97,11 @@ def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, kwargs=No
             obj.save()
         
         next_dispatch += random.expovariate(rate)
-        if next_dispatch > endtime:
-            break
+        next_dispatch = min(endtime, next_dispatch)
+        
+        sleep_time = next_dispatch - (time.time()+sleep_fudge_factor)
+        if sleep_time > 0.:
+            time.sleep(sleep_time)
         
         while time.time() < next_dispatch:
             # wait for next launch
@@ -97,16 +111,22 @@ def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, kwargs=No
     total_time = time.time() - start
     obj.elapsed = total_time
     obj.tasks_sent = count
+    obj.timestamp = datetime.datetime.now()
     obj.save()
     
     ##print 'celerymanagement.demo_dispatch::  saved model'
-    # clear results:
-    print 'celerymanagement.demo_dispatch::  clearing results (this may take a while).'
-    errors_on_result = clear_results(results)
+    # We must clear the results.  If a task produces results, those results 
+    # stick around in the system until they're read.
+    if not task_ignores_results:
+        msg = 'celerymanagement.demo_dispatch::  '
+        msg += 'clearing results (this may take a while).'
+        print msg
+        errors_on_result = clear_results(results)
             
     ##print 'celerymanagement.demo_dispatch::  cleared results'
     obj.errors_on_result = errors_on_result
     obj.completed = True
+    obj.timestamp = datetime.datetime.now()
     obj.save()
     
     print 'celerymanagement.demo_dispatch:: results:'
@@ -119,6 +139,9 @@ def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, kwargs=No
     print '  errors_on_result:  {0}'.format(errors_on_result)
     print '  errors_on_send:    {0}'.format(errors_on_send)
     
-    # TODO: clear old records?
+    # clear old records
+    keepdays = datetime.timedelta(days=DELETE_TASKDEMOGROUPS_AFTER)
+    maxdate = datetime.datetime.now() - keepdays
+    TaskDemoGroup.objects.filter(timestamp__lt=maxdate).delete()
     
 #==============================================================================#
