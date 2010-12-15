@@ -139,13 +139,20 @@ class RegisteredTaskType(models.Model):
         
         
 class TaskDemoGroup(models.Model):
-    uuid =              models.CharField(max_length=32)
+    uuid =              models.CharField(max_length=32, db_index=True, unique=True)
+    name =              models.CharField(max_length=200)
     elapsed =           models.FloatField(default=-1.0)
     tasks_sent =        models.IntegerField(default=-1)
     completed =         models.BooleanField(default=False)
-    errors_on_send =    models.IntegerField(default=0)
+    errors_on_send =    models.IntegerField(default=-1)
     errors_on_result =  models.IntegerField(default=-1)
-    started =           models.DateTimeField(auto_now_add=True)
+    timestamp =         models.DateTimeField()
+    
+    requested_rate =    models.FloatField(default=0.0)
+    requested_runfor =  models.FloatField(default=0.0)
+    requested_args =    models.TextField(default="")
+    requested_kwargs =  models.TextField(default="")
+    requested_options = models.TextField(default="")
                
     
 

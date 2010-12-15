@@ -56,7 +56,7 @@ def task_demo_test_dataview(request):
     
     name = 'celerymanagementapp.testutil.tasks.simple_test'
     rate = 2.0
-    runfor = 10.0
+    runfor = 30.0
     
     send = urlreverse('celerymanagementapp.dataviews.task_demo_dataview')
     

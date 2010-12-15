@@ -2,7 +2,7 @@
     Django view functions that return Json data.
 """
 
-import json
+#import json
 import itertools
 import socket
 import uuid
@@ -24,23 +24,23 @@ from celerymanagementapp.jsonquery.filter import JsonFilter
 from celerymanagementapp.jsonquery.xyquery import JsonXYQuery
 from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 
-from celerymanagementapp import tasks
+from celerymanagementapp import tasks, jsonutil
 from celerymanagementapp.models import OutOfBandWorkerNode, RegisteredTaskType
 from celerymanagementapp.models import TaskDemoGroup
 
 #==============================================================================#
-def _json_from_post(request, allow_empty=False):
+def _json_from_post(request, *args, **kwargs):
     """Return the json content of the given request.  The json must be in the 
        request's POST data."""
     rawjson = request.raw_post_data
-    if allow_empty and not rawjson:
+    if kwargs.pop('allow_empty',False) and not rawjson:
         return None
-    return json.loads(rawjson)
+    return jsonutil.loads(rawjson, *args, **kwargs)
     
-def _json_response(jsondata, **kwargs):
+def _json_response(jsondata, *args, **kwargs):
     """Convert a Python structure (such as dict, list, string, etc) into a json 
        bystream which is then returned as a Django HttpResponse."""
-    rawjson = json.dumps(jsondata, **kwargs)
+    rawjson = jsonutil.dumps(jsondata, *args, **kwargs)
     return HttpResponse(rawjson, content_type='application/json')
     
 def _update_json_request(json_request, **kwargs):
@@ -390,24 +390,38 @@ def task_demo_dataview(request):
 def task_demo_status_dataview(request, uuid=None):
     # default values
     response = {
+        'name': '<invalid>',
+        'status': 'NOTFOUND',
         'completed': False,
         'elapsed': -1.0,
         'tasks_sent': -1,
         'errors_on_send': -1,
         'errors_on_result': -1,
-        'uuid_not_found': True,
+        'orig_request': {}
         }
     try:
         # get object from db
         obj = TaskDemoGroup.objects.get(uuid=uuid)
+        orig_request = {
+            'rate': obj.requested_rate,
+            'runfor': obj.requested_runfor,
+            }
         response = {
+            'name': obj.name,
             'completed': obj.completed,
             'elapsed': obj.elapsed,
             'tasks_sent': obj.tasks_sent,
             'errors_on_send': obj.errors_on_send,
             'errors_on_result': obj.errors_on_result,
-            'uuid_not_found': False,
+            'orig_request': orig_request,
             }
+        status = 'RUNNING'
+        if obj.completed:
+            if obj.errors_on_send or obj.errors_on_result:
+                status = 'ERROR'
+            else:
+                status = 'SUCCESS'
+        response['status'] = status
     except ObjectDoesNotExist:
         pass
     return _json_response(response)

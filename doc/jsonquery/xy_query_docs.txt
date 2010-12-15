@@ -193,43 +193,93 @@ Here is a high-level view of the returned data::
 The y-value will be a dictionary where each entry corresponds to a field in the 
 "aggregate" entry in the original query.  If only one field was aggregated, 
 there will only be one entry.  The entry's value will be another dictionary 
-which contains one entry for each aggregation method used.  But, there is one 
-exception to this rule: if the field was "count", the corresponding value will 
-simply be an integer representing the count.  
+which contains one entry for each aggregation method used.  
 
-Hopefully the following examples will make this clearer (each shows a single 
-x,y data pair).
+Hopefully the following examples will make this clearer--each shows a **single** 
+x,y data pair.
 
     Data containing the count field::
 
-        [ "tasks.mytask", { "count": 10 } ]
+        [ 
+            "tasks.mytask", 
+            [ { "fieldname": "count", 
+                "methods":   [ {"name": "count", "value": 10 } ] 
+              } 
+            ] 
+        ]
         
     Typical single-value x,y data::
 
-        [ "tasks.mytask", { "runtime": { "average": 5.0 } } ]
+        [ 
+            "tasks.mytask", 
+            [ { "fieldname": "runtime", 
+                "methods":   [ { "name": "average", "value": 5.0 } ] 
+              } 
+            ] 
+        ]
         
     The enumerate method has more elaborate results::
 
-        [ "tasks.mytask", { "state": { "enumerate": [["STARTED",1],["RUNNING",1],["SUCCESS",25]] } } ]
+        [ 
+            "tasks.mytask", 
+            [ { "fieldname": "state", 
+                "methods":   [ { "name": "enumerate", "value": [["STARTED",1],["RUNNING",1],["SUCCESS",25]] } ] 
+              } 
+            ] 
+        ]
         
     A multiple field result with count as one of those fields::
 
-        [ "tasks.mytask", { "runtime": { "average": 5.0 }, "count": 188 } ]
+        [ 
+            "tasks.mytask", 
+            [ { "fieldname": "runtime", 
+                "methods":   [ { "name": "average", "value": 5.0 } ] 
+              }, 
+              { "fieldname": "count", 
+                "methods":   [ { "name": "count",   "value": 188 } ] 
+              } 
+            ] 
+        ]
         
-    A multiple field result with two "normal" fields::
+    A multiple field result with two fields::
 
-        [ "tasks.mytask", { "runtime": { "average": 5.0 }, "waittime": { "max": 0.08 } } ]
+        [ 
+            "tasks.mytask", 
+            [ { "fieldname": "runtime", 
+                "methods":   [ { "name": "average", "value": 5.0 } ] 
+              }, 
+              { "fieldname": "waittime", 
+                "methods":   [ { "name": "max",     "value": 0.08 } ] 
+              } 
+            ] 
+        ]
         
     A multiple method result::
 
-        [ "tasks.mytask", { "runtime": { "average": 5.0, "min": 1.9, "max": 18.4 } } ]
+        [ 
+            "tasks.mytask", 
+            [ { "fieldname": "runtime", 
+                "methods": [ { "name": "average", "value": 5.0  }, 
+                             { "name": "min",     "value": 1.9  }, 
+                             { "name": "max",     "value": 18.4 } ] 
+              } 
+            ] 
+        ]
         
     A result showing both multiple fields and multiple methods::
-
-        [ "tasks.mytask", { 
-            "runtime": { "average": 5.0, "min": 1.9, "max": 18.4 }, 
-            "waittime": { "average": 0.05, "min": 0.01, "max": 0.08 } 
-            } 
+    
+        [ "tasks.mytask", 
+            [ { "fieldname": "runtime", 
+                "methods": [ { "name": "average", "value": 5.0 }, 
+                             { "name": "min",     "value": 1.9 }, 
+                             { "name": "max",     "value": 18.4 } ] 
+              }, 
+              { "fieldname": "waittime", 
+                "methods": [ { "name": "average", "value": 0.05 }, 
+                             { "name": "min",     "value": 0.01 }, 
+                             { "name": "max",     "value": 0.08 } ] 
+              } 
+            ]
         ]
         
         
