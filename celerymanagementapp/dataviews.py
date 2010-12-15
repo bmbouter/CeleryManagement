@@ -27,6 +27,7 @@ from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 from celerymanagementapp import tasks, jsonutil
 from celerymanagementapp.models import OutOfBandWorkerNode, RegisteredTaskType
 from celerymanagementapp.models import TaskDemoGroup
+from celerymanagementapp.models import OutOfBandWorkerNodeForm
 
 #==============================================================================#
 def _json_from_post(request, *args, **kwargs):
@@ -215,8 +216,9 @@ def worker_subprocesses_dataview(request, name=None):
 
 def create_outofbandworker(request):
     """Create an OutOfBandWorker"""
-    new_obj = OutOfBandWorkerNode(request.POST)
-    new_obj.save()
+    if request.method == 'POST':
+        new_obj = OutOfBandWorkerNodeForm(request.POST)
+        new_obj.save()
 
 def worker_start(request):
     """Find an available node and start a worker process"""
