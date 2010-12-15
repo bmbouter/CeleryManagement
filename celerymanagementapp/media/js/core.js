@@ -71,6 +71,24 @@ $(document).ready(function() {
             console.log(data)
             });
     });
+    $('.outOfBandForm').hide();
+    $('#createNewOutOfBand').click(function() {
+        $('#blankOutOfBandForm').animate({
+                height: "toggle",
+            },
+            500,
+            function(){}
+        );
+    });
+    $('.workerNode').click(function(){
+        var elem = document.getElementById($(this).attr("id") + "Form");
+        $(elem).animate({
+            height: "toggle",
+            },
+            500,
+            function() {}
+        );
+    });
 
 	/*int length = obj.length;*/
 });

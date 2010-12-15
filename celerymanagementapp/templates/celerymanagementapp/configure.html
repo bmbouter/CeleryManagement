@@ -7,7 +7,17 @@
         <div class="header">
             Out of Band
         </div>
-        <form method="POST" id="outOfBandForm">
+        <div class="workerHeader">
+            IP Address
+            <a id="createNewOutOfBand"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png">New Worker Node</img></a>
+        </div>
+        {% for worker in outofbandworkers %}
+        <div class="workerNode" id="{{ worker.ip }}_workerNode">
+            <h1>
+                {{ worker.ip }}
+            </h1>
+        </div>
+        <form method="POST" class="outOfBandForm" id="{{ worker.ip }}_workerNodeForm">
             {% for field in outofbandworkernode_form %}
             {% csrf_token %}
             <div class="fieldWrapper">
@@ -17,8 +27,21 @@
                 </div>
             </div>
             {% endfor %}
+            <button id="submitOutOfBandButton" class="button">Submit</button>
         </form>
-        <button id="submitOutOfBandButton" class="button">Submit</button>
+        {% endfor %}
+        <form method="POST" class="outOfBandForm" id="blankOutOfBandForm">
+            {% for field in outofbandworkernode_form %}
+            {% csrf_token %}
+            <div class="fieldWrapper">
+                <div class="field">
+                    {{ field.label_tag }} {{ field }}
+                    <label id="{{ field.label }}_error"></label>
+                </div>
+            </div>
+            {% endfor %}
+            <button id="submitOutOfBandButton" class="button">Submit</button>
+        </form>
     </div>
     {% endif %}
 </div>

@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import simplejson
 
 from celerymanagementapp.forms import OutOfBandWorkerNodeForm
+from celerymanagementapp.models import OutOfBandWorkerNode
 
 def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
@@ -20,21 +21,26 @@ def dashboard(request):
 
 def configure(request):
     if request.method == "POST":
-        if request.POST['id_ip']:
+        if "ip" in request.POST:
             return HttpResponse("success")
         else:
             out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
             errors = []
             for field in out_of_band_worker_node_form:
                 errors.append({ 'field' : field.label,
-                                'error' : fields.errors })
+                                'error' : field.errors })
             failed = { 'failure' : errors }
             json = simplejson.dumps(failed)
             return HttpResponse(json)
     else:
         out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
+        OutOfBandWorkers = []
+        for i in range(0,10):
+            worker1 = OutOfBandWorkerNode(ip="4.5.6." + str(i))
+            OutOfBandWorkers.append(worker1);
         return render_to_response('celerymanagementapp/configure.html',
                 {'outofbandworkernode_form': out_of_band_worker_node_form,
+                "outofbandworkers" : OutOfBandWorkers,
                 "load_test_data" : "true" },
                 context_instance=RequestContext(request))
 
@@ -72,7 +78,7 @@ def task_demo_test_dataview(request):
     
     name = 'celerymanagementapp.testutil.tasks.simple_test'
     rate = 2.0
-    runfor = 30.0
+    runfor = 10.0
     
     send = urlreverse('celerymanagementapp.dataviews.task_demo_dataview')
     
