@@ -40,7 +40,7 @@ def configure(request):
             OutOfBandWorkers.append(worker1);
         return render_to_response('celerymanagementapp/configure.html',
                 {'outofbandworkernode_form': out_of_band_worker_node_form,
-                "outofbandworkers" : OutOfBandWorkers,
+                "outofbandworkernodes" : OutOfBandWorkers,
                 "load_test_data" : "true" },
                 context_instance=RequestContext(request))
 

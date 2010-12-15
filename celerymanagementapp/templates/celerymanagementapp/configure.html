@@ -11,7 +11,7 @@
             IP Address
             <a id="createNewOutOfBand"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png">New Worker Node</img></a>
         </div>
-        {% for worker in outofbandworkers %}
+        {% for worker in outofbandworkernodes %}
         <div class="workerNode" id="{{ worker.ip }}_workerNode">
             <h1>
                 {{ worker.ip }}
