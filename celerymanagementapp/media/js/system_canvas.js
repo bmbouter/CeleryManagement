@@ -121,8 +121,8 @@ function SystemViewer(){
 
         if( typeof entity != "undefined"  && entity.constructor.name == "Worker" ){
             $('#workerMenu').css({
-                top: e.pageY + 'px',
-                left: e.pageX + 'px'
+                top: (entity.yCenter) + 'px',
+                left: (entity.xCenter - 125) + 'px'
             }).show();
         }
         return false;
