@@ -4,12 +4,10 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.core.urlresolvers import reverse as urlreverse
 from django.contrib.auth.decorators import login_required
+from django.utils import simplejson
 
-def get_dispatched_tasks_data(request, name=None):
-    if request.method == 'POST':
-        f = open(settings.BASE_DIR + '/celerymanagementapp/media/test_data/chart_data.json', "r")
-
-        return HttpResponse(f)
+from celerymanagementapp.forms import OutOfBandWorkerNodeForm
+from celerymanagementapp.models import OutOfBandWorkerNode
 
 def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
@@ -22,9 +20,29 @@ def dashboard(request):
             context_instance=RequestContext(request))
 
 def configure(request):
-    return render_to_response('celerymanagementapp/configure.html',
-            { "load_test_data" : "true" },
-            context_instance=RequestContext(request))
+    if request.method == "POST":
+        if "ip" in request.POST:
+            return HttpResponse("success")
+        else:
+            out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
+            errors = []
+            for field in out_of_band_worker_node_form:
+                errors.append({ 'field' : field.label,
+                                'error' : field.errors })
+            failed = { 'failure' : errors }
+            json = simplejson.dumps(failed)
+            return HttpResponse(json)
+    else:
+        out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
+        OutOfBandWorkers = []
+        for i in range(0,10):
+            worker1 = OutOfBandWorkerNode(ip="4.5.6." + str(i))
+            OutOfBandWorkers.append(worker1);
+        return render_to_response('celerymanagementapp/configure.html',
+                {'outofbandworkernode_form': out_of_band_worker_node_form,
+                "outofbandworkernodes" : OutOfBandWorkers,
+                "load_test_data" : "true" },
+                context_instance=RequestContext(request))
 
 def task_view(request, taskname=None):
     return render_to_response('celerymanagementapp/task.html',
@@ -44,7 +62,11 @@ def kill_worker(request, name=None):
     else:
         return HttpResponse("failed")
 
+def get_dispatched_tasks_data(request, name=None):
+    if request.method == 'POST':
+        f = open(settings.BASE_DIR + '/celerymanagementapp/media/test_data/chart_data.json', "r")
 
+        return HttpResponse(f)
 
 @login_required
 def task_demo_test_dataview(request):
@@ -56,7 +78,7 @@ def task_demo_test_dataview(request):
     
     name = 'celerymanagementapp.testutil.tasks.simple_test'
     rate = 2.0
-    runfor = 30.0
+    runfor = 10.0
     
     send = urlreverse('celerymanagementapp.dataviews.task_demo_dataview')
     

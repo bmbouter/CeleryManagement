@@ -142,6 +142,11 @@ CELERYMANAGEMENTAPP_MEDIA_PREFIX = "/celerymanagementapp/site_media/"
 # seconds.
 CELERYMANAGEMENTAPP_SYSTEMVIEW_REFRESH_RATE = 0;
 
+# Determines the mode of use you plan to use the application in.
+# The value should be one of: passive, static, or dynamic.
+# Please see documentation for descriptions of each mode.
+CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE = "passive";
+
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 TEMPLATE_CONTEXT_PROCESSORS += (
     'celerymanagementapp.context_processors.context_processor',

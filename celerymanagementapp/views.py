@@ -22,7 +22,7 @@ from celery.task.control import inspect, broadcast
 #from celery.task.control import Control
 #from celery.app import app_or_default
 from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes#, CeleryStats
-from celerymanagementapp.models import DispatchedTask
+from celerymanagementapp.models import DispatchedTask, OutOfBandWorkerNode
 from celerymanagementapp.forms import OutOfBandWorkerNodeForm
 
 import gviz_api
@@ -370,8 +370,10 @@ def system_overview(request):
 
 def configure(request):
     out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
+    outofbandworkernodes = OutOfBandWorkerNode.objects.all()
     return render_to_response('celerymanagementapp/configure.html',
-            {'outofbandworkernode_form': out_of_band_worker_node_form},
+            {'outofbandworkernode_form': out_of_band_worker_node_form,
+             'outofbandworkernodes': outofbandworkernodes},
             context_instance=RequestContext(request))
 
 def task_view(request, taskname=None):
