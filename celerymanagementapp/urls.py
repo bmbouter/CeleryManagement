@@ -60,6 +60,9 @@ urlpatterns += patterns('celerymanagementapp',
     (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/grow/(?P<num>\d+)/$', 'views.grow_worker_pool'),
     (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/shrink/(?P<num>\d+)/$', 'views.shrink_worker_pool'),
     
+    # manipulating outofbandworker ...
+    (r'^outofbandworker/$', 'dataviews.create_outofbandworker'),
+
     # for manual testing...
     (r'^worker/(?P<name>[-\w\d_.]+)/test_commands/$', 'test_views.worker_commands_test_view'),
     

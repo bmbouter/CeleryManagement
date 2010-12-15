@@ -213,6 +213,11 @@ def worker_subprocesses_dataview(request, name=None):
         
     return _json_response(workercounts)
 
+def create_outofbandworker(request):
+    """Create an OutOfBandWorker"""
+    new_obj = OutOfBandWorkerNode(request.POST)
+    new_obj.save()
+
 def worker_start(request):
     """Find an available node and start a worker process"""
     active_nodes = OutOfBandWorkerNode.objects.filter(active=True)
