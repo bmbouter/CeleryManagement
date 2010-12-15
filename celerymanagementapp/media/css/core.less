@@ -37,179 +37,178 @@ body {
 #container {
     background: @page_background;
     min-height: 600px;
+    min-width: 1100px;
     margin: 0;
     padding: 0;
-}
 
-#header {
-    height: @header_height;
-    background: @header_background;
-    position: relative;
-    width: 100%;
-    
-    #headerBarContainer {
+    #header {
         height: @header_height;
-        //background: @headerBarContainer_background;
-        border-bottom: 1px solid #873D00;
-        -webkit-box-shadow: 0px 1px 4px #000;
-        //-webkit-box-shadow: inset 0px 0px 10px #873D00;
-
-        h1 {
-            margin: 0px;
-            padding: 15px 0px 0px 40px;
-            font-size: 1.7em;
-            position: absolute;
-            font-weight: bold;
-            color: black;
-        }  
-
-        #statusUpdate {
-            height: @statusUpdate_height;
-            margin-left: 45%;
-            position: absolute;
-            
-            #statusText {
-                font-size: 1.0em;
-                padding: 23px;
-                font-weight: normal;
-                width: 25%;
-                color: #FF7400;
-            }
-        }
-    }
-
-}
-
-#contentContainer {
-    min-height: 400px;
-    
-    #dummy { 
-        width: @navigation_width + 10px;
-        float: left;
-    }
-    
-    #navigation {
-        background: @navigation_background;
-        margin: 2px 0px 0px 0px;
-        border-right: 1px solid #873D00;
-        -webkit-box-shadow: 1px 0px 4px #000;
-        width: @navigation_width;
-
-        ul {
-            padding: 10px 0px 0px 0px;
-        }
-
-        li {
-            margin: 0px 0 10px 10px;
-            font-size: 0.8em;
-
-            a {
-                text-decoration: none;
-                color: #7D7D7D;
-                cursor: pointer;
-                cursor: hand;
-            }
-
-            a:visited {
-                color: #7D7D7D;
-            }
-
-            a:hover {
-                color: black;
-                font-weight: bold;
-            }
-        }
-        
-        #taskNavigation {
-            display: none;
-            margin: 0 0 0 20px;
-        }
-        
-        #workerNavigation {
-            display: none;
-            margin: 0 0 0 20px;
-        }
-    }
-
-    #content {
-        float: left;
+        background: @header_background;
         position: relative;
-        min-height: 400px;
-        min-width: 600px;
+        width: 100%;
+        
+        #headerBarContainer {
+            height: @header_height;
+            //background: @headerBarContainer_background;
+            border-bottom: 1px solid #873D00;
+            -webkit-box-shadow: 0px 1px 4px #000;
+            //-webkit-box-shadow: inset 0px 0px 10px #873D00;
 
-        #workerMenu {
-            display: none;
-            position: absolute;
-            background-color: #FFF;
-            border: 1px solid #CCC;
-            border-radius: 2px;
-            
+            h1 {
+                margin: 0px;
+                padding: 15px 0px 0px 40px;
+                font-size: 1.7em;
+                position: absolute;
+                font-weight: bold;
+                color: black;
+            }  
+
+            #statusUpdate {
+                height: @statusUpdate_height;
+                margin-left: 45%;
+                position: absolute;
+                
+                #statusText {
+                    font-size: 1.0em;
+                    padding: 23px;
+                    font-weight: normal;
+                    width: 25%;
+                    color: #FF7400;
+                }
+            }
+        }
+
+    }
+
+    #contentContainer {
+        
+        #dummy { 
+            width: @navigation_width + 10px;
+            float: left;
+        }
+        
+        #navigation {
+            background: @navigation_background;
+            margin: 2px 0px 0px 0px;
+            border-right: 1px solid #873D00;
+            -webkit-box-shadow: 1px 0px 4px #000;
+            width: @navigation_width;
+
+            ul {
+                padding: 10px 0px 0px 0px;
+            }
+
             li {
-                width: 250px;
-                margin: 10px 0 10px 0;
+                margin: 0px 0px 10px 10px;
+                font-size: 0.8em;
 
                 a {
                     text-decoration: none;
-                    width: 250px;
-                    padding: 10px 80px 10px 34px;
+                    color: #7D7D7D;
+                    cursor: pointer;
+                    cursor: hand;
                 }
 
                 a:visited {
-                    color: black;
+                    color: #7D7D7D;
                 }
 
                 a:hover {
-                    background: blue;
-                    color: white;
+                    color: black;
+                    font-weight: bold;
                 }
             }
+            
+            #taskNavigation {
+                display: none;
+                margin: 0 0 0 20px;
+            }
+            
+            #workerNavigation {
+                display: none;
+                margin: 0 0 0 20px;
+            }
         }
-        
-        #system {
-            position: absolute;
-        }
 
-        #OutofBand {
-            width: 90%;
-            margin: 0 0 0 50px;
-            font-size: 0.8em;
+        #content {
+            float: left;
+            position: relative;
+            min-width: 600px;
 
-            .header {
-                border: 2px outset #383838;
-                height: 20px;
-                margin: 30px 0 0 0;
-                border-radius: 20px;
-                background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#383838), to(#383838), color-stop(.5,#575757)); //-webkit-gradient(linear, 0% 0%, 0% 100%, from(#5CCCCC), to(#5CCCCC), color-stop(.5,#6BEDED));
-                color: #FFF;  //#173333;
-                padding: 2px 0 0 10px;
+            #workerMenu {
+                display: none;
+                position: absolute;
+                background-color: #FFF;
+                border: 1px solid #CCC;
+                border-radius: 2px;
+                
+                li {
+                    width: 250px;
+                    margin: 10px 0 10px 0;
+
+                    a {
+                        text-decoration: none;
+                        width: 250px;
+                        padding: 10px 80px 10px 34px;
+                    }
+
+                    a:visited {
+                        color: black;
+                    }
+
+                    a:hover {
+                        background: blue;
+                        color: white;
+                    }
+                }
+            }
+            
+            #system {
+                position: absolute;
             }
 
-            .fieldWrapper {
-                display: block;
-                float: left;
-                width: 100%;
-                margin: 15px 0 0 10px;
-            }
-            .field {
-                float: left;
-            }
-            input {
-                float: left;
-                margin: 5px 0 0 0;
-            }
-            label {
-                text-align: right;
-                width: 150px;
-                float: left;
-                margin: 5px 5px 0 0;
-                color: black;
-            }
-            .errorWrapper {
-                width: 150px;
-                float: left;
-            }
-            #submitOutOfBandButton {
-                margin: 15px 0 0 165px;
+            #OutofBand {
+                width: 90%;
+                margin: 0 0 0 50px;
+                font-size: 0.8em;
+
+                .header {
+                    border: 2px outset #383838;
+                    height: 20px;
+                    margin: 30px 0 0 0;
+                    border-radius: 20px;
+                    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#383838), to(#383838), color-stop(.5,#575757)); //-webkit-gradient(linear, 0% 0%, 0% 100%, from(#5CCCCC), to(#5CCCCC), color-stop(.5,#6BEDED));
+                    color: #FFF;  //#173333;
+                    padding: 2px 0 0 10px;
+                }
+
+                .fieldWrapper {
+                    display: block;
+                    float: left;
+                    width: 100%;
+                    margin: 15px 0 0 10px;
+                }
+                .field {
+                    float: left;
+                }
+                input {
+                    float: left;
+                    margin: 5px 0 0 0;
+                }
+                label {
+                    text-align: right;
+                    width: 150px;
+                    float: left;
+                    margin: 5px 5px 0 0;
+                    color: black;
+                }
+                .errorWrapper {
+                    width: 150px;
+                    float: left;
+                }
+                #submitOutOfBandButton {
+                    margin: 15px 0 0 165px;
+                }
             }
         }
     }

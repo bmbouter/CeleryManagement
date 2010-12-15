@@ -4,14 +4,9 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.core.urlresolvers import reverse as urlreverse
 from django.contrib.auth.decorators import login_required
+from django.utils import simplejson
 
 from celerymanagementapp.forms import OutOfBandWorkerNodeForm
-
-def get_dispatched_tasks_data(request, name=None):
-    if request.method == 'POST':
-        f = open(settings.BASE_DIR + '/celerymanagementapp/media/test_data/chart_data.json', "r")
-
-        return HttpResponse(f)
 
 def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
@@ -24,11 +19,24 @@ def dashboard(request):
             context_instance=RequestContext(request))
 
 def configure(request):
-    out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
-    return render_to_response('celerymanagementapp/configure.html',
-            {'outofbandworkernode_form': out_of_band_worker_node_form,
-            "load_test_data" : "true" },
-            context_instance=RequestContext(request))
+    if request.method == "POST":
+        if request.POST['id_ip']:
+            return HttpResponse("success")
+        else:
+            out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
+            errors = []
+            for field in out_of_band_worker_node_form:
+                errors.append({ 'field' : field.label,
+                                'error' : fields.errors })
+            failed = { 'failure' : errors }
+            json = simplejson.dumps(failed)
+            return HttpResponse(json)
+    else:
+        out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
+        return render_to_response('celerymanagementapp/configure.html',
+                {'outofbandworkernode_form': out_of_band_worker_node_form,
+                "load_test_data" : "true" },
+                context_instance=RequestContext(request))
 
 def task_view(request, taskname=None):
     return render_to_response('celerymanagementapp/task.html',
@@ -48,7 +56,11 @@ def kill_worker(request, name=None):
     else:
         return HttpResponse("failed")
 
+def get_dispatched_tasks_data(request, name=None):
+    if request.method == 'POST':
+        f = open(settings.BASE_DIR + '/celerymanagementapp/media/test_data/chart_data.json', "r")
 
+        return HttpResponse(f)
 
 @login_required
 def task_demo_test_dataview(request):

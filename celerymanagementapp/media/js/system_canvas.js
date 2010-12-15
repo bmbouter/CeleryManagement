@@ -54,7 +54,7 @@ function Task(y, name){
 function Worker(y, name, active){
     this.width = 200;
     this.height = 40;
-    this.x = $('#systemCanvas')[0].width - this.width - 200;
+    this.x = $('#systemCanvas')[0].width - this.width - 100;
     this.y = y;
     this.activeFill = '#FFC028';
     this.inactiveFill = '#CCC';
@@ -224,8 +224,14 @@ function SystemViewer(){
     }
     
     this.redraw = function(){
-        console.log("redraw");
         $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
+        if( $(window).width() > $('#container').css("min-width").split("px")[0] ){
+            for( wrkr in workers ){
+                worker = workers[wrkr];
+                worker.x = $('#systemCanvas')[0].width - worker.width - 100;
+                worker.xCenter = (worker.width / 2) + worker.x;
+            }
+        }
         draw();
     }
 
@@ -400,8 +406,6 @@ function SystemRenderer(height){
     }
     
     this.drawWorker = function(worker){
-        worker.x = $('#systemCanvas')[0].width - worker.width - 200;
-        worker.xCenter = (worker.width / 2) + worker.x;
         drawShapes.roundedRect(worker.x, worker.y, worker.width, worker.height, worker.getFill());
         context.textBaseline = "middle";
         context.textAlign = "start";
