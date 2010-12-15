@@ -370,10 +370,10 @@ def system_overview(request):
 
 def configure(request):
     out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
-    outofbandworkernodes = OutOfBandWorkerNode.objects.get()
+    outofbandworkernodes = OutOfBandWorkerNode.objects.all()
     return render_to_response('celerymanagementapp/configure.html',
             {'outofbandworkernode_form': out_of_band_worker_node_form,
-             'outofbandworkernodes': outofbandwworkernodes},
+             'outofbandworkernodes': outofbandworkernodes},
             context_instance=RequestContext(request))
 
 def task_view(request, taskname=None):
