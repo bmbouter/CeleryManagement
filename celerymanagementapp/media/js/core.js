@@ -64,7 +64,7 @@ $(document).ready(function() {
             function(){}
         );
     });
-    $('.workerNode').click(function(){
+    $('.editWorkerNode').click(function(){
         var elem = document.getElementById($(this).attr("id") + "Form");
         $(elem).animate({
             height: "toggle",
