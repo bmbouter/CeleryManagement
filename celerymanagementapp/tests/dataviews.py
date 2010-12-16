@@ -39,7 +39,7 @@ class XYDataView_TestCase(base.CeleryManagement_DBTestCaseBase):
 
 class Configuration_TestCase(base.CeleryManagement_TestCaseBase):
     def setUp(self):
-        self.client = Client()
+    #    self.client = Client()
         self.outofbandworker_url = '/celerymanagementapp/outofbandworker/'
 
     def test_create_outofbandworker(self):
