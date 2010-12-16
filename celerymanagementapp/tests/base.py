@@ -66,6 +66,7 @@ class CeleryManagement_DBTestCaseBase(CeleryManagement_TestCaseBase):
         
     def setUp(self):
         self.today = datetime.date.today()
+        self.client = Client()
         self.users = []
         
     def create_users(self, n):
