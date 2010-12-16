@@ -1,0 +1,11 @@
+#These settings are for testing anything that requires user specific settings
+#or are settings that are sensitive on a per user basis.  This file should be
+#copied to a testcase_settings.py file in the same directory as this one.
+
+#These settings are for testing creation of out of band workers.
+OUTOFBANDWORKER_IP = ""
+OUTOFBANDWORKER_USERNAME = ""
+OUTOFBANDWORKER_SSH_KEY_FILE = ""
+OUTOFBANDWORKER_CELERYD_START = ""
+OUTOFBANDWORKER_CELERYD_STOP = ""
+OUTOFBANDWORKER_CELERYD_STATUS = ""
