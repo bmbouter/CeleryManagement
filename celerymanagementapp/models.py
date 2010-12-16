@@ -119,6 +119,8 @@ class RegisteredTaskType(models.Model):
     name =      models.CharField(_(u"name"), max_length=200)
     # The worker that the task is registered with.
     worker =    models.CharField(_(u"worker"), max_length=200)
+    modified =  models.DateTimeField(_(u"modified"), auto_now=True)
+    
     
     class Meta:
         """Model meta-data."""
