@@ -119,6 +119,8 @@ class RegisteredTaskType(models.Model):
     name =      models.CharField(_(u"name"), max_length=200)
     # The worker that the task is registered with.
     worker =    models.CharField(_(u"worker"), max_length=200)
+    modified =  models.DateTimeField(_(u"modified"), auto_now=True)
+    
     
     class Meta:
         """Model meta-data."""
@@ -153,6 +155,9 @@ class TaskDemoGroup(models.Model):
     requested_args =    models.TextField(default="")
     requested_kwargs =  models.TextField(default="")
     requested_options = models.TextField(default="")
+    
+    def __unicode__(self):
+        return u"<{0}> {1} {2}".format(self.uuid, self.name, self.timestamp)
                
     
 

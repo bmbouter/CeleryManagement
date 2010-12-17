@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from djcelery.admin import TaskMonitor, fixedwidth
 
 from celerymanagementapp.models import DispatchedTask, OutOfBandWorkerNode
+from celerymanagementapp.models import RegisteredTaskType, TaskDemoGroup
 
 # 'TASK_STATE_COLORS' and 'colored_state()' from djcelery.admin
 TASK_STATE_COLORS = {states.SUCCESS: "green",
@@ -63,6 +64,12 @@ class DispatchedTaskAdmin(admin.ModelAdmin):
                     'routing_key')
     list_filter = ('name', 'state', 'worker', 'routing_key', 'tstamp')
     
+class RegisteredTaskTypeAdmin(admin.ModelAdmin):
+    list_display = ('worker','name','modified')
+    list_filter = ('worker','name','modified')
+    
 admin.site.register(DispatchedTask, DispatchedTaskAdmin)
 admin.site.register(OutOfBandWorkerNode)
-#admin.site.register(DispatchedTask)
+admin.site.register(RegisteredTaskType, RegisteredTaskTypeAdmin)
+admin.site.register(TaskDemoGroup)
+

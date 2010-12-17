@@ -1,14 +1,22 @@
 import sys
 from datetime import datetime, timedelta
 
+from django.db import transaction
+
 from celery.app import app_or_default
 from celery.utils import instantiate, LOG_LEVELS
 from celery.utils.timeutils import maybe_iso8601
+from celery.task.control import inspect
 
 from djcelery.snapshot import Camera as DjCeleryCamera
 
 from celerymanagementapp.snapshot.state import State
-from celerymanagementapp.models import DispatchedTask
+from celerymanagementapp.models import DispatchedTask, RegisteredTaskType
+
+
+REFRESH_REGISTERED_TASKS_EVERY = 60  #seconds
+CLEAR_REGISTERED_TASKS_AFTER = 24  #hours
+
 
 class Camera(DjCeleryCamera):
     TaskState = DispatchedTask
@@ -16,11 +24,16 @@ class Camera(DjCeleryCamera):
     def __init__(self, *args, **kwargs):
         ##print >> sys.stderr, 'Camera.__init__(): creating celerymanagementapp.Camera'
         super(Camera, self).__init__(*args, **kwargs)
-        
+        self.shutter_count = 0
+        self.refresh_regtasks_every = REFRESH_REGISTERED_TASKS_EVERY
+            
     def on_shutter(self, state):
         ##print >> sys.stderr, 'Camera.on_shutter(): shutter triggered'
         super(Camera, self).on_shutter(state)
-                
+        if (self.shutter_count % self.refresh_regtasks_every) == 0:
+            self.refresh_registered_tasks()
+        self.shutter_count += 1
+        
     def handle_task(self, (uuid, task), worker=None):
         if task.worker and task.worker.hostname:
             worker = self.handle_worker((task.worker.hostname, task.worker))
@@ -48,7 +61,40 @@ class Camera(DjCeleryCamera):
             "eta":      maybe_iso8601(task.eta),
             }
         return self.update_task(task.state, task_id=uuid, defaults=defaults)
-                          
+        
+    
+    @transaction.commit_manually
+    def refresh_registered_tasks(self):
+        # Transactions are handled manually so all worker modifications appear 
+        # to happen at once.  Otherwise, others could see the 
+        # RegisteredTaskType models in an inconsistent state.
+        i = inspect()
+        workers = i.registered_tasks()
+        # This if statement protects against the case when no workers are 
+        # running.
+        if workers:
+            try:
+                for workername, tasks in workers.iteritems():
+                    RegisteredTaskType.clear_tasks(workername)
+                    for taskname in tasks:
+                        RegisteredTaskType.add_task(taskname, workername)
+            except:
+                transaction.rollback()
+                pass
+            else:
+                transaction.commit()
+                pass
+        else:
+            transaction.rollback()
+                
+    def on_cleanup(self):
+        super(Camera, self).on_cleanup()
+        self.clear_old_registered_tasks()
+                
+    def clear_old_registered_tasks(self):
+        clrhrs = timedelta(hours=CLEAR_REGISTERED_TASKS_AFTER)
+        cleartime = datetime.now() - clrhrs
+        RegisteredTaskType.objects.filter(modified__lt=cleartime).delete()
 
     
 

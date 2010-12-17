@@ -81,6 +81,9 @@ def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, kwargs=No
         
         try:
             r = send_task(args=args, kwargs=kwargs, **options)
+            print 'Task state: {0}'.format(r.state)
+            if r.failed():
+                errors_on_send += 1
             results.append(r)
             count += 1
         except:
@@ -94,6 +97,7 @@ def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, kwargs=No
         if (count % commit_every) == 0:
             obj.elapsed = time.time()-start
             obj.tasks_sent = count
+            obj.errors_on_send = errors_on_send
             obj.save()
         
         next_dispatch += random.expovariate(rate)
@@ -111,6 +115,7 @@ def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, kwargs=No
     total_time = time.time() - start
     obj.elapsed = total_time
     obj.tasks_sent = count
+    obj.errors_on_send = errors_on_send
     obj.timestamp = datetime.datetime.now()
     obj.save()
     

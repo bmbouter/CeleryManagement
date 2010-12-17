@@ -11,11 +11,10 @@
             IP Address
             <a id="createNewOutOfBand"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png">New Worker Node</img></a>
         </div>
-        {% for worker in outofbandworkers %}
-        <div class="workerNode" id="{{ worker.ip }}_workerNode">
-            <h1>
-                {{ worker.ip }}
-            </h1>
+        {% for worker in outofbandworkernodes %}
+        <div class="workerNode" >
+            {{ worker.ip }}
+            <a class="editWorkerNode" id="{{ worker.ip }}_workerNode">Edit Worker Node</a>
         </div>
         <form method="POST" class="outOfBandForm" id="{{ worker.ip }}_workerNodeForm">
             {% for field in outofbandworkernode_form %}

@@ -40,7 +40,7 @@ def configure(request):
             OutOfBandWorkers.append(worker1);
         return render_to_response('celerymanagementapp/configure.html',
                 {'outofbandworkernode_form': out_of_band_worker_node_form,
-                "outofbandworkers" : OutOfBandWorkers,
+                "outofbandworkernodes" : OutOfBandWorkers,
                 "load_test_data" : "true" },
                 context_instance=RequestContext(request))
 
@@ -89,7 +89,8 @@ def task_demo_test_dataview(request):
     <script>
     
     function json() {{
-    var query = '{{"name": "{name}", "rate":{rate}, "runfor":{runfor} }}';
+    var query = '{{"name": "[NAME]", "rate":{rate}, "runfor":{runfor} }}';
+    query = query.replace("[NAME]", document.testform.taskname.value)
     
     $.post(
         '{send}',
@@ -106,14 +107,17 @@ def task_demo_test_dataview(request):
     </script>
     </head>
     <body>
-    <table>
-      <tr><td>
-        <form action="{send}" method="POST">
+    <form name="testform" action="{send}" method="POST">
+      <table>
         {{% csrf_token %}}
+        <tr><td>
+        <input type="text" name="taskname" value="{name}" size="90" />
+        </td></tr>
+        <tr><td>
         <input type="button" value="Send" onclick="json();"/>
-        </form>
-      </td></tr>
-    </table>
+        </td></tr>
+      </table>
+    </form>
     </body>
     </html>
     """
