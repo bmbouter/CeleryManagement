@@ -9,6 +9,7 @@ import uuid
 import tempfile
 import os
 import subprocess
+import time
 
 from django.http import HttpResponse
 from django.conf import settings
@@ -73,14 +74,47 @@ def _resolve_name(name):
     if not name or name.lower() == 'all':
         name = None
     return name
+    
+    
+class SimpleCache(object):
+    def __init__(self, refresh_interval=20.0):
+        self._cache = []
+        self._next_refresh = 0.0  # timestamp in seconds, as returned from time.time()
+        self._refresh_interval = refresh_interval  # seconds
+        
+    def getdata(self):
+        if self._next_refresh < time.time():
+            self._next_refresh = time.time() + self._refresh_interval
+            self._cache = self.refresh()
+        return self._cache
+        
+    data = property(getdata)
+    
+    def refresh(self):
+        raise NotImplementedError()
+        
+class TaskListCache(SimpleCache):
+    def refresh(self):
+        qs = RegisteredTaskType.objects.all()
+        names = list(set(obj.name for obj in qs))
+        names.sort()
+        return names
+        
+class WorkerStateCache(SimpleCache):
+    def refresh(self):
+        return [w for w in WorkerState.objects.all()]
+        
+_worker_state_cache = WorkerStateCache()
+_task_list_cache = TaskListCache()
 
     
 def get_defined_tasks():
     """Get a list of the currently defined tasks."""
-    qs = RegisteredTaskType.objects.all()
-    names = list(set(obj.name for obj in qs))
-    names.sort()
-    return names
+    return _task_list_cache.data
+    #qs = RegisteredTaskType.objects.all()
+    #names = list(set(obj.name for obj in qs))
+    #names.sort()
+    #return names
     
 def get_defined_tasks_live():
     """ Get the list of defined tasks as reported by Celery right now. """
@@ -95,8 +129,9 @@ def get_defined_tasks_live():
     
 def get_workers_from_database():
     """Get a list of all workers that exist (running or not) in the database."""
-    workers = WorkerState.objects.all()
-    return [unicode(w) for w in workers]
+    return [unicode(w) for w in _worker_state_cache.data]
+    #workers = WorkerState.objects.all()
+    #return [unicode(w) for w in workers]
     
 def get_workers_live():
     """ Get the list of workers as reported by Celery right now. """
@@ -250,7 +285,7 @@ def tasks_per_worker_dataview(request, name=None):
     queryset = jfilter(queryset)
     
     tasknames = get_defined_tasks()
-    workers = [(unicode(obj), obj.pk) for obj in WorkerState.objects.all()]
+    workers = [(unicode(obj), obj.pk) for obj in _worker_state_cache.data]
     
     r = {}
     

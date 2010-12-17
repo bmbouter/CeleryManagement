@@ -64,8 +64,12 @@ class DispatchedTaskAdmin(admin.ModelAdmin):
                     'routing_key')
     list_filter = ('name', 'state', 'worker', 'routing_key', 'tstamp')
     
+class RegisteredTaskTypeAdmin(admin.ModelAdmin):
+    list_display = ('worker','name','modified')
+    list_filter = ('worker','name','modified')
+    
 admin.site.register(DispatchedTask, DispatchedTaskAdmin)
 admin.site.register(OutOfBandWorkerNode)
-admin.site.register(RegisteredTaskType)
+admin.site.register(RegisteredTaskType, RegisteredTaskTypeAdmin)
 admin.site.register(TaskDemoGroup)
 
