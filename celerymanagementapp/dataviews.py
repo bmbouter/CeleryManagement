@@ -27,7 +27,7 @@ from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 from celerymanagementapp import tasks, jsonutil
 from celerymanagementapp.models import OutOfBandWorkerNode, RegisteredTaskType
 from celerymanagementapp.models import TaskDemoGroup
-from celerymanagementapp.models import OutOfBandWorkerNodeForm
+from celerymanagementapp.forms import OutOfBandWorkerNodeForm
 
 #==============================================================================#
 def _json_from_post(request, *args, **kwargs):
