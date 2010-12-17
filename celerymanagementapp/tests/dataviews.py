@@ -1,7 +1,6 @@
 import json
 
 from django.core.urlresolvers import reverse as urlreverse
-from django.test.client import Client
 
 from celerymanagementapp.tests import base, testcase_settings
 from celerymanagementapp.models import OutOfBandWorkerNode
@@ -39,8 +38,7 @@ class XYDataView_TestCase(base.CeleryManagement_DBTestCaseBase):
 
 class Configuration_TestCase(base.CeleryManagement_TestCaseBase):
     def setUp(self):
-        self.client = Client()
-        self.outofbandworker_url = '/celerymanagementapp/outofbandworker/'
+        self.outofbandworker_url = '/celerymanagementapp/view/configure/'
 
     def test_create_outofbandworker(self):
         f = open(testcase_settings.OUTOFBANDWORKER_SSH_KEY_FILE) #path to ssh_key file for testing
@@ -49,11 +47,12 @@ class Configuration_TestCase(base.CeleryManagement_TestCaseBase):
                         'username' : testcase_settings.OUTOFBANDWORKER_USERNAME,
                         'ssh_key' : f,
                         'celeryd_start_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_START ,
-                        'celeryd_stop_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_START,
-                        'celeryd_status_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_START
+                        'celeryd_stop_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_STOP,
+                        'celeryd_status_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_STATUS,
+                        'active' : 'on',
                             })
         f.close()
-        self.assertEquals(repsonse.status_code, 200)
+        self.assertEquals(response.status_code, 200)
         outofbandworkers = OutOfBandWorkerNode.objects.all()
         self.assertEquals(len(outofbandworkers), 1)
 

@@ -50,11 +50,6 @@ $(document).ready(function() {
         $('#workerNavigationMaster').click();
     }
 
-    $('#submitOutOfBandButton').click(function (){
-        CMACore.postCreateOutOfBandWorkerNode(function(data){
-            console.log(data)
-            });
-    });
     $('.outOfBandForm').hide();
     $('#createNewOutOfBand').click(function() {
         $('#blankOutOfBandForm').animate({

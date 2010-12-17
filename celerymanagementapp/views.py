@@ -369,12 +369,23 @@ def system_overview(request):
             context_instance=RequestContext(request))
 
 def configure(request):
-    out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
-    outofbandworkernodes = OutOfBandWorkerNode.objects.all()
-    return render_to_response('celerymanagementapp/configure.html',
-            {'outofbandworkernode_form': out_of_band_worker_node_form,
-             'outofbandworkernodes': outofbandworkernodes},
-            context_instance=RequestContext(request))
+    if request.method == 'POST':
+        new_obj = OutOfBandWorkerNodeForm(request.POST, request.FILES)
+        if new_obj.is_valid():
+            new_obj.save()
+            OutOfBandWorkers = OutOfBandWorkerNode.objects.all()
+            return render_to_response('celerymanagementapp/configure.html',
+                {'outofbandworkernode_form': new_obj,
+                "outofbandworkernodes" : OutOfBandWorkers,
+                "load_test_data" : "true" },
+                context_instance=RequestContext(request))
+    else:
+        out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
+        outofbandworkernodes = OutOfBandWorkerNode.objects.all()
+        return render_to_response('celerymanagementapp/configure.html',
+                {'outofbandworkernode_form': out_of_band_worker_node_form,
+                 'outofbandworkernodes': outofbandworkernodes},
+                context_instance=RequestContext(request))
 
 def task_view(request, taskname=None):
     return render_to_response('celerymanagementapp/task.html',
