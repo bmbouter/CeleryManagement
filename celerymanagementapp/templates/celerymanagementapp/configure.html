@@ -26,20 +26,21 @@
                 </div>
             </div>
             {% endfor %}
-            <button id="submitOutOfBandButton" class="button">Submit</button>
+            <button class="submitOutOfBandButtonEdit" class="button">Submit</button>
         </form>
         {% endfor %}
-        <form method="POST" class="outOfBandForm" id="blankOutOfBandForm">
+        <form method="POST" enctype="multipart/form-data" class="outOfBandForm" id="blankOutOfBandForm" action="/celerymanagementapp/outofbandworker/">
             {% for field in outofbandworkernode_form %}
             {% csrf_token %}
             <div class="fieldWrapper">
                 <div class="field">
                     {{ field.label_tag }} {{ field }}
-                    <label id="{{ field.label }}_error"></label>
+                    <!--<label id="{{ field.label }}_error"></label>-->
+                    {{ field.errors }}
                 </div>
             </div>
             {% endfor %}
-            <button id="submitOutOfBandButton" class="button">Submit</button>
+            <input type="submit" id="submitOutOfBandButton" class="button">Submit
         </form>
     </div>
     {% endif %}

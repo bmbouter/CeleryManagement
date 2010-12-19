@@ -16,6 +16,9 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse as urlreverse
+from django.utils import simplejson
+from django.shortcuts import render_to_response
+from django.template import RequestContext
 
 from celery import signals
 from celery.task.control import broadcast, inspect
@@ -188,8 +191,23 @@ def worker_subprocesses_dataview(request, name=None):
 def create_outofbandworker(request):
     """Create an OutOfBandWorker"""
     if request.method == 'POST':
-        new_obj = OutOfBandWorkerNodeForm(request.POST)
-        new_obj.save()
+        new_obj = OutOfBandWorkerNodeForm(request.POST, request.FILES)
+        if new_obj.is_valid():
+            new_obj.save()
+            OutOfBandWorkers = OutOfBandWorkerNode.objects.all()
+            return render_to_response('celerymanagementapp/configure.html',
+                {'outofbandworkernode_form': new_obj,
+                "outofbandworkernodes" : OutOfBandWorkers,
+                "load_test_data" : "true" },
+                context_instance=RequestContext(request))
+        else:
+            OutOfBandWorkers = OutOfBandWorkerNode.objects.all()
+            return render_to_response('celerymanagementapp/configure.html',
+                {'outofbandworkernode_form': new_obj,
+                "outofbandworkernodes" : OutOfBandWorkers,
+                "load_test_data" : "true" },
+                context_instance=RequestContext(request))
+
 
 def worker_start(request):
     """Find an available node and start a worker process"""

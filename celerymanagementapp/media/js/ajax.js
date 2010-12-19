@@ -12,7 +12,7 @@ CMACore.loadUrls = function() {
     CMACore.query_dispatched_tasks_url = CMACore.root_url + "xy_query/dispatched_tasks/";
     CMACore.task_url = "/celerymanagementapp/view/task/";
     CMACore.worker_url = "/celerymanagementapp/view/task/";
-    CMACore.create_out_of_band_worker_url = CMACore.post_root_url + "configure/";
+    CMACore.create_out_of_band_worker_url = CMACore.root_url + "outofbandworker/";
 }
 
 CMACore.loadTestUrls = function(){
@@ -60,5 +60,5 @@ CMACore.getDispatchedTasksData = function(query, callbackFunction) {
 }
 
 CMACore.postCreateOutOfBandWorkerNode = function(callbackFunction){
-    $.post(CMACore.create_out_of_band_worker_url, $('#outOfBandForm').serialize(), callbackFunction);
+    $.post(CMACore.create_out_of_band_worker_url, $('#blankOutOfBandForm').serialize(), callbackFunction);
 }
