@@ -4,18 +4,17 @@ var systemDisplay;
 
 $(document).ready(function() {
     
-    $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
     systemDisplay = new SystemDisplay();
      
     $(window).resize(function(e) {
         $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
-        systemViewer.redraw();
+        systemDisplay.viewer.redraw();
     });
     
 });
 
 function refresh(){
-    systemDisplay.systemViewer.refresh();
+    systemDisplay.viewer.refresh();
     $('#statusText').text("Refreshing view...");
     $('#statusText').fadeOut("slow", function() {});
     $('#statusText').show();
@@ -31,10 +30,11 @@ function refresh(){
 function SystemDisplay(){
     var canvasElement = $('#systemCanvas');
     var canvas = $('#systemCanvas')[0];
+    canvas.width = $(window).width() - $('#dummy').css("width").split("px")[0];
     var systemRenderer;
-    this.systemViewer = new Viewer();
-    this.systemViewer.init();
-    var systemEventHandler = new SystemEventHandler(canvasElement, this.systemViewer);
+    this.viewer = new Viewer();
+    this.viewer.init();
+    var systemEventHandler = new SystemEventHandler(canvasElement, this.viewer);
     var yOffset = $('#header').css("height").split("px")[0];
     var xOffset = $('#dummy').css("width").split("px")[0];
     var tasks = {};
@@ -65,7 +65,7 @@ function SystemDisplay(){
     function Worker(y, name, active){
         this.width = 200;
         this.height = 40;
-        this.x = $('#systemCanvas')[0].width - this.width - 100;
+        this.x = canvas.width - this.width - 100;
         this.y = y;
         this.activeFill = '#FFC028';
         this.inactiveFill = '#CCC';
@@ -133,33 +133,11 @@ function SystemDisplay(){
         var tasksSet = false;
         var workersSet = false;
         var canvasHeight = 0;
-        var clickedEntity = false;
         var connectorWeight = 0;
 
         function connectorWeightingFunction(size){
             return (size / connectorWeight + 0.30) * 4;
         }
-
-        $('#systemCanvas').bind("contextmenu", function(e){
-            var entity = getEntity(e.pageX, e.pageY);
-            clickedEntity = entity;
-
-            if( typeof entity != "undefined"  && entity.constructor.name == "Worker" ){
-                $('#workerMenu').css({
-                    top: (entity.yCenter) + 'px',
-                    left: (entity.xCenter - 125) + 'px'
-                }).show();
-            }
-            return false;
-        });
-
-        $('#deactivateWorker').click(function (){
-            if( typeof clickedEntity != "undefined"  && clickedEntity.constructor.name == "Worker" ){
-                CMACore.postShutdownWorker(clickedEntity.fullName, shutdownWorker);
-                console.log("deactivate clicked");
-                clickedEntity = false;
-            }
-        });
 
         function shutdownWorker(data){
             if( data != "failed" || typeof data != "undefined" ){
@@ -246,11 +224,11 @@ function SystemDisplay(){
         }
         
         this.redraw = function(){
-            $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
+            canvas.width = $(window).width() - $('#dummy').css("width").split("px")[0];
             if( $(window).width() > $('#container').css("min-width").split("px")[0] ){
                 for( wrkr in workers ){
                     worker = workers[wrkr];
-                    worker.x = $('#systemCanvas')[0].width - worker.width - 100;
+                    worker.x = canvas.width - worker.width - 100;
                     worker.xCenter = (worker.width / 2) + worker.x;
                 }
             }
@@ -259,8 +237,7 @@ function SystemDisplay(){
 
         function draw(){
             systemRenderer = new SystemRenderer(canvasHeight + 60);
-            $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
-            console.log(connectorWeight);
+            canvas.width = $(window).width() - $('#dummy').css("width").split("px")[0];
             for( connector in connectors ){
                 systemRenderer.drawConnector(connectors[connector], connectorWeightingFunction(connectors[connector].numTasks));
             }
@@ -276,8 +253,8 @@ function SystemDisplay(){
             if( !expandedTask ){
                 showTaskConnectors(task);
                 expandTask(task, true);
-                $('#systemCanvas').css("cursor", "pointer");
-                $('#systemCanvas').css("cursor", "hand");
+                canvasElement.css("cursor", "pointer");
+                canvasElement.css("cursor", "hand");
             }
         }
 
@@ -285,18 +262,18 @@ function SystemDisplay(){
             if( !expandedWorker ){
                 showWorkerConnectors(worker);
                 expandWorker(worker, true);
-                $('#systemCanvas').css("cursor", "pointer");
-                $('#systemCanvas').css("cursor", "hand");
+                canvasElement.css("cursor", "pointer");
+                canvasElement.css("cursor", "hand");
             }
         }
 
         this.unexpandEntity = function(){
             if( expandedTask ){
                 expandTask(expandedTask, false);   
-                $('#systemCanvas').css("cursor", "auto");
+                canvasElement.css("cursor", "auto");
             } else if( expandedWorker ){
                 expandWorker(expandedWorker, false);   
-                $('#systemCanvas').css("cursor", "auto");
+                canvasElement.css("cursor", "auto");
             }
         }
 
@@ -359,9 +336,10 @@ function SystemDisplay(){
         }
     }
 
-    function SystemEventHandler(canvasElement, systemViewer){
+    function SystemEventHandler(canvasElement, viewer){
         canvasElement.click(handleClick);
         canvasElement.mousemove(handleHover);
+        var clickedEntity = null;
 
         $(document).ready(function() {
             $('#workerMenu').click(function() {
@@ -384,12 +362,40 @@ function SystemDisplay(){
         function handleHover(e){
             var entity = getEntity(e.pageX, e.pageY);
             if( typeof entity != "undefined" && entity.constructor.name == "Task" ){
-                systemViewer.handleTaskHover(entity);
+                viewer.handleTaskHover(entity);
             } else if( typeof entity != "undefined" && entity.constructor.name == "Worker" ){
-                systemViewer.handleWorkerHover(entity);
+                viewer.handleWorkerHover(entity);
             } else {
-                systemViewer.unexpandEntity();
+                viewer.unexpandEntity();
             }
+        }
+        
+        if( CMACore.USE_MODE == "static" ){
+            
+            canvasElement.bind("contextmenu", function(e){
+                var entity = getEntity(e.pageX, e.pageY);
+                clickedEntity = entity;
+
+                if( typeof entity != "undefined"  && entity.constructor.name == "Worker" ){
+                    $('#workerMenu').css({
+                        top: (entity.yCenter) + 'px',
+                        left: (entity.xCenter - 125) + 'px'
+                    }).show();
+                }
+                return false;
+            });
+
+            $('#deactivateWorker').click(function (){
+                if( typeof clickedEntity != "undefined"  && clickedEntity.constructor.name == "Worker" ){
+                    CMACore.postShutdownWorker(clickedEntity.fullName, viewer.shutdownWorker);
+                    console.log("deactivate clicked");
+                    clickedEntity = false;
+                }
+            });
+        } else {
+            canvasElement.bind("contextmenu", function(e){
+                return false;
+            });
         }
     }
 
@@ -472,7 +478,7 @@ function SystemDisplay(){
         }
         
         this.clearCanvas = function(){
-            $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
+            canvas.width = $(window).width() - $('#dummy').css("width").split("px")[0];
             canvas.height = height;
             context.clearRect(0, 0, canvas.width, canvas.height);
         }
