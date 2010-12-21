@@ -1,6 +1,5 @@
 var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
 
-
 $(document).ready(function() {
 
     if( typeof CMACore.testUrls == "undefined" ){
@@ -51,6 +50,18 @@ $(document).ready(function() {
     }
 
     $('.outOfBandForm').hide();
+    $('#blankOutOfBandForm').ajaxForm({
+        dataType: 'json',
+        url: CMACore.create_out_of_band_worker_url,
+        success: successFor
+    });
+
+    function successFor(data){
+        for( var i=0; i < data.failure.length; i++){
+            console.log(data.failure[i].error);
+        }
+    }
+
     $('#createNewOutOfBand').click(function() {
         $('#blankOutOfBandForm').animate({
                 height: "toggle",

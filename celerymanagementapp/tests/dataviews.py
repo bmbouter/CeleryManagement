@@ -38,7 +38,7 @@ class XYDataView_TestCase(base.CeleryManagement_DBTestCaseBase):
 
 class Configuration_TestCase(base.CeleryManagement_TestCaseBase):
     def setUp(self):
-        self.outofbandworker_url = '/celerymanagementapp/view/configure/'
+        self.outofbandworker_url = '/celerymanagementapp/outofbandworker/'
 
     def test_create_outofbandworker(self):
         f = open(testcase_settings.OUTOFBANDWORKER_SSH_KEY_FILE) #path to ssh_key file for testing

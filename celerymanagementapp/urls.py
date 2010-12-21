@@ -102,7 +102,7 @@ if settings.DEBUG:
         url(r'^test/view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url"),
         url(r'^test/post/worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'kill_worker', name="test_kill_worker_url"),
         url(r'^test/post/xy_query/dispatched_tasks/$', 'get_dispatched_tasks_data', name='test_get_dispatched_tasks_url'),
-        url(r'^test/post/configure/$', 'configure', name="test_configure_url"),
+        url(r'^test/post/outofbandworker/$', 'create_outofbandworker', name="test_outofbandworker_url"),
     )
 
 if settings.DEBUG:
