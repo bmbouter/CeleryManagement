@@ -1,8 +1,27 @@
-Need to include celeryconfig.py in this directory.
+Getting Started Instructions:
 
-celeryconfig.py will be used by djcelerymon.  Settings are similar to ones for celery workers.
+Overview of Steps:
+*Create your virtual environment containing the correct requirements
+*Configure your settings
+*Start the required processes
 
-celeryconfig.py should provide database information. This is the database where task information will be stored.  
+Create your virtual environment:
+Make sure you have pip and virtualenv installed on your system already.
 
-Current implementation requires that the djcelerymon and CeleryManagementApp use the same database.
+1.  Change into the cloned CeleryManagement directory (where this README is contained)
+2.  Run the following:    virtualenv --no-site-packages ve
+3.  Activate your virtual environment by running:  source ve/bin/activate
+4.  Install the requirements by running:  pip install -r requirements.pip
+5.  pip uninstall celery django-celery
+6.  pip install -U https://github.com/ask/django-celery/tarball/master#egg=django-celery
+7.  pip uninstall celery
+8.  pip install -U https://github.com/ask/celery/tarball/master#egg=celery
 
+Notes:
+*Need to include celeryconfig.py in this directory.
+
+*celeryconfig.py will be used by djcelerymon.  This should contain AMQP broker information, connecting Settings are similar to ones for celery workers.
+
+*celeryconfig.py should provide database information. This is the database where task information will be stored.  
+
+*Current implementation requires that the djcelerymon and CeleryManagementApp use the same database.
