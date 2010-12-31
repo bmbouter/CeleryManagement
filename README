@@ -5,7 +5,8 @@ Overview of Steps:
 *Configure your settings
 *Start the required processes
 
-Create your virtual environment:
+Create your virtual environment containing the correct requirements:
+
 Make sure you have pip and virtualenv installed on your system already.
 
 1.  Change into the cloned CeleryManagement directory (where this README is contained)
@@ -17,7 +18,41 @@ Make sure you have pip and virtualenv installed on your system already.
 7.  pip uninstall celery
 8.  pip install -U https://github.com/ask/celery/tarball/master#egg=celery
 
-Notes:
+Configure your settings:
+
+1.  Change into the cloned CeleryManagement directory (where this README is contained)
+2.  Create your settings.py file from the template by running:  cp settings.py.sample settings.py
+3.  Open up your settings.py file and fill out the following configuration values:
+
+      BROKER_HOST
+      BROKER_PORT
+      BROKER_USER
+      BROKER_PASSWORD
+      BROKER_VHOST
+4.  Create your database by running:  python manage.py syncdb
+
+Start the required processes:
+You will need two sessions to run both the event listener and the web application at the same time
+
+1.  Change into the cloned CeleryManagement directory (where this README is contained)
+2.  Make sure your virtual environment is active by running:  source ve/bin/activate
+3.  Start the event listener by running:  python manage.py cmrun
+4.  Open a new session/terminal
+5.  Change into the cloned CeleryManagement directory (where this README is contained)
+6.  Make sure your virtual environment is active by running:  source ve/bin/activate
+7.  Start the web application by running:  python manage.py runserver 0.0.0.0:9253
+
+Starting a worker daemon: (Optional)
+All workers must be started WITH events using the -E option to celeryd.  To start a worker on the same node you installed this web application do the following:
+
+1.  Change into the cloned CeleryManagement directory (where this README is contained)
+2.  Make sure your virtual environment is active by running:  source ve/bin/activate
+2.  Start a worker node by running:  python manage.py celeryd -E
+
+
+
+
+Old Notes:
 *Need to include celeryconfig.py in this directory.
 
 *celeryconfig.py will be used by djcelerymon.  This should contain AMQP broker information, connecting Settings are similar to ones for celery workers.
