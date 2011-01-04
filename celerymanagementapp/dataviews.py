@@ -108,10 +108,6 @@ _task_list_cache = TaskListCache()
 def get_defined_tasks():
     """Get a list of the currently defined tasks."""
     return _task_list_cache.data
-    #qs = RegisteredTaskType.objects.all()
-    #names = list(set(obj.name for obj in qs))
-    #names.sort()
-    #return names
     
 def get_defined_tasks_live():
     """ Get the list of defined tasks as reported by Celery right now. """
@@ -127,8 +123,6 @@ def get_defined_tasks_live():
 def get_workers_from_database():
     """Get a list of all workers that exist (running or not) in the database."""
     return [unicode(w) for w in _worker_state_cache.data]
-    #workers = WorkerState.objects.all()
-    #return [unicode(w) for w in workers]
     
 def get_workers_live():
     """ Get the list of workers as reported by Celery right now. """
@@ -290,17 +284,10 @@ def worker_list_dataview(request):
     workernames = get_workers_live()
     return _json_response(workernames)
     
-def worker_info_dataview(request, name=None):
-    name = _resolve_name(name)
-    if name:
-        workers = WorkerState.objects.all(hostname=name)
-    else:
-        workers = WorkerState.objects.all()
-    d = dict((unicode(w), {'is_alive': w.is_alive()}) for w in workers)
-    return _json_response(d)
-    
 
 #==============================================================================#
+TASKDEMO_RUNFOR_MAX = 60.*10  # ten minutes
+
 def validate_task_demo_request(json_request):
     """ Helper to task_demo_dataview.  It validates the Json request. """
     # return (is_valid, msg)
@@ -326,6 +313,10 @@ def validate_task_demo_request(json_request):
     defined = get_defined_tasks_live()
     if name not in defined:
         return False, "There is no task by the name: '{0}'.".format(name)
+    if runfor > TASKDEMO_RUNFOR_MAX:
+        msg =  'The task runfor value, {0}, exceeds the '.format(runfor)
+        msg += 'maximum allowable value of {0}.'.format(TASKDEMO_RUNFOR_MAX)
+        return False, msg
     
     return True, ""
     

@@ -22,13 +22,11 @@ class Camera(DjCeleryCamera):
     TaskState = DispatchedTask
     
     def __init__(self, *args, **kwargs):
-        ##print >> sys.stderr, 'Camera.__init__(): creating celerymanagementapp.Camera'
         super(Camera, self).__init__(*args, **kwargs)
         self.shutter_count = 0
         self.refresh_regtasks_every = REFRESH_REGISTERED_TASKS_EVERY
             
     def on_shutter(self, state):
-        ##print >> sys.stderr, 'Camera.on_shutter(): shutter triggered'
         super(Camera, self).on_shutter(state)
         if (self.shutter_count % self.refresh_regtasks_every) == 0:
             self.refresh_registered_tasks()
@@ -94,6 +92,7 @@ class Camera(DjCeleryCamera):
     def clear_old_registered_tasks(self):
         clrhrs = timedelta(hours=CLEAR_REGISTERED_TASKS_AFTER)
         cleartime = datetime.now() - clrhrs
+        print 'cleartime: {0}'.format(cleartime)
         RegisteredTaskType.objects.filter(modified__lt=cleartime).delete()
 
     
@@ -101,7 +100,6 @@ class Camera(DjCeleryCamera):
 # evcam function taken from celery.events.snapshot
 def evcam(camera, freq=1.0, maxrate=None, loglevel=0,
         logfile=None, app=None):
-    ##print >> sys.stderr, 'evcam()...'
     app = app_or_default(app)
     if not isinstance(loglevel, int):
         loglevel = LOG_LEVELS[loglevel.upper()]
@@ -109,28 +107,23 @@ def evcam(camera, freq=1.0, maxrate=None, loglevel=0,
                                   logfile=logfile,
                                   name="celery.evcam")
     logger.info(
-        "-> cmevcam: Taking snapshots with %s (every %s secs.)\n" % (
+        "-> cmrun: Taking snapshots with %s (every %s secs.)\n" % (
             camera, freq))
     
-    ##print >> sys.stderr, 'evcam: creating state'
     state = State()
     cam = instantiate(camera, state, app=app,
                       freq=freq, maxrate=maxrate, logger=logger)
     cam.install()
     conn = app.broker_connection()
-    ##print >> sys.stderr, 'evcam: creating event receiver'
     recv = app.events.Receiver(conn, handlers={"*": state.event})
     try:
         try:
-            ##print >> sys.stderr, 'evcam: capturing events'
             recv.capture(limit=None)
         except KeyboardInterrupt:
             raise SystemExit
     finally:
-        ##print >> sys.stderr, 'exc_info: {0}'.format(sys.exc_info())
         import traceback
         traceback.print_exc()
-        ##print >> sys.stderr, 'evcam: cleaning up'
         cam.cancel()
         conn.close()
 
