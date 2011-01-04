@@ -17,11 +17,8 @@ def clear_results(results):
     """ Clear the results from the given iterable. Returns the number of 
         exceptions found.
     """
-    ##print 'clearing results...'
-    ##print 'results length: {0}'.format(len(results))
     errors = 0
     for r in results:
-        ##print 'clearing result.'
         try:
             r.get(timeout=1.0)
         except TimeoutError:
@@ -34,9 +31,6 @@ def clear_results(results):
 
 def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, kwargs=None):
     print 'celerymanagement.demo_dispatch::  task: {0}'.format(taskname)
-    ##print ' ::  options: {0}'.format(options)
-    ##print ' ::  args:    {0}'.format(args)
-    ##print ' ::  kwargs:  {0}'.format(kwargs)
     
     options = options or {}
     args = args or []
@@ -67,23 +61,15 @@ def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, kwargs=No
     errors_on_result = 0
     results = []
     sleep_fudge_factor = 0.1
-    #publisher = 
-    ##lambd = 1./rate
     start = time.time()  # minimize the code between this and the loop below
     endtime = start + runfor
     next_dispatch = start
-    
-    ##print 'time:    {0}'.format(time.time())
-    ##print 'endtime: {0}'.format(endtime)
     
     # the loop...
     while time.time() < endtime:
         
         try:
             r = send_task(args=args, kwargs=kwargs, **options)
-            print 'Task state: {0}'.format(r.state)
-            if r.failed():
-                errors_on_send += 1
             results.append(r)
             count += 1
         except:
@@ -111,7 +97,6 @@ def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, kwargs=No
             # wait for next launch
             pass
     
-    ##print 'celerymanagement.demo_dispatch::  finished loop'
     total_time = time.time() - start
     obj.elapsed = total_time
     obj.tasks_sent = count
@@ -119,7 +104,6 @@ def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, kwargs=No
     obj.timestamp = datetime.datetime.now()
     obj.save()
     
-    ##print 'celerymanagement.demo_dispatch::  saved model'
     # We must clear the results.  If a task produces results, those results 
     # stick around in the system until they're read.
     if not task_ignores_results:
@@ -128,7 +112,6 @@ def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, kwargs=No
         print msg
         errors_on_result = clear_results(results)
             
-    ##print 'celerymanagement.demo_dispatch::  cleared results'
     obj.errors_on_result = errors_on_result
     obj.completed = True
     obj.timestamp = datetime.datetime.now()
