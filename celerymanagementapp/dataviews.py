@@ -209,18 +209,15 @@ def create_outofbandworker(request):
         if new_obj.is_valid():
             new_obj.save()
             OutOfBandWorkers = OutOfBandWorkerNode.objects.all()
-            return render_to_response('celerymanagementapp/configure.html',
-                {'outofbandworkernode_form': new_obj,
-                "outofbandworkernodes" : OutOfBandWorkers,
-                "load_test_data" : "true" },
-                context_instance=RequestContext(request))
+            return HttpResponse("success")
         else:
-            OutOfBandWorkers = OutOfBandWorkerNode.objects.all()
-            return render_to_response('celerymanagementapp/configure.html',
-                {'outofbandworkernode_form': new_obj,
-                "outofbandworkernodes" : OutOfBandWorkers,
-                "load_test_data" : "true" },
-                context_instance=RequestContext(request))
+            errors = []
+            for field in new_obj:
+                errors.append({ 'field' : field.html_name,
+                                'error' : field.errors })
+            failed = { 'failure' : errors }
+            json = simplejson.dumps(failed)
+            return HttpResponse("<textarea>" + json + "</textarea>")
 
 def worker_start(request):
     """Find an available node and start a worker process"""
