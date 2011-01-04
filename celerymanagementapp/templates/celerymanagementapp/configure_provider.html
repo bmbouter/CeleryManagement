@@ -4,9 +4,9 @@
         </header>
         <div class="workerHeader">
             IP Address
-            <a id="createNewOutOfBand"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png">New Worker Node</img></a>
+            <a id="createNewProvider"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png">New Worker Node</img></a>
         </div>
-        <form method="POST" enctype="multipart/form-data" class="outOfBandForm" id="blankOutOfBandForm" action="/celerymanagementapp/outofbandworker/">
+        <form method="POST" enctype="multipart/form-data" class="providerForm" id="blankProviderForm" action="/celerymanagementapp/outofbandworker/">
             {% for field in outofbandworkernode_form %}
             {% csrf_token %}
             <div class="fieldWrapper">
@@ -17,7 +17,7 @@
                 </div>
             </div>
             {% endfor %}
-            <input type="submit" id="submitOutOfBandButton" class="button">
+            <input type="submit" id="submitProviderButton" class="button">
         </form>
         {% for worker in outofbandworkernodes %}
         <div class="workerNode" >
@@ -25,7 +25,7 @@
             <a class="editWorkerNode" id="{{ worker.worker.ip }}_deleteWorkerNode">Delete</a>
             <a class="editWorkerNode" id="{{ worker.worker.ip }}_workerNode">Edit</a>
         </div>
-        <form method="POST" enctype="multipart/form-data" class="outOfBandForm" id="{{ worker.worker.ip }}_workerNodeForm">
+        <form method="POST" enctype="multipart/form-data" class="providerForm" id="{{ worker.worker.ip }}_workerNodeForm">
             {% for field in worker.workerForm %}
             {% csrf_token %}
             <div class="fieldWrapper">
@@ -35,7 +35,7 @@
                 </div>
             </div>
             {% endfor %}
-            <button class="submitOutOfBandButtonEdit" class="button">Submit</button>
+            <button class="submitProviderButtonEdit" class="button">Submit</button>
         </form>
         {% endfor %}
     </div>

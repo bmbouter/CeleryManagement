@@ -81,7 +81,9 @@ CMA.Core.setupEvents = function(){
 
 
     $(window).resize(function() {
-        $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 10) + "px");
+        if( $(window).width() > $('#container').css("min-width").split("px")[0] ){
+            $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 20) + "px");
+        } 
         if( $(window).height() > $('#container').css("min-height").split("px")[0] ){
             $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
         } else {
@@ -92,17 +94,34 @@ CMA.Core.setupEvents = function(){
 
 CMA.Core.setupFormEvents = function(){
     var successFor = function(data){
-        if( !data.failure ){
+        if( !data.hasOwnProperty("failure") ){
             console.log("success");
-            
         } else {
-            for( var i=0; i < data.failure.length; i++){
-                console.log(data.failure[i].error);
+            var i = 0,
+                elem,
+                length = data.failure.length;
+            
+            for( i=0; i < length; i += 1){
+                elem = document.getElementById(data.failure[i].field + "_error");
+                $(elem).text(function(){
+                    var errLength = data.failure[i].error.length,
+                        text = "";
+                    for( j=0; j < errLength; j += 1){
+                        text += data.failure[i].error[j];
+                    }
+                    return text;
+                });
+                if( $(elem).text() !== ""){                
+                    $(elem).show();
+                } else {
+                    $(elem).hide();
+                }
             }
         }
     };
 
     $('.outOfBandForm').hide();
+
     $('#blankOutOfBandForm').ajaxForm({
         dataType: 'json',
         url: CMA.Core.create_out_of_band_worker_url,
@@ -110,21 +129,27 @@ CMA.Core.setupFormEvents = function(){
     });
 
     $('#createNewOutOfBand').click(function() {
+        var formHeight = $('#blankOutOfBandForm').height();
         $('#blankOutOfBandForm').animate({
                 height: "toggle",
             },
             500,
-            function(){}
+            function(){
+                $('#blankOutOfBandForm').css("height", formHeight + "px");
+            }
         );
     });
 
     $('.editWorkerNode').click(function(){
         var elem = document.getElementById($(this).attr("id") + "Form");
+        var formHeight = $(elem).height();
         $(elem).animate({
             height: "toggle",
             },
             500,
-            function() {}
+            function(){
+                $(elem).css("height", formHeight + "px");
+            }
         );
     });
 }

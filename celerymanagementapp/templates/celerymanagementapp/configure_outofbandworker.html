@@ -1,5 +1,5 @@
     <div id="OutofBand">
-        <header class="header">
+        <header>
             Out of Band
         </header>
         <div class="workerHeader">
@@ -11,13 +11,14 @@
             {% csrf_token %}
             <div class="fieldWrapper">
                 <div class="field">
-                    {{ field.label_tag }} {{ field }}
-                    <!--<label id="{{ field.label }}_error"></label>-->
-                    {{ field.errors }}
+                    {{ field.label_tag }} 
+                    {{ field }}
+                    <span class="errorWrapper" id="{{ field.html_name }}_error"></span>
                 </div>
             </div>
             {% endfor %}
-            <input type="submit" id="submitOutOfBandButton" class="button">
+            <button id="submitOutOfBandButton" >Submit</button>
+            <!--<input type="submit" id="submitOutOfBandButton" value="Submit" class="button" />-->
         </form>
         {% for worker in outofbandworkernodes %}
         <div class="workerNode" >
@@ -35,7 +36,7 @@
                 </div>
             </div>
             {% endfor %}
-            <button class="submitOutOfBandButtonEdit" class="button">Submit</button>
+            <input type="submit" class="submitOutOfBandButtonEdit" value="Submit"/>
         </form>
         {% endfor %}
     </div>
