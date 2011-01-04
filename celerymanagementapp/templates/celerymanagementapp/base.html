@@ -30,6 +30,9 @@
             {% if workername %}
                 CMACore.workername = "{{ workername }}";
             {% endif %}
+            {% if CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE %}
+                CMACore.USE_MODE = "{{ CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE }}";
+            {% endif %}
         </script>
 
         {% block extrajs %}

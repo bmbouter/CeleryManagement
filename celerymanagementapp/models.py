@@ -1,4 +1,8 @@
 import datetime
+import socket
+
+import libcloud.types
+import libcloud.providers
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -62,7 +66,7 @@ class DispatchedTask(models.Model):
         verbose_name_plural = _(u"tasks")
         get_latest_by = "tstamp"
         ordering = ["-tstamp"]
-        
+
 class OutOfBandWorkerNode(models.Model):
     """An out-of-band Worker Node"""
     ip = models.IPAddressField(_(u"IP address"), unique=True)
@@ -81,6 +85,11 @@ class OutOfBandWorkerNode(models.Model):
         return self.ip
 
     def clean(self):
+        try:
+            socket.inet_aton(self.ip)
+        except:
+            from django.core.exceptions import ValidationError
+            raise ValidationError("%s is not a valid IP address" % self.ip)
         ssh = self._get_SSH_Object()
         if not ssh.ssh_avail():
             from django.core.exceptions import ValidationError
@@ -104,6 +113,69 @@ class OutOfBandWorkerNode(models.Model):
         """SSH's to the Node and runs the celeryd_stop commands"""
         ssh = self._get_SSH_Object()
         return ssh.ssh_run_command(self.celeryd_status_cmd.split(' '))
+        
+class Provider(models.Model):
+    """Represents a infrastructure provider for libcloud"""
+
+    PROVIDER_CHOICES = (
+        ('dreamhost', 'DreamHost'),
+        ('dummy', 'Dummy Driver'),
+        ('ec2', 'Amazon EC2'),
+        ('ecp', 'Enomaly ECP'),
+        ('elastichosts', 'ElasticHosts'),
+        ('gogrid', 'GoGrid'),
+        ('ibm_sbc', 'IBM Developer Cloud'),
+        ('linode', 'Linode'),
+        ('opennebula', 'OpenNebula'),
+        ('rackspace', 'Rackspace'),
+        ('rimuhosting', 'RimuHosting'),
+        ('slicehost', 'Slicehost'),
+        ('softlayer', 'Softlayer'),
+        ('vcloud', 'VMware vCloud'),
+        ('voxel', 'Voxel VoxCloud'),
+        ('vpsnet', 'VPS.net'),
+    )
+
+    username = models.CharField(_(u"username"),
+            max_length=128)
+    password = models.CharField(_(u"password"),
+            max_length=128)
+    provider = models.CharField(max_length=32, choices=PROVIDER_CHOICES)
+    image_id = models.CharField(_(u"image id"),
+            max_length=64)
+
+    def clean(self):
+        import pdb;pdb.set_trace()
+        from django.core.exceptions import ValidationError
+        raise ValidationError("Invalid Provider Credentials")
+
+    def __unicode__(self):
+        return self.driver
+
+    @property
+    def conn(prov):
+        """Returns a libcloud driver connection"""
+        provider = libcloud.types.Provider.__getattr__[self.provider]
+        Driver = libcloud.providers.get_driver(provider)
+        return Driver(self.username, self.password)
+
+    def create_vm(self):
+        """Creates and starts a VM on Provider"""
+        new_vm = self.conn.create_node(image=self.image_id, size=sizes[0]) 
+        return InBandWorkerNode(instance_id=new_vm.instance_id, provider=self)
+
+class InBandWorkerNode(OutOfBandWorkerNode):
+    instance_id = models.CharField(_(u"instance id"),
+            max_length=64)
+    provider = models.ForeignKey('celerymanagementapp.Provider')
+
+    def __unicode__(self):
+        return '%s on %s' % (self.ip, self.provider.name)
+
+    def delete(self, *args, **kwargs):
+        """Delete's the running virtual machine"""
+        self.provider.conn.destroy()
+        super(Blog, self).delete(*args, **kwargs)
 
 # class DefinedTask(models.Model):
     # """A task type that has been defined."""
