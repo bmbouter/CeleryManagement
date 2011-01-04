@@ -1,64 +1,64 @@
-var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
+CMA.Core = (typeof CMA.Core === "undefined" || !CMA.Core) ? {} : CMA.Core;
 
-CMACore.loadUrls = function() {
-    CMACore.root_url = "/celerymanagementapp/";
-    CMACore.get_tasks_url = CMACore.root_url + "task/all/list/";
-    CMACore.get_workers_url = CMACore.root_url + "worker/all/list/";
-    CMACore.tasks_per_worker_url = CMACore.root_url + "task/all/dispatched/byworker/count/";
-    CMACore.task_url = CMACore.root_url + "view/dispatched_tasks/";
-    CMACore.pending_tasks_url = CMACore.root_url + "task/all/dispatched/pending/count/";
-    CMACore.worker_processes_url = CMACore.root_url + "worker/all/subprocess/count/";
-    CMACore.shutdown_worker_url = CMACore.root_url + "worker/<placeHolder>/shutdown/";
-    CMACore.query_dispatched_tasks_url = CMACore.root_url + "xy_query/dispatched_tasks/";
-    CMACore.task_url = "/celerymanagementapp/view/task/";
-    CMACore.worker_url = "/celerymanagementapp/view/task/";
-    CMACore.create_out_of_band_worker_url = CMACore.root_url + "outofbandworker/";
+CMA.Core.loadUrls = function() {
+    CMA.Core.root_url = "/celerymanagementapp/";
+    CMA.Core.get_tasks_url = CMA.Core.root_url + "task/all/list/";
+    CMA.Core.get_workers_url = CMA.Core.root_url + "worker/all/list/";
+    CMA.Core.tasks_per_worker_url = CMA.Core.root_url + "task/all/dispatched/byworker/count/";
+    CMA.Core.task_url = CMA.Core.root_url + "view/dispatched_tasks/";
+    CMA.Core.pending_tasks_url = CMA.Core.root_url + "task/all/dispatched/pending/count/";
+    CMA.Core.worker_processes_url = CMA.Core.root_url + "worker/all/subprocess/count/";
+    CMA.Core.shutdown_worker_url = CMA.Core.root_url + "worker/<placeHolder>/shutdown/";
+    CMA.Core.query_dispatched_tasks_url = CMA.Core.root_url + "xy_query/dispatched_tasks/";
+    CMA.Core.task_url = "/celerymanagementapp/view/task/";
+    CMA.Core.worker_url = "/celerymanagementapp/view/task/";
+    CMA.Core.create_out_of_band_worker_url = CMA.Core.root_url + "outofbandworker/";
 }
 
-CMACore.loadTestUrls = function(){
-    CMACore.root_url = "/celerymanagementapp/site_media/test_data/";
-    CMACore.post_root_url = "/celerymanagementapp/test/post/";
-    CMACore.get_tasks_url = CMACore.root_url + "tasks.json";
-    CMACore.get_workers_url = CMACore.root_url + "workers.json";
-    CMACore.tasks_per_worker_url = CMACore.root_url + "tasks_per_worker.json";
-    CMACore.pending_tasks_url = CMACore.root_url + "tasks_pending.json";
-    CMACore.worker_processes_url = CMACore.root_url + "worker_processes.json";
-    CMACore.shutdown_worker_url = CMACore.post_root_url + "worker/<placeHolder>/shutdown/";
-    CMACore.query_dispatched_tasks_url = CMACore.post_root_url + "xy_query/dispatched_tasks/";
-    CMACore.task_url = "/celerymanagementapp/test/view/task/";
-    CMACore.worker_url = "/celerymanagementapp/test/view/worker/";
-    CMACore.chart_data_url = CMACore.root_url + "chart/enumerate-1.json";
-    CMACore.create_out_of_band_worker_url = CMACore.post_root_url + "outofbandworker/";
+CMA.Core.loadTestUrls = function(){
+    CMA.Core.root_url = "/celerymanagementapp/site_media/test_data/";
+    CMA.Core.post_root_url = "/celerymanagementapp/test/post/";
+    CMA.Core.get_tasks_url = CMA.Core.root_url + "tasks.json";
+    CMA.Core.get_workers_url = CMA.Core.root_url + "workers.json";
+    CMA.Core.tasks_per_worker_url = CMA.Core.root_url + "tasks_per_worker.json";
+    CMA.Core.pending_tasks_url = CMA.Core.root_url + "tasks_pending.json";
+    CMA.Core.worker_processes_url = CMA.Core.root_url + "worker_processes.json";
+    CMA.Core.shutdown_worker_url = CMA.Core.post_root_url + "worker/<placeHolder>/shutdown/";
+    CMA.Core.query_dispatched_tasks_url = CMA.Core.post_root_url + "xy_query/dispatched_tasks/";
+    CMA.Core.task_url = "/celerymanagementapp/test/view/task/";
+    CMA.Core.worker_url = "/celerymanagementapp/test/view/worker/";
+    CMA.Core.chart_data_url = CMA.Core.root_url + "chart/enumerate-1.json";
+    CMA.Core.create_out_of_band_worker_url = CMA.Core.post_root_url + "outofbandworker/";
 }
 
-CMACore.getTasks = function(callbackFunction){
-    $.getJSON(CMACore.get_tasks_url, callbackFunction);
+CMA.Core.getTasks = function(callbackFunction){
+    $.getJSON(CMA.Core.get_tasks_url, callbackFunction);
 }
 
-CMACore.getWorkers = function(callbackFunction){
-    $.getJSON(CMACore.get_workers_url, callbackFunction);
+CMA.Core.getWorkers = function(callbackFunction){
+    $.getJSON(CMA.Core.get_workers_url, callbackFunction);
 }
 
-CMACore.getTasksPerWorker = function(callbackFunction){
-    $.getJSON(CMACore.tasks_per_worker_url, callbackFunction);
+CMA.Core.getTasksPerWorker = function(callbackFunction){
+    $.getJSON(CMA.Core.tasks_per_worker_url, callbackFunction);
 }
 
-CMACore.getPendingTasks = function(callbackFunction){
-    $.getJSON(CMACore.pending_tasks_url, callbackFunction);
+CMA.Core.getPendingTasks = function(callbackFunction){
+    $.getJSON(CMA.Core.pending_tasks_url, callbackFunction);
 }
 
-CMACore.getWorkerProcesses = function(callbackFunction){
-    $.getJSON(CMACore.worker_processes_url, callbackFunction);
+CMA.Core.getWorkerProcesses = function(callbackFunction){
+    $.getJSON(CMA.Core.worker_processes_url, callbackFunction);
 }
 
-CMACore.postShutdownWorker = function(workerName, callbackFunction){
-    $.post(CMACore.shutdown_worker_url.replace("<placeHolder>", workerName), callbackFunction);
+CMA.Core.postShutdownWorker = function(workerName, callbackFunction){
+    $.post(CMA.Core.shutdown_worker_url.replace("<placeHolder>", workerName), callbackFunction);
 }
 
-CMACore.getDispatchedTasksData = function(query, callbackFunction) {
-    $.post(CMACore.query_dispatched_tasks_url, query, callbackFunction);
+CMA.Core.getDispatchedTasksData = function(query, callbackFunction) {
+    $.post(CMA.Core.query_dispatched_tasks_url, query, callbackFunction);
 }
 
-CMACore.postCreateOutOfBandWorkerNode = function(callbackFunction){
-    $.post(CMACore.create_out_of_band_worker_url, $('#blankOutOfBandForm').serialize(), callbackFunction);
+CMA.Core.postCreateOutOfBandWorkerNode = function(callbackFunction){
+    $.post(CMA.Core.create_out_of_band_worker_url, $('#blankOutOfBandForm').serialize(), callbackFunction);
 }

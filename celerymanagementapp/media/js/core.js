@@ -1,101 +1,18 @@
-var CMACore = (typeof CMACore == "undefined" || !CMACore) ? {} : CMACore;
+var CMA = (typeof CMA === "undefined" || !CMA) ? {} : CMA;
+CMA.Core = (typeof CMA.Core === "undefined" || !CMA.Core) ? {} : CMA.Core;
 
 $(document).ready(function() {
 
-    if( typeof CMACore.testUrls == "undefined" ){
-        CMACore.loadUrls();
-    } else {
-        CMACore.loadTestUrls();
-    }
-    
-    CMACore.expandedTasks = false;
-    var expandedWorkers = false;
-    $('textarea').attr("rows", "3");
-    $('textarea').css("resize", "none");
+    CMA.Core.init();
+    CMA.Core.setupEvents();
+    CMA.Core.setupFormEvents();
 
-
-    $('#taskNavigationMaster').click(function (){
-        if( CMACore.expandedTasks ){
-            $('#taskNavigationMaster').text("+ Tasks");
-            $('#taskNavigation').hide();   
-            CMACore.expandedTasks = false;
-        } else {
-            $('#taskNavigationMaster').text("- Tasks");
-            $('#taskNavigation').show();
-            CMACore.expandedTasks = true;
-        }
-    });
-    $('#workerNavigationMaster').click(function (){
-        if( expandedWorkers ){
-            $('#workerNavigationMaster').text("+ Workers");
-            $('#workerNavigation').hide();   
-            expandedWorkers = false;
-        } else {
-            $('#workerNavigationMaster').text("- Workers");
-            $('#workerNavigation').show();
-            expandedWorkers = true;
-        }
-    });
+    CMA.Core.getTasks(CMA.Core.populateTaskNavigation);
+    CMA.Core.getWorkers(CMA.Core.populateWorkerNavigation);
     
-    var xhr = jQuery.getJSON(CMACore.get_tasks_url);
+    var xhr = jQuery.getJSON(CMA.Core.get_tasks_url);
     var obj = jQuery.parseJSON(xhr.responseText);
-    CMACore.getTasks(populateTaskNavigation);
-    CMACore.getWorkers(populateWorkerNavigation);
 	
-    if( CMACore.taskname != "undefined" ){
-        $('#taskNavigationMaster').click();
-    }
-    if( CMACore.workername != "undefined" ){
-        $('#workerNavigationMaster').click();
-    }
-
-    $('.outOfBandForm').hide();
-    $('#blankOutOfBandForm').ajaxForm({
-        dataType: 'json',
-        url: CMACore.create_out_of_band_worker_url,
-        success: successFor
-    });
-
-    function successFor(data){
-        for( var i=0; i < data.failure.length; i++){
-            console.log(data.failure[i].error);
-        }
-    }
-
-    $('#createNewOutOfBand').click(function() {
-        $('#blankOutOfBandForm').animate({
-                height: "toggle",
-            },
-            500,
-            function(){}
-        );
-    });
-    $('.editWorkerNode').click(function(){
-        var elem = document.getElementById($(this).attr("id") + "Form");
-        $(elem).animate({
-            height: "toggle",
-            },
-            500,
-            function() {}
-        );
-    });
-
-    $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 10) + "px");
-    if( $(window).height() > $('#container').css("min-height").split("px")[0] ){
-        $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
-    } else {
-        $('#navigation').css("height", $('#container').css("min-height"));
-    }
-
-    $(window).resize(function() {
-        $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 10) + "px");
-        if( $(window).height() > $('#container').css("min-height").split("px")[0] ){
-            $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
-        } else {
-            $('#navigation').css("height", $('#container').css("min-height"));
-        }
-    });
-    
 });
 
 function createTable(data) {
@@ -109,36 +26,140 @@ function createTable(data) {
     });
 }
 
-function populateTaskNavigation(data){
+CMA.Core.init = function(){
+    if( typeof CMA.Core.testUrls === "undefined" ){
+        CMA.Core.loadUrls();
+    } else {
+        CMA.Core.loadTestUrls();
+    }
+    
+    $('textarea').attr("rows", "3");
+    $('textarea').css("resize", "none");
+
+    CMA.Core.expandedTasks = false;
+    CMA.Core.expandedWorkers = false;
+    
+    $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 10) + "px");
+    if( $(window).height() > $('#container').css("min-height").split("px")[0] ){
+        $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
+    } else {
+        $('#navigation').css("height", $('#container').css("min-height"));
+    }
+}
+
+CMA.Core.setupEvents = function(){
+    
+    $('#taskNavigationMaster').click(function (){
+        if( CMA.Core.expandedTasks ){
+            $('#taskNavigationMaster').text("+ Tasks");
+            $('#taskNavigation').hide();   
+            CMA.Core.expandedTasks = false;
+        } else {
+            $('#taskNavigationMaster').text("- Tasks");
+            $('#taskNavigation').show();
+            CMA.Core.expandedTasks = true;
+        }
+    });
+    $('#workerNavigationMaster').click(function (){
+        if( CMA.Core.expandedWorkers ){
+            $('#workerNavigationMaster').text("+ Workers");
+            $('#workerNavigation').hide();   
+            CMA.Core.expandedWorkers = false;
+        } else {
+            $('#workerNavigationMaster').text("- Workers");
+            $('#workerNavigation').show();
+            CMA.Core.expandedWorkers = true;
+        }
+    });
+    
+    if( CMA.Core.taskname !== "undefined" ){
+        $('#taskNavigationMaster').click();
+    }
+    if( CMA.Core.workername !== "undefined" ){
+        $('#workerNavigationMaster').click();
+    }
+
+
+    $(window).resize(function() {
+        $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 10) + "px");
+        if( $(window).height() > $('#container').css("min-height").split("px")[0] ){
+            $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
+        } else {
+            $('#navigation').css("height", $('#container').css("min-height"));
+        }
+    });
+}
+
+CMA.Core.setupFormEvents = function(){
+    var successFor = function(data){
+        if( !data.failure ){
+            console.log("success");
+            
+        } else {
+            for( var i=0; i < data.failure.length; i++){
+                console.log(data.failure[i].error);
+            }
+        }
+    };
+
+    $('.outOfBandForm').hide();
+    $('#blankOutOfBandForm').ajaxForm({
+        dataType: 'json',
+        url: CMA.Core.create_out_of_band_worker_url,
+        success: successFor
+    });
+
+    $('#createNewOutOfBand').click(function() {
+        $('#blankOutOfBandForm').animate({
+                height: "toggle",
+            },
+            500,
+            function(){}
+        );
+    });
+
+    $('.editWorkerNode').click(function(){
+        var elem = document.getElementById($(this).attr("id") + "Form");
+        $(elem).animate({
+            height: "toggle",
+            },
+            500,
+            function() {}
+        );
+    });
+}
+
+CMA.Core.populateTaskNavigation = function(data){
     var color = "#7D7D7D";
     for( item in data ){
-        if( data[item] == CMACore.taskname ){
+        if( data[item] === CMA.Core.taskname ){
             color = "red";
         } else {
             color = "#7D7D7D";
         }
         if( data[item].length > 15 ){
             var task_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-            $('#taskNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMACore.task_url + data[item] + "/'>" + task_text + "</a></li>");
+            $('#taskNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.task_url + data[item] + "/'>" + task_text + "</a></li>");
         } else {
-            $('#taskNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMACore.task_url + data[item] + "/'>" + data[item] + "</a></li>");
+            $('#taskNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.task_url + data[item] + "/'>" + data[item] + "</a></li>");
         }
     }
 }
 
-function populateWorkerNavigation(data){
+CMA.Core.populateWorkerNavigation = function(data){
     var color = "#7D7D7D";
     for( item in data ){
-        if( data[item] == CMACore.workername ){
+        if( data[item] === CMA.Core.workername ){
             color = "red";
         } else {
             color = "#7D7D7D";
         }
         if( data[item].length > 15 ){
             var worker_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-            $('#workerNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMACore.worker_url + data[item] + "/'>" + worker_text + "</a></li>");
+            $('#workerNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.worker_url + data[item] + "/'>" + worker_text + "</a></li>");
         } else {
-            $('#workerNavigation').append("<li><a id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMACore.worker_url + data[item] + "/'>" + data[item] + "</a></li>");
+            $('#workerNavigation').append("<li><a id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.worker_url + data[item] + "/'>" + data[item] + "</a></li>");
         }
     }
 }
+
