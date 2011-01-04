@@ -23,7 +23,7 @@ def configure(request):
     out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
     OutOfBandWorkers = []
     for i in range(0,10):
-        worker = OutOfBandWorkerNode(ip="4.5.6." + str(i), username="Test Username")
+        worker = OutOfBandWorkerNode(ip="4.5.6." + str(i), celeryd_username="Test Username")
         workerForm = OutOfBandWorkerNodeForm(instance=worker)
         OutOfBandWorkers.append({ "worker" : worker, "workerForm" : workerForm })
     return render_to_response('celerymanagementapp/configure.html',
