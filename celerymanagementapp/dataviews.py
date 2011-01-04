@@ -31,7 +31,7 @@ from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 from celerymanagementapp import tasks, jsonutil
 from celerymanagementapp.models import OutOfBandWorkerNode, RegisteredTaskType
 from celerymanagementapp.models import TaskDemoGroup
-from celerymanagementapp.forms import OutOfBandWorkerNodeForm
+from celerymanagementapp.forms import OutOfBandWorkerNodeForm, InBandWorkerNodeForm
 
 #==============================================================================#
 def _json_from_post(request, *args, **kwargs):
@@ -188,6 +188,26 @@ def worker_subprocesses_dataview(request, name=None):
         
     return _json_response(workercounts)
 
+def create_provider(request):
+    """Create a Provider"""
+    if request.method == 'POST':
+        new_obj = ProviderForm(request.POST, request.FILES)
+        if new_obj.is_valid():
+            new_obj.save()
+            providers = Provider.objects.all()
+            return render_to_response('celerymanagementapp/configure.html',
+                {'provider_form': new_obj,
+                "providers" : providers,
+                "load_test_data" : "true" },
+                context_instance=RequestContext(request))
+        else:
+            providers = Providers.objects.all()
+            return render_to_response('celerymanagementapp/configure.html',
+                {'provider_form': new_obj,
+                "providers" : providers,
+                "load_test_data" : "true" },
+                context_instance=RequestContext(request))
+
 def create_outofbandworker(request):
     """Create an OutOfBandWorker"""
     if request.method == 'POST':
@@ -207,7 +227,6 @@ def create_outofbandworker(request):
                 "outofbandworkernodes" : OutOfBandWorkers,
                 "load_test_data" : "true" },
                 context_instance=RequestContext(request))
-
 
 def worker_start(request):
     """Find an available node and start a worker process"""
