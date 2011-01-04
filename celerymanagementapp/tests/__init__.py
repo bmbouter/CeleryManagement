@@ -5,10 +5,10 @@ from celerymanagementapp.tests import base
 #==============================================================================#
 # Test modules...
 from celerymanagementapp.tests import stats, segmentize, jsonquery, dataviews
-from celerymanagementapp.tests import jsonutil
+from celerymanagementapp.tests import jsonutil, policy
 
 # List of all test modules containing tests.  
-_testmodules = [stats, segmentize, jsonquery, dataviews, jsonutil]
+_testmodules = [stats, segmentize, jsonquery, dataviews, jsonutil, policy]
 
 # Import all test cases so they appear in this module.  This appears to be 
 # needed for Hudson automated testing.  Do this instead of just: 
