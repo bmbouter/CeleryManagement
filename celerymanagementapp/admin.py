@@ -67,11 +67,22 @@ class DispatchedTaskAdmin(admin.ModelAdmin):
 class RegisteredTaskTypeAdmin(admin.ModelAdmin):
     list_display = ('worker','name','modified')
     list_filter = ('worker','name','modified')
+
+class ProviderAdmin(admin.ModelAdmin):
+    exclude = ('ip', 'active')
+    fieldsets = (
+        ('Provider Settings', {
+            'fields': ('provider_name', 'provider_username', 'provider_password')
+        }),
+        ('Image Settings', {
+            'fields': ('image_id', 'celeryd_username', 'ssh_key', 'celeryd_start_cmd', 'celeryd_stop_cmd', 'celeryd_status_cmd')
+        }),
+    )
     
 admin.site.register(DispatchedTask, DispatchedTaskAdmin)
 admin.site.register(OutOfBandWorkerNode)
 admin.site.register(InBandWorkerNode)
-admin.site.register(Provider)
+admin.site.register(Provider, ProviderAdmin)
 admin.site.register(RegisteredTaskType, RegisteredTaskTypeAdmin)
 admin.site.register(TaskDemoGroup)
 
