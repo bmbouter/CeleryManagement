@@ -210,14 +210,14 @@ class SectionParser(object):
         
     def process_one_subsection(self, tokens):
         """ tokens is a list of tokens (*not* a list of lists of tokens). """
-        #import debug_help
+        import debug_help
         self.check_tokens(tokens)
         tokens = self.correct_tokens(tokens)
         text = self.assemble_tokens(tokens)
         text = self.correct_text(text)
         tree = self.create_ast(text)
-        #print debug_help.write_ast(tree)
-        #print ''
+        print debug_help.write_ast(tree)
+        print ''
         tree = self.fix_linenumbers_ast(tree)
         tree = self.correct_ast(tree)
         self.check_ast(tree)
@@ -267,6 +267,12 @@ class SectionParser(object):
         return tree
         
     def fix_linenumbers_ast(self, tree):
+        # Hack because of Python bug(?).  When creating the tree, some nodes do 
+        # not have the _attributes field.
+        for node in ast.walk(tree):
+            if not hasattr(node, '_attributes'):
+                node._attributes = ()
+        
         tree = ast.fix_missing_locations(tree)
         
         for node in ast.walk(tree):

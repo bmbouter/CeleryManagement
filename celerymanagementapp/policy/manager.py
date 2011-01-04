@@ -1,3 +1,10 @@
+import datetime
+import time
+
+from django.core.exceptions import ObjectDoesNotExist
+
+from celerymanagementapp.models import PolicyModel
+from celerymanagementapp.policy import policy
 
 class Entry(object):
     def __init__(self, policy, modified, last_run_time=None):
@@ -5,11 +12,8 @@ class Entry(object):
         self.last_run_time = last_run_time
         self.modified = modified
         
-    def next_run_time(self):
-        self.policy.next_run_time(self.last_run_time)
-        
-    def is_due(self, current_time):
-        return current_time > self.next_run_time()
+    def is_due(self):
+        return self.policy.is_due(self.last_run_time)
         
     def set_last_run_time(self, current_time):
         self.last_run_time = current_time
@@ -30,15 +34,15 @@ class Registry(object):
     def register(self, obj):
         assert obj.enabled
         assert obj.id not in self.data
-        policy = Policy(source=obj.source, id=obj.id)
-        entry = Entry(policy=policy, modified=obj.modified, last_run_time=obj.last_run_time)
+        policyobj = policy.Policy(source=obj.source, id=obj.id, name=obj.name)
+        entry = Entry(policy=policyobj, modified=obj.modified, last_run_time=obj.last_run_time)
         self.data[obj.id] = entry
         
     def reregister(self, obj):
         assert obj.enabled
         entry = self.data[obj.id]
         assert obj.last_run_time is None or obj.last_run_time <= entry.last_run_time
-        entry.policy.reinit(source=obj.source)
+        entry.policy.reinit(source=obj.source, name=obj.name)
         entry.update(modified=obj.modified)
         
     def unregister(self, id):
@@ -56,7 +60,7 @@ class Registry(object):
                 elif not obj.enabled:
                     self.unregister(id)
                     updated = True
-            except ...:
+            except ObjectDoesNotExist:
                 self.unregister(id)
                 updated = True
         
@@ -76,44 +80,54 @@ class Registry(object):
         obj.modified, entry.modified = current_time, current_time
         obj.save()
         
+    def close(self):
+        self.refresh()
+        
 
+MIN_LOOP_SLEEP_TIME = 30  # seconds
+MAX_LOOP_SLEEP_TIME = 60*2  # seconds
 
 class PolicyMain(object):
     def __init__(self):
         self.registry = Registry()
-        self.next_run_time = datetime.datetime.now()
+        #self.next_run_delta = 0
+        
+    def __enter__(self):
+        return self
+        
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.registry.close()
         
     def loop(self):
         self.refresh_registry()
-        self.run_ready_policies()
-        sleep()
+        sleeptime = self.run_ready_policies()
+        time.sleep(max(sleeptime,MIN_LOOP_SLEEP_TIME))
         
     def refresh_registry(self):
-        if self.registry.refresh():
-            self.update_next_runtime()
-            
-    def update_next_runtime(self):
-        self.next_run_time = min(entry.next_run_time() for entry in self.registry)
+        self.registry.refresh()
         
     def run_ready_policies(self):
-        now = datetime.datetime.now()
-        if now >= self.next_run_time:
-            modified_ids = []
-            try:
-                for entry in self.registry:
-                    if entry.is_due(now):
-                        self.run_policy(entry.policy)
-                        entry.set_last_run_time(now)
-                        modified_ids.append(entry.policy.id)
-            finally:
-                now = datetime.datetime.now()
-                for id in modified_ids
-                    self.registry.save(id, now)
-                self.update_next_runtime()
+        modified_ids = []
+        run_deltas = []
+        # TODO: put try block on inside of loop, so we can continue with other 
+        # policies if an exception is thrown.
+        try:
+            for entry in self.registry:
+                is_due, next_run_delta = entry.is_due()
+                if is_due:
+                    self.run_policy(entry.policy)
+                    entry.set_last_run_time(now)
+                    modified_ids.append(entry.policy.id)
+                run_deltas.append(next_run_delta)
+        finally:
+            now = datetime.datetime.now()
+            for id in modified_ids:
+                self.registry.save(id, now)
+        return min(run_deltas+[MAX_LOOP_SLEEP_TIME])
             
-    def run_policy(self, policy):
-        if policy.run_condition():
-            policy.run_apply()
+    def run_policy(self, policyobj):
+        if policyobj.run_condition():
+            policyobj.run_apply()
         
         
         

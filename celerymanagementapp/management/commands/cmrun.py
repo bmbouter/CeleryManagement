@@ -1,5 +1,6 @@
 import sys
 
+from multiprocessing import Process
 from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
@@ -14,6 +15,11 @@ class CmEvCommand(celeryev.EvCommand):
         self.set_process_status("cam")
         kwargs["app"] = self.app
         return evcam(*args, **kwargs)
+        
+def run_policy_manager():
+    from celerymanagementapp.policy.manager import PolicyMain
+    with PolicyMain() as main:
+        main.loop()
 
 
 class Command(BaseCommand):
@@ -42,7 +48,21 @@ the database.'''
         options['dump'] = False
         options['prog_name'] = 'cmrun'
             
-        ev = CmEvCommand(app=app)
+        main(*args, **options)
+        
+        
+        
+def main(*args, **options):
+    ev = CmEvCommand(app=app)
+    p = Process(target=run_policy_manager)
+    p.start()
+    try:
         ev.run(*args, **options)
+    finally:
+        p.join()
+
+
+
+
 
 

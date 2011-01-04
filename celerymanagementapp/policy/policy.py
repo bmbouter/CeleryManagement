@@ -1,6 +1,8 @@
 import sys
 import traceback
 
+from celery.schedules import crontab
+
 from celerymanagementapp.policy import parser, exceptions
 
 _policyparser = parser.PolicyParser()
@@ -12,34 +14,39 @@ class Runner(object):
         self.locals = locals
         
     def __call__(self, code, text):
-        # TODO: catch and reformat exceptions
         globals = self.globals.copy()
         locals = self.locals.copy()
         try:
             r = eval(code, globals, locals)
         except exceptions.BaseException:
+            # If the exception is a Policy exception, reraise it.
             raise
         except Exception as e:
             exctype, excval, tb = sys.exc_info()
             fmttb = traceback.extract_tb(tb)
             filename, lineno, funcname, txt_ = fmttb[-1]
+            # If it came from a policy, wrap the exception...
             if filename.startswith('<policy:'):
                 print '[{0}]: {1}'.format(lineno, text[lineno-1])
                 EW = exceptions.ExceptionWrapper
                 raise EW(exctype, msg=e.message, lineno=lineno, 
                          line=text[lineno-1], file=filename)
+            # ...otherwise re-raise the exception.
             else:
                 raise
         return r
         
-_runner = Runner(globals={}, locals={})
+_runner = Runner(globals={}, locals={'crontab': crontab})
 
 class Policy(object):
-    def __init__(self, source=None, schedule_src=None, condition_srcs=None, apply_src=None, id=None):
+    def __init__(self, source=None, schedule_src=None, condition_srcs=None, apply_src=None, id=None, name=None):
         """ Create a policy object. 
         
             If the 'source' arg is not provided, then all three 'schedule_src', 
             'condition_srcs', 'apply_src' must be provided.
+            
+            The 'name' argument must be present when creating new Policies that 
+            do not exist in the database.
             
             source:
                 The source text for the policy.
@@ -67,9 +74,12 @@ class Policy(object):
         """
         self._compile_src(source, schedule_src, condition_srcs, apply_src)
         self.id = id
+        self.name = name
         
-    def reinit(self, source):
+    def reinit(self, source, name):
         assert source is not None
+        assert name is not None
+        self.name = name
         self._compile_src(source=source)
         
     def _compile_src(self, source=None, schedule_src=None, condition_srcs=None, apply_src=None):
@@ -89,8 +99,8 @@ class Policy(object):
     def run_apply(self):
         return _runner(self.apply_code, self.source)
         
-    def next_run_time(self, last_run_time):
-        pass
+    def is_due(self, last_run_time):
+        return self.schedule.is_due(last_run_time)
 
 
 
