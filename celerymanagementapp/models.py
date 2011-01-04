@@ -67,10 +67,9 @@ class DispatchedTask(models.Model):
         get_latest_by = "tstamp"
         ordering = ["-tstamp"]
 
-class OutOfBandWorkerNode(models.Model):
-    """An out-of-band Worker Node"""
-    ip = models.IPAddressField(_(u"IP address"), unique=True)
-    username = models.CharField(_(u"username"),
+class AbstractWorkerNode(models.Model):
+    """An abstract class containing common attributes used by Provider and WorkerNode"""
+    celeryd_username = models.CharField(_(u"username"),
             max_length=64)
     ssh_key = models.FileField("SSH key", upload_to='sshkeys', storage=fs)
     celeryd_start_cmd = models.TextField(_(u"commands to start celeryd"),
@@ -79,6 +78,13 @@ class OutOfBandWorkerNode(models.Model):
             max_length=1024)
     celeryd_status_cmd = models.TextField(
             _(u"commands to report celeryd status"), max_length=1024)
+
+    class Meta:
+        abstract = True
+
+class OutOfBandWorkerNode(AbstractWorkerNode):
+    """An out-of-band Worker Node"""
+    ip = models.IPAddressField(_(u"IP address"), unique=True)
     active = models.BooleanField(_(u"currently active"), default=True)
 
     def __unicode__(self):
@@ -97,7 +103,7 @@ class OutOfBandWorkerNode(models.Model):
 
     def _get_SSH_Object(self):
         return NodeUtil(self.ip, settings.SECURE_UPLOADS + str(self.ssh_key),
-            self.username)
+            self.celeryd_username)
 
     def celeryd_start(self):
         """SSH's to the Node and runs the celeryd_start commands"""
@@ -114,57 +120,75 @@ class OutOfBandWorkerNode(models.Model):
         ssh = self._get_SSH_Object()
         return ssh.ssh_run_command(self.celeryd_status_cmd.split(' '))
         
-class Provider(models.Model):
+class Provider(AbstractWorkerNode):
     """Represents a infrastructure provider for libcloud"""
 
     PROVIDER_CHOICES = (
-        ('dreamhost', 'DreamHost'),
-        ('dummy', 'Dummy Driver'),
-        ('ec2', 'Amazon EC2'),
-        ('ecp', 'Enomaly ECP'),
-        ('elastichosts', 'ElasticHosts'),
-        ('gogrid', 'GoGrid'),
-        ('ibm_sbc', 'IBM Developer Cloud'),
-        ('linode', 'Linode'),
-        ('opennebula', 'OpenNebula'),
-        ('rackspace', 'Rackspace'),
-        ('rimuhosting', 'RimuHosting'),
-        ('slicehost', 'Slicehost'),
-        ('softlayer', 'Softlayer'),
-        ('vcloud', 'VMware vCloud'),
-        ('voxel', 'Voxel VoxCloud'),
-        ('vpsnet', 'VPS.net'),
+        ('DREAMHOST', 'DreamHost'),
+        ('DUMMY', 'Dummy Driver'),
+        ('EC2_US_EAST', 'Amazon EC2 US East'),
+        ('EC2_US_WEST', 'Amazon EC2 US West'),
+        ('EC2_EU_WEST', 'Amazon Europe West'),
+        ('EC2_AP_SOUTHEAST', 'Amazon Asia Pacific Southeast'),
+        ('ECP', 'Enomaly ECP'),
+        ('ELASTICHOSTS_UK1', 'ElasticHosts UK 1'),
+        ('ELASTICHOSTS_UK2', 'ElasticHosts UK 2'),
+        ('ELASTICHOSTS_US1', 'ElasticHosts US 1'),
+        ('GOGRID', 'GoGrid'),
+        ('IBM', 'IBM Developer Cloud'),
+        ('LINODE', 'Linode'),
+        ('OPENNEBULA', 'OpenNebula'),
+        ('RACKSPACE', 'Rackspace'),
+        ('RIMUHOSTING', 'RimuHosting'),
+        ('SLICEHOST', 'Slicehost'),
+        ('SOFTLAYER', 'Softlayer'),
+        ('VOXEL', 'Voxel VoxCloud'),
+        ('VPSNET', 'VPS.net'),
     )
 
-    username = models.CharField(_(u"username"),
+    provider_user_id = models.CharField(_(u"Provider user id"),
+            max_length=128, blank=True)
+    provider_key = models.CharField(_(u"Provider key"),
             max_length=128)
-    password = models.CharField(_(u"password"),
-            max_length=128)
-    provider = models.CharField(max_length=32, choices=PROVIDER_CHOICES)
+    provider_name = models.CharField(_('provider'), max_length=32, choices=PROVIDER_CHOICES)
     image_id = models.CharField(_(u"image id"),
             max_length=64)
 
     def clean(self):
-        import pdb;pdb.set_trace()
-        from django.core.exceptions import ValidationError
-        raise ValidationError("Invalid Provider Credentials")
+        try:
+            conn = self.conn
+        except libcloud.types.InvalidCredsError:
+            from django.core.exceptions import ValidationError
+            raise ValidationError("Invalid Provider Credentials")
 
     def __unicode__(self):
         return self.driver
 
     @property
-    def conn(prov):
-        """Returns a libcloud driver connection"""
-        provider = libcloud.types.Provider.__getattr__[self.provider]
-        Driver = libcloud.providers.get_driver(provider)
-        return Driver(self.username, self.password)
+    def conn(self):
+        """Returns a libcloud driver connection
+
+        This method will raise a libcloud.types.InvalidCredsError if the
+        credentials are not valid.  Anytime this method is called, it should be
+        wrapped in an except statement which should handle cases when the
+        credentials are not correct.
+
+        """
+        p = getattr(libcloud.types.Provider, self.provider_name)
+        Driver = libcloud.providers.get_driver(p)
+        try:
+            return Driver(self.provider_user_id, secret=self.provider_key)
+        except TypeError as type_error:
+            if type_error.args[0] == "__init__() got an unexpected keyword argument 'secret'":
+                #Libcloud doesn't have consistant interfaces so some objects that inherit from Driver need to only take one parameter.  This code is designed to detect and workaround this error.
+                Driver(self.provider_user_id)
 
     def create_vm(self):
         """Creates and starts a VM on Provider"""
         new_vm = self.conn.create_node(image=self.image_id, size=sizes[0]) 
         return InBandWorkerNode(instance_id=new_vm.instance_id, provider=self)
 
-class InBandWorkerNode(OutOfBandWorkerNode):
+class InBandWorkerNode(models.Model):
     instance_id = models.CharField(_(u"instance id"),
             max_length=64)
     provider = models.ForeignKey('celerymanagementapp.Provider')

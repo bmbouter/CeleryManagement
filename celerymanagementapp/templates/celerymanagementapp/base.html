@@ -1,9 +1,11 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" xml:lang="en-us" >
+<!DOCTYPE html>
+<html lang="en">
     <head>
-        <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/reset-min.css" rel="stylesheet" type="text/css" />
-        <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/core.less" rel="stylesheet/less" type="text/css" />
-        <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/fluid_grid.css" rel="stylesheet" type="text/css" />
+        <meta charset="utf-8">
+
+        <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/reset-min.css" rel="stylesheet" />
+        <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/core.less" rel="stylesheet/less" />
+        <link href="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}css/fluid_grid.css" rel="stylesheet" />
         
         {% block extracss %}
         {% endblock extracss %}
@@ -18,20 +20,21 @@
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/json.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/charts.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/formatter.js" ></script>
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.form.js" ></script>
 
         <script>
             {% if load_test_data %}
-               CMACore.testUrls = true;
+               CMA.Core.testUrls = true;
             {% endif %}
 
             {% if taskname %}
-                CMACore.taskname = "{{ taskname }}";
+                CMA.Core.taskname = "{{ taskname }}";
             {% endif %}
             {% if workername %}
-                CMACore.workername = "{{ workername }}";
+                CMA.Core.workername = "{{ workername }}";
             {% endif %}
             {% if CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE %}
-                CMACore.USE_MODE = "{{ CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE }}";
+                CMA.Core.USE_MODE = "{{ CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE }}";
             {% endif %}
         </script>
 

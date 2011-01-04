@@ -20,29 +20,17 @@ def dashboard(request):
             context_instance=RequestContext(request))
 
 def configure(request):
-    if request.method == "POST":
-        if "ip" in request.POST:
-            return HttpResponse("success")
-        else:
-            out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
-            errors = []
-            for field in out_of_band_worker_node_form:
-                errors.append({ 'field' : field.label,
-                                'error' : field.errors })
-            failed = { 'failure' : errors }
-            json = simplejson.dumps(failed)
-            return HttpResponse(json)
-    else:
-        out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
-        OutOfBandWorkers = []
-        for i in range(0,10):
-            worker1 = OutOfBandWorkerNode(ip="4.5.6." + str(i))
-            OutOfBandWorkers.append(worker1);
-        return render_to_response('celerymanagementapp/configure.html',
-                {'outofbandworkernode_form': out_of_band_worker_node_form,
-                "outofbandworkernodes" : OutOfBandWorkers,
-                "load_test_data" : "true" },
-                context_instance=RequestContext(request))
+    out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
+    OutOfBandWorkers = []
+    for i in range(0,10):
+        worker = OutOfBandWorkerNode(ip="4.5.6." + str(i), celeryd_username="Test Username")
+        workerForm = OutOfBandWorkerNodeForm(instance=worker)
+        OutOfBandWorkers.append({ "worker" : worker, "workerForm" : workerForm })
+    return render_to_response('celerymanagementapp/configure.html',
+            {'outofbandworkernode_form': out_of_band_worker_node_form,
+            "outofbandworkernodes" : OutOfBandWorkers,
+            "load_test_data" : "true" },
+            context_instance=RequestContext(request))
 
 def task_view(request, taskname=None):
     return render_to_response('celerymanagementapp/task.html',
@@ -55,6 +43,20 @@ def worker_view(request, workername=None):
             { "load_test_data" : "true",
             "workername" : workername, },
             context_instance=RequestContext(request))
+
+def create_outofbandworker(request):
+    if request.method == "POST":
+        out_of_band_worker_node_form = OutOfBandWorkerNodeForm(request.POST, request.FILES)
+        if out_of_band_worker_node_form.is_valid():
+            return HttpResponse("success")
+        else:
+            errors = []
+            for field in out_of_band_worker_node_form:
+                errors.append({ 'field' : field.html_name,
+                                'error' : field.errors })
+            failed = { 'failure' : errors }
+            json = simplejson.dumps(failed)
+            return HttpResponse(json)
 
 def kill_worker(request, name=None):
     if request.method == 'POST':
