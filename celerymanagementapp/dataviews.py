@@ -29,9 +29,9 @@ from celerymanagementapp.jsonquery.xyquery import JsonXYQuery
 from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 
 from celerymanagementapp import tasks, jsonutil
-from celerymanagementapp.models import OutOfBandWorkerNode, RegisteredTaskType
+from celerymanagementapp.models import OutOfBandWorkerNode, RegisteredTaskType, Provider
 from celerymanagementapp.models import TaskDemoGroup
-from celerymanagementapp.forms import OutOfBandWorkerNodeForm, InBandWorkerNodeForm
+from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
 
 #==============================================================================#
 def _json_from_post(request, *args, **kwargs):
@@ -195,7 +195,7 @@ def create_provider(request):
                 "load_test_data" : "true" },
                 context_instance=RequestContext(request))
         else:
-            providers = Providers.objects.all()
+            providers = Provider.objects.all()
             return render_to_response('celerymanagementapp/configure.html',
                 {'provider_form': new_obj,
                 "providers" : providers,

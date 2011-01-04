@@ -67,9 +67,8 @@ class DispatchedTask(models.Model):
         get_latest_by = "tstamp"
         ordering = ["-tstamp"]
 
-class OutOfBandWorkerNode(models.Model):
-    """An out-of-band Worker Node"""
-    ip = models.IPAddressField(_(u"IP address"), unique=True)
+class AbstractWorkerNode(models.Model):
+    """An abstract class containing common attributes used by Provider and WorkerNode"""
     celeryd_username = models.CharField(_(u"username"),
             max_length=64)
     ssh_key = models.FileField("SSH key", upload_to='sshkeys', storage=fs)
@@ -79,6 +78,13 @@ class OutOfBandWorkerNode(models.Model):
             max_length=1024)
     celeryd_status_cmd = models.TextField(
             _(u"commands to report celeryd status"), max_length=1024)
+
+    class Meta:
+        abstract = True
+
+class OutOfBandWorkerNode(AbstractWorkerNode):
+    """An out-of-band Worker Node"""
+    ip = models.IPAddressField(_(u"IP address"), unique=True)
     active = models.BooleanField(_(u"currently active"), default=True)
 
     def __unicode__(self):
@@ -114,7 +120,7 @@ class OutOfBandWorkerNode(models.Model):
         ssh = self._get_SSH_Object()
         return ssh.ssh_run_command(self.celeryd_status_cmd.split(' '))
         
-class Provider(OutOfBandWorkerNode):
+class Provider(AbstractWorkerNode):
     """Represents a infrastructure provider for libcloud"""
 
     PROVIDER_CHOICES = (
@@ -140,9 +146,9 @@ class Provider(OutOfBandWorkerNode):
         ('VPSNET', 'VPS.net'),
     )
 
-    provider_username = models.CharField(_(u"Provider username"),
-            max_length=128)
-    provider_password = models.CharField(_(u"Provider password"),
+    provider_user_id = models.CharField(_(u"Provider user id"),
+            max_length=128, blank=True)
+    provider_key = models.CharField(_(u"Provider key"),
             max_length=128)
     provider_name = models.CharField(_('provider'), max_length=32, choices=PROVIDER_CHOICES)
     image_id = models.CharField(_(u"image id"),
@@ -154,8 +160,6 @@ class Provider(OutOfBandWorkerNode):
         except libcloud.types.InvalidCredsError:
             from django.core.exceptions import ValidationError
             raise ValidationError("Invalid Provider Credentials")
-        conn.list_nodes()
-        print 'nodes done'
 
     def __unicode__(self):
         return self.driver
@@ -172,7 +176,12 @@ class Provider(OutOfBandWorkerNode):
         """
         p = getattr(libcloud.types.Provider, self.provider_name)
         Driver = libcloud.providers.get_driver(p)
-        return Driver(self.provider_username, secret=self.provider_password)
+        try:
+            return Driver(self.provider_user_id, secret=self.provider_key)
+        except TypeError as type_error:
+            if type_error.args[0] == "__init__() got an unexpected keyword argument 'secret'":
+                #Libcloud doesn't have consistant interfaces so some objects that inherit from Driver need to only take one parameter.  This code is designed to detect and workaround this error.
+                Driver(self.provider_user_id)
 
     def create_vm(self):
         """Creates and starts a VM on Provider"""
