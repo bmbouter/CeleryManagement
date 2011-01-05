@@ -1,36 +1,11 @@
 import ast
 import re
 
-from celerymanagementapp.policy import exceptions, tokenlib
+from celerymanagementapp.policy import exceptions, tokenlib, config
 
 # Import token constants directly into this module's namespace.
 for v,name in tokenlib.tok_name.iteritems():
     globals()[name] = v
-    
-#==============================================================================#
-def _names(*args):
-    assert len(args) > 0
-    s = ' '.join(args)
-    return list(w for w in s.split())
-    
-FORBIDDEN_KEYWORDS = _names(
-    'def class lambda return yield', # functions, classes
-    'import from global del',        # limit name access, modifications
-    'for while try except',          # no loops or exceptions
-    'exec',)                         # no exec code
-FORBIDDEN_NAMES = _names('''__class__ __dict__ __methods__ __members__ __bases__
-    __mro__ mro __subclasses__ __new__ __del__ __init__ __getattr__
-    __setattr__ __delattr__ __getattribute__ __get__ __set__ __delete__
-    __slots__ __metaclass__ __getitem__ __setitem__ __delitem__ __getslice__
-    __setslice__ __delslice__ __enter__ __exit__'''
-    )
-ALLOWED_BUILTINS = _names('''abs all any basestring bin bool bytearray callable
-    chr cmp complex dict divmod enumerate filter float format frozenset hash
-    help hex id int isinstance issubclass iter len list long map max
-    memoryview min next object oct ord pow print range reduce repr reversed
-    round set slice sorted str sum tuple unichr unicode xrange zip
-    True False None''')
-UNASSIGNABLE_NAMES = _names('')
 
 #==============================================================================#
         
@@ -195,7 +170,8 @@ class SectionParser(object):
     # Note: This expects the code to be indented.  It doesn't matter how much, 
     # just as long as it is.
     filename = '<unknown>'
-    forbidden_names = set([])
+    forbidden_names = None
+    unassignable_names = None
     
     def __init__(self, text):
         self.text = text
@@ -306,14 +282,10 @@ class SectionParser(object):
 #------------------------------------------------------------------------------#
 class ScheduleSectionParser(SectionParser):
     filename = '<policy:schedule>'
-    _forbidden_names = set()
+    forbidden_names = config.SCHEDULE_FORBIDDEN_ALL
     
     def __init__(self, text):
         super(ScheduleSectionParser, self).__init__(text)
-        
-    def get_forbidden_names(self):
-        return self._forbidden_names | PolicyParser.forbidden_names
-    forbidden_names = property(get_forbidden_names)
     
     def check_ast(self, tree):
         for node in tree.body:
@@ -329,14 +301,10 @@ class ScheduleSectionParser(SectionParser):
 class ConditionSectionParser(SectionParser):
     # no assignment
     filename = '<policy:condition>'
-    _forbidden_names = set()
+    forbidden_names = config.CONDITION_FORBIDDEN_ALL
     
     def __init__(self, text):
         super(ConditionSectionParser, self).__init__(text)
-        
-    def get_forbidden_names(self):
-        return self._forbidden_names | PolicyParser.forbidden_names
-    forbidden_names = property(get_forbidden_names)
         
     def correct_ast(self, tree):
         tree = super(ConditionSectionParser,self).correct_ast(tree)
@@ -366,17 +334,14 @@ class ConditionSectionParser(SectionParser):
     
 class ApplySectionParser(SectionParser):
     filename = '<policy:apply>'
-    _forbidden_names = set()
+    forbidden_names = config.APPLY_FORBIDDEN_ALL
+    unassignable_names = config.APPLY_UNASSIGNABLE_NAMES
     
     def __init__(self, text):
         super(ApplySectionParser, self).__init__(text)
-        
-    def get_forbidden_names(self):
-        return self._forbidden_names | PolicyParser.forbidden_names
-    forbidden_names = property(get_forbidden_names)
     
     def check_ast(self, tree):
-        CheckAssignedNameVisitor(self.text, PolicyParser.unassignable_names).visit(tree)
+        CheckAssignedNameVisitor(self.text, self.unassignable_names).visit(tree)
 
 
 #==============================================================================#
@@ -387,13 +352,13 @@ def _get_forbidden_builtins(allowed_builtins):
 
 
 class PolicyParser(object):
-    _forbidden_names = set(FORBIDDEN_NAMES)
-    _forbidden_keywords = set(FORBIDDEN_KEYWORDS)
-    _allowed_builtins = set(ALLOWED_BUILTINS)
-    _forbidden_builtins = _get_forbidden_builtins(_allowed_builtins)
-    forbidden_names = _forbidden_names | _forbidden_keywords | _forbidden_builtins
+    #_forbidden_names = set(FORBIDDEN_NAMES)
+    #_forbidden_keywords = set(FORBIDDEN_KEYWORDS)
+    #_allowed_builtins = set(ALLOWED_BUILTINS)
+    #_forbidden_builtins = _get_forbidden_builtins(_allowed_builtins)
+    #forbidden_names = _forbidden_names | _forbidden_keywords | _forbidden_builtins
     
-    unassignable_names = set(UNASSIGNABLE_NAMES)
+    #unassignable_names = set(UNASSIGNABLE_NAMES)
     
     def __init__(self):
         pass

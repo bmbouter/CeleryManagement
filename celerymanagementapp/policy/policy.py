@@ -1,9 +1,7 @@
 import sys
 import traceback
 
-from celery.schedules import crontab
-
-from celerymanagementapp.policy import parser, exceptions
+from celerymanagementapp.policy import parser, exceptions, env
 
 _policyparser = parser.PolicyParser()
 
@@ -37,9 +35,12 @@ class Runner(object):
                 raise
         return r
         
-_schedule_runner = Runner(globals={}, locals={'crontab': crontab})
-_condition_runner = Runner(globals={}, locals={})
-_apply_runner = Runner(globals={}, locals={})
+_schedule_runner = Runner(globals=env.SCHEDULE_GLOBALS, 
+                          locals=env.SCHEDULE_LOCALS)
+_condition_runner = Runner(globals=env.CONDITION_GLOBALS, 
+                           locals=env.CONDITION_LOCALS)
+_apply_runner = Runner(globals=env.APPLY_GLOBALS, 
+                       locals=env.APPLY_LOCALS)
 
 #==============================================================================#
 class Policy(object):
