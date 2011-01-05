@@ -93,7 +93,7 @@ CMA.Core.setupEvents = function(){
 }
 
 CMA.Core.setupFormEvents = function(){
-    var successFor = function(data){
+    var formReturn = function(data){
         if( !data.hasOwnProperty("failure") ){
             console.log("success");
         } else {
@@ -121,14 +121,15 @@ CMA.Core.setupFormEvents = function(){
     };
 
     $('.outOfBandForm').hide();
+    $('.providerForm').hide();
 
     $('#blankOutOfBandForm').ajaxForm({
         dataType: 'json',
         url: CMA.Core.create_out_of_band_worker_url,
-        success: successFor
+        success: formReturn
     });
 
-    $('#createNewOutOfBand').click(function() {
+    $('.createNewOutOfBand').click(function() {
         var formHeight = $('#blankOutOfBandForm').height();
         $('#blankOutOfBandForm').animate({
                 height: "toggle",
@@ -141,6 +142,37 @@ CMA.Core.setupFormEvents = function(){
     });
 
     $('.editWorkerNode').click(function(){
+        var elem = document.getElementById($(this).attr("id") + "Form");
+        var formHeight = $(elem).height();
+        $(elem).animate({
+            height: "toggle",
+            },
+            500,
+            function(){
+                $(elem).css("height", formHeight + "px");
+            }
+        );
+    });
+    
+    $('#blankProviderForm').ajaxForm({
+        dataType: 'json',
+        url: CMA.Core.create_provider_url,
+        success: formReturn
+    });
+    
+    $('.createNewProvider').click(function() {
+        var formHeight = $('#providerForm').height();
+        $('#blankProviderForm').animate({
+                height: "toggle",
+            },
+            500,
+            function(){
+                $('#providerForm').css("height", formHeight + "px");
+            }
+        );
+    });
+    
+    $('.editProvider').click(function(){
         var elem = document.getElementById($(this).attr("id") + "Form");
         var formHeight = $(elem).height();
         $(elem).animate({

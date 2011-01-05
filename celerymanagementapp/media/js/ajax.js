@@ -13,6 +13,7 @@ CMA.Core.loadUrls = function() {
     CMA.Core.task_url = "/celerymanagementapp/view/task/";
     CMA.Core.worker_url = "/celerymanagementapp/view/task/";
     CMA.Core.create_out_of_band_worker_url = CMA.Core.root_url + "outofbandworker/";
+    CMA.Core.create_provider_url = CMA.Core.root_url + "provider/";
 }
 
 CMA.Core.loadTestUrls = function(){
@@ -29,6 +30,7 @@ CMA.Core.loadTestUrls = function(){
     CMA.Core.worker_url = "/celerymanagementapp/test/view/worker/";
     CMA.Core.chart_data_url = CMA.Core.root_url + "chart/enumerate-1.json";
     CMA.Core.create_out_of_band_worker_url = CMA.Core.post_root_url + "outofbandworker/";
+    CMA.Core.create_provider_url = CMA.Core.post_root_url + "provider/";
 }
 
 CMA.Core.getTasks = function(callbackFunction){
@@ -61,4 +63,8 @@ CMA.Core.getDispatchedTasksData = function(query, callbackFunction) {
 
 CMA.Core.postCreateOutOfBandWorkerNode = function(callbackFunction){
     $.post(CMA.Core.create_out_of_band_worker_url, $('#blankOutOfBandForm').serialize(), callbackFunction);
+}
+
+CMA.Core.postCreateProvider = function(callbackFunction){
+    $.post(CMA.Core.create_provider_url, $('#blankProviderForm').serialize(), callbackFunction);
 }
