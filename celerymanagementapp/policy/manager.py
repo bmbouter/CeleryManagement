@@ -6,6 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from celerymanagementapp.models import PolicyModel
 from celerymanagementapp.policy import policy
 
+#==============================================================================#
 class Entry(object):
     def __init__(self, policy, modified, last_run_time=None):
         self.policy = policy
@@ -24,6 +25,7 @@ class Entry(object):
         self.modified = kwargs.pop('modified', self.modified)
 
 
+#==============================================================================#
 class Registry(object):
     def __init__(self):
         self.data = {}
@@ -84,6 +86,7 @@ class Registry(object):
         self.refresh()
         
 
+#==============================================================================#
 MIN_LOOP_SLEEP_TIME = 30  # seconds
 MAX_LOOP_SLEEP_TIME = 60*2  # seconds
 
@@ -130,6 +133,7 @@ class PolicyMain(object):
             policyobj.run_apply()
         
         
+#==============================================================================#
         
 
 

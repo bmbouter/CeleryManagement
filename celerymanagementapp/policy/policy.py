@@ -8,6 +8,7 @@ from celerymanagementapp.policy import parser, exceptions
 _policyparser = parser.PolicyParser()
 
 
+#==============================================================================#
 class Runner(object):
     def __init__(self, globals, locals):
         self.globals = globals
@@ -38,6 +39,7 @@ class Runner(object):
         
 _runner = Runner(globals={}, locals={'crontab': crontab})
 
+#==============================================================================#
 class Policy(object):
     def __init__(self, source=None, schedule_src=None, condition_srcs=None, apply_src=None, id=None, name=None):
         """ Create a policy object. 
@@ -103,6 +105,7 @@ class Policy(object):
         return self.schedule.is_due(last_run_time)
 
 
+#==============================================================================#
 
 
 

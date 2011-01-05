@@ -11,6 +11,7 @@ for name,v in _tokenize.__dict__.iteritems():
     if name==name.upper() and isinstance(v, int):
         globals()[name] = v
 
+#==============================================================================#
 # The tokenize module parses these all as 'OP'.
 _op_tokens_lookup = {
     '(': LPAR,
@@ -70,11 +71,13 @@ N_TOKENS += 1
 tok_name = _tokenize.tok_name.copy()
 tok_name[KEYWORD] = 'KEYWORD'
 
+#==============================================================================#
 _assigns = frozenset((EQUAL,PLUSEQUAL,MINEQUAL,STAREQUAL,SLASHEQUAL,PERCENTEQUAL,))
 
 def is_assignmentop(toktype):
     return toktype in _assigns
     
+#==============================================================================#
 _re_lines = re.compile(r'.*(\r\n|\n|\Z)')
     
 class StringReadline(object):
@@ -113,6 +116,7 @@ def tokenize(readline):
         yield (ty,val,start,end,ln)
         
 
+#==============================================================================#
 def untokenize(iterable):
     prev_row = 1
     prev_col = 0
@@ -142,3 +146,4 @@ def untokenize(iterable):
     return ''.join(toks)
 
 
+#==============================================================================#

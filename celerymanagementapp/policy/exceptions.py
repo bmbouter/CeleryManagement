@@ -1,5 +1,7 @@
 import __builtin__
 
+
+#==============================================================================#
 _err_tmpl_wcaret = '''\
   File "{file}", line {lineno}
     {line}
@@ -11,7 +13,6 @@ _err_tmpl = '''\
     {line}
 {clsname}: {msg}
 '''
-
 
 def _error_message(clsname, file, lineno, col, line, msg):
     caret =  ' ' if (col is None or line is None or lineno is None) else '^'
@@ -32,7 +33,7 @@ def _error_message(clsname, file, lineno, col, line, msg):
                                        col=col, msg=msg, lineno=lineno, 
                                        clsname=clsname)
 
-
+#==============================================================================#
 class BaseException(__builtin__.Exception):
     pass
 
@@ -68,8 +69,10 @@ class SyntaxError(Error):
     def __init__(self, msg, lineno=None, column=None, line=''):
         super(SyntaxError, self).__init__(msg=msg, lineno=lineno, 
                                           column=column, line=line)
-        
+
+#==============================================================================#
 def error(msg='', *args, **kwargs):
     raise SyntaxError(msg, *args, **kwargs)
 
 
+#==============================================================================#
