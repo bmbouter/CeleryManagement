@@ -37,7 +37,9 @@ class Runner(object):
                 raise
         return r
         
-_runner = Runner(globals={}, locals={'crontab': crontab})
+_schedule_runner = Runner(globals={}, locals={'crontab': crontab})
+_condition_runner = Runner(globals={}, locals={})
+_apply_runner = Runner(globals={}, locals={})
 
 #==============================================================================#
 class Policy(object):
@@ -74,40 +76,59 @@ class Policy(object):
                 in the database and have this value as it's primary key.  Do 
                 not set this value unless you know what you are doing.
         """
-        self._compile_src(source, schedule_src, condition_srcs, apply_src)
         self.id = id
+        self._initself()
+        self._compile_src(source, schedule_src, condition_srcs, apply_src)
         self.name = name
         
     def reinit(self, source, name):
+        """ Re-initializes the policy.  This is used """
         assert source is not None
         assert name is not None
-        self.name = name
+        self._initself()
         self._compile_src(source=source)
+        self.name = name
+        
+    def _initself(self):
+        self.sourcelines = []   # The policy source code as a list of lines.  
+                                # Used to display context when errors occur.
+        self._source = None     # The source code as a string.
+        self.condition_code = None  # the compiled condition-section code
+        self.apply_code = None  # the compiled apply-section code
+        self.schedule = None  # the result of running the schedule-section code
         
     def _compile_src(self, source=None, schedule_src=None, condition_srcs=None, apply_src=None):
-        if source is None:
-            source = parser.combine_section_sources(schedule_src, condition_srcs, apply_src)
-        self.source = source.splitlines()
-        ret = _policyparser(source)
-        self.schedule_code, self.condition_code, self.apply_code = ret
-        self._init_schedule()
-         
-    def _init_schedule(self):
-        self.schedule = _runner(self.schedule_code, self.source)
+        #if source is None:
+        self._source = source or parser.combine_section_sources(schedule_src, condition_srcs, apply_src)
+        self.sourcelines = self._source.splitlines()
+        ret = _policyparser(self._source)
+        schedule_code, self.condition_code, self.apply_code = ret
+        self.schedule = _schedule_runner(schedule_code, self.sourcelines)
         
     def run_condition(self):
-        return _runner(self.condition_code, self.source)
+        return _condition_runner(self.condition_code, self.sourcelines)
         
     def run_apply(self):
-        return _runner(self.apply_code, self.source)
+        return _apply_runner(self.apply_code, self.sourcelines)
         
     def is_due(self, last_run_time):
         return self.schedule.is_due(last_run_time)
+        
+    def getsource(self):
+        return self._source
+    source = property(getsource)
 
 
 #==============================================================================#
+def combine_sources(source=None, schedule_src=None, condition_srcs=None, apply_src=None):
+    return source or parser.combine_section_sources(schedule_src, condition_srcs, apply_src)
 
-
+def check_source(source):
+    """ Throws an exception on error.  If no exception was thrown, the 
+        compilation was successful.
+    """
+    _policyparser(source)
+    return True
 
 
 

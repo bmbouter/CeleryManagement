@@ -7,10 +7,12 @@ from celerymanagementapp.models import PolicyModel
 from celerymanagementapp.policy import policy
 
 #==============================================================================#
+default_time = datetime.datetime(2000,1,1)
+
 class Entry(object):
     def __init__(self, policy, modified, last_run_time=None):
         self.policy = policy
-        self.last_run_time = last_run_time
+        self.last_run_time = last_run_time or default_time
         self.modified = modified
         
     def is_due(self):
@@ -55,7 +57,7 @@ class Registry(object):
         objects = PolicyModel.objects.all()
         for id,entry in self.data.iteritems():
             try:
-                obj = objects.get(id)
+                obj = objects.get(id=id)
                 if obj.enabled and obj.modified > entry.modified:
                     self.reregister(obj)
                     updated = True
@@ -75,7 +77,7 @@ class Registry(object):
                 
     def save(self, id, current_time):
         entry = self.data[id]
-        obj = PolicyModel.objects.get(id)
+        obj = PolicyModel.objects.get(id=id)
         if obj.modified > entry.modified:
             self.reregister(obj)
         obj.last_run_time = entry.last_run_time
@@ -110,6 +112,7 @@ class PolicyMain(object):
         self.registry.refresh()
         
     def run_ready_policies(self):
+        now = datetime.datetime.now()
         modified_ids = []
         run_deltas = []
         # TODO: put try block on inside of loop, so we can continue with other 
@@ -134,7 +137,30 @@ class PolicyMain(object):
         
         
 #==============================================================================#
-        
 
-
+def create_policy(name, source=None, schedule_src=None, condition_srcs=None, apply_src=None, enabled=True):
+    """ Creates a new policy model object to the database.  If it doesn't 
+        compile, an exception will be thrown.
+    """
+    assert isinstance(name, basestring)  # TODO: make this an exception
+    source = policy.combine_sources(source, schedule_src, condition_srcs, apply_src)
+    # The following should throw an exception if it fails.
+    if not policy.check_source(source):
+        raise RuntimeError('Invariant error:  policy.check_source() returned False.')
+    model = PolicyModel(name=name, source=source, enabled=enabled)
+    model.save()
+    return model
+    
+def save_policy(model):
+    """ Saves an existing policy model to the database.  If it doesn't compile, 
+        an excecption will be thrown.
+    """
+    # The following should throw an exception if it fails.
+    if not policy.check_source(model.source):
+        raise RuntimeError('Invariant error:  policy.check_source() returned False.')
+    model.save()
+    
+#==============================================================================#
+    
+    
 

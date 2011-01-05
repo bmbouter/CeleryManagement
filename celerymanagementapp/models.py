@@ -266,6 +266,10 @@ class PolicyModel(models.Model):
     
     def __unicode__(self):
         return u"<{0}>  last run: {1}  enabled: {2}".format(self.name, self.last_run_time, self.enabled)
+        
+    def save(self, *args, **kwargs):
+        self.source = self.source.replace('\r\n','\n')
+        super(PolicyModel, self).save(*args, **kwargs)
 
 
 

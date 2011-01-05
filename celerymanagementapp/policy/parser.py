@@ -8,14 +8,16 @@ for v,name in tokenlib.tok_name.iteritems():
     globals()[name] = v
     
 #==============================================================================#
-def _names(s):
+def _names(*args):
+    assert len(args) > 0
+    s = ' '.join(args)
     return list(w for w in s.split())
     
 FORBIDDEN_KEYWORDS = _names(
-    'def class lambda return yield' # functions, classes
-    'import from global del'        # limit name access, modifications
-    'for while try except'          # no loops or exceptions
-    'exec')                         # no exec code
+    'def class lambda return yield', # functions, classes
+    'import from global del',        # limit name access, modifications
+    'for while try except',          # no loops or exceptions
+    'exec',)                         # no exec code
 FORBIDDEN_NAMES = _names('''__class__ __dict__ __methods__ __members__ __bases__
     __mro__ mro __subclasses__ __new__ __del__ __init__ __getattr__
     __setattr__ __delattr__ __getattribute__ __get__ __set__ __delete__
@@ -26,7 +28,8 @@ ALLOWED_BUILTINS = _names('''abs all any basestring bin bool bytearray callable
     chr cmp complex dict divmod enumerate filter float format frozenset hash
     help hex id int isinstance issubclass iter len list long map max
     memoryview min next object oct ord pow print range reduce repr reversed
-    round set slice sorted str sum tuple unichr unicode xrange zip''')
+    round set slice sorted str sum tuple unichr unicode xrange zip
+    True False None''')
 UNASSIGNABLE_NAMES = _names('')
 
 #==============================================================================#
@@ -189,6 +192,8 @@ class AssertNoStatementsVisitor(NodeVisitor):
 
 #==============================================================================#
 class SectionParser(object):
+    # Note: This expects the code to be indented.  It doesn't matter how much, 
+    # just as long as it is.
     filename = '<unknown>'
     forbidden_names = set([])
     
@@ -210,17 +215,17 @@ class SectionParser(object):
         
     def process_one_subsection(self, tokens):
         """ tokens is a list of tokens (*not* a list of lists of tokens). """
-        import debug_help
+        #import debug_help
         self.check_tokens(tokens)
         tokens = self.correct_tokens(tokens)
         text = self.assemble_tokens(tokens)
         text = self.correct_text(text)
         tree = self.create_ast(text)
-        print debug_help.write_ast(tree)
-        print ''
+        #print debug_help.write_ast(tree)
+        #print ''
         tree = self.fix_linenumbers_ast(tree)
-        tree = self.correct_ast(tree)
         self.check_ast(tree)
+        tree = self.correct_ast(tree)
         #print debug_help.write_ast(tree)
         #print ''
         return tree
