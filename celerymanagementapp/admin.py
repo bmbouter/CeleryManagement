@@ -69,10 +69,9 @@ class RegisteredTaskTypeAdmin(admin.ModelAdmin):
     list_filter = ('worker','name','modified')
 
 class ProviderAdmin(admin.ModelAdmin):
-    exclude = ('ip', 'active')
     fieldsets = (
         ('Provider Settings', {
-            'fields': ('provider_name', 'provider_username', 'provider_password')
+            'fields': ('provider_name', 'provider_user_id', 'provider_key')
         }),
         ('Image Settings', {
             'fields': ('image_id', 'celeryd_username', 'ssh_key', 'celeryd_start_cmd', 'celeryd_stop_cmd', 'celeryd_status_cmd')
