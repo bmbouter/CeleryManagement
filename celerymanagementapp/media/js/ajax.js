@@ -1,6 +1,10 @@
 CMA.Core = (typeof CMA.Core === "undefined" || !CMA.Core) ? {} : CMA.Core;
 
-CMA.Core.loadUrls = function() {
+CMA.Core.ajax = {
+    urls: {}
+};
+
+CMA.Core.ajax.urls.loadUrls = function() {
     CMA.Core.root_url = "/celerymanagementapp/";
     CMA.Core.get_tasks_url = CMA.Core.root_url + "task/all/list/";
     CMA.Core.get_workers_url = CMA.Core.root_url + "worker/all/list/";
@@ -16,7 +20,7 @@ CMA.Core.loadUrls = function() {
     CMA.Core.create_provider_url = CMA.Core.root_url + "provider/";
 }
 
-CMA.Core.loadTestUrls = function(){
+CMA.Core.ajax.urls.loadTestUrls = function(){
     CMA.Core.root_url = "/celerymanagementapp/site_media/test_data/";
     CMA.Core.post_root_url = "/celerymanagementapp/test/post/";
     CMA.Core.get_tasks_url = CMA.Core.root_url + "tasks.json";

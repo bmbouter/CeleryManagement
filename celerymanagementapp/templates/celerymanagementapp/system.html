@@ -13,12 +13,32 @@
 {% block content %}
     <div id="system">
         <canvas id="systemCanvas">
-
         </canvas>
     </div>
-    <div id="workerMenu">
-        <ul>
-            <li><a id="deactivateWorker">Deactivate Worker</a></li>
-        </ul>
+    {% if CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static" %}
+    <div id="workerMenu" class="contextMenu">
+        <div class="iconColumn left">
+            <ul>
+                <li id="deactivateWorkerImg" class="menuImg click"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/deactivate-worker.png" /></li>
+            </ul>
+        </div>
+        <div class="textColumn right">
+            <ul>
+                <li id="deactivateWorker" class="menuItem click">Deactivate Worker</li>
+            </ul>
+        </div>
     </div>
+    <div id="taskMenu" class="contextMenu">
+        <div class="iconColumn left">
+            <ul>
+                <li id="dispatchTaskImg" class="menuImg click"></li>
+            </ul>
+        </div>
+        <div class="textColumn right">
+            <ul>
+                <li id="dispatchTask" class="menuItem click">Dispatch Task</li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
 {% endblock content %}

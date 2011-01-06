@@ -28,9 +28,9 @@ function createTable(data) {
 
 CMA.Core.init = function(){
     if( typeof CMA.Core.testUrls === "undefined" ){
-        CMA.Core.loadUrls();
+        CMA.Core.ajax.urls.loadUrls();
     } else {
-        CMA.Core.loadTestUrls();
+        CMA.Core.ajax.urls.loadTestUrls();
     }
     
     $('textarea').attr("rows", "3");
@@ -79,6 +79,35 @@ CMA.Core.setupEvents = function(){
         $('#workerNavigationMaster').click();
     }
 
+    $('.menuItem').hover(
+        function() {
+            var elem = $(this);
+            var img = document.getElementById(elem.attr("id") + "Img");
+            $(elem).toggleClass("menuItemHover rightRounded");
+            $(img).toggleClass("menuItemHover leftRounded");
+        },
+        function() {
+            var elem = $(this);
+            var img = document.getElementById(elem.attr("id") + "Img");
+            $(elem).toggleClass("menuItemHover rightRounded");
+            $(img).toggleClass("menuItemHover leftRounded");
+        }
+    );
+
+    $('.menuImg').hover(
+        function() {
+            var elem = $(this);
+            var img = document.getElementById(elem.attr("id").split("Img")[0]);
+            $(elem).toggleClass("menuItemHover leftRounded");
+            $(img).toggleClass("menuItemHover rightRounded");
+        },
+        function() {
+            var elem = $(this);
+            var img = document.getElementById(elem.attr("id").split("Img")[0]);
+            $(elem).toggleClass("menuItemHover leftRounded");
+            $(img).toggleClass("menuItemHover rigtRounded");
+        }
+    );
 
     $(window).resize(function() {
         if( $(window).width() > $('#container').css("min-width").split("px")[0] ){
@@ -121,7 +150,6 @@ CMA.Core.setupFormEvents = function(){
     };
 
     $('.outOfBandForm').hide();
-    $('.providerForm').hide();
 
     $('#blankOutOfBandForm').ajaxForm({
         dataType: 'json',
@@ -160,7 +188,7 @@ CMA.Core.setupFormEvents = function(){
         success: formReturn
     });
     
-    $('.createNewProvider').click(function() {
+    /*$('.createNewProvider').click(function() {
         var formHeight = $('#providerForm').height();
         $('#blankProviderForm').animate({
                 height: "toggle",
@@ -183,7 +211,7 @@ CMA.Core.setupFormEvents = function(){
                 $(elem).css("height", formHeight + "px");
             }
         );
-    });
+    });*/
 }
 
 CMA.Core.populateTaskNavigation = function(data){

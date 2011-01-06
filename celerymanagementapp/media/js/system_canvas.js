@@ -35,8 +35,12 @@ CMA.SystemDisplay.Controller = function(){
         canvas = $('#systemCanvas')[0];
         canvas.width = $(window).width() - $('#dummy').css("width").split("px")[0];
 
-    var modelFactory = CMA.SystemDisplay.ModelFactory(canvas),
-        viewer = CMA.SystemDisplay.Viewer(modelFactory, canvas, canvasElement),
+    var modelFactory = CMA.SystemDisplay.ModelFactory(canvas);
+
+    CMA.Core.getTasks(modelFactory.createTasks);
+    CMA.Core.getWorkers(modelFactory.createWorkers);
+   
+    var viewer = CMA.SystemDisplay.Viewer(modelFactory, canvas, canvasElement),
         systemEventHandler = CMA.SystemDisplay.EventHandler(canvasElement, viewer, modelFactory);
 };
 
@@ -170,12 +174,11 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
 };
 
 CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
-    CMA.Core.getTasks(modelFactory.createTasks);
-    CMA.Core.getWorkers(modelFactory.createWorkers);
     
     var expandedTask = false,
         expandedWorker = false,
         canvasHeight = 0,
+        systemRender,
 
         connectorWeightingFunction = function(size){
             return (size / modelFactory.getConnectorsWeight() + 0.35) * 4;
@@ -196,7 +199,7 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
         },
 
         draw = function(){
-            systemRenderer = CMA.SystemDisplay.Renderer(canvas, modelFactory.getCanvasHeight() + 60);
+            systemRenderer = CMA.SystemDisplay.Renderer(canvas, modelFactory);
             canvas.width = $(window).width() - $('#dummy').css("width").split("px")[0];
             var connectors = modelFactory.getConnectors();
             var tasks = modelFactory.getTasks();
@@ -336,8 +339,12 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
         $('#workerMenu').click(function() {
             $('#workerMenu').hide();
         });
+        $('#taskMenu').click(function() {
+            $('#taskMenu').hide();
+        });
         $(document).click(function() {
             $('#workerMenu').hide();
+            $('#taskMenu').hide();
         });
     });
 
@@ -392,6 +399,7 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
             clickedEntity = entity;
 
             if( entity !== undefined  && entity.objectType === "Worker" ){
+                $('#taskMenu').hide();
                 $('#workerMenu').css({
                     top: (entity.yCenter) + 'px',
                     left: (entity.xCenter - 125) + 'px'
@@ -413,13 +421,43 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
         });
     }
     
+    if( CMA.Core.USE_MODE === "static" ){
+        
+        canvasElement.bind("contextmenu", function(e){
+            var entity = getEntity(e.pageX, e.pageY);
+            clickedEntity = entity;
+            
+            if( entity !== undefined  && entity.objectType === "Task" ){
+                $('#workerMenu').hide();
+                $('#taskMenu').css({
+                    top: (entity.yCenter) + 'px',
+                    left: (entity.xCenter - 125) + 'px'
+                }).show();
+            }
+            return false;
+        });
+
+        $('#dispatchTask').click(function (){
+            if(  clickedEntity !== undefined  && clickedEntity.objectType === "Task" ){
+                //CMA.Core.postShutdownWorker(clickedEntity.fullName, viewer.shutdownWorker);
+                console.log("task dispatch");
+                clickedEntity = false;
+            }
+        });
+    } else {
+        canvasElement.bind("contextmenu", function(e){
+            return false;
+        });
+    }
+    
     canvasElement.click(handleClick);
     canvasElement.mousemove(handleHover);
 
 };
 
-CMA.SystemDisplay.Renderer = function(canvas, height){
+CMA.SystemDisplay.Renderer = function(canvas, modelFactory){
     var context = canvas.getContext("2d"),
+        height = modelFactory.getCanvasHeight() + 60,
         drawShapes = CMA.SystemDisplay.DrawShapes(context);
 
     context.lineJoin = "bevel";
