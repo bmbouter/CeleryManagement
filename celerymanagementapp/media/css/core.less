@@ -41,6 +41,18 @@ body {
     margin: 0;
     padding: 0;
 
+
+    .left {
+        float: left;
+    }
+    .right {
+        float: right;
+    }
+    .click {
+        cursor: pointer;
+        cursor: hand;
+    }
+
     #header {
         height: @header_height;
         background: @header_background;
@@ -166,39 +178,36 @@ body {
                 position: absolute;
             }
 
-            #OutofBand {
-                width: 70%;
+            #configurationManagement {
                 margin: 0 0 0 50px;
                 font-size: 0.8em;
 
-                .header {
+                header {
+                    width: 80%;
                     border: 2px outset #383838;
                     height: 20px;
-                    margin: 30px 0 0 0;
+                    margin: 30px 0 30px 0;
                     border-radius: 20px;
                     background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#383838), to(#383838), color-stop(.5,#575757)); //-webkit-gradient(linear, 0% 0%, 0% 100%, from(#5CCCCC), to(#5CCCCC), color-stop(.5,#6BEDED));
                     color: #FFF;  //#173333;
                     padding: 2px 0 0 10px;
                 }
                 
-                .workerHeader {
+                ul {
                     width: 65%;
                     height: 20px;
-                    margin: 30px 0px 0 64px;
-                    padding: 2px 0 0 10px;
+                    margin: 0px 0px 0 64px;
+                    padding: 10px 0 0 10px;
 
-                    a {
-                        margin: 0 5px 0 0;
+                    li {
+                        display: inline;
+                        margin: 0 7px 0 0;
                     }
                 }
 
-                .workerNode {
-                    width: 65%;
+                .node {
                     border: 2px solid rgba(0, 158, 142, 0.25);
-                    height: 22px;
-                    margin: 0px 0px 0 60px;
                     background: rgba(93, 207, 195, 0.25);
-                    padding: 10px 0 0 10px;
                 
                     h1 {
                         color: black;
@@ -242,11 +251,14 @@ body {
                     color: black;
                 }
                 .errorWrapper {
-                    width: 150px;
-                    float: left;
+                    color: red;
+                    font-weight: bold;
+                    margin: 5px 0 0 5px;
+                    position: relative;
+                    display: none;
                 }
-                #submitOutOfBandButton {
-                    margin: 15px 0 0 165px;
+                .submitButton {
+                    margin: 15px 0 15px 185px;
                 }
             }
         }

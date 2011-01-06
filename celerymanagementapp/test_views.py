@@ -6,8 +6,8 @@ from django.core.urlresolvers import reverse as urlreverse
 from django.contrib.auth.decorators import login_required
 from django.utils import simplejson
 
-from celerymanagementapp.forms import OutOfBandWorkerNodeForm
-from celerymanagementapp.models import OutOfBandWorkerNode
+from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
+from celerymanagementapp.models import OutOfBandWorkerNode, Provider
 
 def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
@@ -20,16 +20,34 @@ def dashboard(request):
             context_instance=RequestContext(request))
 
 def configure(request):
-    out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
-    OutOfBandWorkers = []
-    for i in range(0,10):
-        worker = OutOfBandWorkerNode(ip="4.5.6." + str(i), celeryd_username="Test Username")
-        workerForm = OutOfBandWorkerNodeForm(instance=worker)
-        OutOfBandWorkers.append({ "worker" : worker, "workerForm" : workerForm })
+    context = { "load_test_data": "true" }
+    if settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static":
+        out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
+        OutOfBandWorkers = []
+
+        for i in range(0,10):
+            worker = OutOfBandWorkerNode(ip="4.5.6." + str(i), celeryd_username="Test Username")
+            workerForm = OutOfBandWorkerNodeForm(instance=worker)
+            OutOfBandWorkers.append({ "worker" : worker, "workerForm" : workerForm })
+
+        context["outofbandworkernode_form"] = out_of_band_worker_node_form
+        context["outofbandworkernodes"] = OutOfBandWorkers
+    elif settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "dynamic":
+        provider_form = ProviderForm()
+        providers = []
+
+        for i in range(0,10):
+            provider = Provider(provider_user_id="test456YUser", celeryd_username="Test Username", 
+                                provider_name=Provider.PROVIDER_CHOICES[i][1], image_id="6sd6aF8dadSSa3")
+            provider.id = i;
+            providerForm = ProviderForm(instance=provider)
+            providers.append({ "provider" : provider, "providerForm" : providerForm })
+
+        context["provider_form"] = provider_form
+        context["providers"] = providers
+
     return render_to_response('celerymanagementapp/configure.html',
-            {'outofbandworkernode_form': out_of_band_worker_node_form,
-            "outofbandworkernodes" : OutOfBandWorkers,
-            "load_test_data" : "true" },
+            context,
             context_instance=RequestContext(request))
 
 def task_view(request, taskname=None):
@@ -52,6 +70,20 @@ def create_outofbandworker(request):
         else:
             errors = []
             for field in out_of_band_worker_node_form:
+                errors.append({ 'field' : field.html_name,
+                                'error' : field.errors })
+            failed = { 'failure' : errors }
+            json = simplejson.dumps(failed)
+            return HttpResponse(json)
+
+def create_provider(request):
+    if request.method == "POST":
+        provider_form = ProviderForm(request.POST, request.FILES)
+        if provider_form.is_valid():
+            return HttpResponse("success")
+        else:
+            errors = []
+            for field in provider_form:
                 errors.append({ 'field' : field.html_name,
                                 'error' : field.errors })
             failed = { 'failure' : errors }

@@ -27,7 +27,7 @@ CMA.SystemDisplay.refresh = function(){
     $('#statusText').fadeIn("slow", function() {});
     $('#statusText').fadeOut(2000, function() {});
     console.log("refreshed");
-}
+};
 
 
 CMA.SystemDisplay.Controller = function(){
@@ -38,7 +38,7 @@ CMA.SystemDisplay.Controller = function(){
     var modelFactory = CMA.SystemDisplay.ModelFactory(canvas),
         viewer = CMA.SystemDisplay.Viewer(modelFactory, canvas, canvasElement),
         systemEventHandler = CMA.SystemDisplay.EventHandler(canvasElement, viewer, modelFactory);
-}
+};
 
 CMA.SystemDisplay.ModelFactory = function(canvas){
     var tasks = {},
@@ -50,15 +50,21 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
         connectorWeight = 0,
             
         createWorkers = function(data){
+            var y = 40,
+                i = 0,
+                length = data.length;
+
             workers = {};
-            var y = 40;
-            for ( item in data ){
-                workers[data[item]] = CMA.SystemDisplay.Worker(y, canvas.width, data[item], true);
+            
+            for (i=0; i < length; i += 1){
+                workers[data[i]] = CMA.SystemDisplay.Worker(y, canvas.width, data[i], true);
                 y += 60;
             }
+
             if( y > canvasHeight ){
                 canvasHeight = y;
             }
+
             workersSet = true;
             if( tasksSet ){
                 CMA.Core.getTasksPerWorker(createConnectors);
@@ -66,15 +72,21 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
         },
 
         createTasks = function(data){
+            var y = 40,
+                i = 0,
+                length = data.length;
+            
             tasks = {};
-            var y = 40;
-            for( item in data ){
-                tasks[data[item]] = CMA.SystemDisplay.Task(y, data[item]);
+
+            for(i=0; i < length; i += 1){
+                tasks[data[i]] = CMA.SystemDisplay.Task(y, data[i]);
                 y += 60;
             }
+
             if( y > canvasHeight ){
                 canvasHeight = y;
             }
+
             tasksSet = true;
             if( workersSet ){
                 CMA.Core.getTasksPerWorker(createConnectors);
@@ -82,31 +94,41 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
         },
 
         createConnectors = function(data){
+            var num;
+
             connectors = [];
             connectorWeight = 0;
+
             for( task in tasks ){
                 for( worker in workers ){
-                    var num = data[task][worker];
-                    if( num ){
-                        connectors.push(CMA.SystemDisplay.Connector(tasks[task], workers[worker], num));
-                        connectorWeight += num;
+                    if( workers.hasOwnProperty(worker) && tasks.hasOwnProperty(task) ){
+                        num = data[task][worker];
+                        if( num ){
+                            connectors.push(CMA.SystemDisplay.Connector(tasks[task], workers[worker], num));
+                            connectorWeight += num;
+                        }
                     }
                 }
             }
+
             CMA.Core.getPendingTasks(setPendingTasks);
             CMA.Core.getWorkerProcesses(setWorkerProcesses);
         },
 
         setPendingTasks = function(data){
             for( item in data ){
-                tasks[item].pending = data[item];
+                if( data.hasOwnProperty(item) ){
+                    tasks[item].pending = data[item];
+                }
             }
             CMA.SystemDisplay.fire("Redraw");
         },
 
         setWorkerProcesses = function(data){
             for( item in data ){
-                workers[item].processes = data[item];
+                if( data.hasOwnProperty(item) ){
+                    workers[item].processes = data[item];
+                }
             }
             CMA.SystemDisplay.fire("Redraw");
         },
@@ -145,7 +167,7 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
         createTasks: createTasks,
         createWorkers: createWorkers
     };
-}
+};
 
 CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
     CMA.Core.getTasks(modelFactory.createTasks);
@@ -303,15 +325,12 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
             }
         }
     };
-}
+};
 
 CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
     var clickedEntity = null,
         yOffset = $('#header').css("height").split("px")[0],
         xOffset = $('#dummy').css("width").split("px")[0];
-
-    canvasElement.click(handleClick);
-    canvasElement.mousemove(handleHover);
 
     $(document).ready(function() {
         $('#workerMenu').click(function() {
@@ -393,7 +412,11 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
             return false;
         });
     }
-}
+    
+    canvasElement.click(handleClick);
+    canvasElement.mousemove(handleHover);
+
+};
 
 CMA.SystemDisplay.Renderer = function(canvas, height){
     var context = canvas.getContext("2d"),
@@ -476,7 +499,7 @@ CMA.SystemDisplay.Renderer = function(canvas, height){
             context.clearRect(0, 0, canvas.width, canvas.height);
         }
     };
-}
+};
 
 CMA.SystemDisplay.DrawShapes = function(context){
     
@@ -513,7 +536,7 @@ CMA.SystemDisplay.DrawShapes = function(context){
     return {
         roundedRect: roundedRect
     };
-}
+};
 
 CMA.SystemDisplay.Task = function(y, name){
 
@@ -548,7 +571,7 @@ CMA.SystemDisplay.Task = function(y, name){
         getFill: getFill,
         objectType: "Task"
     };
-}
+};
 
 CMA.SystemDisplay.Worker = function(y, canvasWidth, name, active){
 
@@ -592,7 +615,7 @@ CMA.SystemDisplay.Worker = function(y, canvasWidth, name, active){
         objectType: "Worker"
     };
     
-}
+};
 
 CMA.SystemDisplay.Connector = function(task, worker, numTasks){
     var task = task,

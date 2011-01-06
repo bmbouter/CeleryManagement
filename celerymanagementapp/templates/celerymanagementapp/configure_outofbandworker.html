@@ -1,33 +1,34 @@
-    <div id="OutofBand">
-        <header class="header">
+        <header>
             Out of Band
         </header>
-        <div class="workerHeader">
-            IP Address
-            <a id="createNewOutOfBand"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png">New Worker Node</img></a>
-        </div>
+        <ul>
+            <li>IP Address</li>
+            <li class="createNewOutOfBand right click">New Worker Node</li>
+            <li class="createNewOutOfBand right click"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png"/></li>
+        </ul>
         <form method="POST" enctype="multipart/form-data" class="outOfBandForm" id="blankOutOfBandForm" action="/celerymanagementapp/outofbandworker/">
-            {% for field in outofbandworkernode_form %}
             {% csrf_token %}
+            {% for field in outofbandworkernode_form %}
             <div class="fieldWrapper">
                 <div class="field">
-                    {{ field.label_tag }} {{ field }}
-                    <!--<label id="{{ field.label }}_error"></label>-->
-                    {{ field.errors }}
+                    {{ field.label_tag }} 
+                    {{ field }}
+                    <span class="errorWrapper" id="{{ field.html_name }}_error"></span>
                 </div>
             </div>
             {% endfor %}
-            <input type="submit" id="submitOutOfBandButton" class="button">
+            <button class="submitButton" id="submitOutOfBandButton" >Submit</button>
+            <!--<input type="submit" id="submitOutOfBandButton" value="Submit" class="button" />-->
         </form>
         {% for worker in outofbandworkernodes %}
-        <div class="workerNode" >
-            {{ worker.worker.ip }}
-            <a class="editWorkerNode" id="{{ worker.worker.ip }}_deleteWorkerNode">Delete</a>
-            <a class="editWorkerNode" id="{{ worker.worker.ip }}_workerNode">Edit</a>
-        </div>
+        <ul class="node">
+            <li class="left">{{ worker.worker.ip }}</li>
+            <li class="editWorkerNode right click" id="{{ worker.worker.ip }}_deleteWorkerNode">Delete</li>
+            <li class="editWorkerNode right click" id="{{ worker.worker.ip }}_workerNode">Edit</li>
+        </ul>
         <form method="POST" enctype="multipart/form-data" class="outOfBandForm" id="{{ worker.worker.ip }}_workerNodeForm">
-            {% for field in worker.workerForm %}
             {% csrf_token %}
+            {% for field in worker.workerForm %}
             <div class="fieldWrapper">
                 <div class="field">
                     {{ field.label_tag }} {{ field }}
@@ -35,7 +36,6 @@
                 </div>
             </div>
             {% endfor %}
-            <button class="submitOutOfBandButtonEdit" class="button">Submit</button>
+            <input type="submit" class="submitOutOfBandButtonEdit submitButton" value="Submit"/>
         </form>
         {% endfor %}
-    </div>

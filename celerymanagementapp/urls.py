@@ -98,14 +98,15 @@ urlpatterns += patterns('celerymanagementapp.views',
 
 if settings.DEBUG:
     urlpatterns += patterns('celerymanagementapp.test_views',
-       url(r'^test/view/system/$', 'system_overview', name="test_system_overview_url"),
+        url(r'^test/view/system/$', 'system_overview', name="test_system_overview_url"),
         url(r'^test/view/dashboard/$', 'dashboard', name="test_dashboard_url"),
         url(r'^test/view/configure/$', 'configure', name="test_configure_url"),
         url(r'^test/view/task/(?P<taskname>[-\w\d_.]+)/$', 'task_view', name="task_view_url"),
         url(r'^test/view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url"),
         url(r'^test/post/worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'kill_worker', name="test_kill_worker_url"),
         url(r'^test/post/xy_query/dispatched_tasks/$', 'get_dispatched_tasks_data', name='test_get_dispatched_tasks_url'),
-        url(r'^test/post/configure/$', 'configure', name="test_post_configure_url"),
+        url(r'^test/post/outofbandworker/$', 'create_outofbandworker', name="test_create_outofbandworker_url"),
+        url(r'^test/post/provider/$', 'create_provider', name="test_create_provider_url"),
     )
 
 if settings.DEBUG:

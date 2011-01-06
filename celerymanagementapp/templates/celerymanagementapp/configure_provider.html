@@ -1,33 +1,33 @@
-    <div id="Provider">
         <header>
             Providers
         </header>
-        <div class="workerHeader">
-            IP Address
-            <a id="createNewOutOfBand"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png">New Worker Node</img></a>
-        </div>
-        <form method="POST" enctype="multipart/form-data" class="outOfBandForm" id="blankOutOfBandForm" action="/celerymanagementapp/outofbandworker/">
-            {% for field in outofbandworkernode_form %}
+        <ul>
+            <li>Provider</li>
+            <li class="createNewProvider right click">New Provider</li>
+            <li class="createNewProvider right click"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png"/></li>
+        </ul>
+        <form method="POST" enctype="multipart/form-data" class="providerForm" id="blankProviderForm" action="/celerymanagementapp/provider/">
             {% csrf_token %}
+            {% for field in provider_form %}
             <div class="fieldWrapper">
                 <div class="field">
                     {{ field.label_tag }} {{ field }}
-                    <!--<label id="{{ field.label }}_error"></label>-->
+                    <span class="errorWrapper" id="{{ field.html_name }}_error"></span>
                     {{ field.errors }}
                 </div>
             </div>
             {% endfor %}
-            <input type="submit" id="submitOutOfBandButton" class="button">
+            <button class="submitButton" id="submitProviderButton">Submit</button>
         </form>
-        {% for worker in outofbandworkernodes %}
-        <div class="workerNode" >
-            {{ worker.worker.ip }}
-            <a class="editWorkerNode" id="{{ worker.worker.ip }}_deleteWorkerNode">Delete</a>
-            <a class="editWorkerNode" id="{{ worker.worker.ip }}_workerNode">Edit</a>
-        </div>
-        <form method="POST" enctype="multipart/form-data" class="outOfBandForm" id="{{ worker.worker.ip }}_workerNodeForm">
-            {% for field in worker.workerForm %}
+        {% for provider in providers %}
+        <ul class="node">
+            <li class="left">{{ provider.provider.provider_name }}</li>
+            <li class="editProvider right click" id="{{ provider.provider.id }}_deleteProvider">Delete</li>
+            <li class="editProvider right click" id="{{ provider.provider.id }}_provider">Edit</li>
+        </ul>
+        <form method="POST" enctype="multipart/form-data" class="providerForm" id="{{ provider.provider.id }}_providerForm">
             {% csrf_token %}
+            {% for field in provider.providerForm %}
             <div class="fieldWrapper">
                 <div class="field">
                     {{ field.label_tag }} {{ field }}
@@ -35,7 +35,6 @@
                 </div>
             </div>
             {% endfor %}
-            <button class="submitOutOfBandButtonEdit" class="button">Submit</button>
+            <button class="submitProviderButtonEdit submitButton">Submit</button>
         </form>
         {% endfor %}
-    </div>
