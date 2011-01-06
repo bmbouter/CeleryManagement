@@ -11,10 +11,13 @@ class Runner(object):
     def __init__(self, globals, locals):
         self.globals = globals
         self.locals = locals
+        # the following are used for testing
+        self.last_globals = {}
+        self.last_locals = {}
         
     def __call__(self, code, text):
-        globals = self.globals.copy()
-        locals = self.locals.copy()
+        globals = self.globals.copy() 
+        locals = self.locals.copy() 
         try:
             r = eval(code, globals, locals)
         except exceptions.BaseException:
@@ -33,6 +36,9 @@ class Runner(object):
             # ...otherwise re-raise the exception.
             else:
                 raise
+        finally:
+            self.last_globals = globals
+            self.last_locals = locals
         return r
         
 _schedule_runner = Runner(globals=env.SCHEDULE_GLOBALS, 

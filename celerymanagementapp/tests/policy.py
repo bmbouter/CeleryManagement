@@ -1,11 +1,16 @@
 import datetime
 import traceback
+import types
 
 from celerymanagementapp.tests import base
 from celerymanagementapp import policy
 from celerymanagementapp.policy import exceptions
+from celerymanagementapp.policy.policy import _apply_runner
+from celerymanagementapp.policy.env import ModuleWrapper
 
 
+
+#==============================================================================#
 class Policy_TestCase(base.CeleryManagement_TestCaseBase):
     def test_basic(self):
         _testdata = '''\
@@ -47,10 +52,54 @@ policy:
         self.assertEquals(None, p.run_apply())
         self.assertEquals((False,240), p.is_due(lastrun))
         
-class ScheduleSection_TestCase(base.CeleryManagement_TestCaseBase):
-    pass
+#==============================================================================#
+class Env_TestCase(base.CeleryManagement_TestCaseBase):
+    def check_object_dict(self, name, obj):
+        if isinstance(obj, ModuleWrapper):
+            dict = obj.__dict__['data']
+        else:
+            dict = obj.__dict__
+        for k,v in dict.iteritems():
+            try:
+                # none of an object's attributes should be a module
+                self.assertFalse(isinstance(v, types.ModuleType))
+            except Exception as e:
+                msg = '\n    Note: obj was: {0}.{1}'.format(name,k)
+                e.args = e.args[0:1] + (msg,) + e.args[1:]
+                raise
         
-class ConditionSection_TestCase(base.CeleryManagement_TestCaseBase):
+    def test_modules(self):
+        self.assertFalse(isinstance(_apply_runner.globals['time'], types.ModuleType))
+        self.assertEquals(type(_apply_runner.globals['datetime']), ModuleWrapper)
+        self.assertEquals(type(_apply_runner.globals['calendar']), ModuleWrapper)
+        self.assertEquals(type(_apply_runner.globals['time']), ModuleWrapper)
+        self.assertEquals(type(_apply_runner.globals['math']), ModuleWrapper)
+        
+                
+    def test_names(self):
+        globals = _apply_runner.globals
+        for k,v in _apply_runner.globals.iteritems():
+            if hasattr(v, '__dict__'):
+                self.check_object_dict(k,v)
+                
+
+
+#==============================================================================#
+class Section_TestCaseBase(base.CeleryManagement_TestCaseBase):
+    _tmpl = None  # must be a string containing {src}
+    def src(self, src):
+        """ Indents source code.  Embedded newlines are allowed. """
+        indent = ' '*4*2
+        src = '\n'.join('{0}{1}'.format(indent,s) for s in src.splitlines())
+        return self._tmpl.format(src=src)
+    
+    
+#==============================================================================#
+class ScheduleSection_TestCase(Section_TestCaseBase):
+    pass
+    
+    
+class ConditionSection_TestCase(Section_TestCaseBase):
     _tmpl = '''\
 policy:
     schedule:
@@ -61,11 +110,6 @@ policy:
         10
 
     '''
-    def src(self, src):
-        """ Indents source code.  Embedded newlines are allowed. """
-        indent = ' '*4*2
-        src = '\n'.join('{0}{1}'.format(indent,s) for s in src.splitlines())
-        return self._tmpl.format(src=src)
         
     def test_allowed(self):
         exprs = [ 'True','False','None', 
@@ -104,7 +148,7 @@ policy:
                 raise
 
         
-class ApplySection_TestCase(base.CeleryManagement_TestCaseBase):
+class ApplySection_TestCase(Section_TestCaseBase):
     _tmpl = '''\
 policy:
     schedule:
@@ -115,10 +159,6 @@ policy:
 {src}
 
     '''
-    def src(self, src):
-        indent = ' '*4*2
-        src = '\n'.join('{0}{1}'.format(indent,s) for s in src.splitlines())
-        return self._tmpl.format(src=src)
         
     def test_allowed(self):
         exprs = [ 'True','False','None', 
@@ -154,4 +194,49 @@ policy:
                 msg = '\n    Note: expr was: {0}'.format(expr)
                 e.args = (e.args[0] + msg,) + e.args[1:]
                 raise
+        
+    def test_unassignable_error(self):
+        exprs = [ 'workers = 5',
+                  'datetime = 1',
+                ]
+        for expr in exprs:
+            testdata = self.src(expr)
+            try:
+                self.assertRaises(exceptions.SyntaxError, policy.Policy, testdata)
+            except Exception as e:
+                msg = '\n    Note: expr was: {0}'.format(expr)
+                e.args = (e.args[0] + msg,) + e.args[1:]
+                raise
+
+
+#==============================================================================#
+class ApplySectionExec_TestCase(Section_TestCaseBase):
+    _tmpl = '''\
+policy:
+    schedule:
+        1
+    condition:
+        True
+    apply:
+{src}
+
+    '''
+    
+    def test_basic(self):
+        expr = 'x = 5'
+        testdata = self.src(expr)
+        p = policy.Policy(testdata)
+        r = p.run_apply()
+        self.assertEquals(5, _apply_runner.last_locals['x'])
+    
+    def test_basic_api(self):
+        testdata = self.src('t = time.time()')
+        p = policy.Policy(testdata)
+        r = p.run_apply()
+        self.assertEquals(float, type(_apply_runner.last_locals['t']))
+        
+#==============================================================================#
+
+
+
 

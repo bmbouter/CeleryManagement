@@ -29,10 +29,13 @@ FORBIDDEN_NAMES = _names('''__class__ __dict__ __methods__ __members__ __bases__
 ALLOWED_BUILTINS = _names('''abs all any basestring bin bool bytearray callable
     chr cmp complex dict divmod enumerate filter float format frozenset hash
     help hex id int isinstance issubclass iter len list long map max
-    memoryview min next object oct ord pow print range reduce repr reversed
+    memoryview min next oct ord pow print range reduce repr reversed
     round set slice sorted str sum tuple unichr unicode xrange zip
     True False None''')
-UNASSIGNABLE_NAMES = _names('')
+UNASSIGNABLE_NAMES = _names(
+    'datetime time calendar math',  # wrappers around standard modules
+    'workers tasks',    # api objects
+    )
 
 #------------------------------------------------------------------------------#
 SCHEDULE_FORBIDDEN_KEYWORDS = _names('')
