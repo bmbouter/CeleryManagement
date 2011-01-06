@@ -18,7 +18,7 @@ def _names(*args):
 FORBIDDEN_KEYWORDS = _names(
     'def class lambda return yield', # functions, classes
     'import from global del',        # limit name access, modifications
-    'for while try except',          # no loops or exceptions
+    'while try except',          # no loops or exceptions
     'exec',)                         # no exec code
 FORBIDDEN_NAMES = _names('''__class__ __dict__ __methods__ __members__ __bases__
     __mro__ mro __subclasses__ __new__ __del__ __init__ __getattr__
@@ -35,11 +35,11 @@ ALLOWED_BUILTINS = _names('''abs all any basestring bin bool bytearray callable
 UNASSIGNABLE_NAMES = _names('')
 
 #------------------------------------------------------------------------------#
-SCHEDULE_FORBIDDEN_KEYWORDS = _names('if elif else')
+SCHEDULE_FORBIDDEN_KEYWORDS = _names('')
 SCHEDULE_FORBIDDEN_NAMES = _names('')
 SCHEDULE_ALLOWED_BUILTINS = _names('')
 
-CONDITION_FORBIDDEN_KEYWORDS = _names('if elif else')
+CONDITION_FORBIDDEN_KEYWORDS = _names('')
 CONDITION_FORBIDDEN_NAMES = _names('')
 CONDITION_ALLOWED_BUILTINS = _names('')
 

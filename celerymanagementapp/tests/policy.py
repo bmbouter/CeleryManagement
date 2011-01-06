@@ -62,12 +62,20 @@ policy:
 
     '''
     def src(self, src):
+        """ Indents source code.  Embedded newlines are allowed. """
         indent = ' '*4*2
         src = '\n'.join('{0}{1}'.format(indent,s) for s in src.splitlines())
         return self._tmpl.format(src=src)
         
     def test_allowed(self):
-        exprs = [ 'True','False','None', 'a==b', 'a and (b or c)',]
+        exprs = [ 'True','False','None', 
+                  'a==b', 'a and (b or c)',
+                  '[a for b in c]',
+                  '[a for b in c if d]',
+                  '(a for b in c if d)',
+                  'a if b else c',
+                  'func(keyword=value)',
+                ]
         for expr in exprs:
             testdata = self.src(expr)
             try:
@@ -113,7 +121,14 @@ policy:
         return self._tmpl.format(src=src)
         
     def test_allowed(self):
-        exprs = [ 'True','False','None', 'a = b', 'a and (b or c)','if True: pass',]
+        exprs = [ 'True','False','None', 
+                  'a = b', 'a and (b or c)',
+                  'if True: pass',
+                  'x = [a for b in c]',
+                  'x = [a for b in c if d]',
+                  'x = (a for b in c if d)',
+                  'a if b else c',
+                ]
         for expr in exprs:
             testdata = self.src(expr)
             try:
@@ -128,6 +143,8 @@ policy:
         exprs = [ 'while true: pass',
                   'import sys',
                   'def func(): pass',
+                  'for x in y: pass',
+                  'yield z',
                 ]
         for expr in exprs:
             testdata = self.src(expr)

@@ -118,52 +118,79 @@ class PolicySectionSplitter(object):
         return alltoks
 
 #==============================================================================#
+# Visitor classes that operate on ASTs.
+
 class NodeVisitor(ast.NodeVisitor):
     def __init__(self, text):
         super(NodeVisitor, self).__init__()
         self.text = text
-
-class CheckAssignedNameVisitor(NodeVisitor):
-    def __init__(self, text, unassignable_names):
-        super(CheckAssignedNameVisitor, self).__init__(text)
-        self.unassignable_names = unassignable_names
+    def syntax_error(self, node, msg):
+        row, col = node.lineno, node.col_offset
+        line = self.text[row-1]
+        raise exceptions.SyntaxError(msg, row, col, line)
+    # Forbidden statements
+    def visit_FunctionDef(self, node):
+        self.syntax_error(node, 'Function definitions are not allowed.')
+    def visit_ClassDef(self, node):
+        self.syntax_error(node, 'Class definitions are not allowed.')
+    def visit_Return(self, node):
+        self.syntax_error(node, 'Return statements are not allowed.')
+    def visit_For(self, node):
+        self.syntax_error(node, 'For statements are not allowed.')
+    def visit_White(self, node):
+        self.syntax_error(node, 'While statements are not allowed.')
+    def visit_Raise(self, node):
+        self.syntax_error(node, 'Raise statements are not allowed.')
+    def visit_TryExcept(self, node):
+        self.syntax_error(node, 'Try...Except statements are not allowed.')
+    def visit_TryFinally(self, node):
+        self.syntax_error(node, 'Try...Finally statements are not allowed.')
+    def visit_Import(self, node):
+        self.syntax_error(node, 'Import statements are not allowed.')
+    def visit_ImportFrom(self, node):
+        self.syntax_error(node, 'Import...From statements are not allowed.')
+    def visit_Exec(self, node):
+        self.syntax_error(node, 'Exec statements are not allowed.')
+    def visit_Global(self, node):
+        self.syntax_error(node, 'Global statements are not allowed.')
+    # Forbidden expressions
+    def visit_Lambda(self, node):
+        self.syntax_error(node, 'Lambda expressions are not allowed.')
+    def visit_Yield(self, node):
+        self.syntax_error(node, 'Yield expressions are not allowed.')
         
+class ApplySectionVisitor(NodeVisitor):
+    """ Visits nodes of the 'apply' section and raises an exception if the node 
+        is not allowed. """
+    def __init__(self, text, unassignable_names):
+        super(ApplySectionVisitor, self).__init__(text)
+        self.unassignable_names = unassignable_names
+    def generic_visit(self, node):
+        # visits children of a node
+        return super(ApplySectionVisitor, self).generic_visit(node)
     def visit_Name(self, node):
         if isinstance(node.ctx, (ast.Store, ast.Del, ast.AugStore)):
             if node.id in self.unassignable_names:
-                row, col = node.lineno, node.col_offset
-                line = self.text[row-1]
-                msg = 'The name "{0}" may not be assigned to.'.format(node.id)
-                error(msg,row,col,line)
+                msg = 'The name "{0}" may not be assigned to nor deleted.'.format(node.id)
+                self.syntax_error(node, msg)
         return self.generic_visit(node)
-
-
-class AssertNoAssignmentsVisitor(NodeVisitor):
+        
+class RestrictedNodeVisitor(NodeVisitor):
+    """ Allows fewer constructs than NodeVisitor. """
     def __init__(self, text):
-        super(AssertNoAssignmentsVisitor, self).__init__(text)
-    def visit_Assign(self, node):
-        row, col = node.lineno, node.col_offset
-        line = self.text[row-1]
-        msg = 'Assignment is not allowed in this context.'
-        error(msg,row,col,line)
-    def visit_AugAssign(self, node):
-        row, col = node.lineno, node.col_offset
-        line = self.text[row-1]
-        msg = 'Assignment is not allowed in this context.'
-        error(msg,row,col,line)
-
-
-class AssertNoStatementsVisitor(NodeVisitor):
-    def __init__(self, text):
-        super(AssertNoStatementsVisitor, self).__init__(text)
-    # Only Expr statements are allowed
+        super(RestrictedNodeVisitor, self).__init__(text)
     def visit(self, node):
         if isinstance(node, ast.stmt) and not isinstance(node, ast.Expr):
-            row, col = node.lineno, node.col_offset
-            line = self.text[row-1]
-            error('No statements allowed in this context.',row,col,line)
-        super(AssertNoStatementsVisitor,self).visit(node)
-
+            self.syntax_error(node, 'No statements are allowed in this context.')
+        super(RestrictedNodeVisitor,self).visit(node)
+    def visit_Delete(self, node):
+        self.syntax_error(node, 'Delete statements are not allowed in this context.')
+    def visit_Assign(self, node):
+        self.syntax_error(node, 'Assignment is not allowed in this context.')
+    def visit_AugAssign(self, node):
+        self.syntax_error(node, 'Assignment is not allowed in this context.')
+    def visit_If(self, node):
+        self.syntax_error(node, 'If statements are not allowed in this context.')
 
 #==============================================================================#
 class SectionParser(object):
@@ -289,7 +316,7 @@ class ScheduleSectionParser(SectionParser):
     
     def check_ast(self, tree):
         for node in tree.body:
-            AssertNoStatementsVisitor(self.text).visit(node)
+            RestrictedNodeVisitor(self.text).visit(node)
         
     def merge_asts(self, trees):
         assert len(trees) == 1
@@ -318,7 +345,7 @@ class ConditionSectionParser(SectionParser):
     
     def check_ast(self, tree):
         for node in tree.body:
-            AssertNoStatementsVisitor(self.text).visit(node)
+            RestrictedNodeVisitor(self.text).visit(node)
     
     def merge_asts(self, trees):
         exprs = []
@@ -341,7 +368,7 @@ class ApplySectionParser(SectionParser):
         super(ApplySectionParser, self).__init__(text)
     
     def check_ast(self, tree):
-        CheckAssignedNameVisitor(self.text, self.unassignable_names).visit(tree)
+        ApplySectionVisitor(self.text, self.unassignable_names).visit(tree)
 
 
 #==============================================================================#
