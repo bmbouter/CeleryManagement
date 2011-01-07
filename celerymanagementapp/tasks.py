@@ -1,37 +1,41 @@
 import json
-import os
+import uuid
 
-from celery.decorators import task
-
+#from celery.decorators import task
+from celery.task import Task
 from celerymanagementapp.taskcontrol import demo_dispatch
 from celerymanagementapp import jsonutil
 
-@task(ignore_result=True)
-def launch_demotasks(dispatchid, tmpfilename):
-    try:
-        f = open(tmpfilename, 'rb')
-    except IOError as e:
-        msg =  'An error occurred while trying to open the tmpfile:\n'
-        if e.filename:
-            msg += '{0}: {1}'.format(e.strerror, e.filename)
-        else:
-            msg += '{0}'.format(e.strerror)
-        print msg
-        raise
+
+class launch_demotasks(Task):
+    ignore_result = True
     
-    rawjson = f.read()
-    f.close()
-    os.remove(tmpfilename)
+    def run(self, rawjson):    
+        jsondata = jsonutil.loads(rawjson)
+        dispatchid = uuid.UUID(self.request.id).hex
+        
+        taskname = jsondata['name']
+        args = jsondata.get('args', [])
+        kwargs = jsondata.get('kwargs', {})
+        options = jsondata.get('options', {})
+        rate = jsondata['rate']
+        runfor = jsondata['runfor']
+        
+        demo_dispatch(taskname, dispatchid, runfor, rate, options, args, kwargs)
+        
+
+
+# @task(ignore_result=True)
+# def launch_demotasks(rawjson):
+    # jsondata = jsonutil.loads(rawjson)
     
-    jsondata = jsonutil.loads(rawjson)
+    # taskname = jsondata['name']
+    # args = jsondata.get('args', [])
+    # kwargs = jsondata.get('kwargs', {})
+    # options = jsondata.get('options', {})
+    # rate = jsondata['rate']
+    # runfor = jsondata['runfor']
     
-    taskname = jsondata['name']
-    args = jsondata.get('args', [])
-    kwargs = jsondata.get('kwargs', {})
-    options = jsondata.get('options', {})
-    rate = jsondata['rate']
-    runfor = jsondata['runfor']
-    
-    demo_dispatch(taskname, dispatchid, runfor, rate, options, args, kwargs)
+    # demo_dispatch(taskname, dispatchid, runfor, rate, options, args, kwargs)
 
 

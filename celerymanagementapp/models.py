@@ -239,6 +239,7 @@ class RegisteredTaskType(models.Model):
 class TaskDemoGroup(models.Model):
     uuid =              models.CharField(max_length=32, db_index=True, unique=True)
     name =              models.CharField(max_length=200)
+    ##launcher_uuid =     models.CharField(max_length=36, unique=True)
     elapsed =           models.FloatField(default=-1.0)
     tasks_sent =        models.IntegerField(default=-1)
     completed =         models.BooleanField(default=False)
