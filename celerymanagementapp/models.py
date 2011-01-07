@@ -269,6 +269,7 @@ class PolicyModel(models.Model):
         return u"<{0}>  last run: {1}  enabled: {2}".format(self.name, self.last_run_time, self.enabled)
         
     def save(self, *args, **kwargs):
+        # convert Windows newlines to Unix newlines
         self.source = self.source.replace('\r\n','\n')
         super(PolicyModel, self).save(*args, **kwargs)
 
