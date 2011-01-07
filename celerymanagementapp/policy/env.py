@@ -38,7 +38,8 @@ class ModuleWrapper(object):
 
 GLOBALS = { 'datetime': ModuleWrapper(datetime, exclude='datetime_CAPI'),
             'time': ModuleWrapper(time), 'calendar': ModuleWrapper(calendar),
-            'math': ModuleWrapper(math),
+            'math': ModuleWrapper(math), 
+            'now': datetime.datetime.now, 'today': datetime.date.today,
           }
 LOCALS = {}
 

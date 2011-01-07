@@ -20,16 +20,20 @@ class Runner(object):
         locals = self.locals.copy() 
         try:
             r = eval(code, globals, locals)
-        except exceptions.BaseException:
-            # If the exception is a Policy exception, reraise it.
+        except exceptions.StaticException:
+            # If the exception is a static Policy exception, reraise it.
+            raise
+        except exceptions.Exception as e:
+            # Other Policy exceptions need line information.
+            exctype, excval, tb = sys.exc_info()
+            line, lineno, filename = exceptions.policy_traceback_info(text, tb)
+            e.set_policy_context(lineno=lineno, line=line, file=file)
             raise
         except Exception as e:
-            exctype, excval, tb = sys.exc_info()
-            fmttb = traceback.extract_tb(tb)
-            filename, lineno, funcname, txt_ = fmttb[-1]
             # If it came from a policy, wrap the exception...
-            if filename.startswith('<policy:'):
-                print '[{0}]: {1}'.format(lineno, text[lineno-1])
+            exctype, excval, tb = sys.exc_info()
+            line, lineno, filename = exceptions.policy_traceback_info(text, tb)
+            if line:
                 EW = exceptions.ExceptionWrapper
                 raise EW(exctype, msg=e.message, lineno=lineno, 
                          line=text[lineno-1], file=filename)

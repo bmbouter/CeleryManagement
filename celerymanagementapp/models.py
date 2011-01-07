@@ -263,6 +263,7 @@ class PolicyModel(models.Model):
     enabled =       models.BooleanField(default=False)
     last_run_time = models.DateTimeField(null=True)
     source =        models.TextField(default="")
+    # add field which keeps error information
     
     def __unicode__(self):
         return u"<{0}>  last run: {1}  enabled: {2}".format(self.name, self.last_run_time, self.enabled)

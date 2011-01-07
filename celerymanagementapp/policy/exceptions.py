@@ -44,16 +44,33 @@ class Error(BaseException):
         self.lineno = lineno
         self.column = column
         self.line = line
+        self._msg = msg
         msg = _error_message(clsname=self.clsname, file=file, lineno=lineno, 
                              col=column, line=line, msg=msg)
         self.formatted_message = msg
-        super(Error, self).__init__('\n{0}'.format(msg))
+        super(Error, self).__init__(self._msg)
+        
+    def set_policy_context(self, lineno=None, column=None, line='', file=None):
+        self.lineno = lineno
+        self.column = column
+        self.line = line
+        msg = _error_message(clsname=self.clsname, file=file, lineno=lineno, 
+                             col=column, line=line, msg=self._msg)
+        self.formatted_message = msg
         
     def __unicode__(self):
         return u'\n'+self.formatted_message
         
     def __str__(self):
         return '\n'+self.formatted_message
+        
+class StaticError(Error):
+    clsname = 'StaticError'
+    def __init__(self, msg, lineno=None, column=None, line='', file=None):
+        super(StaticError, self).__init__(msg)
+        super(StaticError, self).set_policy_context(lineno=lineno, column=column, 
+                                                    line=line, file=file)
+        
         
 def ExceptionWrapper(exctype, *args, **kwargs):
     class _ExceptionWrapper(Error):
@@ -64,11 +81,39 @@ def ExceptionWrapper(exctype, *args, **kwargs):
     return _ExceptionWrapper(*args, **kwargs)
         
 
-class SyntaxError(Error):
+class SyntaxError(StaticError):
     clsname = 'PolicySyntaxError'
     def __init__(self, msg, lineno=None, column=None, line=''):
         super(SyntaxError, self).__init__(msg=msg, lineno=lineno, 
                                           column=column, line=line)
+
+
+
+
+#==============================================================================#
+def current_policy_traceback():
+    stack = traceback.extract_stack()
+    for i in range(len(stack)-1,-1,-1):
+        # the first item in a traceback is the filename
+        if stack[i][0].startswith('<policy:'):
+            return stack[:i+1]
+    else:
+        return []
+
+def policy_traceback_info(source_lines, tb):
+    tbstack = traceback.extract_tb(tb)
+    for i in range(len(tbstack)-1,-1,-1):
+        # the first item in a traceback is the filename
+        if tbstack[i][0].startswith('<policy:'):
+            lineno = tbstack[i][1] 
+            s = source_lines[lineno-1]
+            return (s,lineno,tbstack[i][0])   # line, lineno, filename
+    else:
+        return ('',-1,'')
+
+def apply_policy_traceback():
+    pass
+
 
 #==============================================================================#
 def error(msg='', *args, **kwargs):
