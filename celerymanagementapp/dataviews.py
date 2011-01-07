@@ -376,17 +376,10 @@ def task_demo_dataview(request):
         # validate request
         is_valid, msg = validate_task_demo_request(json_request)
         if is_valid:
-            # save json to temp file
             rawjson = request.raw_post_data
-            fd, tmpname = tempfile.mkstemp()
-            os.close(fd)
-            tmp = open(tmpname, 'wb')
-            tmp.write(rawjson)
-            tmp.close()
-            # generate id
-            dispatchid = uuid.uuid4().hex
             ##print 'Launching dispatcher task...'
-            tasks.launch_demotasks.apply_async(args=[dispatchid, tmpname])
+            r = tasks.launch_demotasks.apply_async(args=[rawjson])
+            dispatchid = uuid.UUID(r.task_id).hex
             ##print 'Dispatcher task launched.'
             
         # prepare response
