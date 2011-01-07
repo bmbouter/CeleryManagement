@@ -160,9 +160,15 @@ class Provider(AbstractWorkerNode):
         except libcloud.types.InvalidCredsError:
             from django.core.exceptions import ValidationError
             raise ValidationError("Invalid Provider Credentials")
+        images = conn.list_images()
+        for image in images:
+            if self.image_id == image.id or self.image_id == image.name:
+                return
+        from django.core.exceptions import ValidationError
+        raise ValidationError("Image ID is not valid")
 
     def __unicode__(self):
-        return self.driver
+        return self.provider_name
 
     @property
     def conn(self):
