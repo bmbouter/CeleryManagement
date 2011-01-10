@@ -1,5 +1,7 @@
 import datetime
 import socket
+import random
+import string
 
 import libcloud.types
 import libcloud.providers
@@ -160,9 +162,24 @@ class Provider(AbstractWorkerNode):
         except libcloud.types.InvalidCredsError:
             from django.core.exceptions import ValidationError
             raise ValidationError("Invalid Provider Credentials")
+        if self._get_image_obj() is None:
+            from django.core.exceptions import ValidationError
+            raise ValidationError("Image ID is not valid")
 
     def __unicode__(self):
-        return self.driver
+        return self.provider_name
+
+    def _get_image_obj(self):
+        """Returns an object of type libcloud.base.NodeImage looked up by id or name"""
+        images = self.conn.list_images()
+        for image in images:
+            if self.image_id == image.id or self.image_id == image.name:
+                return image
+
+    @property
+    def sizes(self):
+        """Returns a list of libcloud.base.NodeSize objects"""
+        return self.conn.list_sizes()
 
     @property
     def conn(self):
@@ -185,8 +202,21 @@ class Provider(AbstractWorkerNode):
 
     def create_vm(self):
         """Creates and starts a VM on Provider"""
-        new_vm = self.conn.create_node(image=self.image_id, size=sizes[0]) 
-        return InBandWorkerNode(instance_id=new_vm.instance_id, provider=self)
+        chars = string.letters + string.digits
+        while True:
+            random_string = ''.join([random.choice(chars)for i in range(8)])
+            vm_name = 'celerydworker%s' % random_string
+            node_image = self._get_image_obj()
+            try:
+                new_vm = self.conn.create_node(name=vm_name, image=node_image, size=self.sizes[0]) 
+                break
+            except Exception as e:
+                import pdb;pdb.set_trace()
+                if 'Server name already in use' in e.args[0]:
+                    pass
+        in_band_worker_node = InBandWorkerNode(instance_id=new_vm.id, provider=self)
+        in_band_worker_node.save()
+        return in_band_worker_node
 
 class InBandWorkerNode(models.Model):
     instance_id = models.CharField(_(u"instance id"),
@@ -194,12 +224,20 @@ class InBandWorkerNode(models.Model):
     provider = models.ForeignKey('celerymanagementapp.Provider')
 
     def __unicode__(self):
-        return '%s on %s' % (self.ip, self.provider.name)
+        return 'Image %s on %s' % (self.instance_id, self.provider.provider_name)
+
+    def _get_node_obj(self):
+        """Returns an object of type libcloud.base.Node looked up by id"""
+        nodes = self.provider.conn.list_nodes()
+        for node in nodes:
+            if self.instance_id == node.id:
+                return node
 
     def delete(self, *args, **kwargs):
         """Delete's the running virtual machine"""
-        self.provider.conn.destroy()
-        super(Blog, self).delete(*args, **kwargs)
+        node = self._get_node_obj()
+        self.provider.conn.destroy_node(node)
+        super(InBandWorkerNode, self).delete(*args, **kwargs)
 
 # class DefinedTask(models.Model):
     # """A task type that has been defined."""
@@ -239,6 +277,7 @@ class RegisteredTaskType(models.Model):
 class TaskDemoGroup(models.Model):
     uuid =              models.CharField(max_length=32, db_index=True, unique=True)
     name =              models.CharField(max_length=200)
+    ##launcher_uuid =     models.CharField(max_length=36, unique=True)
     elapsed =           models.FloatField(default=-1.0)
     tasks_sent =        models.IntegerField(default=-1)
     completed =         models.BooleanField(default=False)
