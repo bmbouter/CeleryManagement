@@ -7,12 +7,13 @@ $(document).ready(function() {
     CMA.Core.setupEvents();
     CMA.Core.setupFormEvents();
 
-    CMA.Core.getTasks(CMA.Core.populateTaskNavigation);
-    CMA.Core.getWorkers(CMA.Core.populateWorkerNavigation);
+    CMA.Core.ajax.getTasks(CMA.Core.populateTaskNavigation);
+    CMA.Core.ajax.getWorkers(CMA.Core.populateWorkerNavigation);
     
     var xhr = jQuery.getJSON(CMA.Core.get_tasks_url);
     var obj = jQuery.parseJSON(xhr.responseText);
-	
+
+
 });
 
 function createTable(data) {
@@ -109,16 +110,26 @@ CMA.Core.setupEvents = function(){
         }
     );
 
-    $(window).resize(function() {
-        if( $(window).width() > $('#container').css("min-width").split("px")[0] ){
-            $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 20) + "px");
-        } 
-        if( $(window).height() > $('#container').css("min-height").split("px")[0] ){
-            $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
-        } else {
-            $('#navigation').css("height", $('#container').css("min-height"));
-        }
-    });
+    var resizer = (function() {
+            var wind = $(window),
+                container = $('#container'),
+                navigation = $('#navigation'),
+    
+                resize = function() {
+                    if( wind.width() > container.css("min-width").split("px")[0] ){
+                        $('#content').css("width", (wind.width() - $('#dummy').css("width").split("px")[0] - 20) + "px");
+                    } 
+                    if( wind.height() > container.css("min-height").split("px")[0] ){
+                        navigation.css("height", (wind.height() - $('#header').css("height").split("px")[0] - 2) + "px");
+                    } else {
+                        navigation.css("height", container.css("min-height"));
+                    }
+                };
+
+            return resize;
+    }());
+
+    $(window).resize(resizer);
 }
 
 CMA.Core.setupFormEvents = function(){
@@ -216,7 +227,11 @@ CMA.Core.setupFormEvents = function(){
 }
 
 CMA.Core.populateTaskNavigation = function(data){
-    var color = "#7D7D7D";
+    var color = "#7D7D7D",
+        task_text = "",
+        taskList = $('#taskNavigation'),
+        clone = taskList.clone();
+
     for( item in data ){
         if( data[item] === CMA.Core.taskname ){
             color = "red";
@@ -224,20 +239,21 @@ CMA.Core.populateTaskNavigation = function(data){
             color = "#7D7D7D";
         }
         if( data[item].length > 15 ){
-            var task_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-            $('#taskNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.task_url + data[item] + "/'>" + task_text + "</a></li>");
+            task_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
+            clone.append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.ajax.urls.task_url + data[item] + "/'>" + task_text + "</a></li>");
         } else {
-            $('#taskNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.task_url + data[item] + "/'>" + data[item] + "</a></li>");
+            clone.append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.ajax.urls.task_url + data[item] + "/'>" + data[item] + "</a></li>");
         }
     }
+
+    taskList.replaceWith(clone);
 }
 
 CMA.Core.populateWorkerNavigation = function(data){
     var color = "#7D7D7D",
         worker_text = "",
-        frag;
-
-    frag = document.createDocumentFragment();
+        workerList = $('#workerNavigation'),
+        clone = workerList.clone();
 
     for( item in data ){
         if( data[item] === CMA.Core.workername ){
@@ -248,12 +264,11 @@ CMA.Core.populateWorkerNavigation = function(data){
 
         if( data[item].length > 15 ){
             worker_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-            frag.appendChild("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.worker_url + data[item] + "/'>" + worker_text + "</a></li>");
+            clone.append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.ajax.urls.worker_url + data[item] + "/'>" + worker_text + "</a></li>");
         } else {
-            frag.appendChild("<li><a id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.worker_url + data[item] + "/'>" + data[item] + "</a></li>");
+            clone.append("<li><a id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.ajax.urls.worker_url + data[item] + "/'>" + data[item] + "</a></li>");
         }
     }
-
-    $('#workerNavigation').append(frag);
+ 
+    workerList.replaceWith(clone);   
 }
-
