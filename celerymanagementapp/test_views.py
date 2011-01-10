@@ -19,6 +19,11 @@ def dashboard(request):
             { "load_test_data" : "true" },
             context_instance=RequestContext(request))
 
+def policy(request):
+    return render_to_response('celerymanagementapp/policy.html',
+            { "load_test_data" : "true" },
+            context_instance=RequestContext(request))
+
 def configure(request):
     context = { "load_test_data": "true" }
     if settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static":

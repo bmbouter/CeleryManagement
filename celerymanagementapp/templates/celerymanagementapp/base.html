@@ -70,10 +70,16 @@
                             <li><a href="/celerymanagementapp/test/view/dashboard/">Dashboard</a></li>
                             <li><a href="/celerymanagementapp/test/view/system/">Realtime View</a></li>
                             <li><a href="/celerymanagementapp/test/view/configure/">Configuration</a></li>
+                            {% if CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "dynamic" %}
+                            <li><a href="/celerymanagementapp/test/view/policy/">Policies</a></li>
+                            {% endif %}
                             {% else %}
                             <li><a href="/celerymanagementapp/view/dashboard/">Dashboard</a></li>
                             <li><a href="/celerymanagementapp/view/system/">Realtime View</a></li>
                             <li><a href="/celerymanagementapp/view/configure/">Configuration</a></li>
+                            {% if CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "dynamic" %}
+                            <li><a href="/celerymanagementapp/view/policy/">Policies</a></li>
+                            {% endif %}
                             {% endif %}
                             <li><a id="taskNavigationMaster">+ Tasks</a></li>
                             <ul id="taskNavigation">

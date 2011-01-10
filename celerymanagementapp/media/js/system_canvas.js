@@ -401,8 +401,8 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
             if( entity !== undefined  && entity.objectType === "Worker" ){
                 $('#taskMenu').hide();
                 $('#workerMenu').css({
-                    top: (entity.yCenter) + 'px',
-                    left: (entity.xCenter - 125) + 'px'
+                    top: (e.pageY - yOffset) + 'px',
+                    left: (e.pageX - xOffset - $('#workerMenu').width()) + 'px'
                 }).show();
             }
             return false;
@@ -430,8 +430,8 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
             if( entity !== undefined  && entity.objectType === "Task" ){
                 $('#workerMenu').hide();
                 $('#taskMenu').css({
-                    top: (entity.yCenter) + 'px',
-                    left: (entity.xCenter - 125) + 'px'
+                    top: (e.pageY - yOffset) + 'px',
+                    left: (e.pageX - xOffset) + 'px'
                 }).show();
             }
             return false;
@@ -586,15 +586,17 @@ CMA.SystemDisplay.Task = function(y, name){
         yCenter = (height / 2) + y,
         fill = '#FFC028',
 
+        displayName = (function() {
+            if( name.length > 30 ){
+                return "..." +  name.substring(name.length-29, name.length);
+            } else {
+                return name;
+            }
+        }()),
+
         getFill = function(){
             return fill;
         };
-
-    if( name.length > 30 ){
-        var displayName = "..." +  name.substring(name.length-29, name.length);
-    } else {
-        var displayName = name;
-    }
 
     return {
         x: x,
@@ -624,6 +626,15 @@ CMA.SystemDisplay.Worker = function(y, canvasWidth, name, active){
         yCenter = (height / 2) + y,
         active = active,
         processes = 0,
+
+        displayName = (function() {
+            if( name.length > 30 ){
+                return "..." +  name.substring(name.length-29, name.length);
+            } else {
+                return name;
+            }
+        }()),
+
         getFill = function(){
             if( active ){
                 return activeFill;
@@ -632,12 +643,6 @@ CMA.SystemDisplay.Worker = function(y, canvasWidth, name, active){
             }
         };
     
-    if( name.length > 30 ){
-        var displayName = name.substring(0, 27) + "...";
-    } else {
-        var displayName = name;
-    }
-
     return {
         x: x,
         y: y,

@@ -393,6 +393,10 @@ def worker_view(request, workername=None):
 def dashboard(request):
     return render_to_response('celerymanagementapp/dashboard.html',
             context_instance=RequestContext(request))
+    
+def policy(request):
+    return render_to_response('celerymanagementapp/policy.html',
+            context_instance=RequestContext(request))
 
 #==============================================================================#
 def _resolve_name_param(name):

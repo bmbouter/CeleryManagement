@@ -150,6 +150,7 @@ CMA.Core.setupFormEvents = function(){
     };
 
     $('.outOfBandForm').hide();
+    $('.policyForm').hide();
 
     $('#blankOutOfBandForm').ajaxForm({
         dataType: 'json',
@@ -232,19 +233,27 @@ CMA.Core.populateTaskNavigation = function(data){
 }
 
 CMA.Core.populateWorkerNavigation = function(data){
-    var color = "#7D7D7D";
+    var color = "#7D7D7D",
+        worker_text = "",
+        frag;
+
+    frag = document.createDocumentFragment();
+
     for( item in data ){
         if( data[item] === CMA.Core.workername ){
             color = "red";
         } else {
             color = "#7D7D7D";
         }
+
         if( data[item].length > 15 ){
-            var worker_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-            $('#workerNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.worker_url + data[item] + "/'>" + worker_text + "</a></li>");
+            worker_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
+            frag.appendChild("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.worker_url + data[item] + "/'>" + worker_text + "</a></li>");
         } else {
-            $('#workerNavigation').append("<li><a id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.worker_url + data[item] + "/'>" + data[item] + "</a></li>");
+            frag.appendChild("<li><a id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.worker_url + data[item] + "/'>" + data[item] + "</a></li>");
         }
     }
+
+    $('#workerNavigation').append(frag);
 }
 

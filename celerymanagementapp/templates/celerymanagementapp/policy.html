@@ -1,0 +1,46 @@
+{% extends "celerymanagementapp/base.html" %}
+
+{% block content %}
+<div id="configurationManagement">
+    <h1>
+        Policies
+    </h1>
+    <ul>
+        <li>Policy Name</li>
+        <li class="createPolicy right click">Policy</li>
+        <li class="createPolicy right click"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png"/></li>
+    </ul>
+    <form method="POST" enctype="multipart/form-data" class="policyForm" id="policyForm" action="/celerymanagementapp/policy/">
+        {% csrf_token %}
+        {% for field in outofbandworkernode_form %}
+        <div class="fieldWrapper">
+            <div class="field">
+                {{ field.label_tag }} 
+                {{ field }}
+                <span class="errorWrapper" id="{{ field.html_name }}_error"></span>
+            </div>
+        </div>
+        {% endfor %}
+        <button class="submitButton" id="submitPolicyButton" >Submit</button>
+    </form>
+    {% for policy in policies %}
+    <ul class="node">
+        <li class="left">{{ policy.policy.ip }}</li>
+        <li class="editPolicy right click" id="{{ policy.policy.ip }}_deleteWorkerNode">Delete</li>
+        <li class="editPolicy right click" id="{{ policy.policy.ip }}_workerNode">Edit</li>
+    </ul>
+    <form method="POST" enctype="multipart/form-data" class="policyForm" id="{{ policy.policy.ip }}_policyForm">
+        {% csrf_token %}
+        {% for field in policy.policyForm %}
+        <div class="fieldWrapper">
+            <div class="field">
+                {{ field.label_tag }} {{ field }}
+                <label id="{{ field.label }}_error"></label>
+            </div>
+        </div>
+        {% endfor %}
+        <input type="submit" class="submitPolicyEdit submitButton" value="Submit"/>
+    </form>
+    {% endfor %}
+</div>
+{% endblock %}

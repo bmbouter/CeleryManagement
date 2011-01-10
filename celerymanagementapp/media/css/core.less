@@ -154,13 +154,14 @@ body {
                 margin: 0 0 0 50px;
                 font-size: 0.8em;
 
-                header {
+                h1 {
                     width: 80%;
                     border: 2px outset #383838;
                     height: 20px;
                     margin: 30px 0 30px 0;
-                    border-radius: 20px;
-                    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#383838), to(#383838), color-stop(.5,#575757)); //-webkit-gradient(linear, 0% 0%, 0% 100%, from(#5CCCCC), to(#5CCCCC), color-stop(.5,#6BEDED));
+                    .rounded_borders(20px);
+                    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#383838), to(#383838), color-stop(.5,#575757));
+                    background: -moz-linear-gradient(0% 100% 90deg,#383838, #575757, #383838 100%);
                     color: #FFF;  //#173333;
                     padding: 2px 0 0 10px;
                     font-weight: bold;

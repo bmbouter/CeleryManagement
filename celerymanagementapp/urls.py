@@ -101,6 +101,7 @@ if settings.DEBUG:
         url(r'^test/view/system/$', 'system_overview', name="test_system_overview_url"),
         url(r'^test/view/dashboard/$', 'dashboard', name="test_dashboard_url"),
         url(r'^test/view/configure/$', 'configure', name="test_configure_url"),
+        url(r'^test/view/policy/$', 'policy', name="test_policy_url"),
         url(r'^test/view/task/(?P<taskname>[-\w\d_.]+)/$', 'task_view', name="task_view_url"),
         url(r'^test/view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url"),
         url(r'^test/post/worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'kill_worker', name="test_kill_worker_url"),
