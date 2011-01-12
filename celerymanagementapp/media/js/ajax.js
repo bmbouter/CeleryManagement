@@ -19,7 +19,7 @@ CMA.Core.ajax = (function() {
                 worker_url: "/celerymanagementapp/view/task/",
                 create_out_of_band_worker_url: root_url + "outofbandworker/",
                 create_provider_url: root_url + "provider/",
-                get_images_url: post_root_url + "provider/images/",
+                get_images_url: root_url + "provider/images/",
             };
         },
         loadTestUrls = function() {
