@@ -8,11 +8,6 @@ $(document).ready(function() {
     eventuality(CMA.SystemDisplay);
     systemDisplay = CMA.SystemDisplay.Controller();
      
-    $(window).resize(function(e) {
-        $('#systemCanvas')[0].width = $(window).width() - $('#dummy').css("width").split("px")[0];
-        CMA.SystemDisplay.fire("Redraw");
-    });
-    
 });
 
 CMA.SystemDisplay.refresh = function(){
@@ -35,8 +30,12 @@ CMA.SystemDisplay.Controller = function(){
         canvas = $('#systemCanvas')[0];
         canvas.width = $(window).width() - $('#dummy').css("width").split("px")[0];
 
-    var modelFactory = CMA.SystemDisplay.ModelFactory(canvas),
-        viewer = CMA.SystemDisplay.Viewer(modelFactory, canvas, canvasElement),
+    var modelFactory = CMA.SystemDisplay.ModelFactory(canvas);
+
+    CMA.Core.ajax.getTasks(modelFactory.createTasks);
+    CMA.Core.ajax.getWorkers(modelFactory.createWorkers);
+   
+    var viewer = CMA.SystemDisplay.Viewer(modelFactory, canvas, canvasElement),
         systemEventHandler = CMA.SystemDisplay.EventHandler(canvasElement, viewer, modelFactory);
 };
 
@@ -67,7 +66,7 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
 
             workersSet = true;
             if( tasksSet ){
-                CMA.Core.getTasksPerWorker(createConnectors);
+                CMA.Core.ajax.getTasksPerWorker(createConnectors);
             }
         },
 
@@ -89,7 +88,7 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
 
             tasksSet = true;
             if( workersSet ){
-                CMA.Core.getTasksPerWorker(createConnectors);
+                CMA.Core.ajax.getTasksPerWorker(createConnectors);
             }
         },
 
@@ -111,8 +110,8 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
                 }
             }
 
-            CMA.Core.getPendingTasks(setPendingTasks);
-            CMA.Core.getWorkerProcesses(setWorkerProcesses);
+            CMA.Core.ajax.getPendingTasks(setPendingTasks);
+            CMA.Core.ajax.getWorkerProcesses(setWorkerProcesses);
         },
 
         setPendingTasks = function(data){
@@ -170,19 +169,19 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
 };
 
 CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
-    CMA.Core.getTasks(modelFactory.createTasks);
-    CMA.Core.getWorkers(modelFactory.createWorkers);
     
     var expandedTask = false,
         expandedWorker = false,
         canvasHeight = 0,
+        systemRender
+        dummyWidth = $('#dummy').css("width").split("px")[0],
 
         connectorWeightingFunction = function(size){
             return (size / modelFactory.getConnectorsWeight() + 0.35) * 4;
         },
 
         redraw = function(){
-            canvas.width = $(window).width() - $('#dummy').css("width").split("px")[0];
+            canvas.width = $(window).width() - dummyWidth - 20;
             var workers;
             if( $(window).width() > $('#container').css("min-width").split("px")[0] ){
                 workers = modelFactory.getWorkers();
@@ -196,7 +195,7 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
         },
 
         draw = function(){
-            systemRenderer = CMA.SystemDisplay.Renderer(canvas, modelFactory.getCanvasHeight() + 60);
+            systemRenderer = CMA.SystemDisplay.Renderer(canvas, modelFactory);
             canvas.width = $(window).width() - $('#dummy').css("width").split("px")[0];
             var connectors = modelFactory.getConnectors();
             var tasks = modelFactory.getTasks();
@@ -273,8 +272,8 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
         },
 
         refresh = function(){
-            CMA.Core.getTasks(modelFactory.createTasks);
-            CMA.Core.getWorkers(modelFactory.createWorkers);
+            CMA.Core.ajax.getTasks(modelFactory.createTasks);
+            CMA.Core.ajax.getWorkers(modelFactory.createWorkers);
         };
 
     CMA.SystemDisplay.on("Redraw", redraw);
@@ -328,18 +327,11 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
 };
 
 CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
-    var clickedEntity = null,
+    var events = {},
+        handlers = {},
+        clickedEntity = null,
         yOffset = $('#header').css("height").split("px")[0],
         xOffset = $('#dummy').css("width").split("px")[0];
-
-    $(document).ready(function() {
-        $('#workerMenu').click(function() {
-            $('#workerMenu').hide();
-        });
-        $(document).click(function() {
-            $('#workerMenu').hide();
-        });
-    });
 
     var getEntity = function(xPos, yPos){
         var xMousePos = xPos - xOffset,
@@ -365,16 +357,16 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
         }
     }
 
-    function handleClick(e){
+    handlers.handleClick = function(e){
         var entity = getEntity(e.pageX, e.pageY);
         if( entity !== undefined && entity.objectType === "Task" ){
-            window.location = CMA.Core.task_url + entity.fullName + "/";
+            window.location = CMA.Core.ajax.task_url + entity.fullName + "/";
         } else if( entity !== undefined && entity.objectType === "Worker" ){
-            window.location = CMA.Core.worker_url + entity.fullName + "/";
+            window.location = CMA.Core.ajax.worker_url + entity.fullName + "/";
         }
     }
  
-    function handleHover(e){
+    handlers.handleHover = function(e){
         var entity = getEntity(e.pageX, e.pageY);
         if( entity !== undefined && entity.objectType === "Task" ){
             viewer.handleTaskHover(entity);
@@ -392,9 +384,10 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
             clickedEntity = entity;
 
             if( entity !== undefined  && entity.objectType === "Worker" ){
+                $('#taskMenu').hide();
                 $('#workerMenu').css({
-                    top: (entity.yCenter) + 'px',
-                    left: (entity.xCenter - 125) + 'px'
+                    top: (e.pageY - yOffset) + 'px',
+                    left: (e.pageX - xOffset - $('#workerMenu').width()) + 'px'
                 }).show();
             }
             return false;
@@ -402,7 +395,7 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
 
         $('#deactivateWorker').click(function (){
             if(  clickedEntity !== undefined  && clickedEntity.objectType === "Worker" ){
-                CMA.Core.postShutdownWorker(clickedEntity.fullName, viewer.shutdownWorker);
+                CMA.Core.ajax.postShutdownWorker(clickedEntity.fullName, viewer.shutdownWorker);
                 console.log("deactivate clicked");
                 clickedEntity = false;
             }
@@ -413,13 +406,71 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
         });
     }
     
-    canvasElement.click(handleClick);
-    canvasElement.mousemove(handleHover);
+    if( CMA.Core.USE_MODE === "static" ){
+        
+        canvasElement.bind("contextmenu", function(e){
+            var entity = getEntity(e.pageX, e.pageY);
+            clickedEntity = entity;
+            
+            if( entity !== undefined  && entity.objectType === "Task" ){
+                $('#workerMenu').hide();
+                $('#taskMenu').css({
+                    top: (e.pageY - yOffset) + 'px',
+                    left: (e.pageX - xOffset) + 'px'
+                }).show();
+            }
+            return false;
+        });
+
+        $('#dispatchTask').click(function (){
+            if(  clickedEntity !== undefined  && clickedEntity.objectType === "Task" ){
+                //CMA.Core.postShutdownWorker(clickedEntity.fullName, viewer.shutdownWorker);
+                console.log("task dispatch");
+                clickedEntity = false;
+            }
+        });
+    } else {
+        canvasElement.bind("contextmenu", function(e){
+            return false;
+        });
+    }
+    
+
+    handlers.resizer = (function() {
+        var canvasElement = $('#systemCanvas')[0],
+            wind = $(window),
+            dummyWidth = $('#dummy').css("width").split("px")[0];
+
+            resize = function() {
+                canvasElement.width = wind.width() - dummyWidth;
+                CMA.SystemDisplay.fire("Redraw");
+            };
+
+        return resize;
+    }());
+
+    $(document).ready(function() {
+        $('#workerMenu').click(function() {
+            $('#workerMenu').hide();
+        });
+        $('#taskMenu').click(function() {
+            $('#taskMenu').hide();
+        });
+        $(document).click(function() {
+            $('#workerMenu').hide();
+            $('#taskMenu').hide();
+        });
+    });
+    
+    canvasElement.click(handlers.handleClick);
+    canvasElement.mousemove(handlers.handleHover);
+    $(window).resize(handlers.resizer);
 
 };
 
-CMA.SystemDisplay.Renderer = function(canvas, height){
+CMA.SystemDisplay.Renderer = function(canvas, modelFactory){
     var context = canvas.getContext("2d"),
+        height = modelFactory.getCanvasHeight() + 60,
         drawShapes = CMA.SystemDisplay.DrawShapes(context);
 
     context.lineJoin = "bevel";
@@ -430,7 +481,7 @@ CMA.SystemDisplay.Renderer = function(canvas, height){
             drawShapes.roundedRect(task.x, task.y, task.width, task.height, task.getFill());
             context.textBaseline = "middle";
             context.textAlign = "start";
-            context.font = "13px sans-serif";
+            context.font = "12px sans-serif";
             context.fillStyle = "black";
             context.fillText(task.displayName, task.x + 5, task.y + 12);
             context.font = "11px sans-serif";
@@ -441,7 +492,7 @@ CMA.SystemDisplay.Renderer = function(canvas, height){
             drawShapes.roundedRect(worker.x, worker.y, worker.width, worker.height, worker.getFill());
             context.textBaseline = "middle";
             context.textAlign = "start";
-            context.font = "13px sans-serif";
+            context.font = "12px sans-serif";
             context.fillStyle = "black";
             context.fillText(worker.displayName, worker.x + 5, worker.y + 12);
             context.font = "11px sans-serif";
@@ -548,15 +599,17 @@ CMA.SystemDisplay.Task = function(y, name){
         yCenter = (height / 2) + y,
         fill = '#FFC028',
 
+        displayName = (function() {
+            if( name.length > 30 ){
+                return "..." +  name.substring(name.length-29, name.length);
+            } else {
+                return name;
+            }
+        }()),
+
         getFill = function(){
             return fill;
         };
-
-    if( name.length > 30 ){
-        var displayName = "..." +  name.substring(name.length-29, name.length);
-    } else {
-        var displayName = name;
-    }
 
     return {
         x: x,
@@ -586,6 +639,15 @@ CMA.SystemDisplay.Worker = function(y, canvasWidth, name, active){
         yCenter = (height / 2) + y,
         active = active,
         processes = 0,
+
+        displayName = (function() {
+            if( name.length > 30 ){
+                return "..." +  name.substring(name.length-29, name.length);
+            } else {
+                return name;
+            }
+        }()),
+
         getFill = function(){
             if( active ){
                 return activeFill;
@@ -594,12 +656,6 @@ CMA.SystemDisplay.Worker = function(y, canvasWidth, name, active){
             }
         };
     
-    if( name.length > 30 ){
-        var displayName = name.substring(0, 27) + "...";
-    } else {
-        var displayName = name;
-    }
-
     return {
         x: x,
         y: y,

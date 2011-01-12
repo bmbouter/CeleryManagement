@@ -6,20 +6,22 @@ $(document).ready(function() {
     CMA.Core.init();
     CMA.Core.setupEvents();
     CMA.Core.setupFormEvents();
+    CMA.Core.providerCreation();
 
-    CMA.Core.getTasks(CMA.Core.populateTaskNavigation);
-    CMA.Core.getWorkers(CMA.Core.populateWorkerNavigation);
+    CMA.Core.ajax.getTasks(CMA.Core.populateTaskNavigation);
+    CMA.Core.ajax.getWorkers(CMA.Core.populateWorkerNavigation);
     
     var xhr = jQuery.getJSON(CMA.Core.get_tasks_url);
     var obj = jQuery.parseJSON(xhr.responseText);
-	
+
+
 });
 
 CMA.Core.init = function(){
     if( typeof CMA.Core.testUrls === "undefined" ){
-        CMA.Core.loadUrls();
+        CMA.Core.ajax.loadUrls();
     } else {
-        CMA.Core.loadTestUrls();
+        CMA.Core.ajax.loadTestUrls();
     }
     
     $('textarea').attr("rows", "3");
@@ -68,17 +70,56 @@ CMA.Core.setupEvents = function(){
         $('#workerNavigationMaster').click();
     }
 
-
-    $(window).resize(function() {
-        if( $(window).width() > $('#container').css("min-width").split("px")[0] ){
-            $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 20) + "px");
-        } 
-        if( $(window).height() > $('#container').css("min-height").split("px")[0] ){
-            $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
-        } else {
-            $('#navigation').css("height", $('#container').css("min-height"));
+    $('.menuItem').hover(
+        function() {
+            var elem = $(this);
+            var img = document.getElementById(elem.attr("id") + "Img");
+            $(elem).toggleClass("menuItemHover rightRounded");
+            $(img).toggleClass("menuItemHover leftRounded");
+        },
+        function() {
+            var elem = $(this);
+            var img = document.getElementById(elem.attr("id") + "Img");
+            $(elem).toggleClass("menuItemHover rightRounded");
+            $(img).toggleClass("menuItemHover leftRounded");
         }
-    });
+    );
+
+    $('.menuImg').hover(
+        function() {
+            var elem = $(this);
+            var img = document.getElementById(elem.attr("id").split("Img")[0]);
+            $(elem).toggleClass("menuItemHover leftRounded");
+            $(img).toggleClass("menuItemHover rightRounded");
+        },
+        function() {
+            var elem = $(this);
+            var img = document.getElementById(elem.attr("id").split("Img")[0]);
+            $(elem).toggleClass("menuItemHover leftRounded");
+            $(img).toggleClass("menuItemHover rigtRounded");
+        }
+    );
+
+    var resizer = (function() {
+            var wind = $(window),
+                container = $('#container'),
+                navigation = $('#navigation'),
+    
+                resize = function() {
+                    if( wind.width() > container.css("min-width").split("px")[0] ){
+                        $('#content').css("width", (wind.width() - $('#dummy').css("width").split("px")[0] - 20) + "px");
+                    } 
+                    if( wind.height() > container.css("min-height").split("px")[0] ){
+                        navigation.css("height", (wind.height() - $('#header').css("height").split("px")[0] - 2) + "px");
+                    } else {
+                        navigation.css("height", container.css("min-height"));
+                    }
+                };
+
+            return resize;
+    }());
+
+    $(window).resize(resizer);
 }
 
 CMA.Core.setupFormEvents = function(){
@@ -110,11 +151,11 @@ CMA.Core.setupFormEvents = function(){
     };
 
     $('.outOfBandForm').hide();
-    $('.providerForm').hide();
+    $('.policyForm').hide();
 
     $('#blankOutOfBandForm').ajaxForm({
         dataType: 'json',
-        url: CMA.Core.create_out_of_band_worker_url,
+        url: CMA.Core.ajax.urls.create_out_of_band_worker_url,
         success: formReturn
     });
 
@@ -142,14 +183,15 @@ CMA.Core.setupFormEvents = function(){
             }
         );
     });
-    
+        
     $('#blankProviderForm').ajaxForm({
         dataType: 'json',
-        url: CMA.Core.create_provider_url,
+        url: CMA.Core.ajax.urls.create_provider_url,
         success: formReturn
     });
+
     
-    $('.createNewProvider').click(function() {
+    /*$('.createNewProvider').click(function() {
         var formHeight = $('#providerForm').height();
         $('#blankProviderForm').animate({
                 height: "toggle",
@@ -172,11 +214,15 @@ CMA.Core.setupFormEvents = function(){
                 $(elem).css("height", formHeight + "px");
             }
         );
-    });
+    });*/
 }
 
 CMA.Core.populateTaskNavigation = function(data){
-    var color = "#7D7D7D";
+    var color = "#7D7D7D",
+        task_text = "",
+        taskList = $('#taskNavigation'),
+        clone = taskList.clone();
+
     for( item in data ){
         if( data[item] === CMA.Core.taskname ){
             color = "red";
@@ -184,28 +230,55 @@ CMA.Core.populateTaskNavigation = function(data){
             color = "#7D7D7D";
         }
         if( data[item].length > 15 ){
-            var task_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-            $('#taskNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.task_url + data[item] + "/'>" + task_text + "</a></li>");
+            task_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
+            clone.append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.ajax.urls.task_url + data[item] + "/'>" + task_text + "</a></li>");
         } else {
-            $('#taskNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.task_url + data[item] + "/'>" + data[item] + "</a></li>");
+            clone.append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.ajax.urls.task_url + data[item] + "/'>" + data[item] + "</a></li>");
         }
     }
+
+    taskList.replaceWith(clone);
 }
 
 CMA.Core.populateWorkerNavigation = function(data){
-    var color = "#7D7D7D";
+    var color = "#7D7D7D",
+        worker_text = "",
+        workerList = $('#workerNavigation'),
+        clone = workerList.clone();
+
     for( item in data ){
         if( data[item] === CMA.Core.workername ){
             color = "red";
         } else {
             color = "#7D7D7D";
         }
+
         if( data[item].length > 15 ){
-            var worker_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-            $('#workerNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.worker_url + data[item] + "/'>" + worker_text + "</a></li>");
+            worker_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
+            clone.append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.ajax.urls.worker_url + data[item] + "/'>" + worker_text + "</a></li>");
         } else {
-            $('#workerNavigation').append("<li><a id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.worker_url + data[item] + "/'>" + data[item] + "</a></li>");
+            clone.append("<li><a id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.ajax.urls.worker_url + data[item] + "/'>" + data[item] + "</a></li>");
         }
     }
+ 
+    workerList.replaceWith(clone);   
 }
 
+CMA.Core.providerCreation = function() {
+    
+    $('#getImagesButton').click(function() {
+        var providerStep2 = $('#providerStep2');
+            originalText = providerStep2.text();
+        $(this).hide();
+        providerStep2.show();
+        providerStep2.text("Please wait while we determine the availible images...");
+        CMA.Core.ajax.postGetImages(function(data) {
+            window.setTimeout(function(){            console.log(data);
+            providerStep2.text(originalText);
+            }, 
+            3000);
+        });           
+    });
+
+
+};

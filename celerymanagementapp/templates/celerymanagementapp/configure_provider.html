@@ -1,11 +1,11 @@
-        <header>
-            Providers
-        </header>
-        <ul>
+        <h1>
+            Provider
+        </h1>
+       <!-- <ul>
             <li>Provider</li>
             <li class="createNewProvider right click">New Provider</li>
             <li class="createNewProvider right click"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png"/></li>
-        </ul>
+        </ul>-->
         <form method="POST" enctype="multipart/form-data" class="providerForm" id="blankProviderForm" action="/celerymanagementapp/provider/">
             {% csrf_token %}
             {% for field in provider_form %}
@@ -19,7 +19,7 @@
             {% endfor %}
             <button class="submitButton" id="submitProviderButton">Submit</button>
         </form>
-        {% for provider in providers %}
+        <!--{% for provider in providers %}
         <ul class="node">
             <li class="left">{{ provider.provider.provider_name }}</li>
             <li class="editProvider right click" id="{{ provider.provider.id }}_deleteProvider">Delete</li>
@@ -37,4 +37,4 @@
             {% endfor %}
             <button class="submitProviderButtonEdit submitButton">Submit</button>
         </form>
-        {% endfor %}
+        {% endfor %}-->

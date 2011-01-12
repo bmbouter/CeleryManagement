@@ -19,6 +19,11 @@ def dashboard(request):
             { "load_test_data" : "true" },
             context_instance=RequestContext(request))
 
+def policy(request):
+    return render_to_response('celerymanagementapp/policy.html',
+            { "load_test_data" : "true" },
+            context_instance=RequestContext(request))
+
 def configure(request):
     context = { "load_test_data": "true" }
     if settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static":
@@ -90,6 +95,22 @@ def create_provider(request):
             json = simplejson.dumps(failed)
             return HttpResponse(json)
 
+'''
+def create_policy(request):
+    if request.method == "POST":
+        policy_form = PolicyForm(request.POST, request.FILES)
+        if policy_form.is_valid():
+            return HttpResponse("success")
+        else:
+            errors = []
+            for field in policy_form:
+                errors.append({ 'field' : field.html_name,
+                                'error' : field.errors })
+            failed = { 'failure' : errors }
+            json = simplejson.dumps(failed)
+            return HttpResponse(json)
+'''
+
 def kill_worker(request, name=None):
     if request.method == 'POST':
         return HttpResponse(name)
@@ -111,7 +132,7 @@ def task_demo_test_dataview(request):
     from django.template import RequestContext
     
     name = 'celerymanagementapp.testutil.tasks.simple_test'
-    rate = 0.5
+    rate = 2.0
     runfor = 10.0
     
     send = urlreverse('celerymanagementapp.dataviews.task_demo_dataview')
@@ -123,9 +144,8 @@ def task_demo_test_dataview(request):
     <script>
     
     function json() {{
-    var query = '{{"name": "[NAME]", "rate":[RATE], "runfor":{runfor} }}';
+    var query = '{{"name": "[NAME]", "rate":{rate}, "runfor":{runfor} }}';
     query = query.replace("[NAME]", document.testform.taskname.value)
-    query = query.replace("[RATE]", document.testform.rate.value)
     
     $.post(
         '{send}',
@@ -147,9 +167,6 @@ def task_demo_test_dataview(request):
         {{% csrf_token %}}
         <tr><td>
         <input type="text" name="taskname" value="{name}" size="90" />
-        </td></tr>
-        <tr><td>
-        <input type="text" name="rate" value="{rate}" size="30" />
         </td></tr>
         <tr><td>
         <input type="button" value="Send" onclick="json();"/>
