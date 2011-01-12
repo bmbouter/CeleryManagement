@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.context_processors import csrf
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django.conf import settings
 
 from djcelery.models import WorkerState
 from celery.registry import TaskRegistry, tasks
@@ -22,8 +23,8 @@ from celery.task.control import inspect, broadcast
 #from celery.task.control import Control
 #from celery.app import app_or_default
 from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes#, CeleryStats
-from celerymanagementapp.models import DispatchedTask, OutOfBandWorkerNode
-from celerymanagementapp.forms import OutOfBandWorkerNodeForm
+from celerymanagementapp.models import DispatchedTask, OutOfBandWorkerNode, Provider
+from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
 
 import gviz_api
 import json
@@ -369,15 +370,32 @@ def system_overview(request):
             context_instance=RequestContext(request))
 
 def configure(request):
-    out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
-    OutOfBandWorkers = []
-    outofbandworkernodes = OutOfBandWorkerNode.objects.all()
-    for worker in outofbandworkernodes:
-        workerForm = OutOfBandWorkerNodeForm(instance=worker)
-        OutOfBandWorkers.append({ "worker" : worker, "workerForm" : workerForm })
+    context= {}
+    if settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static":
+        out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
+        OutOfBandWorkers = []
+
+        outofbandworkernodes = OutOfBandWorkerNode.objects.all()
+        for worker in outofbandworkernodes:
+            workerForm = OutOfBandWorkerNodeForm(instance=worker)
+            OutOfBandWorkers.append({ "worker" : worker, "workerForm" : workerForm })
+
+        context["outofbandworkernode_form"] = out_of_band_worker_node_form
+        context["outofbandworkernodes"] = OutOfBandWorkers
+    elif settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "dynamic":
+        provider_form = ProviderForm()
+        providers = []
+
+        providernodes = Provider.objects.all()
+        for provider in providernodes:
+            providerForm = ProviderForm(instance=provider)
+            providers.append({ "provider" : provider, "providerForm" : providerForm })
+
+        context["provider_form"] = provider_form
+        context["providers"] = providers
+
     return render_to_response('celerymanagementapp/configure.html',
-            {'outofbandworkernode_form': out_of_band_worker_node_form,
-             'outofbandworkernodes': OutOfBandWorkers},
+            context,
             context_instance=RequestContext(request))
 
 def task_view(request, taskname=None):

@@ -19,6 +19,7 @@ CMA.Core.ajax = (function() {
                 worker_url: "/celerymanagementapp/view/task/",
                 create_out_of_band_worker_url: root_url + "outofbandworker/",
                 create_provider_url: root_url + "provider/",
+                get_images_url: root_url + "provider/images/",
             };
         },
         loadTestUrls = function() {
@@ -69,7 +70,7 @@ CMA.Core.ajax = (function() {
             $.post(urls.create_provider_url, $('#blankProviderForm').serialize(), callbackFunction);
         },
         postGetImages = function(callbackFunction){
-            $.post(urls.get_images_url, $('#blankProviderForm').serialize(), callbackFunction);
+            $.post(urls.get_images_url, $('#blankProviderForm').serialize(), callbackFunction, "json");
         };
 
     return {

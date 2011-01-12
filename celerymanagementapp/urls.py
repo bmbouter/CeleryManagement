@@ -108,6 +108,7 @@ if settings.DEBUG:
         url(r'^test/post/xy_query/dispatched_tasks/$', 'get_dispatched_tasks_data', name='test_get_dispatched_tasks_url'),
         url(r'^test/post/outofbandworker/$', 'create_outofbandworker', name="test_create_outofbandworker_url"),
         url(r'^test/post/provider/$', 'create_provider', name="test_create_provider_url"),
+        url(r'^test/post/provider/images/$', 'get_images', name="test_get_images_url"),
     )
 
 if settings.DEBUG:

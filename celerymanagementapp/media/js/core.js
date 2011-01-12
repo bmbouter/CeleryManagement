@@ -124,6 +124,7 @@ CMA.Core.setupEvents = function(){
 
 CMA.Core.setupFormEvents = function(){
     var formReturn = function(data){
+        console.log(data);
         if( !data.hasOwnProperty("failure") ){
             console.log("success");
         } else {
@@ -184,7 +185,7 @@ CMA.Core.setupFormEvents = function(){
         );
     });
         
-    $('#blankProviderForm').ajaxForm({
+    $('#blankProviderForm').ajaxSubmit({
         dataType: 'json',
         url: CMA.Core.ajax.urls.create_provider_url,
         success: formReturn
@@ -273,12 +274,30 @@ CMA.Core.providerCreation = function() {
         providerStep2.show();
         providerStep2.text("Please wait while we determine the availible images...");
         CMA.Core.ajax.postGetImages(function(data) {
-            window.setTimeout(function(){            console.log(data);
-            providerStep2.text(originalText);
-            }, 
-            3000);
+            if( !data.hasOwnProperty("failure") ){
+                var div = '<div class="fieldWrapper">',
+                    length = data.length,
+                    i = 0,
+                    element;
+                
+                for(i=0; i < length; i += 1){
+                    div += '<input class="imageID" type="radio" name="image_id" value="' + data[i] + '">' + data[i] + '<br/>';
+                }
+                div += '</div>';
+                
+                console.log(div);
+                providerStep2.text(originalText);
+                element = $(div);
+                console.log(element);
+                providerStep2.append(element);
+                $('#providerStep3').show();
+                $('#submitProviderButton').show();
+                $('.fieldWrapper').show();
+            } else {
+                console.log(data);
+                providerStep2.text(originalText);
+            }
         });           
     });
-
 
 };

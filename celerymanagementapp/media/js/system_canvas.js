@@ -522,7 +522,7 @@ CMA.SystemDisplay.Renderer = function(canvas, modelFactory){
             context.textAlign = "left";
             context.font = "15px sans-serif";
             context.fillStyle = "black";
-            context.fillText(connector.numTasks, connector.xCenter+10, connector.yCenter+1);
+            context.fillText(connector.numTasks, connector.xCenter+10, connector.yCenter+5);
         },
         dimConnector: function(connector){
             context.lineCap = "butt";
