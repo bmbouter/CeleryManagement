@@ -1,4 +1,4 @@
-CMA.Core.loadUrls();
+CMA.Core.ajax.loadTestUrls();
         
 var c1 = null;
 var data = null;
@@ -84,13 +84,14 @@ function create_query() {
 }
 
 function submit_query(query) {
-    $.post(CMA.Core.query_dispatched_tasks_url, query, format_data);
+    //$.post(CMA.Core.ajax.urls.query_dispatched_tasks_url, query, format_data);
+    CMA.Core.ajax.getDispatchedTasksData(query, format_data);
 }
 
 $(document).ready(function() {
     formatter = new Formatter();
     
-    xhr = $.getJSON(CMA.Core.chart_data_url, format_data);
+    xhr = $.getJSON(CMA.Core.ajax.urls.chart_data_url, format_data);
 });
 
 function format_data(response) {

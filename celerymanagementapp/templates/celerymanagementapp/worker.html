@@ -2,35 +2,7 @@
 
 {% block extrajs %}
 {% if load_test_data %}
-    <script type="text/javascript">
-        /*CMA.Core.loadTestUrls();
-        
-        var c1 = null;
-        var data = null;
-        var options = { };
-        var json = null;
-        var formatter = null;
-        var query = null;
-        var xhr = null;
-        
-        $(document).ready(function() {
-            formatter = new Formatter();
-            
-            xhr = $.getJSON(CMA.Core.chart_data_url, formatData);
-        });
-        
-        function formatData(response) {
-            data = formatter.formatData(response);
-            showChart();
-        }
-        
-        function showChart() {
-            c1 = new Chart("#chart", data, options);
-            c1.displayBarChart(true);
-            c1.enableTooltips();
-            c1.disableLegend();
-        }*/
-    </script>
+    
 {% endif %}
 {% endblock extrajs %}
 
