@@ -196,7 +196,7 @@ CMA.Core.setupFormEvents = function(){
         );
     });
         
-    $('#blankProviderForm').ajaxForm({
+    $('#blankProviderForm').ajaxSubmit({
         dataType: 'json',
         url: CMA.Core.ajax.urls.create_provider_url,
         success: formReturn
