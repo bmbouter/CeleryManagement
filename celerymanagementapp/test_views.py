@@ -95,6 +95,10 @@ def create_provider(request):
             json = simplejson.dumps(failed)
             return HttpResponse(json)
 
+def get_images(request):
+    return HttpResponse("success")
+
+
 '''
 def create_policy(request):
     if request.method == "POST":

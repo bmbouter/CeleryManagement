@@ -1,40 +1,32 @@
         <h1>
             Provider
         </h1>
-       <!-- <ul>
-            <li>Provider</li>
-            <li class="createNewProvider right click">New Provider</li>
-            <li class="createNewProvider right click"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png"/></li>
-        </ul>-->
+        <div class="fieldWrapper">
+            Step 1: Enter provider information, then click "Get Images" to retrieve availible images.
+        </div>
         <form method="POST" enctype="multipart/form-data" class="providerForm" id="blankProviderForm" action="/celerymanagementapp/provider/">
             {% csrf_token %}
             {% for field in provider_form %}
-            <div class="fieldWrapper">
+            {% if forloop.counter == 4 %}
+            <div class="fieldWrapper hidden" id="providerStep2">
+                Step 2: Please choose the image ID to be used.
+            </div>
+            {% endif %}
+            {% if forloop.counter == 5 %}
+            <div class="fieldWrapper hidden" id="providerStep3">
+                Step 3: Enter configuration information for your image.
+            </div>
+            {% endif %}
+            <div class="fieldWrapper {% if forloop.counter > 3 %}hidden{% endif %}">
                 <div class="field">
                     {{ field.label_tag }} {{ field }}
                     <span class="errorWrapper" id="{{ field.html_name }}_error"></span>
                     {{ field.errors }}
                 </div>
             </div>
+            {% if forloop.counter == 3 %}
+            <button type="button" class="submitButton click" id="getImagesButton">Get Images</button>
+            {% endif %}
             {% endfor %}
-            <button class="submitButton" id="submitProviderButton">Submit</button>
+            <button class="submitButton hidden click" id="submitProviderButton">Create</button>
         </form>
-        <!--{% for provider in providers %}
-        <ul class="node">
-            <li class="left">{{ provider.provider.provider_name }}</li>
-            <li class="editProvider right click" id="{{ provider.provider.id }}_deleteProvider">Delete</li>
-            <li class="editProvider right click" id="{{ provider.provider.id }}_provider">Edit</li>
-        </ul>
-        <form method="POST" enctype="multipart/form-data" class="providerForm" id="{{ provider.provider.id }}_providerForm">
-            {% csrf_token %}
-            {% for field in provider.providerForm %}
-            <div class="fieldWrapper">
-                <div class="field">
-                    {{ field.label_tag }} {{ field }}
-                    <label id="{{ field.label }}_error"></label>
-                </div>
-            </div>
-            {% endfor %}
-            <button class="submitProviderButtonEdit submitButton">Submit</button>
-        </form>
-        {% endfor %}-->
