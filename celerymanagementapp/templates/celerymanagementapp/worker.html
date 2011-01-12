@@ -1,5 +1,166 @@
 {% extends "celerymanagementapp/base.html" %}
 
-{% block content %}
+{% block extrajs %}
+{% if load_test_data %}
+    <script type="text/javascript">
+        /*CMA.Core.loadTestUrls();
+        
+        var c1 = null;
+        var data = null;
+        var options = { };
+        var json = null;
+        var formatter = null;
+        var query = null;
+        var xhr = null;
+        
+        $(document).ready(function() {
+            formatter = new Formatter();
+            
+            xhr = $.getJSON(CMA.Core.chart_data_url, formatData);
+        });
+        
+        function formatData(response) {
+            data = formatter.formatData(response);
+            showChart();
+        }
+        
+        function showChart() {
+            c1 = new Chart("#chart", data, options);
+            c1.displayBarChart(true);
+            c1.enableTooltips();
+            c1.disableLegend();
+        }*/
+    </script>
+{% endif %}
+{% endblock extrajs %}
 
+{% block content %}
+{% if load_test_data %}
+<div id="chart" style="width: 600px; height: 500px; float: left; margin: 10px 10px"></div>
+<div id="chartOptions">
+    <form>
+        <fieldset id="segmentize_set">
+            <legend>Segmentize</legend>
+            <label for="segmentize" class="no_padding">Segmentize</label>
+            <input name="segmentize" id="segmentize" checked="checked" type="checkbox" />
+            <br />
+            <div id="segmentize_options">
+                <label for="segmentize_field">Field</label>
+                <div class="fields">
+                    <select id="segmentize_field" name="segmentize_field" value="segmentize_field">
+                        <!--<option label="Name" value="name">Name</option>-->
+                        <option label="State" value="state">State</option>
+                        <option label="Task ID" value="task_id">Task ID</option>
+                        <option label="Worker" value="worker">Worker</option>
+                        <option label="Runtime" value="runtime">Runtime</option>
+                        <option label="Wait Time" value="waittime">Wait Time</option>
+                        <option label="Total Time" value="totaltime">Total Time</option>
+                    </select>
+                </div>
+                
+                <label for="segmentize_method">Method</label>
+                <div class="fields">
+                    <select id="segmentize_method" name="segmentize_method" value="segmentize_method">
+                        <option label="Range" value="range">Range</option>
+                        <option label="All" value="all">All</option>
+                        <option label="Values" value="values">Values</option>
+                        <option label="Each" value="each">Each</option>
+                    </select>
+                </div>
+                
+                <div id="segmentize_range">
+                    <label for="range_min">Range Min</label>
+                    <div class="fields">
+                        <input id="range_min" name="min" />
+                    </div>
+                    <label for="range_max">Range Max</label>
+                    <div class="fields">
+                        <input id="range_max" name="max" />
+                    </div>
+                    <label for="range_interval">Range Interval</label>
+                    <div class="fields">
+                        <input id="range_interval" name="interval" />
+                    </div>
+                </div>
+                
+                <div id="segmentize_values" style="display: none">
+                    <label for="values">Values (comma sep.)</label>
+                    <div class="fields">
+                        <input id="values" name="values" />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset id="aggregate_set">
+            <legend>Aggregate</legend>
+            <label for="aggregate" class="no_padding">Aggregate</label>
+            <input name="aggragate" id="aggregate" checked="checked" type="checkbox" />
+            <br />
+            <div id="aggregate_options">
+                <label for="aggregate_field">Field</label>
+                <div class="aggregate_field">
+                    <select id="aggregate_field" name="aggregate_field" value="aggregate_field">
+                        <option label="Count" value="count">Count</option>
+                        <option label="Name" value="name">Name</option>
+                        <option label="State" value="state">State</option>
+                        <option label="Task ID" value="task_id">Task ID</option>
+                        <option label="Worker" value="worker">Worker</option>
+                        <option label="Runtime" value="runtime">Runtime</option>
+                        <option label="Wait Time" value="waittime">Wait Time</option>
+                        <option label="Total Time" value="totaltime">Total Time</option>
+                    </select>
+                </div>
+                
+                <label for="aggregate_methods">Methods</label>
+                <div class="fields">
+                    <select id="aggregate_methods" name="aggregate_methods" value="aggregate_methods" size=4 multiple>
+                        <option label="Average" value="average">Average</option>
+                        <option label="Max" value="max">Max</option>
+                        <option label="Min" value="min">Min</option>
+                        <option label="Variance" value="variance">Variance</option>
+                        <option label="Sum" value="sum">Sum</option>
+                        <option label="Enumerate" value="enumerate">Enumerate</option>
+                    </select>
+                </div>
+                <input id="add_aggregation" value="Add Aggregation" type="button" style="width: 120px" />
+            </div>
+        </fieldset>
+    </form>
+    
+    <table id="aggregate_table">
+        <tbody>
+            <tr>
+                <th>Field</th>
+                <th>Methods</th>
+            </tr>
+        </tbody>
+    </table>
+    
+    <input id="submit_query" value="Submit Form" onclick="create_query();" type="button" style="width: 100px; margin-top: 100px" />
+</div>
+{% endif %}
 {% endblock content %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

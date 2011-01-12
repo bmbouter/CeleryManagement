@@ -15,17 +15,6 @@ $(document).ready(function() {
 	
 });
 
-function createTable(data) {
-    var table = $('.content');
-    table.html(""); //Empty the content
-    
-    table.html("<table> </table>");
-    
-    data.each(function(i, e) {
-        alert(i + " " + e);
-    });
-}
-
 CMA.Core.init = function(){
     if( typeof CMA.Core.testUrls === "undefined" ){
         CMA.Core.loadUrls();

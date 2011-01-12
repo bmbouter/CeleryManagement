@@ -3,7 +3,7 @@
 {% block extrajs %}
 {% if load_test_data %}
     <script type="text/javascript">
-        CMACore.loadTestUrls();
+        CMA.Core.loadTestUrls();
         
         var c1 = null;
         var data = null;
@@ -16,9 +16,7 @@
         $(document).ready(function() {
             formatter = new Formatter();
             
-            query = '{"filter" : {["state", "SUCCESS"]}, "segmentize": {"field": "worker", "method": [ "all" ]}, "aggregate": [{"field": "runtime", "methods": ["average"]}, {"field": "waittime", "methods": ["average"]}]}';
-            
-            xhr = $.getJSON(CMACore.chart_data_url, formatData);
+            xhr = $.getJSON(CMA.Core.chart_data_url, formatData);
         });
         
         function formatData(response) {
