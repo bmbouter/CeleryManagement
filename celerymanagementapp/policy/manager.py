@@ -3,8 +3,10 @@ import time
 
 from django.core.exceptions import ObjectDoesNotExist
 
+from celery.task.control import broadcast, inspect
+
 from celerymanagementapp.models import PolicyModel
-from celerymanagementapp.policy import policy
+from celerymanagementapp.policy import policy, signals
 
 #==============================================================================#
 default_time = datetime.datetime(2000,1,1)
@@ -89,63 +91,131 @@ class Registry(object):
         
 
 #==============================================================================#
-MIN_LOOP_SLEEP_TIME = 30  # seconds
-MAX_LOOP_SLEEP_TIME = 60*2  # seconds
+def get_registered_tasks(workername):
+    i = inspect()
+    tasks_by_worker = i.registered_tasks() or {}
+    return tasks_by_worker.get(workername, [])
+    
+def _merge_broadcast_result(result):
+    r = {}
+    for x in result:
+        assert isinstance(x, dict)
+        r.update(x)
+    return r
+    
+def _condense_broadcast_result(result):
+    checkval = None
+    first_iteration = True
+    for k,v in result.iteritems():
+        if first_iteration:
+            checkval = v
+            first_iteration = False
+        assert v==checkval, 'v!=checkval:\nv: {0}\ncheckval: {1}\n'.format(v,checkval)
+    return checkval
+    
+_setting_names = ('ignore_result', 'routing_key', 'exchange', 
+                  'default_retry_delay', 'rate_limit', 
+                  'store_errors_even_if_ignored', 'acks_late', 'expires',
+                 )
+    
+def get_task_settings(workername, tasknames):
+    destination = [workername] if workername else None
+    settings = broadcast('get_task_settings', destination=destination, 
+                         arguments={'tasknames': tasknames, 
+                         'setting_names': _setting_names}, reply=True)
+    settings = _merge_broadcast_result(settings)
+    #print 'settings: {0}'.format(settings)
+    if workername:
+        return settings.get(workername)
+    else:
+        return settings
+    
+def get_all_task_settings():
+    settings = broadcast('get_all_task_settings', 
+                         arguments={'setting_names': _setting_names}, 
+                         reply=True)
+    settings = _merge_broadcast_result(settings)
+    return _condense_broadcast_result(settings) or {}
+    
+def update_tasks_settings(workername, tasks_settings):
+        broadcast('update_tasks_settings', destination=[workername],
+                  arguments={'tasks_settings': tasks_settings})
 
-class PolicyMain(object):
+def restore_task_settings(restore_data):
+        broadcast('restore_task_settings', 
+                  arguments={'restore_data': restore_data})
+
+
+
+class TaskSettings(object):
+    def __init__(self, task_name, initial_settings):
+        self.name = task_name
+        self.initial_settings = initial_settings.copy()
+        self.settings = {}
+        
+    def restore(self):
+        # restore Task settings to the original settings
+        restore = dict((k,v) for (k,v) in self.initial_settings.iteritems() 
+                                       if self.settings.get(k,v) != v)
+        erase = [k for k in self.settings if k not in self.initial_settings]
+        return restore, erase
+        
+    def set(self, attr, value):
+        # a setting on a Task was changed
+        self.settings[attr] = value
+    
+    def current(self):
+        # get current settings, for instance, for writing settings of newly-started worker
+        return self.settings
+        
+
+class TaskSettingsManager(object):
     def __init__(self):
-        self.registry = Registry()
-        #self.next_run_delta = 0
+        self.data = {}
+        signals.on_task_modified.register(self.on_tasks_modified)
+        signals.on_worker_started.register(self.on_worker_start)
+        # TODO: get data from existing workers
+        self._initialize_settings()
         
-    def __enter__(self):
-        return self
+    def cleanup(self):
+        signals.on_worker_started.unregister(self.on_worker_start)
+        signals.on_task_modified.unregister(self.on_tasks_modified)
+        self.restore()
         
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.registry.close()
+    def _initialize_settings(self):
+        settings = get_all_task_settings()
+        for taskname, tasksettings in settings.iteritems():
+            if taskname=='error':
+                print 'cmrun: ERROR: {0}'.format(tasksettings)
+            print 'cmrun: Found existing task: {0}'.format(taskname)
+            ts = TaskSettings(taskname, settings)
+            self.data[taskname] = ts
         
-    def loop(self):
-        print 'cmrun: Starting PolicyMain loop...'
-        try:
-            while True:
-                self.refresh_registry()
-                sleeptime = self.run_ready_policies()
-                print 'cmrun: Sleeping for {0:.2f} seconds.'.format(sleeptime)
-                time.sleep(max(sleeptime,MIN_LOOP_SLEEP_TIME))
-        finally:
-            self.on_loop_exit()
+    def on_tasks_modified(self, tasknames, setting_name, value):
+        for taskname in tasknames:
+            if taskname in self.data:
+                self.data[taskname].set(setting_name, value)
+                
+    def on_worker_start(self, workername):
+        tasknames = get_registered_tasks(workername)  # TODO
+        tasks_settings = dict( (taskname, self.data[taskname].current()) 
+                               for taskname in tasknames 
+                                   if taskname in self.data)
+        # { taskname: { setting_name: value, ...}, ... }
+        update_tasks_settings(workername, tasks_settings)
+        new_tasknames = [s for s in tasknames if s not in self.data]
+        new_task_settings = get_task_settings(workername, new_tasknames)
+        for taskname,settings in new_task_settings.iteritems():
+            ts = TaskSettings(taskname, settings)
+            self.data[taskname] = ts
+                    
+    def restore(self):
+        restore_data = {}
+        for taskname,settings in self.data.iteritems():
+            restore,erase = settings.restore()
+            restore_data[taskname] = (restore, erase)
+        restore_task_settings(restore_data)
             
-    def on_loop_exit(self):
-        print 'cmrun: Exiting PolicyMain loop.'
-        
-    def refresh_registry(self):
-        self.registry.refresh()
-        
-    def run_ready_policies(self):
-        print 'cmrun: Running ready policies...'
-        now = datetime.datetime.now()
-        modified_ids = []
-        run_deltas = []
-        # TODO: put try block on inside of loop, so we can continue with other 
-        # policies if an exception is thrown.
-        try:
-            for entry in self.registry:
-                is_due, next_run_delta = entry.is_due()
-                if is_due:
-                    self.run_policy(entry.policy)
-                    entry.set_last_run_time(now)
-                    modified_ids.append(entry.policy.id)
-                run_deltas.append(next_run_delta)
-        finally:
-            print 'cmrun: Finished running ready policies.'
-            now = datetime.datetime.now()
-            for id in modified_ids:
-                self.registry.save(id, now)
-        return min(run_deltas+[MAX_LOOP_SLEEP_TIME])
-            
-    def run_policy(self, policyobj):
-        print 'cmrun: Running policy "{0}"'.format(policyobj.name)
-        if policyobj.run_condition():
-            policyobj.run_apply()
         
         
 #==============================================================================#

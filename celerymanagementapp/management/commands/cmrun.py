@@ -1,11 +1,10 @@
 import sys
 
-from multiprocessing import Process
+from multiprocessing import Process, Queue
 from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
 
-from djcelery.app import app
 from celery.bin import celeryev
 
 
@@ -17,9 +16,9 @@ class CmEvCommand(celeryev.EvCommand):
         return evcam(*args, **kwargs)
         
 def run_policy_manager():
-    from celerymanagementapp.policy.manager import PolicyMain
-    with PolicyMain() as main:
-        main.loop()
+    from celerymanagementapp.policy import main
+    from djcelery.app import app
+    main.policy_main(app=app)
 
 
 class Command(BaseCommand):
@@ -53,8 +52,9 @@ the database.'''
         
         
 def main(*args, **options):
+    from djcelery.app import app
     ev = CmEvCommand(app=app)
-    p = Process(target=run_policy_manager)
+    p = Process(target=run_policy_manager, args=())
     p.start()
     try:
         ev.run(*args, **options)

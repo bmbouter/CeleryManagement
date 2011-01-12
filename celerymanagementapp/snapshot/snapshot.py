@@ -111,8 +111,8 @@ def evcam(camera, freq=1.0, maxrate=None, loglevel=0,
             camera, freq))
     
     state = State()
-    cam = instantiate(camera, state, app=app,
-                      freq=freq, maxrate=maxrate, logger=logger)
+    cam = instantiate(camera, state, app=app, freq=freq, maxrate=maxrate, 
+                      logger=logger)
     cam.install()
     conn = app.broker_connection()
     recv = app.events.Receiver(conn, handlers={"*": state.event})
@@ -122,8 +122,8 @@ def evcam(camera, freq=1.0, maxrate=None, loglevel=0,
         except KeyboardInterrupt:
             raise SystemExit
     finally:
-        import traceback
-        traceback.print_exc()
+        #import traceback
+        #traceback.print_exc()
         cam.cancel()
         conn.close()
 

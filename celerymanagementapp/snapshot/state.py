@@ -45,6 +45,11 @@ class DispatchedTask(celery_state.Task):
         self.totaltime = self.runtime
         if self.sent:
             self.totaltime = self.succeeded - self.sent
+            
+class Worker(celery_state.Worker):
+    # on start
+    # on stop
+    pass
 
 
 class State(celery_state.State):
@@ -56,4 +61,8 @@ class State(celery_state.State):
         except KeyError:
             task = self.tasks[uuid] = DispatchedTask(uuid=uuid)
             return task
+    
+    # overwrite...
+    # def get_or_create_worker(self, hostname):
+    #   pass
 
