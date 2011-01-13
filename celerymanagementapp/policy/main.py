@@ -5,6 +5,7 @@ from celery.app import app_or_default
 
 from celerymanagementapp.policy.manager import Registry, TaskSettingsManager
 from celerymanagementapp.policy.signals import Receiver
+from celerymanagementapp.policy import util
 
 #==============================================================================#
 MIN_LOOP_SLEEP_TIME = 30  # seconds
@@ -51,25 +52,31 @@ class PolicyMain(object):
             pass
         
     def run_ready_policies(self):
-        print 'cmrun: Running ready policies...'
         now = datetime.datetime.now()
         modified_ids = []
         run_deltas = []
         # TODO: put try block on inside of loop, so we can continue with other 
         # policies if an exception is thrown.
-        try:
-            for entry in self.registry:
-                is_due, next_run_delta = entry.is_due()
-                if is_due:
-                    self.run_policy(entry.policy)
-                    entry.set_last_run_time(now)
-                    modified_ids.append(entry.policy.id)
-                run_deltas.append(next_run_delta)
-        finally:
-            print 'cmrun: Finished running ready policies.'
-            now = datetime.datetime.now()
-            for id in modified_ids:
-                self.registry.save(id, now)
+        
+        # Only run policies if there are workers.
+        if util.get_all_worker_names():
+            print 'cmrun: Running ready policies...'
+            try:
+                for entry in self.registry:
+                    is_due, next_run_delta = entry.is_due()
+                    if is_due:
+                        self.run_policy(entry.policy)
+                        entry.set_last_run_time(now)
+                        modified_ids.append(entry.policy.id)
+                    run_deltas.append(next_run_delta)
+            finally:
+                print 'cmrun: Finished running ready policies.'
+                now = datetime.datetime.now()
+                for id in modified_ids:
+                    self.registry.save(id, now)
+        else:
+            print 'cmrun: Not running policies -- no workers are available.'
+            run_deltas.append(MIN_LOOP_SLEEP_TIME)
         return min(run_deltas+[MAX_LOOP_SLEEP_TIME])
             
     def run_policy(self, policyobj):

@@ -64,6 +64,7 @@ def restore_task_settings(panel, restore_data):
 #==============================================================================#
 @Panel.register
 def get_task_attribute(panel, taskname, attrname):
+    print 'policy.control: get_task_attribute()'
     try:
         task = _get_task_class(taskname)
     except KeyError:
@@ -82,6 +83,7 @@ def get_task_attribute(panel, taskname, attrname):
 
 @Panel.register
 def set_task_attribute(panel, tasknames, attrname, value):
+    print 'policy.control: set_task_attribute()'
     if isinstance(tasknames, basestring):
         tasknames = [tasknames]
     for taskname in tasknames:

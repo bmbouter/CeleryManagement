@@ -67,6 +67,10 @@ class DispatchedTaskAdmin(admin.ModelAdmin):
 class RegisteredTaskTypeAdmin(admin.ModelAdmin):
     list_display = ('worker','name','modified')
     list_filter = ('worker','name','modified')
+    
+class PolicyModelAdmin(admin.ModelAdmin):
+    list_display = ('name','modified','enabled','last_run_time')
+    list_filter = ('modified','last_run_time','enabled')
 
 class ProviderAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -84,5 +88,5 @@ admin.site.register(InBandWorkerNode)
 admin.site.register(Provider, ProviderAdmin)
 admin.site.register(RegisteredTaskType, RegisteredTaskTypeAdmin)
 admin.site.register(TaskDemoGroup)
-admin.site.register(PolicyModel)
+admin.site.register(PolicyModel, PolicyModelAdmin)
 

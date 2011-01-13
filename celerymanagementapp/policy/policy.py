@@ -20,10 +20,10 @@ class Runner(object):
         locals = self.locals.copy() 
         try:
             r = eval(code, globals, locals)
-        except exceptions.StaticException:
+        except exceptions.StaticError:
             # If the exception is a static Policy exception, reraise it.
             raise
-        except exceptions.Exception as e:
+        except exceptions.Error as e:
             # Other Policy exceptions need line information.
             exctype, excval, tb = sys.exc_info()
             line, lineno, filename = exceptions.policy_traceback_info(text, tb)

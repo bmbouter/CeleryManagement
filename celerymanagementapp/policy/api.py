@@ -1,14 +1,25 @@
 import datetime
 import itertools
 
-from celerymanagementapp.policy import exceptions, signals
+from django.db.models import Avg, Min, Max, Variance
+
+from celery.task.control import broadcast, inspect
+from celery.states import RECEIVED, FAILURE, SUCCESS, PENDING, STARTED, REVOKED
+from celery.states import RETRY, READY_STATES, UNREADY_STATES
+
+from celerymanagementapp.models import DispatchedTask
+from celerymanagementapp.policy import exceptions, signals, util
 
 #==============================================================================#
 class ApiError(exceptions.Error):
-    clsname = PolicyApiError
+    clsname = 'PolicyApiError'
+    
+class ApiValidatorError(exceptions.Error):
+    clsname = 'PolicyApiValidatorError'
 
 class TimeIntervalError(exceptions.Error):
     clsname = 'PolicyTimeIntervalError'
+        
 
 
 #==============================================================================#
@@ -56,50 +67,77 @@ def filter(interval=None, workers=None, tasks=None):
     filterargs = {}
     if interval is not None:
         interval = make_time_interval(interval)
-        filterargs['senttime__gte'] = interval[0]
-        filterargs['senttime__lt'] = interval[1]
-    filterargs.update(get_filter_seq_arg('worker', workers))
-    filterargs.update(get_filter_seq_arg('taskname', tasks))
-    qs = Model.objects.filter(**filterargs)
-    
-    
-    
-    if workers:
-        if isinstance(workers, (list, tuple)):
-            q = {'?__in': workers}
-        else:
-            q = {'?': workers}
+        filterargs['sent__gte'] = interval[0]
+        filterargs['sent__lt'] = interval[1]
+    filterargs.update(get_filter_seq_arg('worker__hostname', workers))
+    filterargs.update(get_filter_seq_arg('name', tasks))
+    return DispatchedTask.objects.filter(**filterargs)
             
 #==============================================================================#
-def get_all_registered_tasks():
-    i = inspect()
-    tasks_by_worker = i.registered_tasks() or {}
+def validate_bool(value):
+    if not isinstance(value, bool):
+        raise ApiValidatorError()
+    return value
+
+def validate_string_or_none(value):
+    if not isinstance(value, basestring) and value is not None:
+        raise ApiValidatorError()
+    return value
     
-    i = inspect()
-    tasks_by_worker = i.registered_tasks() or {}
-    defined = set(x for x in 
-                  itertools.chain.from_iterable(workers.itervalues()))
-    defined = list(defined)
-    defined.sort()
-    return defined
+def validate_int(value):
+    if not isinstance(value, int):
+        raise ApiValidatorError()
+    return value
     
-def _merge_broadcast_result(result):
-    r = {}
-    for x in result:
-        if isinstance(x, dict):
-            r.update(x)
-    return r
+def validate_int_or_none(value):
+    if not isinstance(value, int) and value is not None:
+        raise ApiValidatorError()
+    return value
+
+#
+
+TASKAPI_SETTINGS_CONFIG = [
+    ('ignore_result', validate_bool),
+    ('routing_key', validate_string_or_none),
+    ('exchange',  validate_string_or_none),
+    ('default_retry_delay', validate_int),
+    ('rate_limit', validate_string_or_none),
+    ('store_errors_even_if_ignored', validate_bool),
+    ('acks_late', validate_bool),
+    ('expires', validate_int_or_none),
+]
+
 
 
 #==============================================================================#
 class ItemApi(object):
     def __init__(self, names=None):
         self.names = names or []
+        self._locked = True
+        
+    def __setattr__(self, name, val):
+        if getattr(self, '_locked', False):
+            raise ApiError('Cannot assign to attribute: {0}'.format(name))
+        object.__setattr__(self, name, val)
+    
 
 class ItemsCollectionApi(object):
+    """ A collection of objects accessible by name. 
+    
+        Use subscript syntax to work with a single item, or use the all() 
+        method to work with all items.  You may also use multiple names with 
+        subscript syntax by placing them in a tuple.
+        
+            collection['item'].item_attribute
+            collection.all().item_attribute
+            collection[('item0','item1','item2',)].item_attribute
+            
+    """
     ItemApi = None
+    
     def __init__(self):
-        pass
+        self._locked = True
+        
     def __getitem__(self, names):
         if isinstance(names, basestring):
             names = (names,)
@@ -107,64 +145,81 @@ class ItemsCollectionApi(object):
         
     def all(self):
         return self.ItemApi(None)
+        
+    def __getattr__(self, name):
+        if name not in ('all', '_locked', ):
+            raise ApiError('Cannot get attribute: {0}'.format(name))
+        return object.__getattr__(self, name)
+        
+    def __setattr__(self, name, val):
+        if getattr(self, '_locked', False):
+            raise ApiError('Cannot assign to attribute: {0}'.format(name))
+        object.__setattr__(self, name, val)
 
 #==============================================================================#
-class TaskSettingBase(object):
-    def signal_modified(self, tasks, value):
-        signals.on_task_modified(tasknames, self.setting_name, value)
+class TaskSetting(object):
+    def __init__(self, attrname, validator):
+        self.attrname = attrname
+        self.validator = validator
+    
+    def __get__(self, inst, owner):
+        assert inst is not None
+        if len(inst.names) != 1:
+            raise ApiError('Cannot retrieve this attribute for multiple tasks.')
+        arguments = {'taskname': inst.names[0], 'attrname': self.attrname}
+        r = broadcast('get_task_attribute', arguments=arguments, reply=True)
+        r = util._merge_broadcast_result(r)
+        if not r:
+            tmpl = 'Unable to retrieve task attribute: {0}.'
+            msg = tmpl.format(self.attrname)
+            raise ApiError(msg)
+        # check that all 'values' are equal
+        r = util._condense_broadcast_result(r)
+        # check that the value doesn't indicate an error
+        if isinstance(r, dict) and 'error' in r:
+            tmpl = 'Error occurred while retrieving task attribute: {0}.'
+            msg = tmpl.format(self.attrname)
+            raise ApiError(msg)
+        return r
+        
+    def __set__(self, inst, value):
+        value = self.validator(value)
+        arguments = {'tasknames': inst.names, 'attrname':self.attrname, 
+                     'value': value}
+        r = broadcast('set_task_attribute', arguments=arguments, reply=True)
+        r = util._merge_broadcast_result(r)
+        if not r:
+            msg = 'Unable to set task attribute: {0}.'.format(self.attrname)
+            raise ApiError(msg)
+        # check that all 'values' are equal
+        r = util._condense_broadcast_result(r)
+        # check that the value doesn't indicate an error
+        if isinstance(r, dict) and 'error' in r:
+            tmpl = 'Error occurred while setting task attribute: {0}.'
+            msg = tmpl.format(self.attrname)
+            raise ApiError(msg)
+        signals.on_task_modified(inst.names, setting_name, value)
+        
+        
+class TaskApiMeta(type):
+    def __new__(self, clsname, bases, attrs):
+        config = attrs.pop('settings_config')
+        for name, validator in config:
+            attrs[name] = TaskSetting(name, validator)
+        return type.__new__(self, clsname, bases, attrs)
+        
 
 class TaskApi(ItemApi):
+    __metaclass__ = TaskApiMeta
+    
+    settings_config = TASKAPI_SETTINGS_CONFIG
+    
     def __init__(self, names=None):
         if not names:
-            names = get_all_task_names()
+            names = util.get_all_registered_tasks()
         super(TaskApi, self).__init__(names)
         
-    def _setting_modified(self, setting_name, value):
-        # Call this when a setting has been successfully modified by a TaskApi method.
-        signals.on_task_modified(self.names, setting_name, value)
-        
-    def get_ignore_result(self):
-        if len(self.names) != 1:
-            raise ApiError('Cannot retrieve this attribute for multiple tasks.')
-        r = broadcast('get_task_attribute', arguments={'taskname': self.names[0], 'attrname': 'ignore_result'}, reply=True)
-        r = _merge_broadcast_result(r)
-        if not r:
-            raise ApiError('Unable to retrieve task attribute {0}.'.format('ignore_result'))
-        # check that all 'values' are equal
-        after_first = False
-        checkval = None
-        for val in r.itervalues():
-            if not after_first:
-                checkval = val
-                after_first = True
-            if val != checkval:
-                raise ApiError('Task attribute {0} is not consistent.'.format('ignore_result'))
-        # check that the value doesn't indicate an error
-        if isinstance(checkval, dict) and 'error' in checkval:
-            raise ApiError('Error occurred while retrieving task attribute {0}.'.format('ignore_result'))
-        return checkval
-        
-    def set_ignore_result(self, val):
-        r = broadcast('set_task_attribute', arguments={'tasknames': self.names, 'attrname':'ignore_result', 'value': val}, reply=True)
-        r = _merge_broadcast_result(r)
-        if not r:
-            raise ApiError('Unable to set task attribute {0}.'.format('ignore_result'))
-        # check that all 'values' are equal
-        after_first = False
-        checkval = None
-        for val in r.itervalues():
-            if not after_first:
-                checkval = val
-                after_first = True
-            if val != checkval:
-                raise ApiError('Task attribute {0} is not consistent.'.format('ignore_result'))
-        # check that the value doesn't indicate an error
-        if isinstance(checkval, dict) and 'error' in checkval:
-            raise ApiError('Error occurred while setting task attribute {0}.'.format('ignore_result'))
-        self._setting_modified('ignore_result', checkval)
-        
-    ignore_result = property(get_ignore_result, set_ignore_result)
-    
+
 class TasksCollectionApi(ItemsCollectionApi):
     ItemApi = TaskApi
     
@@ -172,13 +227,51 @@ class TasksCollectionApi(ItemsCollectionApi):
 class WorkerApi(ItemApi):
     def __init__(self, names=None):
         if not names:
-            names = get_all_worker_names()
+            names = util.get_all_worker_names()
         super(WorkerApi, self).__init__(names)
     
 class WorkersCollectionApi(ItemsCollectionApi):
     ItemApi = WorkerApi
 
 #==============================================================================#
+class StatsApi(object):
+    def __init__(self):
+        pass
+        
+    [PENDING, RECEIVED, STARTED, SUCCESS]
+    [FAILURE, REVOKED, RETRY]
+    
+    def tasks_by_states(self, states, interval=None, workers=None, tasknames=None):
+        qs = filter(interval, workers, tasknames)
+        if isinstance(states, (tuple, list)):
+            return qs.filter(state__in=states).count()
+        else:
+            return qs.filter(state=states).count()
+        
+    def tasks_failed(self, interval=None, workers=None, tasknames=None):
+        return self.tasks_by_states(FAILURE, interval, workers, tasknames)
+        
+    def tasks_succeeded(self, interval=None, workers=None, tasknames=None):
+        return self.tasks_by_states(SUCCESS, interval, workers, tasknames)
+        
+    def tasks_revoked(self, interval=None, workers=None, tasknames=None):
+        return self.tasks_by_states(REVOKED, interval, workers, tasknames)
+        
+    def tasks_ready(self, interval=None, workers=None, tasknames=None):
+        return self.tasks_by_states(tuple(READY_STATES), interval, workers, 
+                                    tasknames)
+        
+    def tasks_sent(self, interval=None, workers=None, tasknames=None):
+        return self.tasks_by_states(tuple(UNREADY_STATES), interval, workers, 
+                                    tasknames)
+    
+    def mean_waittime(self, interval=None, workers=None, tasknames=None):
+        qs = filter(interval, workers, tasknames).exclude(waittime=None)
+        return qs.aggregate(Avg('waittime'))['waittime__avg']
+    
+    def mean_runtime(self, interval=None, workers=None, tasknames=None):
+        qs = filter(interval, workers, tasknames).exclude(runtime=None)
+        return qs.aggregate(Avg('runtime'))['runtime__avg']
 
 
 

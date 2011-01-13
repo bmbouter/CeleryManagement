@@ -5,6 +5,8 @@ import math
 
 from celery.schedules import crontab
 
+from celerymanagementapp.policy import api
+
 
 #==============================================================================#
 class ModuleWrapper(object):
@@ -47,7 +49,8 @@ SCHEDULE_GLOBALS = {}
 SCHEDULE_LOCALS = {'crontab': crontab}
 CONDITION_GLOBALS = {}
 CONDITION_LOCALS = {}
-APPLY_GLOBALS = {}
+APPLY_GLOBALS = { 'tasks': api.TasksCollectionApi(), 
+                  'workers': api.WorkersCollectionApi(), }
 APPLY_LOCALS = {}
 
 #==============================================================================#

@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from celery.task.control import broadcast, inspect
 
 from celerymanagementapp.models import PolicyModel
-from celerymanagementapp.policy import policy, signals
+from celerymanagementapp.policy import policy, signals, util
 
 #==============================================================================#
 default_time = datetime.datetime(2000,1,1)
@@ -91,27 +91,7 @@ class Registry(object):
         
 
 #==============================================================================#
-def get_registered_tasks(workername):
-    i = inspect()
-    tasks_by_worker = i.registered_tasks() or {}
-    return tasks_by_worker.get(workername, [])
-    
-def _merge_broadcast_result(result):
-    r = {}
-    for x in result:
-        assert isinstance(x, dict)
-        r.update(x)
-    return r
-    
-def _condense_broadcast_result(result):
-    checkval = None
-    first_iteration = True
-    for k,v in result.iteritems():
-        if first_iteration:
-            checkval = v
-            first_iteration = False
-        assert v==checkval, 'v!=checkval:\nv: {0}\ncheckval: {1}\n'.format(v,checkval)
-    return checkval
+
     
 _setting_names = ('ignore_result', 'routing_key', 'exchange', 
                   'default_retry_delay', 'rate_limit', 
@@ -123,7 +103,7 @@ def get_task_settings(workername, tasknames):
     settings = broadcast('get_task_settings', destination=destination, 
                          arguments={'tasknames': tasknames, 
                          'setting_names': _setting_names}, reply=True)
-    settings = _merge_broadcast_result(settings)
+    settings = util._merge_broadcast_result(settings)
     #print 'settings: {0}'.format(settings)
     if workername:
         return settings.get(workername)
@@ -131,17 +111,22 @@ def get_task_settings(workername, tasknames):
         return settings
     
 def get_all_task_settings():
+    # don't do anything if there are no workers
+    if len(util.get_all_worker_names()) == 0:
+        return {}
     settings = broadcast('get_all_task_settings', 
                          arguments={'setting_names': _setting_names}, 
                          reply=True)
-    settings = _merge_broadcast_result(settings)
-    return _condense_broadcast_result(settings) or {}
+    settings = util._merge_broadcast_result(settings)
+    return util._condense_broadcast_result(settings) or {}
     
 def update_tasks_settings(workername, tasks_settings):
-        broadcast('update_tasks_settings', destination=[workername],
-                  arguments={'tasks_settings': tasks_settings})
+    broadcast('update_tasks_settings', destination=[workername],
+              arguments={'tasks_settings': tasks_settings})
 
 def restore_task_settings(restore_data):
+    # only broadcast if there are workers
+    if len(util.get_all_worker_names()):
         broadcast('restore_task_settings', 
                   arguments={'restore_data': restore_data})
 
@@ -157,6 +142,8 @@ class TaskSettings(object):
         # restore Task settings to the original settings
         restore = dict((k,v) for (k,v) in self.initial_settings.iteritems() 
                                        if self.settings.get(k,v) != v)
+        # TODO: maybe base the restore behavior here on _setting_names in 
+        # additon to self.settings
         erase = [k for k in self.settings if k not in self.initial_settings]
         return restore, erase
         
@@ -197,7 +184,7 @@ class TaskSettingsManager(object):
                 self.data[taskname].set(setting_name, value)
                 
     def on_worker_start(self, workername):
-        tasknames = get_registered_tasks(workername)  # TODO
+        tasknames = util.get_registered_tasks_for_worker(workername)  # TODO
         tasks_settings = dict( (taskname, self.data[taskname].current()) 
                                for taskname in tasknames 
                                    if taskname in self.data)
