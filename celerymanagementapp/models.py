@@ -121,6 +121,10 @@ class OutOfBandWorkerNode(AbstractWorkerNode):
         """SSH's to the Node and runs the celeryd_stop commands"""
         ssh = self._get_SSH_Object()
         return ssh.ssh_run_command(self.celeryd_status_cmd.split(' '))
+
+    def is_celeryd_running(self):
+        output = self.celeryd_status()
+        return output.strip('\n').isdigit()
         
 class Provider(AbstractWorkerNode):
     """Represents a infrastructure provider for libcloud"""
@@ -216,6 +220,7 @@ class Provider(AbstractWorkerNode):
                     pass
         in_band_worker_node = InBandWorkerNode(instance_id=new_vm.id, provider=self)
         in_band_worker_node.save()
+        start_celeyrd_on_vm(in_band_worker_node.pk)
         return in_band_worker_node
 
 class InBandWorkerNode(models.Model):
@@ -239,7 +244,31 @@ class InBandWorkerNode(models.Model):
         self.provider.conn.destroy_node(node)
         super(InBandWorkerNode, self).delete(*args, **kwargs)
 
-# class DefinedTask(models.Model):
+    def _get_SSH_Object(self):
+        node = self._get_node_obj()
+        return NodeUtil(node.public_ip[0], settings.SECURE_UPLOADS + str(self.provider.ssh_key),
+            self.provider.celeryd_username)
+
+    def celeryd_start(self):
+        """SSH's to the Node and runs the celeryd_start commands"""
+        ssh = self._get_SSH_Object()
+        return ssh.ssh_run_command(self.provider.celeryd_start_cmd.split(' '))
+
+    def celeryd_stop(self):
+        """SSH's to the Node and runs the celeryd_stop commands"""
+        ssh = self._get_SSH_Object()
+        return ssh.ssh_run_command(self.provider.celeryd_stop_cmd.split(' '))
+
+    def celeryd_status(self):
+        """SSH's to the Node and runs the celeryd_stop commands"""
+        ssh = self._get_SSH_Object()
+        return ssh.ssh_run_command(self.provider.celeryd_status_cmd.split(' '))
+
+    def is_celeryd_running(self):
+        output = self.celeryd_status()
+        return output.strip('\n').isdigit()
+
+#  DefinedTask(models.Model):
     # """A task type that has been defined."""
     # name =      models.CharField(_(u"name"), max_length=200, null=True, 
                                  # db_index=True)

@@ -65,6 +65,7 @@ urlpatterns += patterns('celerymanagementapp',
 
     # manipulating provider ...
     (r'^provider/$', 'dataviews.create_provider'),
+    (r'^provider/images/$', 'dataviews.provider_images'),
 
     # for manual testing...
     (r'^worker/(?P<name>[-\w\d_.]+)/test_commands/$', 'test_views.worker_commands_test_view'),
