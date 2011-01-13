@@ -1,0 +1,109 @@
+CMA.Core.ajax.loadTestUrls();
+        
+var c1 = null;
+var data = null;
+var options = { };
+var json = null;
+var formatter = null;
+var query = null;
+var xhr = null;
+
+$(document).ready(function() {
+    $(':checkbox').change(function() {
+        if($(this).attr('checked')) {
+            $(this).siblings('div').show();
+        } else {
+            $(this).siblings('div').hide();
+        }
+    });
+    
+    $('#segmentize_method').change(function() {
+        if($(this).val() == 'range') {
+            $('#segmentize_range').show();
+            $('#segmentize_values').hide();
+        } else if($(this).val() == 'values') {
+            $('#segmentize_values').show()
+            $('#segmentize_range').hide();
+        } else {
+            $('#segmentize_range').hide();
+            $('#segmentize_values').hide();
+        }
+    });
+    
+    $('#add_aggregation').click(function() {
+        var table = $('#aggregate_table tr:last');
+        
+        if(!$('#aggregate_methods').val()) {
+            alert("Select methods for field: " + $('#aggregate_field').val());
+        } else {
+            table.after(
+                '<tr><td>' + $('#aggregate_field').val() + '</td>' +
+                '<td>' + $('#aggregate_methods').val() + '</td>' +
+                '</tr>'
+            );
+        }
+    });
+});
+
+function create_query() {
+    var object = { };
+    
+    if($('#segmentize').attr('checked')) {
+        object.segmentize = { };
+        object.segmentize.field = $('#segmentize_field').val();
+        object.segmentize.method = [ $('#segmentize_method').val() ];
+        
+        if($('#segmentize_method').val() == 'range') {
+            object.segmentize.method.push({});
+            
+            $.each($('#segmentize_range').children('div').children('input'), function(i, v) {
+                object.segmentize.method[1][$(v).attr('name')] = parseFloat($(v).val());
+            });
+        } else if($('#segmentize_method').val() == 'values') {
+            object.segmentize.method.push($('#segmentize_values').children('div').children('input').val().split(/[\s,]+/));
+        }
+    }
+    
+    if($('#aggregate').attr('checked')) {
+        object.aggregate = [ ];
+        
+        var fields = $('#aggregate_table tr');
+        
+        fields.each(function(i, f) {
+            if(i != 0) {
+                var children = $(f).children();
+                object.aggregate.push({ });
+                object.aggregate[i - 1].field = $.text([children[0]]);
+                object.aggregate[i - 1].methods = $.text([children[1]]).split(/[\s,]+/);
+            }
+        });
+    }
+    
+    console.log(JSON.stringify(object));
+    submit_query(JSON.stringify(object));
+}
+
+function submit_query(query) {
+    //$.post(CMA.Core.ajax.urls.query_dispatched_tasks_url, query, format_data);
+    CMA.Core.ajax.getDispatchedTasksData(query, format_data);
+}
+
+$(document).ready(function() {
+    formatter = new Formatter();
+    
+    xhr = $.getJSON(CMA.Core.ajax.urls.chart_data_url, format_data);
+});
+
+function format_data(response) {
+    console.log(response);
+    data = formatter.formatData(response);
+    show_chart();
+}
+
+function show_chart() {
+    c1 = new Chart("#chart", data, options);
+    c1.displayBarChart(true);
+    c1.enableTooltips();
+    c1.disableLegend();
+}
+
