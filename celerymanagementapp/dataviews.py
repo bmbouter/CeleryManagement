@@ -202,6 +202,17 @@ def create_provider(request):
                 "load_test_data" : "true" },
                 context_instance=RequestContext(request))
 
+def provider_images(request):
+    """Returns a list of images for a Provider"""
+    p = Provider(provider_user_id=request.POST['provider_user_id'],
+            provider_key=request.POST['provider_key'],
+            provider_name=request.POST['provider_name'])
+    images = p.conn.list_images()
+    json_images = []
+    [json_images.append({'name': item.name, 'id': item.id}) for item in images]
+    json = simplejson.dumps(json_images)
+    return HttpResponse(json)
+
 def create_outofbandworker(request):
     """Create an OutOfBandWorker"""
     if request.method == 'POST':
@@ -223,8 +234,7 @@ def worker_start(request):
     """Find an available node and start a worker process"""
     active_nodes = OutOfBandWorkerNode.objects.filter(active=True)
     for node in active_nodes:
-        output = node.celeryd_status()
-        if not output.strip('\n').isdigit():
+        if not node.is_celeryd_running():
             node.celeryd_start()
             return _json_response({'status': 'success'})
     return _json_response({'status': 'failure', 'message': 'No Available Worker Nodes'})

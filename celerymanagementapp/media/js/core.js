@@ -1,5 +1,6 @@
 var CMA = (typeof CMA === "undefined" || !CMA) ? {} : CMA;
 CMA.Core = (typeof CMA.Core === "undefined" || !CMA.Core) ? {} : CMA.Core;
+CMA.Core.ajax = (typeof CMA.Core.ajax === "undefined" || !CMA.Core.ajax) ? {} : CMA.Core.ajax;
 
 $(document).ready(function() {
 
@@ -16,6 +17,17 @@ $(document).ready(function() {
 
 
 });
+
+function createTable(data) {
+    var table = $('.content');
+    table.html(""); //Empty the content
+    
+    table.html("<table> </table>");
+    
+    data.each(function(i, e) {
+        alert(i + " " + e);
+    });
+}
 
 CMA.Core.init = function(){
     if( typeof CMA.Core.testUrls === "undefined" ){
@@ -184,38 +196,17 @@ CMA.Core.setupFormEvents = function(){
             }
         );
     });
-        
-    $('#blankProviderForm').ajaxSubmit({
-        dataType: 'json',
-        url: CMA.Core.ajax.urls.create_provider_url,
-        success: formReturn
-    });
-
     
-    /*$('.createNewProvider').click(function() {
-        var formHeight = $('#providerForm').height();
-        $('#blankProviderForm').animate({
-                height: "toggle",
-            },
-            500,
-            function(){
-                $('#providerForm').css("height", formHeight + "px");
-            }
-        );
-    });
-    
-    $('.editProvider').click(function(){
-        var elem = document.getElementById($(this).attr("id") + "Form");
-        var formHeight = $(elem).height();
-        $(elem).animate({
-            height: "toggle",
-            },
-            500,
-            function(){
-                $(elem).css("height", formHeight + "px");
-            }
-        );
-    });*/
+    /*
+    $('#submitProviderButton').click(function() {
+        console.log(CMA.Core.ajax.urls.create_provider_url);
+        $('#blankProviderForm').ajaxSubmit({
+            dataType: 'json',
+            url: CMA.Core.ajax.urls.create_provider_url,
+            success: formReturn
+        });
+    });   
+    */
 }
 
 CMA.Core.populateTaskNavigation = function(data){
@@ -266,19 +257,13 @@ CMA.Core.populateWorkerNavigation = function(data){
 }
 
 CMA.Core.providerCreation = function() {
-    
-    $('#getImagesButton').click(function() {
-        var providerStep2 = $('#providerStep2');
-            originalText = providerStep2.text();
-        $(this).hide();
-        providerStep2.show();
-        providerStep2.text("Please wait while we determine the availible images...");
-        CMA.Core.ajax.postGetImages(function(data) {
+    var handleImages = function(data) {
+            var providerStep2 = $('#providerStep2'),
+                div, length, i, element;
+
             if( !data.hasOwnProperty("failure") ){
-                var div = '<div class="fieldWrapper">',
-                    length = data.length,
-                    i = 0,
-                    element;
+                div = '<div class="fieldWrapper">';
+                length = data.length;
                 
                 for(i=0; i < length; i += 1){
                     div += '<input class="imageID" type="radio" name="image_id" value="' + data[i] + '">' + data[i] + '<br/>';
@@ -286,7 +271,7 @@ CMA.Core.providerCreation = function() {
                 div += '</div>';
                 
                 console.log(div);
-                providerStep2.text(originalText);
+                providerStep2.text("Step 2: Please choose the image ID to be used.");
                 element = $(div);
                 console.log(element);
                 providerStep2.append(element);
@@ -297,7 +282,17 @@ CMA.Core.providerCreation = function() {
                 console.log(data);
                 providerStep2.text(originalText);
             }
-        });           
+        };
+    
+    $('#getImagesButton').click(function() {
+        var providerStep2 = $('#providerStep2');
+        
+        $(this).hide();
+        providerStep2.show();
+        providerStep2.text("Please wait while we determine the availible images...");
+        
+        CMA.Core.ajax.postGetImages(handleImages);
+            
     });
 
 };

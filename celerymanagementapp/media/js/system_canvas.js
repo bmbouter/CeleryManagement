@@ -331,7 +331,8 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
         handlers = {},
         clickedEntity = null,
         yOffset = $('#header').css("height").split("px")[0],
-        xOffset = $('#dummy').css("width").split("px")[0];
+        xOffset = $('#dummy').css("width").split("px")[0],
+        ajax = CMA.Core.ajax;
 
     var getEntity = function(xPos, yPos){
         var xMousePos = xPos - xOffset,
@@ -360,9 +361,9 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
     handlers.handleClick = function(e){
         var entity = getEntity(e.pageX, e.pageY);
         if( entity !== undefined && entity.objectType === "Task" ){
-            window.location = CMA.Core.ajax.task_url + entity.fullName + "/";
+            window.location = ajax.urls.task_url + entity.fullName + "/";
         } else if( entity !== undefined && entity.objectType === "Worker" ){
-            window.location = CMA.Core.ajax.worker_url + entity.fullName + "/";
+            window.location = ajax.urls.worker_url + entity.fullName + "/";
         }
     }
  
