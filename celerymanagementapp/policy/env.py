@@ -50,7 +50,9 @@ SCHEDULE_LOCALS = {'crontab': crontab}
 CONDITION_GLOBALS = {}
 CONDITION_LOCALS = {}
 APPLY_GLOBALS = { 'tasks': api.TasksCollectionApi(), 
-                  'workers': api.WorkersCollectionApi(), }
+                  'workers': api.WorkersCollectionApi(), 
+                  'stats': api.StatsApi(),
+                }
 APPLY_LOCALS = {}
 
 #==============================================================================#

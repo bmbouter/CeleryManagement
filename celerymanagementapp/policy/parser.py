@@ -335,6 +335,7 @@ class ConditionSectionParser(SectionParser):
         
     def correct_ast(self, tree):
         tree = super(ConditionSectionParser,self).correct_ast(tree)
+        assert tree.body
         
         andnodes = [x.value for x in tree.body]
         boolexpr = ast.BoolOp(op=ast.And(), values=andnodes)
@@ -349,6 +350,10 @@ class ConditionSectionParser(SectionParser):
     
     def merge_asts(self, trees):
         exprs = []
+        if not trees:
+            # Handles the case where there are no conditions.  Condition is 
+            # always true.
+            trees = [ast.Module(body=[ast.Expr(value=ast.Name(id='True', ctx=ast.Load()))])]
         for tree in trees:
             assert len(tree.body) == 1
             exprs.append(tree.body[0])

@@ -260,9 +260,9 @@ class TaskDemoGroup(models.Model):
 class PolicyModel(models.Model):
     """ Model for Policy objects. """
     name =          models.CharField(max_length=100, null=False, unique=True)
-    modified =      models.DateTimeField(null=True)
+    modified =      models.DateTimeField(null=True, default=None, blank=True)
     enabled =       models.BooleanField(default=False)
-    last_run_time = models.DateTimeField(null=True)
+    last_run_time = models.DateTimeField(null=True, default=None, blank=True)
     source =        models.TextField(default="")
     # add field which keeps error information
     

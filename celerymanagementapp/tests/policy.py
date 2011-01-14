@@ -146,6 +146,17 @@ policy:
                 msg = '\n    Note: expr was: {0}'.format(expr)
                 e.args = (e.args[0] + msg,) + e.args[1:]
                 raise
+                
+    def test_null_condition(self):
+        _testdata = '''
+policy:
+    schedule:
+        1
+    apply:
+        1
+'''
+        # Should not cause an exception...
+        p = policy.Policy(_testdata)
 
         
 class ApplySection_TestCase(Section_TestCaseBase):
