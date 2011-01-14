@@ -20,9 +20,9 @@
                 <label for="segmentize_field">Field</label>
                 <div class="fields">
                     <select id="segmentize_field" name="segmentize_field" value="segmentize_field">
-                        <!--<option label="Name" value="name">Name</option>-->
+                        <option label="Name" value="taskname">Name</option>
                         <option label="State" value="state">State</option>
-                        <option label="Task ID" value="task_id">Task ID</option>
+                        <!--<option label="Task ID" value="task_id">Task ID</option>-->
                         <option label="Worker" value="worker">Worker</option>
                         <option label="Runtime" value="runtime">Runtime</option>
                         <option label="Wait Time" value="waittime">Wait Time</option>
@@ -61,6 +61,9 @@
                         <input id="values" name="values" />
                     </div>
                 </div>
+                
+                <!-- Add a list of name, retrieved using a json call -->
+                
             </div>
         </fieldset>
         <fieldset id="aggregate_set">

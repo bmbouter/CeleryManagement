@@ -1,5 +1,3 @@
-var CMAChart = (typeof CMAChart == 'undefined' || ! CMAChart) ? {} : CMAChart;
-
 function Chart(loc, data, options) {
     var chart = loc; //The location of the chart in the DOM (div, span, etc)
     var data = data; //The data in the chart

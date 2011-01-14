@@ -1,24 +1,22 @@
-var CMAFormatter = (typeof CMAFormatter == 'undefined' || ! CMAFormatter) ? {} : CMAFormatter;
-
-function Formatter() {
+var Formatter = function() {
     var formattedData = { };
 
-    this.formatData = function(data) {
-        //console.log(data);         
+    var formatData = function(data) {        
         var dataArray = data.data;
 
-        //console.log(dataArray);
-                
-        if(typeof(dataArray[0][0]) == 'string') {
-            if(dataArray[0][1][0].fieldname == 'runtime') {
+        console.log(data);
+        console.log(dataArray);
+                        
+        if(typeof(dataArray[0][0]) === 'string') {
+            if(dataArray[0][1][0].fieldname === 'runtime') {
                 formattedData = runtimeData(dataArray);
-            } else if(dataArray[0][1][0].fieldname == 'state') {
+            } else if(dataArray[0][1][0].fieldname === 'state') {
                 formattedData = stateData(dataArray);
             } else {
                 formattedData = statusData(dataArray);
             }
-        } else if(typeof(dataArray[0][0]) == 'number') {
-            if(dataArray[0][1][0].fieldname == 'count') {
+        } else if(typeof(dataArray[0][0]) === 'number') {
+            if(dataArray[0][1][0].fieldname === 'count') {
                 formattedData = countData(dataArray);
             } else {
                 formattedData = dummyData();
@@ -26,21 +24,24 @@ function Formatter() {
         }
 
         return formattedData;
-    }
+    };
 
     function runtimeData(dataArray) {
         var data = [];
-        
         var count = 0;
+
+        var item;
 
         for(item in dataArray) {
             var arr = dataArray[item];
             
-            //console.log(arr);
-                        
+            var method;
+                                    
             for(method in arr[1]) {
                 var obj = { };
                 var methodsArray = arr[1][method].methods;
+
+                var object;
 
                 obj.label = arr[0] + ' - ' + arr[1][method].fieldname;
                 obj.data = [];
@@ -62,17 +63,17 @@ function Formatter() {
         var data = [];
         var count = 0;
 
+        var item, method;
+        
         for(item in dataArray) {
             var arr = dataArray[item];
             
-            //console.log(arr);
-
             var label = arr[0];
             
             for(method in arr[1]) {
                 var methodsArray = arr[1][method].methods;
                 
-                if(methodsArray[0].name == 'enumerate') {
+                if(methodsArray[0].name === 'enumerate') {
                     valueArray = methodsArray[0].value;
 
                     
@@ -99,6 +100,8 @@ function Formatter() {
         var chartData = [];
         var obj = { };
 
+        var item;
+
         for(item in dataArray) {
             var arr = dataArray[item];
             var x = arr[0];            
@@ -119,9 +122,10 @@ function Formatter() {
     }
 
     function statusData(dataArray) {
-        var data = []
-        
+        var data = [];
         var count = 0;
+
+        var item;
 
         for(item in dataArray) {
             var obj = { };
@@ -139,9 +143,10 @@ function Formatter() {
         var data = [];
         var chartData = [];
         var obj = { };
+        
+        var i;
 
-
-        for(var i = 0; i < 14; i += 0.5) {
+        for(i = 0; i < 14; i += 0.5) {
             chartData.push([i, Math.sin(i)]);
         }
         
@@ -151,4 +156,9 @@ function Formatter() {
 
         return data;
     }
-}
+
+    return {
+        formatData: formatData
+    };
+};
+

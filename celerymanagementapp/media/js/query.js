@@ -21,9 +21,11 @@ $(document).ready(function() {
         if($(this).val() == 'range') {
             $('#segmentize_range').show();
             $('#segmentize_values').hide();
+            $('#segmentize_taskname').hide();
         } else if($(this).val() == 'values') {
             $('#segmentize_values').show()
             $('#segmentize_range').hide();
+            $('#segmentize_taskname').hide();
         } else {
             $('#segmentize_range').hide();
             $('#segmentize_values').hide();
