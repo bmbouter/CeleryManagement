@@ -4,10 +4,10 @@ function Formatter() {
     var formattedData = { };
 
     this.formatData = function(data) {
-        console.log(data);         
+        //console.log(data);         
         var dataArray = data.data;
 
-        console.log(dataArray);
+        //console.log(dataArray);
                 
         if(typeof(dataArray[0][0]) == 'string') {
             if(dataArray[0][1][0].fieldname == 'runtime') {
@@ -36,7 +36,7 @@ function Formatter() {
         for(item in dataArray) {
             var arr = dataArray[item];
             
-            console.log(arr);
+            //console.log(arr);
                         
             for(method in arr[1]) {
                 var obj = { };
@@ -65,7 +65,7 @@ function Formatter() {
         for(item in dataArray) {
             var arr = dataArray[item];
             
-            console.log(arr);
+            //console.log(arr);
 
             var label = arr[0];
             
