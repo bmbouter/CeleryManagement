@@ -103,5 +103,15 @@ def set_task_attribute(panel, tasknames, attrname, value):
         setattr(task, attrname, value)
     return {"ok": "new %s set successfully" % attrname}
 
+#==============================================================================#
+@Panel.register
+def prefetch_increment(panel, n):
+    panel.consumer.qos.increment(n)
+    return {'ok': 'incremented prefetch by {0}'.format(n) }
+
+@Panel.register
+def prefetch_decrement(panel, n):
+    panel.consumer.qos.decrement(n)
+    return {'ok': 'decremented prefetch by {0}'.format(n) }
 
 

@@ -224,11 +224,59 @@ class TasksCollectionApi(ItemsCollectionApi):
     ItemApi = TaskApi
     
 #==============================================================================#
+class WorkerPrefetchProxy(object):
+    def __init__(self, names):
+        self.names = names
+    def get(self):
+        if len(self.names) != 1:
+            raise ApiError('Cannot retrieve this attribute for multiple workers.')
+        r = broadcast('stats', destination=self.names, reply=True)
+        r = util._merge_broadcast_result(r)
+        if not r:
+            raise ApiError('Unable to retrieve worker attribute: prefetch.')
+        r = util._condense_broadcast_result(r)
+        if isinstance(r, dict) and 'error' in r:
+            raise ApiError('Error occurred while retrieving worker prefetch.')
+        return r['consumer']['prefetch_count']
+        
+    def increment(self, n=1):
+        n = validate_int(n)
+        r = broadcast('prefetch_increment', arguments={'n':n}, reply=True)
+        r = util._merge_broadcast_result(r)
+        if not r:
+            raise ApiError('Unable to increment prefetch.')
+        # check that the value doesn't indicate an error
+        for worker_ret in r:
+            if isinstance(worker_ret, dict) and 'error' in worker_ret:
+                raise ApiError('Error occurred while incrementing prefetch.')
+        
+    def decrement(self, n=1):
+        n = validate_int(n)
+        r = broadcast('prefetch_decrement', arguments={'n':n}, reply=True)
+        r = util._merge_broadcast_result(r)
+        if not r:
+            raise ApiError('Unable to decrement prefetch.')
+        # check that the value doesn't indicate an error
+        for worker_ret in r:
+            if isinstance(worker_ret, dict) and 'error' in worker_ret:
+                raise ApiError('Error occurred while decrementing prefetch.')
+                
+class WorkerSetting(object):
+    def __init__(self, cls):
+        self.cls = cls
+    def __get__(self, inst, owner):
+        assert inst is not None
+        return self.cls(inst.names)
+    def __set__(self, inst, value):
+        raise ApiError('Cannot set attribute')
+
 class WorkerApi(ItemApi):
     def __init__(self, names=None):
         if not names:
             names = util.get_all_worker_names()
         super(WorkerApi, self).__init__(names)
+        
+    prefetch = WorkerSetting(WorkerPrefetchProxy)
     
 class WorkersCollectionApi(ItemsCollectionApi):
     ItemApi = WorkerApi
