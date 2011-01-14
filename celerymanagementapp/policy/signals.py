@@ -22,7 +22,8 @@ on_worker_started = Signal()
 
 #==============================================================================#
 class Receiver(EventReceiver):
-    def __init__(self, connection, routing_key="#", node_id=None, app=None):
+    def __init__(self, connection, logger, routing_key="#", node_id=None, app=None):
+        self.logger = logger
         handlers = self._init_handlers()
         super(Receiver, self).__init__(connection, handlers, routing_key, 
                                        node_id, app)

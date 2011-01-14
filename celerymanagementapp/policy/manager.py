@@ -31,7 +31,8 @@ class Entry(object):
 
 #==============================================================================#
 class Registry(object):
-    def __init__(self):
+    def __init__(self, logger):
+        self.logger = logger
         self.data = {}
         
     def __iter__(self):
@@ -157,7 +158,8 @@ class TaskSettings(object):
         
 
 class TaskSettingsManager(object):
-    def __init__(self):
+    def __init__(self, logger):
+        self.logger = logger
         self.data = {}
         signals.on_task_modified.register(self.on_tasks_modified)
         signals.on_worker_started.register(self.on_worker_start)

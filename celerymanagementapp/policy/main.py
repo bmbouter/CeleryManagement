@@ -12,11 +12,12 @@ MIN_LOOP_SLEEP_TIME = 30  # seconds
 MAX_LOOP_SLEEP_TIME = 60*2  # seconds
 
 class PolicyMain(object):
-    def __init__(self, connection, app=None):
+    def __init__(self, connection, logger, app=None):
         print 'cmrun: Starting PolicyMain...'
-        self.task_settings = TaskSettingsManager()
-        self.event_receiver = Receiver(connection, app=app)
-        self.registry = Registry()
+        self.logger = logger
+        self.task_settings = TaskSettingsManager(logger)
+        self.event_receiver = Receiver(connection, logger, app=app)
+        self.registry = Registry(logger)
         
     def __enter__(self):
         return self
@@ -86,13 +87,19 @@ class PolicyMain(object):
         
         
 #==============================================================================#
-def policy_main(app=None):
-    print 'cmrun: Loading policy manager...'
+def policy_main(app=None, loglevel=0, logfile=None):
+    ##print 'cmrun: Loading policy manager...'
     app = app_or_default(app)
+    
+    logger = app.log.setup_logger(loglevel=loglevel,
+                                  logfile=logfile,
+                                  name="cm.policy")
+    logger.info('cm.policy: Loading policy manager...')
+    ##app.log.redirect_stdouts_to_logger(logger, loglevel=0)
     conn = app.broker_connection()
     try:
         try:
-            with PolicyMain(conn) as pmain:
+            with PolicyMain(conn, logger, app=app) as pmain:
                 pmain.loop()
         except KeyboardInterrupt:
             raise SystemExit
@@ -100,5 +107,6 @@ def policy_main(app=None):
         #import traceback
         #traceback.print_exc()
         conn.close()
-        print 'cmrun: Policy manager shut down.'
+        logger.info('cm.policy: Policy manager shut down.')
+        ##print 'cmrun: Policy manager shut down.'
         
