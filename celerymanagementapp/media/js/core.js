@@ -1,5 +1,6 @@
 var CMA = (typeof CMA === "undefined" || !CMA) ? {} : CMA;
 CMA.Core = (typeof CMA.Core === "undefined" || !CMA.Core) ? {} : CMA.Core;
+CMA.Core.ajax = (typeof CMA.Core.ajax === "undefined" || !CMA.Core.ajax) ? {} : CMA.Core.ajax;
 
 $(document).ready(function() {
 
@@ -195,38 +196,17 @@ CMA.Core.setupFormEvents = function(){
             }
         );
     });
-        
-    $('#blankProviderForm').ajaxSubmit({
-        dataType: 'json',
-        url: CMA.Core.ajax.urls.create_provider_url,
-        success: formReturn
-    });
-
     
-    /*$('.createNewProvider').click(function() {
-        var formHeight = $('#providerForm').height();
-        $('#blankProviderForm').animate({
-                height: "toggle",
-            },
-            500,
-            function(){
-                $('#providerForm').css("height", formHeight + "px");
-            }
-        );
-    });
-    
-    $('.editProvider').click(function(){
-        var elem = document.getElementById($(this).attr("id") + "Form");
-        var formHeight = $(elem).height();
-        $(elem).animate({
-            height: "toggle",
-            },
-            500,
-            function(){
-                $(elem).css("height", formHeight + "px");
-            }
-        );
-    });*/
+    /*
+    $('#submitProviderButton').click(function() {
+        console.log(CMA.Core.ajax.urls.create_provider_url);
+        $('#blankProviderForm').ajaxSubmit({
+            dataType: 'json',
+            url: CMA.Core.ajax.urls.create_provider_url,
+            success: formReturn
+        });
+    });   
+    */
 }
 
 CMA.Core.populateTaskNavigation = function(data){
@@ -281,9 +261,11 @@ CMA.Core.providerCreation = function() {
     $('#getImagesButton').click(function() {
         var providerStep2 = $('#providerStep2');
             originalText = providerStep2.text();
+        
         $(this).hide();
         providerStep2.show();
         providerStep2.text("Please wait while we determine the availible images...");
+        
         CMA.Core.ajax.postGetImages(function(data) {
             if( !data.hasOwnProperty("failure") ){
                 var div = '<div class="fieldWrapper">',

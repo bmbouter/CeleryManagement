@@ -97,8 +97,10 @@ def create_provider(request):
 
 def get_images(request):
     images = ["9ad9adf88dsa", "36d6a6gGHT", "&t6ad7fayYYy"]
-    json = simplejson.dumps(images)
-    return HttpResponse(json)
+    json = simplejson.dumps("test")
+    print json
+    json = "test"
+    return HttpResponse(json, mimetype="application/json")
 
 '''
 def create_policy(request):

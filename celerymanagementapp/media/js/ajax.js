@@ -1,3 +1,4 @@
+var CMA = (typeof CMA === "undefined" || !CMA) ? {} : CMA;
 CMA.Core = (typeof CMA.Core === "undefined" || !CMA.Core) ? {} : CMA.Core;
 
 CMA.Core.ajax = (function() {
