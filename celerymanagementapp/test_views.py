@@ -96,8 +96,10 @@ def create_provider(request):
             return HttpResponse(json)
 
 def get_images(request):
-    images = ["9ad9adf88dsa", "36d6a6gGHT", "&t6ad7fayYYy"]
-    json = simplejson.dumps("test")
+    images = [{ 'name': "Ubuntu34-postgresql", "id": "9ad9adf88dsa"}, 
+                {'name': "Fedora-14-postgresql-Django", "id": "36d6a6gGHT"}, 
+                {'name': "Fedora-14-Django-Celery1.222", "id": "&t6ad7fayYYy"}]
+    json = simplejson.dumps(images)
     return HttpResponse(json, mimetype="application/json")
 
 '''
