@@ -2,21 +2,6 @@ var CMA = (typeof CMA === "undefined" || !CMA) ? {} : CMA;
 CMA.Core = (typeof CMA.Core === "undefined" || !CMA.Core) ? {} : CMA.Core;
 CMA.Core.ajax = (typeof CMA.Core.ajax === "undefined" || !CMA.Core.ajax) ? {} : CMA.Core.ajax;
 
-$(document).ready(function() {
-
-    CMA.Core.init();
-    CMA.Core.setupEvents();
-    CMA.Core.setupFormEvents();
-    CMA.Core.providerCreation();
-
-    CMA.Core.ajax.getTasks(CMA.Core.populateTaskNavigation);
-    CMA.Core.ajax.getWorkers(CMA.Core.populateWorkerNavigation);
-    
-    var xhr = jQuery.getJSON(CMA.Core.get_tasks_url);
-    var obj = jQuery.parseJSON(xhr.responseText);
-
-
-});
 
 function createTable(data) {
     var table = $('.content');
@@ -35,7 +20,7 @@ CMA.Core.init = function(){
     } else {
         CMA.Core.ajax.loadTestUrls();
     }
-    
+ 
     $('textarea').attr("rows", "3");
     $('textarea').css("resize", "none");
 
@@ -169,7 +154,7 @@ CMA.Core.setupFormEvents = function(){
 
     $('#blankOutOfBandForm').ajaxForm({
         dataType: 'json',
-        url: CMA.Core.ajax.urls.create_out_of_band_worker_url,
+        url: CMA.Core.ajax.getUrls().create_out_of_band_worker_url,
         success: formReturn
     });
 
@@ -198,70 +183,45 @@ CMA.Core.setupFormEvents = function(){
         );
     });
     
-    /*
-    $('#submitProviderButton').click(function() {
-        console.log(CMA.Core.ajax.urls.create_provider_url);
-        $('#blankProviderForm').ajaxSubmit({
-            dataType: 'json',
-            url: CMA.Core.ajax.urls.create_provider_url,
-            success: formReturn
-        });
-    });   
-    */
 };
 
-CMA.Core.populateTaskNavigation = function(data){
-    var color = "#7D7D7D",
-        task_text = "",
-        taskList = $('#taskNavigation'),
-        clone = taskList.clone(),
-        item;
 
-    for( item in data ){
-        if( data.hasOwnProperty(item) ){
-            if( data.item === CMA.Core.taskname ){
-                color = "red";
-            } else {
-                color = "#7D7D7D";
+CMA.Core.navigation = (function() {
+    
+    var addNavigationElements = function(names, list, linkUrl, activeItem){
+            var color = "#7D7D7D",
+                clone = list.clone(),
+                length = names.length,
+                name, i, displayText,
+                
+                createTaskElement = function(name, displayName, color){
+                    clone.append("<li><a  id='navigation_" + name  + 
+                                "' style='color: " + color  + 
+                                ";' id='" + name + 
+                                "' href='" + linkUrl + name + "/'>" + 
+                                displayName + "</a></li>");
+                };
+            
+            for(i = 0; i < length; i += 1){
+                name = names[i];
+                color = (name === activeItem) ? "red" : "#7D7D7D";
+                displayText = (name.length > 15) ? "..." + name.substring(name.length - 15, name.length) : name;
+                createTaskElement(name, displayText, color);
             }
-            if( data[item].length > 15 ){
-                task_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-                clone.append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.ajax.urls.task_url + data[item] + "/'>" + task_text + "</a></li>");
-            } else {
-                clone.append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.ajax.urls.task_url + data[item] + "/'>" + data[item] + "</a></li>");
-            }
-        }
-    }
+            list.replaceWith(clone);
+        },
+        populateTaskNavigation = function(data){
+            addNavigationElements(data, $('#taskNavigation'), CMA.Core.ajax.getUrls().task_url, CMA.Core.taskname);
+        },
+        populateWorkerNavigation = function(data){
+            addNavigationElements(data, $('#workerNavigation'), CMA.Core.ajax.getUrls().worker_url, CMA.Core.workername);
+        };
 
-    taskList.replaceWith(clone);
-};
-
-CMA.Core.populateWorkerNavigation = function(data){
-    var color = "#7D7D7D",
-        worker_text = "",
-        workerList = $('#workerNavigation'),
-        clone = workerList.clone(),
-        item;
-
-    for( item in data ){
-        if( data.hasOwnProperty(item) ){
-            if( data[item] === CMA.Core.workername ){
-                color = "red";
-            } else {
-                color = "#7D7D7D";
-            }
-
-            if( data[item].length > 15 ){
-                worker_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-                clone.append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.ajax.urls.worker_url + data[item] + "/'>" + worker_text + "</a></li>");
-            } else {
-                clone.append("<li><a id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.ajax.urls.worker_url + data[item] + "/'>" + data[item] + "</a></li>");
-            }
-        }
-    }
- 
-    workerList.replaceWith(clone);   
-};
+    return {
+        populateTaskNavigation: populateTaskNavigation,
+        populateWorkerNavigation: populateWorkerNavigation
+    };
+}());
 
 CMA.Core.providerCreation = function() {
     var handleImages = function(data) {
@@ -277,16 +237,13 @@ CMA.Core.providerCreation = function() {
                 }
                 div += '</div>';
                 
-                console.log(div);
                 providerStep2.text("Step 2: Please choose the image ID to be used.");
                 element = $(div);
-                console.log(element);
                 providerStep2.append(element);
                 $('#providerStep3').show();
                 $('#submitProviderButton').show();
                 $('.fieldWrapper').show();
             } else {
-                console.log(data);
                 providerStep2.text(originalText);
             }
         };
@@ -301,3 +258,16 @@ CMA.Core.providerCreation = function() {
     });
 
 };
+
+$(document).ready(function() {
+
+    var core = CMA.Core;
+    core.init();
+    core.setupEvents();
+    core.setupFormEvents();
+    core.providerCreation();
+
+    core.ajax.getTasks(core.navigation.populateTaskNavigation);
+    core.ajax.getWorkers(core.navigation.populateWorkerNavigation);
+    
+});
