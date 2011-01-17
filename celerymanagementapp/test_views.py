@@ -137,7 +137,7 @@ def task_demo_test_dataview(request):
     from django.template import RequestContext
     
     name = 'celerymanagementapp.testutil.tasks.simple_test'
-    rate = 2.0
+    rate = 0.5
     runfor = 10.0
     
     send = urlreverse('celerymanagementapp.dataviews.task_demo_dataview')
@@ -147,11 +147,10 @@ def task_demo_test_dataview(request):
     <head>
     <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/jquery.js" ></script>
     <script>
-    
     function json() {{
-    var query = '{{"name": "[NAME]", "rate":{rate}, "runfor":{runfor} }}';
+    var query = '{{"name": "[NAME]", "rate":[RATE], "runfor":{runfor} }}';
     query = query.replace("[NAME]", document.testform.taskname.value)
-    
+    query = query.replace("[RATE]", document.testform.rate.value)
     $.post(
         '{send}',
         query,
@@ -163,20 +162,22 @@ def task_demo_test_dataview(request):
         'json'
     );
     }}
-    
     </script>
     </head>
     <body>
     <form name="testform" action="{send}" method="POST">
-      <table>
-        {{% csrf_token %}}
-        <tr><td>
-        <input type="text" name="taskname" value="{name}" size="90" />
-        </td></tr>
-        <tr><td>
-        <input type="button" value="Send" onclick="json();"/>
-        </td></tr>
-      </table>
+        <table>
+            {{% csrf_token %}}
+            <tr><td>
+            <input type="text" name="taskname" value="{name}" size="90" />
+            </td></tr>
+            <tr><td>
+            <input type="text" name="rate" value="{rate}" size="30" />
+            </td></tr>
+            <tr><td>
+            <input type="button" value="Send" onclick="json();"/>
+            </td></tr>
+        </table>
     </form>
     </body>
     </html>

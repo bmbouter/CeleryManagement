@@ -165,12 +165,20 @@ def task_xy_dataview(request):
         See the docs directory form more information on the format of the query 
         and result.
     """
-    json_request = _json_from_post(request)
-    
-    xyquery = JsonXYQuery(JsonTaskModelMap(), json_request)
-    json_result = xyquery.do_query()
-    
-    return _json_response(json_result)
+    try:
+        json_request = _json_from_post(request)
+        
+        xyquery = JsonXYQuery(JsonTaskModelMap(), json_request)
+        json_result = xyquery.do_query()
+        import pprint
+        print '{0}'.format(pprint.pformat(json_result, indent=2))
+        
+        r = _json_response(json_result)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise
+    return r
 
 def worker_subprocesses_dataview(request, name=None):
     """ Return the number of sub processes for each worker as a json 
