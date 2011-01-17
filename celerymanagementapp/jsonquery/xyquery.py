@@ -171,11 +171,12 @@ class JsonXYQuery(JsonQuery):
         return aggregator_factory
         
     def _build_method_aggregator(self, fieldname, method_specs):
+        from_python = self.modelmap.get_conv_from_python(fieldname)
         methodlist_agg = aggregator.CompoundAggregator()
         methodlist = []
         for method_spec in method_specs:
             aggregator_factory = self._get_aggregator_factory(method_spec)
-            agg = aggregator_factory(fieldname)
+            agg = aggregator_factory(fieldname, from_python)
             method_agg = MethodAggregator(method_spec, agg)
             methodlist.append(method_agg)
         return methodlist

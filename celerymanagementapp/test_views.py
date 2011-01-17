@@ -19,6 +19,11 @@ def dashboard(request):
             { "load_test_data" : "true" },
             context_instance=RequestContext(request))
 
+def policy(request):
+    return render_to_response('celerymanagementapp/policy.html',
+            { "load_test_data" : "true" },
+            context_instance=RequestContext(request))
+
 def configure(request):
     context = { "load_test_data": "true" }
     if settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static":
@@ -90,6 +95,29 @@ def create_provider(request):
             json = simplejson.dumps(failed)
             return HttpResponse(json)
 
+def get_images(request):
+    images = [{ 'name': "Ubuntu34-postgresql", "id": "9ad9adf88dsa"}, 
+                {'name': "Fedora-14-postgresql-Django", "id": "36d6a6gGHT"}, 
+                {'name': "Fedora-14-Django-Celery1.222", "id": "&t6ad7fayYYy"}]
+    json = simplejson.dumps(images)
+    return HttpResponse(json, mimetype="application/json")
+
+'''
+def create_policy(request):
+    if request.method == "POST":
+        policy_form = PolicyForm(request.POST, request.FILES)
+        if policy_form.is_valid():
+            return HttpResponse("success")
+        else:
+            errors = []
+            for field in policy_form:
+                errors.append({ 'field' : field.html_name,
+                                'error' : field.errors })
+            failed = { 'failure' : errors }
+            json = simplejson.dumps(failed)
+            return HttpResponse(json)
+'''
+
 def kill_worker(request, name=None):
     if request.method == 'POST':
         return HttpResponse(name)
@@ -121,12 +149,10 @@ def task_demo_test_dataview(request):
     <head>
     <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/jquery.js" ></script>
     <script>
-    
     function json() {{
     var query = '{{"name": "[NAME]", "rate":[RATE], "runfor":{runfor} }}';
     query = query.replace("[NAME]", document.testform.taskname.value)
     query = query.replace("[RATE]", document.testform.rate.value)
-    
     $.post(
         '{send}',
         query,
@@ -138,23 +164,22 @@ def task_demo_test_dataview(request):
         'json'
     );
     }}
-    
     </script>
     </head>
     <body>
     <form name="testform" action="{send}" method="POST">
-      <table>
-        {{% csrf_token %}}
-        <tr><td>
-        <input type="text" name="taskname" value="{name}" size="90" />
-        </td></tr>
-        <tr><td>
-        <input type="text" name="rate" value="{rate}" size="30" />
-        </td></tr>
-        <tr><td>
-        <input type="button" value="Send" onclick="json();"/>
-        </td></tr>
-      </table>
+        <table>
+            {{% csrf_token %}}
+            <tr><td>
+            <input type="text" name="taskname" value="{name}" size="90" />
+            </td></tr>
+            <tr><td>
+            <input type="text" name="rate" value="{rate}" size="30" />
+            </td></tr>
+            <tr><td>
+            <input type="button" value="Send" onclick="json();"/>
+            </td></tr>
+        </table>
     </form>
     </body>
     </html>

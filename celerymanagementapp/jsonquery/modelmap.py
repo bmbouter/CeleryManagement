@@ -1,4 +1,5 @@
 from celerymanagementapp.models import DispatchedTask
+from djcelery.models import WorkerState
 
 from celerymanagementapp.models import TestModel
 
@@ -52,6 +53,13 @@ class JsonModelMap(object):
     
 
 #==============================================================================#
+def worker_name_to_id(name):
+    return WorkerState.objects.get(hostname=name).id
+    
+def worker_id_to_name(id):
+    return WorkerState.objects.get(id=id).hostname
+
+#==============================================================================#
 class JsonTaskModelMap(JsonModelMap):
     model = DispatchedTask
     # field_info:
@@ -60,7 +68,7 @@ class JsonTaskModelMap(JsonModelMap):
         ('name',        'taskname',     None,   None),
         ('state',       'state',        None,   None),
         ('task_id',     'task_id',      None,   None),
-        ('worker',      'worker',       None,   None),
+        ('worker',      'worker',       worker_name_to_id,   worker_id_to_name),
         
         ('runtime',     'runtime',      None,   None),
         ('waittime',    'waittime',     None,   None),

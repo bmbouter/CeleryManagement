@@ -1,19 +1,7 @@
 var CMA = (typeof CMA === "undefined" || !CMA) ? {} : CMA;
 CMA.Core = (typeof CMA.Core === "undefined" || !CMA.Core) ? {} : CMA.Core;
+CMA.Core.ajax = (typeof CMA.Core.ajax === "undefined" || !CMA.Core.ajax) ? {} : CMA.Core.ajax;
 
-$(document).ready(function() {
-
-    CMA.Core.init();
-    CMA.Core.setupEvents();
-    CMA.Core.setupFormEvents();
-
-    CMA.Core.getTasks(CMA.Core.populateTaskNavigation);
-    CMA.Core.getWorkers(CMA.Core.populateWorkerNavigation);
-    
-    var xhr = jQuery.getJSON(CMA.Core.get_tasks_url);
-    var obj = jQuery.parseJSON(xhr.responseText);
-	
-});
 
 function createTable(data) {
     var table = $('.content');
@@ -28,11 +16,11 @@ function createTable(data) {
 
 CMA.Core.init = function(){
     if( typeof CMA.Core.testUrls === "undefined" ){
-        CMA.Core.loadUrls();
+        CMA.Core.ajax.loadUrls();
     } else {
-        CMA.Core.loadTestUrls();
+        CMA.Core.ajax.loadTestUrls();
     }
-    
+ 
     $('textarea').attr("rows", "3");
     $('textarea').css("resize", "none");
 
@@ -45,7 +33,7 @@ CMA.Core.init = function(){
     } else {
         $('#navigation').css("height", $('#container').css("min-height"));
     }
-}
+};
 
 CMA.Core.setupEvents = function(){
     
@@ -79,21 +67,69 @@ CMA.Core.setupEvents = function(){
         $('#workerNavigationMaster').click();
     }
 
-
-    $(window).resize(function() {
-        if( $(window).width() > $('#container').css("min-width").split("px")[0] ){
-            $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 20) + "px");
-        } 
-        if( $(window).height() > $('#container').css("min-height").split("px")[0] ){
-            $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
-        } else {
-            $('#navigation').css("height", $('#container').css("min-height"));
+    $('.menuItem').hover(
+        function() {
+            var elem = $(this);
+            var img = document.getElementById(elem.attr("id") + "Img");
+            $(elem).toggleClass("menuItemHover rightRounded");
+            $(img).toggleClass("menuItemHover leftRounded");
+        },
+        function() {
+            var elem = $(this);
+            var img = document.getElementById(elem.attr("id") + "Img");
+            $(elem).toggleClass("menuItemHover rightRounded");
+            $(img).toggleClass("menuItemHover leftRounded");
         }
-    });
-}
+    );
+
+    $('.menuImg').hover(
+        function() {
+            var elem = $(this);
+            var img = document.getElementById(elem.attr("id").split("Img")[0]);
+            $(elem).toggleClass("menuItemHover leftRounded");
+            $(img).toggleClass("menuItemHover rightRounded");
+        },
+        function() {
+            var elem = $(this);
+            var img = document.getElementById(elem.attr("id").split("Img")[0]);
+            $(elem).toggleClass("menuItemHover leftRounded");
+            $(img).toggleClass("menuItemHover rigtRounded");
+        }
+    );
+
+    var resizer = (function() {
+            var wind = $(window),
+                container = $('#container'),
+                navigation = $('#navigation'),
+    
+                resize = function() {
+                    if( wind.width() > container.css("min-width").split("px")[0] ){
+                        $('#content').css("width", (wind.width() - $('#dummy').css("width").split("px")[0] - 20) + "px");
+                    } 
+                    if( wind.height() > container.css("min-height").split("px")[0] ){
+                        navigation.css("height", (wind.height() - $('#header').css("height").split("px")[0] - 2) + "px");
+                    } else {
+                        navigation.css("height", container.css("min-height"));
+                    }
+                };
+
+            return resize;
+    }());
+
+    $(window).resize(resizer);
+};
 
 CMA.Core.setupFormEvents = function(){
     var formReturn = function(data){
+        var setText = function(){
+                var errLength = data.failure[i].error.length,
+                    text = "";
+                for( j=0; j < errLength; j += 1){
+                    text += data.failure[i].error[j];
+                }
+                return text;
+            };
+
         if( !data.hasOwnProperty("failure") ){
             console.log("success");
         } else {
@@ -103,14 +139,7 @@ CMA.Core.setupFormEvents = function(){
             
             for( i=0; i < length; i += 1){
                 elem = document.getElementById(data.failure[i].field + "_error");
-                $(elem).text(function(){
-                    var errLength = data.failure[i].error.length,
-                        text = "";
-                    for( j=0; j < errLength; j += 1){
-                        text += data.failure[i].error[j];
-                    }
-                    return text;
-                });
+                $(elem).text(setText);
                 if( $(elem).text() !== ""){                
                     $(elem).show();
                 } else {
@@ -121,18 +150,18 @@ CMA.Core.setupFormEvents = function(){
     };
 
     $('.outOfBandForm').hide();
-    $('.providerForm').hide();
+    $('.policyForm').hide();
 
     $('#blankOutOfBandForm').ajaxForm({
         dataType: 'json',
-        url: CMA.Core.create_out_of_band_worker_url,
+        url: CMA.Core.ajax.getUrls().create_out_of_band_worker_url,
         success: formReturn
     });
 
     $('.createNewOutOfBand').click(function() {
         var formHeight = $('#blankOutOfBandForm').height();
         $('#blankOutOfBandForm').animate({
-                height: "toggle",
+                height: "toggle"
             },
             500,
             function(){
@@ -145,7 +174,7 @@ CMA.Core.setupFormEvents = function(){
         var elem = document.getElementById($(this).attr("id") + "Form");
         var formHeight = $(elem).height();
         $(elem).animate({
-            height: "toggle",
+                height: "toggle"
             },
             500,
             function(){
@@ -154,69 +183,91 @@ CMA.Core.setupFormEvents = function(){
         );
     });
     
-    $('#blankProviderForm').ajaxForm({
-        dataType: 'json',
-        url: CMA.Core.create_provider_url,
-        success: formReturn
-    });
+};
+
+
+CMA.Core.navigation = (function() {
     
-    $('.createNewProvider').click(function() {
-        var formHeight = $('#providerForm').height();
-        $('#blankProviderForm').animate({
-                height: "toggle",
-            },
-            500,
-            function(){
-                $('#providerForm').css("height", formHeight + "px");
+    var addNavigationElements = function(names, list, linkUrl, activeItem){
+            var color = "#7D7D7D",
+                clone = list.clone(),
+                length = names.length,
+                name, i, displayText,
+                
+                createTaskElement = function(name, displayName, color){
+                    clone.append("<li><a  id='navigation_" + name  + 
+                                "' style='color: " + color  + 
+                                ";' id='" + name + 
+                                "' href='" + linkUrl + name + "/'>" + 
+                                displayName + "</a></li>");
+                };
+            
+            for(i = 0; i < length; i += 1){
+                name = names[i];
+                color = (name === activeItem) ? "red" : "#7D7D7D";
+                displayText = (name.length > 15) ? "..." + name.substring(name.length - 15, name.length) : name;
+                createTaskElement(name, displayText, color);
             }
-        );
-    });
+            list.replaceWith(clone);
+        },
+        populateTaskNavigation = function(data){
+            addNavigationElements(data, $('#taskNavigation'), CMA.Core.ajax.getUrls().task_url, CMA.Core.taskname);
+        },
+        populateWorkerNavigation = function(data){
+            addNavigationElements(data, $('#workerNavigation'), CMA.Core.ajax.getUrls().worker_url, CMA.Core.workername);
+        };
+
+    return {
+        populateTaskNavigation: populateTaskNavigation,
+        populateWorkerNavigation: populateWorkerNavigation
+    };
+}());
+
+CMA.Core.providerCreation = function() {
+    var handleImages = function(data) {
+            var providerStep2 = $('#providerStep2'),
+                div, length, i, element;
+
+            if( !data.hasOwnProperty("failure") ){
+                div = '<div class="fieldWrapper">';
+                length = data.length;
+                
+                for(i=0; i < length; i += 1){
+                    div += '<input class="imageID" type="radio" name="image_id" value="' + data[i].id + '">' + data[i].name + '<br/>';
+                }
+                div += '</div>';
+                
+                providerStep2.text("Step 2: Please choose the image ID to be used.");
+                element = $(div);
+                providerStep2.append(element);
+                $('#providerStep3').show();
+                $('#submitProviderButton').show();
+                $('.fieldWrapper').show();
+            } else {
+                providerStep2.text(originalText);
+            }
+        };
     
-    $('.editProvider').click(function(){
-        var elem = document.getElementById($(this).attr("id") + "Form");
-        var formHeight = $(elem).height();
-        $(elem).animate({
-            height: "toggle",
-            },
-            500,
-            function(){
-                $(elem).css("height", formHeight + "px");
-            }
-        );
+    $('#getImagesButton').click(function() {
+        var providerStep2 = $('#providerStep2');
+        
+        $(this).hide();
+        providerStep2.text("Please wait while we determine the availible images...");
+        providerStep2.show();
+        CMA.Core.ajax.postGetImages(handleImages);
     });
-}
 
-CMA.Core.populateTaskNavigation = function(data){
-    var color = "#7D7D7D";
-    for( item in data ){
-        if( data[item] === CMA.Core.taskname ){
-            color = "red";
-        } else {
-            color = "#7D7D7D";
-        }
-        if( data[item].length > 15 ){
-            var task_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-            $('#taskNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.task_url + data[item] + "/'>" + task_text + "</a></li>");
-        } else {
-            $('#taskNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.task_url + data[item] + "/'>" + data[item] + "</a></li>");
-        }
-    }
-}
+};
 
-CMA.Core.populateWorkerNavigation = function(data){
-    var color = "#7D7D7D";
-    for( item in data ){
-        if( data[item] === CMA.Core.workername ){
-            color = "red";
-        } else {
-            color = "#7D7D7D";
-        }
-        if( data[item].length > 15 ){
-            var worker_text = "..." + data[item].substring(data[item].length - 15, data[item].length);
-            $('#workerNavigation').append("<li><a  id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.worker_url + data[item] + "/'>" + worker_text + "</a></li>");
-        } else {
-            $('#workerNavigation').append("<li><a id='navigation_" + data[item]  + "' style='color: " + color  + ";' id='" + data[item] + "' href='" + CMA.Core.worker_url + data[item] + "/'>" + data[item] + "</a></li>");
-        }
-    }
-}
+$(document).ready(function() {
 
+    var core = CMA.Core;
+    core.init();
+    core.setupEvents();
+    core.setupFormEvents();
+    core.providerCreation();
+
+    core.ajax.getTasks(core.navigation.populateTaskNavigation);
+    core.ajax.getWorkers(core.navigation.populateWorkerNavigation);
+    
+});

@@ -15,12 +15,13 @@
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.flot.min.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.flot.selection.min.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.flot.stack.js" ></script>
-        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/core.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/ajax.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/json.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/charts.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/formatter.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.form.js" ></script>
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/query.js"></script>
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/core.js" ></script>
 
         <script>
             {% if load_test_data %}
@@ -54,7 +55,7 @@
             <div id="header">
             {% block header %}
                 <div id="headerBarContainer">
-                    <h1>Celery Management</h1>
+                    <h1>Celery Management Console</h1>
                     <div id="statusUpdate">
                         <div id="statusText">
                         </div>
@@ -70,10 +71,16 @@
                             <li><a href="/celerymanagementapp/test/view/dashboard/">Dashboard</a></li>
                             <li><a href="/celerymanagementapp/test/view/system/">Realtime View</a></li>
                             <li><a href="/celerymanagementapp/test/view/configure/">Configuration</a></li>
+                            {% if CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "dynamic" %}
+                            <li><a href="/celerymanagementapp/test/view/policy/">Policies</a></li>
+                            {% endif %}
                             {% else %}
                             <li><a href="/celerymanagementapp/view/dashboard/">Dashboard</a></li>
                             <li><a href="/celerymanagementapp/view/system/">Realtime View</a></li>
                             <li><a href="/celerymanagementapp/view/configure/">Configuration</a></li>
+                            {% if CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "dynamic" %}
+                            <li><a href="/celerymanagementapp/view/policy/">Policies</a></li>
+                            {% endif %}
                             {% endif %}
                             <li><a id="taskNavigationMaster">+ Tasks</a></li>
                             <ul id="taskNavigation">

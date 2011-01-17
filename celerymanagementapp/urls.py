@@ -65,6 +65,7 @@ urlpatterns += patterns('celerymanagementapp',
 
     # manipulating provider ...
     (r'^provider/$', 'dataviews.create_provider'),
+    (r'^provider/images/$', 'dataviews.provider_images'),
 
     # for manual testing...
     (r'^worker/(?P<name>[-\w\d_.]+)/test_commands/$', 'test_views.worker_commands_test_view'),
@@ -101,12 +102,14 @@ if settings.DEBUG:
         url(r'^test/view/system/$', 'system_overview', name="test_system_overview_url"),
         url(r'^test/view/dashboard/$', 'dashboard', name="test_dashboard_url"),
         url(r'^test/view/configure/$', 'configure', name="test_configure_url"),
+        url(r'^test/view/policy/$', 'policy', name="test_policy_url"),
         url(r'^test/view/task/(?P<taskname>[-\w\d_.]+)/$', 'task_view', name="task_view_url"),
         url(r'^test/view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url"),
         url(r'^test/post/worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'kill_worker', name="test_kill_worker_url"),
         url(r'^test/post/xy_query/dispatched_tasks/$', 'get_dispatched_tasks_data', name='test_get_dispatched_tasks_url'),
         url(r'^test/post/outofbandworker/$', 'create_outofbandworker', name="test_create_outofbandworker_url"),
         url(r'^test/post/provider/$', 'create_provider', name="test_create_provider_url"),
+        url(r'^test/post/provider/images/$', 'get_images', name="test_get_images_url"),
     )
 
 if settings.DEBUG:
