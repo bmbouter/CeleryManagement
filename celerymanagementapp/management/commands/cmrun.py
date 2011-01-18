@@ -1,4 +1,6 @@
 import sys
+import os
+import signal
 
 from multiprocessing import Process, Queue
 from optparse import make_option
@@ -59,6 +61,15 @@ def main(*args, **options):
     try:
         ev.run(*args, **options)
     finally:
+        # try to join, if it doesn't, then force it to terminate
+        if p.is_alive():
+            pid = p.pid
+            os.kill(pid, signal.SIGINT)
+            p.join(5.0)
+            if p.is_alive():
+                print 'The policy_manager process did not stop on its own.  '\
+                      'Trying to terminate it...'
+                p.terminate()
         p.join()
 
 

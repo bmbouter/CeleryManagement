@@ -8,15 +8,17 @@ from celerymanagementapp.tests_celery import base
 
 
 class CalculateThroughput_TestCase(base.CeleryManagement_DBTestCaseBase):
+    use_default_procs = True
     def test_oneTask(self):
         taskname = None
         tasks.simple_test.apply_async()
-        time.sleep(2.0)
+        time.sleep(4.0)
         now = datetime.datetime.now()
         timerange = (now-datetime.timedelta(seconds=45), now)
         interval = 5
         seq = calculate_throughputs(taskname, timerange, interval)
         
+        ##print seq
         self.assertEquals(len(seq),9)  # 9 = 45/5
         self.assertTrue(sum(seq) > 0.)
     

@@ -13,38 +13,36 @@
     This will load all tests from the suite() function in the 
     celerymanagementapp.tests_celery module.
 """
-
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
+from celerymanagementapp.testutil.unittest import unittest
     
 import subprocess
 import os
+import signal
     
 from django.core.management.commands import syncdb
 from django.test.simple import DjangoTestSuiteRunner
 from django.conf import settings
 
+from celerymanagementapp.testutil import process
 
-CAMFREQ = '0.1'
-CELERYDLOG='celeryd.log.txt'
-CELERYEVLOG='celeryev.log.txt'
+#CAMFREQ = '0.1'
+#CELERYDLOG='celeryd.log.txt'
+#CELERYEVLOG='celeryev.log.txt'
 
 #ARGS_CELERYD = [CMDBASE, 'celeryd', '-E','-B','-f', CELERYDLOG, SETTINGS, PYPATH]
 #ARGS_CELERYEV = [CMDBASE, 'celeryev', '-c',CAMERA, '--frequency={0}'.format(CAMFREQ),'-f',CELERYEVLOG, SETTINGS, PYPATH]
 
-DEFAULT_SETTINGS = 'testcelery_settings'
-DEFAULT_PYPATH = '.'
-DEFAULT_CMDBASE = 'django-admin.py'
-PYTHON_PATH = '/home/dpwhite2/CeleryManagementEnv/python_libs'
+#DEFAULT_SETTINGS = 'testcelery_settings'
+#DEFAULT_PYPATH = '.'
+#DEFAULT_CMDBASE = 'django-admin.py'
+##PYTHON_PATH = '/home/dpwhite2/CeleryManagementEnv/python_libs'
 
 ENV = os.environ
-oldpypath = ENV.get('PYTHONPATH','')
-if oldpypath:
-    oldpypath += ':'
+##oldpypath = ENV.get('PYTHONPATH','')
+##if oldpypath:
+##    oldpypath += ':'
     
-ENV['PYTHONPATH'] = oldpypath + '/home/dpwhite2/CeleryManagementEnv/python_libs'
+##ENV['PYTHONPATH'] = oldpypath + '/home/dpwhite2/CeleryManagementEnv/python_libs'
 
 
 class TestRunner(DjangoTestSuiteRunner):
@@ -72,79 +70,86 @@ class TestRunner(DjangoTestSuiteRunner):
         options = {
             'settings': self.options.get('settings',None),
             }
-        with DBContextManager(self):
-            suite = self.build_suite()
-            with CeleryContextManager(**options):
-                result = self.run_suite(suite)
+        self.setup_test_environment()
+        oldconfig = self.setup_databases()
+        
+        ##with DBContextManager(self):
+        suite = self.build_suite()
+        ##with CeleryContextManager(**options):
+        result = self.run_suite(suite)
+        
+        self.teardown_databases(oldconfig)
+        self.teardown_test_environment()
+        
         return self.suite_result(suite, result)
         
         
-class DBContextManager(object):
-    def __init__(self, runner):
-        self.runner = runner
+# class DBContextManager(object):
+    # def __init__(self, runner):
+        # self.runner = runner
         
-    def __enter__(self):
-        self.runner.setup_test_environment()
-        self.oldconfig = self.runner.setup_databases()
+    # def __enter__(self):
+        # self.runner.setup_test_environment()
+        # self.oldconfig = self.runner.setup_databases()
         
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.runner.teardown_databases(self.oldconfig)
-        self.runner.teardown_test_environment()
-        
-        
-class CeleryContextManager(object):
-    def __init__(self, settings=None, pythonpath=None, cmdbase=None):
-        self.celeryd = None
-        self.celeryev = None
-        self.settings = settings or DEFAULT_SETTINGS
-        self.pythonpath = pythonpath or DEFAULT_PYPATH
-        self.cmdbase = cmdbase or DEFAULT_CMDBASE
-        
-    def _launch_celeryd(self):
-        args = [self.cmdbase, 'celeryd', '-E','-B',
-                '-f', CELERYDLOG, 
-                '--settings={0}'.format(self.settings),
-                '--pythonpath={0}'.format(self.pythonpath),
-               ]
-        return subprocess.Popen(args, env=ENV)
-        
-    def _launch_celeryev(self):
-        args = [self.cmdbase, 'cmrun',
-                '-f', CELERYEVLOG,
-                '--frequency={0}'.format(CAMFREQ),
-                '--settings={0}'.format(self.settings),
-                '--pythonpath={0}'.format(self.pythonpath),
-               ]
-        return subprocess.Popen(args, env=ENV)
-        
-    def terminate(self):
-        if self.celeryd and not self.celeryd.poll():
-            print 'Terminating celeryd...'
-            self.celeryd.terminate()
-            self.celeryd.wait()
-        if self.celeryev and not self.celeryev.poll():
-            print 'Terminating celeryev...'
-            self.celeryev.terminate()
-            self.celeryev.wait()
-        
-    def __enter__(self):
-        try:
-            print 'Launching celeryd...'
-            self.celeryd = self._launch_celeryd()
-            print 'Launching celeryev...'
-            self.celeryev = self._launch_celeryev()
-        except Exception:
-            print '...Error encountered launching celery processes!'
-            self.terminate()
-            raise
-        print '...celeryd and celeryev launched successfully!'
-        
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.terminate()
+    # def __exit__(self, exc_type, exc_val, exc_tb):
+        # self.runner.teardown_databases(self.oldconfig)
+        # self.runner.teardown_test_environment()
         
         
-def runtests(tests, verbosity=1):
-    runner = TestRunner(verbosity=verbosity, tests=tests)
+# class CeleryContextManager(object):
+    # def __init__(self, settings=None, pythonpath=None, cmdbase=None):
+        # self.celeryd = None
+        # self.celeryev = None
+        # self.settings = settings or DEFAULT_SETTINGS
+        # self.pythonpath = pythonpath or DEFAULT_PYPATH
+        # self.cmdbase = cmdbase or DEFAULT_CMDBASE
+        
+    # def _launch_celeryd(self):
+        # args = [self.cmdbase, 'celeryd', '-E','-B',
+                # '-f', CELERYDLOG, 
+                # '--settings={0}'.format(self.settings),
+                # '--pythonpath={0}'.format(self.pythonpath),
+               # ]
+        # return subprocess.Popen(args, env=ENV)
+        
+    # def _launch_celeryev(self):
+        # args = [self.cmdbase, 'cmrun',
+                # '-f', CELERYEVLOG,
+                # '--frequency={0}'.format(CAMFREQ),
+                # '--settings={0}'.format(self.settings),
+                # '--pythonpath={0}'.format(self.pythonpath),
+               # ]
+        # return subprocess.Popen(args, env=ENV)
+        
+    # def terminate(self):
+        # if self.celeryd and not self.celeryd.poll():
+            # print 'Terminating celeryd...'
+            # self.celeryd.terminate()
+            # self.celeryd.wait()
+        # if self.celeryev and not self.celeryev.poll():
+            # print 'Terminating celeryev...'
+            # self.celeryev.send_signal(signal.SIGINT)
+            # self.celeryev.wait()
+        
+    # def __enter__(self):
+        # try:
+            # print 'Launching celeryd...'
+            # self.celeryd = self._launch_celeryd()
+            # print 'Launching celeryev...'
+            # self.celeryev = self._launch_celeryev()
+        # except Exception:
+            # print '...Error encountered launching celery processes!'
+            # self.terminate()
+            # raise
+        # print '...celeryd and celeryev launched successfully!'
+        
+    # def __exit__(self, exc_type, exc_val, exc_tb):
+        # self.terminate()
+        
+        
+def runtests(tests, verbosity=1, failfast=False):
+    runner = TestRunner(verbosity=verbosity, tests=tests, failfast=failfast)
     runner.run_tests()
 
 
@@ -155,11 +160,17 @@ def get_test_cases():
 
 
 def main(*args, **options):
+    # use default django syncdb handler, instead of, say, South's
+    from django.core import management
+    management._commands['syncdb'] = 'django.core'
+    
     defaultdb = settings.DATABASES['default']
     if not defaultdb.get('TEST_NAME',None):
         raise RuntimeError('The setting DATABASES.TEST_NAME must be defined.')
     if defaultdb['TEST_NAME'] != defaultdb['NAME']:
         raise RuntimeError('The settings DATABASES.TEST_NAME and DATABASE.NAME must be identical.')
+    
+    process.DEFAULT_SETTINGS = settings.SETTINGS_MODULE
     
     testcases = get_test_cases()
     runtests(tests=testcases)

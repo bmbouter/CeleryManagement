@@ -14,7 +14,7 @@ try:
 except ImportError:
     import unittest
 
-from celerymanagementapp.tests_celery import base
+from celerymanagementapp.tests_celery import base, testsuite
 
 #==============================================================================#
 # Test modules...
@@ -36,9 +36,13 @@ for m in _testmodules:
 
 def suite():
     test_suite = unittest.TestSuite()
+    commonproc_testsuite = testsuite.CommonProcSuite()
     for m in _testmodules:
         s = base.autogenerate_testsuite(m.__dict__)
         test_suite.addTest(s)
+        c = base.autogenerate_commonproc_testsuite(m.__dict__)
+        commonproc_testsuite.addTest(c)
+    test_suite.addTest(commonproc_testsuite)
     return test_suite
 
 #==============================================================================#

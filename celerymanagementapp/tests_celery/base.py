@@ -1,7 +1,4 @@
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
+from celerymanagementapp.testutil.unittest import unittest
 
 import re
 import datetime
@@ -42,7 +39,15 @@ class CeleryManagement_TestCaseBase(TestCase):
        should be derived from this (directly or indirectly) so they are picked 
        up by the test loader in __init__.py.
     """
-    pass
+    @classmethod
+    def setUpClass(cls):
+        ##print 'setUpClass()!'
+        pass
+    
+    @classmethod
+    def tearDownClass(cls):
+        ##print 'tearDownClass()!'
+        pass
     
 class CeleryManagement_DBTestCaseBase(CeleryManagement_TestCaseBase):
     """Base TestCase class for all CeleryManagement test cases which access the 
@@ -98,7 +103,9 @@ class CeleryManagement_DBTestCaseBase(CeleryManagement_TestCaseBase):
         # delete all test users
         for user in self.users:
             user.delete()
+            
         
+                
         
 #==============================================================================#
 # Use the following function to generate a TestSuite for a given module.  
@@ -111,7 +118,23 @@ def autogenerate_testsuite(globals):
     loader = unittest.TestLoader()
     for name, val in globals.iteritems():
         if name.endswith('_TestCase') and \
-           issubclass(val, CeleryManagement_TestCaseBase):
+           issubclass(val, CeleryManagement_TestCaseBase) and\
+           not getattr(val, 'no_autoload', None) and\
+           not getattr(val, 'use_default_procs', None):
+            test_suite.addTest(loader.loadTestsFromTestCase(val))
+    return test_suite
+    
+def autogenerate_commonproc_testsuite(globals):
+    """ Generate suite of tests that can share a single celeryd and single 
+        cmrun instance. 
+    """
+    test_suite = unittest.TestSuite()
+    loader = unittest.TestLoader()
+    for name, val in globals.iteritems():
+        if name.endswith('_TestCase') and \
+           issubclass(val, CeleryManagement_TestCaseBase) and\
+           not getattr(val, 'no_autoload', None) and\
+           getattr(val, 'use_default_procs', None):
             test_suite.addTest(loader.loadTestsFromTestCase(val))
     return test_suite
     
