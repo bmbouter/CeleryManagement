@@ -169,7 +169,7 @@ def task_xy_dataview(request):
     
     xyquery = JsonXYQuery(JsonTaskModelMap(), json_request)
     json_result = xyquery.do_query()
-    
+        
     return _json_response(json_result)
 
 def worker_subprocesses_dataview(request, name=None):

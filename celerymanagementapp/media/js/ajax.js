@@ -11,7 +11,7 @@ CMA.Core.ajax = (function() {
                 get_tasks_url: root_url + "task/all/list/",
                 get_workers_url: root_url + "worker/all/list/",
                 tasks_per_worker_url: root_url + "task/all/dispatched/byworker/count/",
-                task_url: root_url + "view/dispatched_tasks/",
+                //task_url: root_url + "view/dispatched_tasks/",
                 pending_tasks_url: root_url + "task/all/dispatched/pending/count/",
                 worker_processes_url: root_url + "worker/all/subprocess/count/",
                 shutdown_worker_url: root_url + "worker/<placeHolder>/shutdown/",
@@ -20,7 +20,7 @@ CMA.Core.ajax = (function() {
                 worker_url: "/celerymanagementapp/view/task/",
                 create_out_of_band_worker_url: root_url + "outofbandworker/",
                 create_provider_url: root_url + "provider/",
-                get_images_url: root_url + "provider/images/",
+                get_images_url: root_url + "provider/images/"
             };
         },
         loadTestUrls = function() {
@@ -40,8 +40,11 @@ CMA.Core.ajax = (function() {
                 chart_data_url: root_url + "chart/enumerate-1.json",
                 create_out_of_band_worker_url: post_root_url + "outofbandworker/",
                 create_provider_url: post_root_url + "provider/",
-                get_images_url: post_root_url + "provider/images/",
+                get_images_url: post_root_url + "provider/images/"
             };
+        },
+        getUrls = function(){
+            return urls;
         },
         getTasks = function(callbackFunction){
             $.getJSON(urls.get_tasks_url, callbackFunction);
@@ -75,7 +78,7 @@ CMA.Core.ajax = (function() {
         };
 
     return {
-        urls: urls,
+        getUrls: getUrls,
         loadUrls: loadUrls,
         loadTestUrls: loadTestUrls,
         getTasks: getTasks,
@@ -87,6 +90,6 @@ CMA.Core.ajax = (function() {
         getDispatchedTasksData: getDispatchedTasksData,
         postCreateOutOfBandWorkerNode: postCreateOutOfBandWorkerNode,
         postCreateProvider: postCreateProvider,
-        postGetImages: postGetImages,
+        postGetImages: postGetImages
     };
 }());
