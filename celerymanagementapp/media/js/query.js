@@ -1,4 +1,4 @@
-CMA.Core.ajax.loadTestUrls();
+CMA.Core.ajax.loadUrls();
         
 var c1 = null;
 var data = null;
