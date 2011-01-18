@@ -9,6 +9,12 @@ var query = null;
 var xhr = null;
 
 $(document).ready(function() {
+    formatter = new Formatter();
+    
+    var q = '{"segmentize":{"field":"worker","method":["all"]},"aggregate":[{"field":"waittime","methods":["average","max","min"]}]}';
+    
+    submit_query(q);
+    
     $(':checkbox').change(function() {
         if($(this).attr('checked')) {
             $(this).siblings('div').show();
@@ -86,14 +92,11 @@ function create_query() {
 }
 
 function submit_query(query) {
-    //$.post(CMA.Core.ajax.urls.query_dispatched_tasks_url, query, format_data);
     CMA.Core.ajax.getDispatchedTasksData(query, format_data);
 }
 
 $(document).ready(function() {
-    formatter = new Formatter();
-    
-    xhr = $.getJSON(CMA.Core.ajax.urls.chart_data_url, format_data);
+    //xhr = $.getJSON(CMA.Core.ajax.urls.chart_data_url, format_data);
 });
 
 function format_data(response) {
