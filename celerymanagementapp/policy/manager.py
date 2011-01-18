@@ -38,7 +38,7 @@ class Registry(object):
         
         msg = 'Found the following policies:\n    '
         if self.data:
-            msg += '\n    '.join(p.name for p in self.data.itervalues())
+            msg += '\n    '.join(e.policy.name for e in self.data.itervalues())
         else:
             msg += '(No policies found.)'
         self.logger.info(msg)

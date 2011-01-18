@@ -20,6 +20,7 @@ class PolicyMain(object):
         self.task_settings = TaskSettingsManager(logger)
         self.event_receiver = Receiver(connection, logger, app=app)
         self.registry = Registry(logger)
+        self.logger.debug('PolicyMain initialized.')
         
     def __enter__(self):
         return self
@@ -30,8 +31,10 @@ class PolicyMain(object):
     def cleanup(self):
         ##print 'cmrun: PolicyMain.cleanup()...'
         self.logger.debug('PolicyMain.cleanup()...')
+        
         self.registry.close()
         self.task_settings.cleanup()
+        
         ##print 'cmrun: PolicyMain.cleanup()... complete.'
         self.logger.debug('PolicyMain.cleanup()... complete.')
         
