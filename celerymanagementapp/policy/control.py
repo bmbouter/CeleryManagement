@@ -14,7 +14,8 @@ def _get_task_class(name):
 
 @Panel.register
 def update_tasks_settings(panel, tasks_settings):
-    print 'policy.control: update_tasks_settings()'
+    panel.logger.debug('policy.control: update_tasks_settings()')
+    ##print 'policy.control: update_tasks_settings()'
     for taskname, settings in tasks_settings.iteritems():
         # TODO: wrap this in try..except so one failure doesn't stop setting all settings.
         taskcls = _get_task_class(taskname)
@@ -25,7 +26,8 @@ def update_tasks_settings(panel, tasks_settings):
 
 @Panel.register
 def get_task_settings(panel, tasknames, setting_names):
-    print 'policy.control: get_task_settings()'
+    panel.logger.debug('policy.control: get_task_settings()')
+    ##print 'policy.control: get_task_settings()'
     allsettings = {}
     for taskname in tasknames:
         taskcls = _get_task_class(taskname)    
@@ -37,7 +39,8 @@ def get_task_settings(panel, tasknames, setting_names):
     
 @Panel.register
 def get_all_task_settings(panel, setting_names):
-    print 'policy.control: get_all_task_settings()'
+    panel.logger.debug('policy.control: get_all_task_settings()')
+    ##print 'policy.control: get_all_task_settings()'
     allsettings = {}
     for taskname in tasks_registry.data:
         ##print 'taskname: {0}'.format(taskname)
@@ -50,7 +53,8 @@ def get_all_task_settings(panel, setting_names):
 
 @Panel.register
 def restore_task_settings(panel, restore_data):
-    print 'policy.control: restore_task_settings()'
+    panel.logger.debug('policy.control: restore_task_settings()')
+    ##print 'policy.control: restore_task_settings()'
     for taskname, (restore, erase) in restore_data.iteritems():
         taskcls = _get_task_class(taskname)
         for attr,v in restore.iteritems():
@@ -64,7 +68,8 @@ def restore_task_settings(panel, restore_data):
 #==============================================================================#
 @Panel.register
 def get_task_attribute(panel, taskname, attrname):
-    print 'policy.control: get_task_attribute()'
+    panel.logger.debug('policy.control: get_task_attribute()')
+    ##print 'policy.control: get_task_attribute()'
     try:
         task = _get_task_class(taskname)
     except KeyError:
@@ -83,7 +88,8 @@ def get_task_attribute(panel, taskname, attrname):
 
 @Panel.register
 def set_task_attribute(panel, tasknames, attrname, value):
-    print 'policy.control: set_task_attribute()'
+    panel.logger.debug('policy.control: set_task_attribute()')
+    ##print 'policy.control: set_task_attribute()'
     if isinstance(tasknames, basestring):
         tasknames = [tasknames]
     for taskname in tasknames:

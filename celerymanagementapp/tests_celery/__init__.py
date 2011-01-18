@@ -9,19 +9,16 @@
     slower than the Django tests that use a sqlite in-memory database.  So any 
     tests that do not need celeryd should use the normal Django tests.
 """
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
 
+from celerymanagementapp.testutil.unittest import unittest
 from celerymanagementapp.tests_celery import base, testsuite
 
 #==============================================================================#
 # Test modules...
-from celerymanagementapp.tests_celery import misc, dataviews
+from celerymanagementapp.tests_celery import misc, dataviews, policy
 
 # List of all test modules containing tests.  
-_testmodules = [misc, dataviews]
+_testmodules = [misc, dataviews, policy]
 
 # Import all test cases so they appear in this module.  This appears to be 
 # needed for Hudson automated testing.  Do this instead of just: 

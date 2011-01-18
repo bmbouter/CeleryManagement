@@ -37,7 +37,9 @@ class Receiver(EventReceiver):
     def on_worker_online(self, event):
         hostname = event.get('hostname')
         if hostname:
-            print 'policy.signals: Worker started: {0}'.format(hostname)
+            ##print 'policy.signals: Worker started: {0}'.format(hostname)
+            self.logger.debug(
+                'policy.signals.Receiver: Worker started: {0}'.format(hostname))
             on_worker_started(hostname)
         
 

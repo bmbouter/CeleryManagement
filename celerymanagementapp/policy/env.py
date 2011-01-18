@@ -46,8 +46,8 @@ GLOBALS = { 'datetime': ModuleWrapper(datetime, exclude='datetime_CAPI'),
 LOCALS = {}
 
 SCHEDULE_GLOBALS = {}
-SCHEDULE_LOCALS = {'crontab': crontab}
-CONDITION_GLOBALS = {}
+SCHEDULE_LOCALS = { 'crontab': crontab, }
+CONDITION_GLOBALS = { 'stats': api.StatsApi(), }
 CONDITION_LOCALS = {}
 APPLY_GLOBALS = { 'tasks': api.TasksCollectionApi(), 
                   'workers': api.WorkersCollectionApi(), 

@@ -34,6 +34,14 @@ class Registry(object):
     def __init__(self, logger):
         self.logger = logger
         self.data = {}
+        self.refresh()
+        
+        msg = 'Found the following policies:\n    '
+        if self.data:
+            msg += '\n    '.join(p.name for p in self.data.itervalues())
+        else:
+            msg += '(No policies found.)'
+        self.logger.info(msg)
         
     def __iter__(self):
         return self.data.itervalues()
@@ -132,7 +140,6 @@ def restore_task_settings(restore_data):
                   arguments={'restore_data': restore_data})
 
 
-
 class TaskSettings(object):
     def __init__(self, task_name, initial_settings):
         self.name = task_name
@@ -173,12 +180,25 @@ class TaskSettingsManager(object):
         
     def _initialize_settings(self):
         settings = get_all_task_settings()
+        found_tasks = []
         for taskname, tasksettings in settings.iteritems():
             if taskname=='error':
-                print 'cmrun: ERROR: {0}'.format(tasksettings)
-            print 'cmrun: Found existing task: {0}'.format(taskname)
+                self.logger.error(
+                    'Error reading task settings: {0}'.format(tasksettings))
+                continue
+                ##print 'cmrun: ERROR: {0}'.format(tasksettings)
+            found_tasks.append(taskname)
+            ##print 'cmrun: Found existing task: {0}'.format(taskname)
             ts = TaskSettings(taskname, settings)
             self.data[taskname] = ts
+        if found_tasks:
+            msg = 'Found existing tasks:\n    '
+            msg += '\n    '.join(found_tasks)
+            self.logger.info(msg)
+        else:
+            msg = 'No existing tasks found.  Is celeryd running?'
+            self.logger.warn(msg)
+            
         
     def on_tasks_modified(self, tasknames, setting_name, value):
         for taskname in tasknames:
@@ -197,12 +217,21 @@ class TaskSettingsManager(object):
         for taskname,settings in new_task_settings.iteritems():
             ts = TaskSettings(taskname, settings)
             self.data[taskname] = ts
+        msg = 'Worker "{0}" has started.  Found the following tasks:\n    '.format(workername)
+        msg += '\n    '.join((name + ('*' if name in new_tasknames else '')) for name in tasknames)
+        self.logger.info(msg)
                     
     def restore(self):
         restore_data = {}
         for taskname,settings in self.data.iteritems():
             restore,erase = settings.restore()
             restore_data[taskname] = (restore, erase)
+        msg = 'Restoring settings for the following tasks:\n    '
+        if restore_data:
+            msg += '\n    '.join(restore_data.iterkeys())
+        else:
+            msg += '(No tasks found.)'
+        self.logger.info(msg)
         restore_task_settings(restore_data)
             
         

@@ -111,13 +111,15 @@ TASKAPI_SETTINGS_CONFIG = [
 
 #==============================================================================#
 class ItemApi(object):
+    assignable_names = set()
+    
     def __init__(self, names=None):
         self.names = names or []
         self._locked = True
         
     def __setattr__(self, name, val):
-        if getattr(self, '_locked', False):
-            raise ApiError('Cannot assign to attribute: {0}'.format(name))
+        if getattr(self, '_locked', False) and name not in self.assignable_names:
+            raise ApiError('Cannot assign to item attribute: {0}'.format(name))
         object.__setattr__(self, name, val)
     
 
@@ -153,7 +155,7 @@ class ItemsCollectionApi(object):
         
     def __setattr__(self, name, val):
         if getattr(self, '_locked', False):
-            raise ApiError('Cannot assign to attribute: {0}'.format(name))
+            raise ApiError('Cannot assign to item collection attribute: {0}'.format(name))
         object.__setattr__(self, name, val)
 
 #==============================================================================#
@@ -198,7 +200,7 @@ class TaskSetting(object):
             tmpl = 'Error occurred while setting task attribute: {0}.'
             msg = tmpl.format(self.attrname)
             raise ApiError(msg)
-        signals.on_task_modified(inst.names, setting_name, value)
+        signals.on_task_modified(inst.names, self.attrname, value)
         
         
 class TaskApiMeta(type):
@@ -213,6 +215,7 @@ class TaskApi(ItemApi):
     __metaclass__ = TaskApiMeta
     
     settings_config = TASKAPI_SETTINGS_CONFIG
+    assignable_names = set(t[0] for t in settings_config)
     
     def __init__(self, names=None):
         if not names:
@@ -271,6 +274,8 @@ class WorkerSetting(object):
         raise ApiError('Cannot set attribute')
 
 class WorkerApi(ItemApi):
+    assignable_names = set()
+    
     def __init__(self, names=None):
         if not names:
             names = util.get_all_worker_names()

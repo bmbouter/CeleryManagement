@@ -1,3 +1,5 @@
+import time
+
 from celerymanagementapp.testutil.unittest import unittest
 from celerymanagementapp.testutil import process
 
@@ -45,6 +47,7 @@ class CommonProcSuite(ScopedTestSuite):
             self.celeryd = process.DjCeleryd(log='celeryd.log.txt')
             print 'Launching cmrun...'
             self.cmrun = process.CMRun(freq=0.1, log='celeryev.log.txt')
+            time.sleep(2.0)
         except Exception:
             print 'Error encountered while starting celeryd and/or cmrun.'
             if self.celeryd and not self.celeryd.is_stopped():
