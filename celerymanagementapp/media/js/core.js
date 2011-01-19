@@ -121,6 +121,7 @@ CMA.Core.setupEvents = function(){
 
 CMA.Core.setupFormEvents = function(){
     var formReturn = function(data){
+        console.log(data);
         var setText = function(){
                 var errLength = data.failure[i].error.length,
                     text = "";
@@ -155,6 +156,12 @@ CMA.Core.setupFormEvents = function(){
     $('#blankOutOfBandForm').ajaxForm({
         dataType: 'json',
         url: CMA.Core.ajax.getUrls().create_out_of_band_worker_url,
+        success: formReturn
+    });
+    
+    $('#blankProviderForm').ajaxForm({
+        dataType: 'json',
+        url: CMA.Core.ajax.getUrls().create_provider_url,
         success: formReturn
     });
 

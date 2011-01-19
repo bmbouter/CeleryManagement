@@ -1,12 +1,13 @@
-        <h1>
-            Provider
-        </h1>
-        <div class="fieldWrapper">
-            Step 1: Enter provider information, then click "Get Images" to retrieve availible images.
-        </div>
-        <form method="POST" enctype="multipart/form-data" class="providerForm" id="blankProviderForm" action="/celerymanagementapp/provider/">
-            {% csrf_token %}
-            {% for field in provider_form %}
+    <h1>
+        Provider
+    </h1>
+    <div class="fieldWrapper">
+        Step 1: Enter provider information, then click "Get Images" to retrieve availible images.
+    </div>
+    <form method="POST" enctype="multipart/form-data" class="providerForm" id="blankProviderForm" action="/celerymanagementapp/provider/">
+        {% csrf_token %}
+        {% for field in provider.provider_form %}
+        {% if not provider.provider %}
             {% if forloop.counter == 4 %}
             <div class="fieldWrapper hidden" id="providerStep2">
             </div>
@@ -16,16 +17,19 @@
                 Step 3: Enter configuration information for your image.
             </div>
             {% endif %}
-            <div class="fieldWrapper {% if forloop.counter > 3 %}hidden{% endif %}">
-                <div class="field">
-                    {{ field.label_tag }} {{ field }}
-                    <span class="errorWrapper" id="{{ field.html_name }}_error"></span>
-                    {{ field.errors }}
-                </div>
+        {% endif %}
+        <div class="fieldWrapper {% if not provider.provider %}{% if forloop.counter > 3 %}hidden{% endif %}{% endif %}">
+            <div class="field">
+                {{ field.label_tag }} {{ field }}
+                <span class="errorWrapper" id="{{ field.html_name }}_error"></span>
+                {{ field.errors }}
             </div>
-            {% if forloop.counter == 3 %}
+        </div>
+        {% if forloop.counter == 3 %}
+        {% if not provider.provider %}
             <button type="button" class="submitButton click" id="getImagesButton">Get Images</button>
-            {% endif %}
-            {% endfor %}
-            <button type="button" class="submitButton hidden click" id="submitProviderButton">Create</button>
-        </form>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+        <button class="submitButton hidden click" id="submitProviderButton">Create</button>
+    </form>
