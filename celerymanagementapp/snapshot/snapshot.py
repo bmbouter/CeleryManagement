@@ -1,4 +1,5 @@
 import sys
+import logging
 from datetime import datetime, timedelta
 
 from django.db import transaction
@@ -105,14 +106,15 @@ def evcam(camera, freq=1.0, maxrate=None, loglevel=0,
         loglevel = LOG_LEVELS[loglevel.upper()]
     logger = app.log.setup_logger(loglevel=loglevel,
                                   logfile=logfile,
-                                  name="celery.evcam")
+                                  name="cm.evcam")
+    app.log.redirect_stdouts_to_logger(logger, loglevel=logging.INFO)
     logger.info(
-        "-> cmrun: Taking snapshots with %s (every %s secs.)\n" % (
+        "-> cm.evcam: Taking snapshots with %s (every %s secs.)\n" % (
             camera, freq))
     
     state = State()
-    cam = instantiate(camera, state, app=app,
-                      freq=freq, maxrate=maxrate, logger=logger)
+    cam = instantiate(camera, state, app=app, freq=freq, maxrate=maxrate, 
+                      logger=logger)
     cam.install()
     conn = app.broker_connection()
     recv = app.events.Receiver(conn, handlers={"*": state.event})
@@ -122,8 +124,8 @@ def evcam(camera, freq=1.0, maxrate=None, loglevel=0,
         except KeyboardInterrupt:
             raise SystemExit
     finally:
-        import traceback
-        traceback.print_exc()
+        #import traceback
+        #traceback.print_exc()
         cam.cancel()
         conn.close()
 

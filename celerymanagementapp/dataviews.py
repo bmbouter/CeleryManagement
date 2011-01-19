@@ -29,8 +29,8 @@ from celerymanagementapp.jsonquery.xyquery import JsonXYQuery
 from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 
 from celerymanagementapp import tasks, jsonutil
-from celerymanagementapp.models import OutOfBandWorkerNode, RegisteredTaskType, Provider
-from celerymanagementapp.models import TaskDemoGroup
+from celerymanagementapp.models import OutOfBandWorkerNode, RegisteredTaskType
+from celerymanagementapp.models import TaskDemoGroup, Provider
 from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
 
 #==============================================================================#

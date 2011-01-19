@@ -328,8 +328,26 @@ class TaskDemoGroup(models.Model):
     
     def __unicode__(self):
         return u"<{0}> {1} {2}".format(self.uuid, self.name, self.timestamp)
-               
+
+
+class PolicyModel(models.Model):
+    """ Model for Policy objects. """
+    name =          models.CharField(max_length=100, null=False, unique=True)
+    modified =      models.DateTimeField(null=True, default=None, blank=True)
+    enabled =       models.BooleanField(default=False)
+    last_run_time = models.DateTimeField(null=True, default=None, blank=True)
+    source =        models.TextField(default="")
+    # add field which keeps error information
     
+    def __unicode__(self):
+        return u"<{0}>  last run: {1}  enabled: {2}".format(self.name, self.last_run_time, self.enabled)
+        
+    def save(self, *args, **kwargs):
+        # convert Windows newlines to Unix newlines
+        self.source = self.source.replace('\r\n','\n')
+        super(PolicyModel, self).save(*args, **kwargs)
+
+
 
 class TestModel(models.Model):
     """A model solely for use in testing."""

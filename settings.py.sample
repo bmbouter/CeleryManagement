@@ -3,8 +3,10 @@ import sys
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# List of modules to import when celery starts.
-CELERY_IMPORTS = ("tasks", )
+# List of modules to import when celery starts. CeleryManagement requires the   
+# celerymanagementapp.celery_imports item as shown here.  Of course, add other 
+# entries needed for your app (or others).
+CELERY_IMPORTS = ("celerymanagementapp.celery_imports",)
 
 ## Result store settings.
 CELERY_RESULT_BACKEND = "amqp"
