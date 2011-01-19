@@ -15,7 +15,7 @@ SOUTH_TESTS_MIGRATE = False
 
 # Make sure CELERY_IMPORTS is defined.  Then add test tasks module to it.
 CELERY_IMPORTS = globals().get('CELERY_IMPORTS',())
-CELERY_IMPORTS = CELERY_IMPORTS + ('celerymanagementapp.testutil.tasks',)
+##CELERY_IMPORTS = CELERY_IMPORTS + ('celerymanagementapp.testutil.tasks',)
 
 DATABASES = {
     'default': {
