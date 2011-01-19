@@ -73,23 +73,12 @@ class PolicyMain(object):
             self.logger.debug('Running ready policies...')
             try:
                 for entry in self.registry:
-                    try:
-                        is_due, next_run_delta = entry.is_due()
-                        if is_due:
-                            self.run_policy(entry.policy)
-                            entry.set_last_run_time(now)
-                            modified_ids.append(entry.policy.id)
+                    was_run, next_run_delta = self.maybe_run_policy(entry)
+                    if was_run:
+                        entry.set_last_run_time(now)
+                        modified_ids.append(entry.policy.id)
+                    if next_run_delta:
                         run_deltas.append(next_run_delta)
-                    except (KeyboardInterrupt, SystemExit):
-                        # Do not ignore these exceptions.
-                        raise
-                    except Exception:
-                        import traceback
-                        msg = 'Exception occurred while running policy: ' 
-                        msg += '{0}\n'.format(entry.policy.name)
-                        msg += 'The following is the traceback:\n'
-                        msg += traceback.format_exc()
-                        self.logger.error(msg)
             finally:
                 self.logger.debug('Finished running ready policies.')
                 now = datetime.datetime.now()
@@ -100,6 +89,26 @@ class PolicyMain(object):
             self.logger.warn(msg)
             run_deltas.append(MIN_LOOP_SLEEP_TIME)
         return min(run_deltas+[MAX_LOOP_SLEEP_TIME])
+        
+    def maybe_run_policy(self, entry):
+        was_run = False
+        try:
+            is_due, next_run_delta = entry.is_due()
+            if is_due:
+                self.run_policy(entry.policy)
+                was_run = True
+        except (KeyboardInterrupt, SystemExit):
+            # Do not ignore these exceptions.
+            raise
+        except Exception:
+            import traceback
+            msg = 'Exception occurred while running policy: ' 
+            msg += '{0}\n'.format(entry.policy.name)
+            msg += 'The following is the traceback:\n'
+            msg += traceback.format_exc()
+            self.logger.error(msg)
+            next_run_delta = 0
+        return (was_run, next_run_delta)
             
     def run_policy(self, policyobj):
         name = policyobj.name
