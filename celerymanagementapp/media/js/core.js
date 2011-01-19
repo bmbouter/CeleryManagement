@@ -82,21 +82,6 @@ CMA.Core.setupEvents = function(){
         }
     );
 
-    $('.menuImg').hover(
-        function() {
-            var elem = $(this);
-            var img = document.getElementById(elem.attr("id").split("Img")[0]);
-            $(elem).toggleClass("menuItemHover leftRounded");
-            $(img).toggleClass("menuItemHover rightRounded");
-        },
-        function() {
-            var elem = $(this);
-            var img = document.getElementById(elem.attr("id").split("Img")[0]);
-            $(elem).toggleClass("menuItemHover leftRounded");
-            $(img).toggleClass("menuItemHover rigtRounded");
-        }
-    );
-
     var resizer = (function() {
             var wind = $(window),
                 container = $('#container'),

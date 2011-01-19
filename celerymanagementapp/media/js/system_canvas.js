@@ -21,13 +21,14 @@ CMA.SystemDisplay.refresh = function(){
 
 CMA.SystemDisplay.Controller = function(){
     var canvasElement = $('#systemCanvas'),
-        canvas = $('#systemCanvas')[0];
+        canvas = $('#systemCanvas')[0],
+        ajax = CMA.Core.ajax;
         canvas.width = $(window).width() - $('#dummy').css("width").split("px")[0];
 
     var modelFactory = CMA.SystemDisplay.ModelFactory(canvas);
 
-    CMA.Core.ajax.getTasks(modelFactory.createTasks);
-    CMA.Core.ajax.getWorkers(modelFactory.createWorkers);
+    ajax.getTasks(modelFactory.createTasks);
+    ajax.getWorkers(modelFactory.createWorkers);
    
     var viewer = CMA.SystemDisplay.Viewer(modelFactory, canvas, canvasElement),
         systemEventHandler = CMA.SystemDisplay.EventHandler(canvasElement, viewer, modelFactory);
@@ -41,6 +42,7 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
         tasksSet = false,
         canvasHeight = 0,
         connectorWeight = 0,
+        ajax = CMA.Core.ajax,
             
         createWorkers = function(data){
             var y = 40,
@@ -58,9 +60,10 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
                 canvasHeight = y;
             }
 
+            ajax.getWorkerProcesses(setWorkerProcesses);
             workersSet = true;
             if( tasksSet ){
-                CMA.Core.ajax.getTasksPerWorker(createConnectors);
+                ajax.getTasksPerWorker(createConnectors);
             }
         },
 
@@ -80,9 +83,10 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
                 canvasHeight = y;
             }
 
+            ajax.getPendingTasks(setPendingTasks);
             tasksSet = true;
             if( workersSet ){
-                CMA.Core.ajax.getTasksPerWorker(createConnectors);
+                ajax.getTasksPerWorker(createConnectors);
             }
         },
 
@@ -105,9 +109,6 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
                     }
                 }
             }
-
-            CMA.Core.ajax.getPendingTasks(setPendingTasks);
-            CMA.Core.ajax.getWorkerProcesses(setWorkerProcesses);
         },
 
         setPendingTasks = function(data){
@@ -179,11 +180,12 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
         },
 
         redraw = function(){
-            var workers, worker, item;
+            var workers, worker, item, connectors, connector;
             canvas.width = $(window).width() - dummyWidth - 20;
             
             if( $(window).width() > $('#container').css("min-width").split("px")[0] ){
                 workers = modelFactory.getWorkers();
+                connectors = modelFactory.getConnectors();
                 for( item in workers ){
                     if( workers.hasOwnProperty(item) ){
                         worker = workers[item];
@@ -191,6 +193,7 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
                         worker.xCenter = (worker.width / 2) + worker.x;
                     }
                 }
+                //CMA.Core.ajax.getTasksPerWorker(createConnectors);
             }
             draw();
         },
@@ -677,7 +680,7 @@ CMA.SystemDisplay.Worker = function(y, canvasWidth, name, active){
 };
 
 CMA.SystemDisplay.Connector = function(task, worker, numTasks){
-    var  x1 = task.xCenter + (task.width / 2),
+    var x1 = task.xCenter + (task.width / 2),
         y1 = task.yCenter,
         x2 = worker.xCenter - (worker.width / 2),
         y2 = worker.yCenter,
