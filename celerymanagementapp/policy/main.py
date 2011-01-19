@@ -67,41 +67,45 @@ class PolicyMain(object):
         now = datetime.datetime.now()
         modified_ids = []
         run_deltas = []
-        # TODO: put try block on inside of loop, so we can continue with other 
-        # policies if an exception is thrown.
         
         # Only run policies if there are workers.
         if util.get_all_worker_names():
             self.logger.debug('Running ready policies...')
-            ##print 'cmrun: Running ready policies...'
             try:
                 for entry in self.registry:
-                    is_due, next_run_delta = entry.is_due()
-                    if is_due:
-                        self.run_policy(entry.policy)
-                        entry.set_last_run_time(now)
-                        modified_ids.append(entry.policy.id)
-                    run_deltas.append(next_run_delta)
+                    try:
+                        is_due, next_run_delta = entry.is_due()
+                        if is_due:
+                            self.run_policy(entry.policy)
+                            entry.set_last_run_time(now)
+                            modified_ids.append(entry.policy.id)
+                        run_deltas.append(next_run_delta)
+                    except (KeyboardInterrupt, SystemExit):
+                        # Do not ignore these exceptions.
+                        raise
+                    except Exception:
+                        import traceback
+                        msg = 'Exception occurred while running policy: ' 
+                        msg += '{0}\n'.format(entry.policy.name)
+                        msg += 'The following is the traceback:\n'
+                        msg += traceback.format_exc()
+                        self.logger.error(msg)
             finally:
                 self.logger.debug('Finished running ready policies.')
-                ##print 'cmrun: Finished running ready policies.'
                 now = datetime.datetime.now()
                 for id in modified_ids:
                     self.registry.save(id, now)
         else:
-            self.logger.warn(
-                'Not running policies -- no workers are available.')
-            ##print 'cmrun: Not running policies -- no workers are available.'
+            msg = 'Not running policies -- no workers are available.'
+            self.logger.warn(msg)
             run_deltas.append(MIN_LOOP_SLEEP_TIME)
         return min(run_deltas+[MAX_LOOP_SLEEP_TIME])
             
     def run_policy(self, policyobj):
-        ##print 'cmrun: Running policy "{0}"'.format(policyobj.name)
-        self.logger.debug(
-            'Running policy "{0}" - condition'.format(policyobj.name))
+        name = policyobj.name
+        self.logger.debug('Checking policy {0} (condition)'.format(name))
         if policyobj.run_condition():
-            self.logger.info(
-                'Running policy "{0}" - apply'.format(policyobj.name))
+            self.logger.info('Running policy {0} (apply)'.format(name))
             policyobj.run_apply()
         
         

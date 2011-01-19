@@ -57,7 +57,7 @@ def get_policy_options(options):
     newopts = {}
     if 'loglevel' in options:
         newopts['loglevel'] = options['loglevel']
-    if 'logfile' in options:
+    if 'logfile' in options and options['logfile']:
         newopts['logfile'] = options['logfile']+'.policy'
     return newopts
     
