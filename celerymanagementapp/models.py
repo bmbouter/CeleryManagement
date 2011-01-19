@@ -160,10 +160,16 @@ class Provider(AbstractWorkerNode):
     image_id = models.CharField(_(u"image id"),
             max_length=64)
 
-    def clean(self):
+    def are_credentials_valid(self):
+        """Returns true if Provider credentials are valid.  False otherwise."""
         try:
             conn = self.conn
-        except libcloud.types.InvalidCredsError:
+            return True
+        except (libcloud.types.InvalidCredsError, AttributeError):
+            return False
+
+    def clean(self):
+        if not self.are_credentials_valid():
             from django.core.exceptions import ValidationError
             raise ValidationError("Invalid Provider Credentials")
         if self._get_image_obj() is None:
@@ -177,7 +183,7 @@ class Provider(AbstractWorkerNode):
         """Returns an object of type libcloud.base.NodeImage looked up by id or name"""
         images = self.conn.list_images()
         for image in images:
-            if self.image_id == image.id or self.image_id == image.name:
+            if self.image_id == image.id:
                 return image
 
     @property

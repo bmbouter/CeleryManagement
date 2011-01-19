@@ -207,6 +207,10 @@ def provider_images(request):
     p = Provider(provider_user_id=request.POST['provider_user_id'],
             provider_key=request.POST['provider_key'],
             provider_name=request.POST['provider_name'])
+    if not p.are_credentials_valid():
+        failed = { 'failure' : 'Invalid Provider Credentials'}
+        json = simplejson.dumps(failed)
+        return HttpResponse(json)
     images = p.conn.list_images()
     json_images = []
     [json_images.append({'name': item.name, 'id': item.id}) for item in images]
