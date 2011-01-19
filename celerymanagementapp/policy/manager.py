@@ -201,6 +201,7 @@ class TaskSettingsManager(object):
             
         
     def on_tasks_modified(self, tasknames, setting_name, value):
+        self.logger.debug('Tasks modified:: {0}: {1} = {2}'.format(','.join(tasknames), setting_name, value))
         for taskname in tasknames:
             if taskname in self.data:
                 self.data[taskname].set(setting_name, value)

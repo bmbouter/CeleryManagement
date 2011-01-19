@@ -4,8 +4,9 @@ from celery.events import EventReceiver
 class Signal(object):
     """ Simple 'signal' class for dispatching and handling in-process events. 
     """
-    def __init__(self):
+    def __init__(self, name=None):
         self.handlers = set()
+        self.name = name
         
     def register(self, handler):
         self.handlers.add(handler)
@@ -14,11 +15,13 @@ class Signal(object):
         self.handlers.discard(handler)
         
     def __call__(self, *args, **kwargs):
+        if self.name:
+            print 'Activated signal: {0} ({1})'.format(self.name, len(self.handlers))
         for handler in self.handlers:
             handler(*args, **kwargs)
 
-on_task_modified = Signal()
-on_worker_started = Signal()
+on_task_modified = Signal('on_task_modified')
+on_worker_started = Signal('on_worker_started')
 
 #==============================================================================#
 class Receiver(EventReceiver):
