@@ -51,10 +51,58 @@ $(document).ready(function() {
             );
         }
     });
+    
+    $('#filter_option').change(function() {
+        var field = $('#filter_arg2');
+        
+        if($(this).val() === 'range') {
+            field.show().next().show();
+        } else {
+            field.hide().next().hide();
+        } 
+    });
+    
+    $('#exclude_option').change(function() {
+        var field = $('#exclude_arg2');
+        
+        if($(this).val() === 'range') {
+            field.show().next().show();
+        } else {
+            field.hide().next().hide();
+        }
+    });
 });
 
 function create_query() {
     var object = { };
+    
+    if($('#filter').attr('checked')) {
+        object.filter = [[ ]];
+        
+        $('#filter_options').children('.fields').children().each(function(i, child) {
+            if($(child).parent().css('display') !== 'none') {
+                if(parseFloat($(child).val())) {
+                    object.filter[0].push(parseFloat($(child).val()));
+                } else {
+                    object.filter[0].push($(child).val());
+                }
+            }
+        });
+    }
+    
+    if($('#exclude').attr('checked')) {
+        object.exclude = [[ ]];
+        
+        $('#exclude_options').children('.fields').children().each(function(i, child) {
+            if($(child).parent().css('display') !== 'none') {
+                if(parseFloat($(child).val())) {
+                    object.exclude[0].push(parseFloat($(child).val()));
+                } else {
+                    object.exclude[0].push($(child).val());
+                }
+            }
+        });
+    }
     
     if($('#segmentize').attr('checked')) {
         object.segmentize = { };
