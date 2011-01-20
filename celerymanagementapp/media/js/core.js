@@ -82,21 +82,6 @@ CMA.Core.setupEvents = function(){
         }
     );
 
-    $('.menuImg').hover(
-        function() {
-            var elem = $(this);
-            var img = document.getElementById(elem.attr("id").split("Img")[0]);
-            $(elem).toggleClass("menuItemHover leftRounded");
-            $(img).toggleClass("menuItemHover rightRounded");
-        },
-        function() {
-            var elem = $(this);
-            var img = document.getElementById(elem.attr("id").split("Img")[0]);
-            $(elem).toggleClass("menuItemHover leftRounded");
-            $(img).toggleClass("menuItemHover rigtRounded");
-        }
-    );
-
     var resizer = (function() {
             var wind = $(window),
                 container = $('#container'),
@@ -121,6 +106,7 @@ CMA.Core.setupEvents = function(){
 
 CMA.Core.setupFormEvents = function(){
     var formReturn = function(data){
+        console.log(data);
         var setText = function(){
                 var errLength = data.failure[i].error.length,
                     text = "";
@@ -155,6 +141,12 @@ CMA.Core.setupFormEvents = function(){
     $('#blankOutOfBandForm').ajaxForm({
         dataType: 'json',
         url: CMA.Core.ajax.getUrls().create_out_of_band_worker_url,
+        success: formReturn
+    });
+    
+    $('#blankProviderForm').ajaxForm({
+        dataType: 'json',
+        url: CMA.Core.ajax.getUrls().create_provider_url,
         success: formReturn
     });
 
@@ -255,6 +247,20 @@ CMA.Core.providerCreation = function() {
         providerStep2.text("Please wait while we determine the availible images...");
         providerStep2.show();
         CMA.Core.ajax.postGetImages(handleImages);
+    });
+    
+    $('#viewProvider').click(function(){
+        //$('#submitProviderButton').text("Close");
+        $('#providerFormWrapper').animate({
+                height: "toggle"
+            },
+            500,
+            function(){}
+        );
+    });
+
+    $('.deleteInstance').click(function() {
+        $(this).parent().remove();
     });
 
 };

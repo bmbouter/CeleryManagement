@@ -6,13 +6,16 @@ from celeryconfig import *
 # here.                                                                        #
 #==============================================================================#
 
-if CELERYMANAGEMENT_USING_HUDSON:
+if globals().get('CELERYMANAGEMENT_USING_HUDSON'):
     TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
     INSTALLED_APPS = INSTALLED_APPS + ('django_nose',)
+    
+# Disable South's migrations when running tests
+SOUTH_TESTS_MIGRATE = False
 
 # Make sure CELERY_IMPORTS is defined.  Then add test tasks module to it.
 CELERY_IMPORTS = globals().get('CELERY_IMPORTS',())
-CELERY_IMPORTS = CELERY_IMPORTS + ('celerymanagementapp.testutil.tasks',)
+##CELERY_IMPORTS = CELERY_IMPORTS + ('celerymanagementapp.testutil.tasks',)
 
 DATABASES = {
     'default': {

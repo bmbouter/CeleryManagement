@@ -160,10 +160,16 @@ class Provider(AbstractWorkerNode):
     image_id = models.CharField(_(u"image id"),
             max_length=64)
 
-    def clean(self):
+    def are_credentials_valid(self):
+        """Returns true if Provider credentials are valid.  False otherwise."""
         try:
             conn = self.conn
-        except libcloud.types.InvalidCredsError:
+            return True
+        except (libcloud.types.InvalidCredsError, AttributeError):
+            return False
+
+    def clean(self):
+        if not self.are_credentials_valid():
             from django.core.exceptions import ValidationError
             raise ValidationError("Invalid Provider Credentials")
         if self._get_image_obj() is None:
@@ -177,7 +183,7 @@ class Provider(AbstractWorkerNode):
         """Returns an object of type libcloud.base.NodeImage looked up by id or name"""
         images = self.conn.list_images()
         for image in images:
-            if self.image_id == image.id or self.image_id == image.name:
+            if self.image_id == image.id:
                 return image
 
     @property
@@ -322,8 +328,26 @@ class TaskDemoGroup(models.Model):
     
     def __unicode__(self):
         return u"<{0}> {1} {2}".format(self.uuid, self.name, self.timestamp)
-               
+
+
+class PolicyModel(models.Model):
+    """ Model for Policy objects. """
+    name =          models.CharField(max_length=100, null=False, unique=True)
+    modified =      models.DateTimeField(null=True, default=None, blank=True)
+    enabled =       models.BooleanField(default=False)
+    last_run_time = models.DateTimeField(null=True, default=None, blank=True)
+    source =        models.TextField(default="")
+    # add field which keeps error information
     
+    def __unicode__(self):
+        return u"<{0}>  last run: {1}  enabled: {2}".format(self.name, self.last_run_time, self.enabled)
+        
+    def save(self, *args, **kwargs):
+        # convert Windows newlines to Unix newlines
+        self.source = self.source.replace('\r\n','\n')
+        super(PolicyModel, self).save(*args, **kwargs)
+
+
 
 class TestModel(models.Model):
     """A model solely for use in testing."""

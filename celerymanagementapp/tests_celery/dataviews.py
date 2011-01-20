@@ -5,8 +5,9 @@ from celerymanagementapp.tests_celery import base
 
 
 class WorkerSubprocessesDataview_TestCase(base.CeleryManagement_DBTestCaseBase):
+    use_default_procs = True
     def test_basic(self):
-        url = urlreverse('celerymanagementapp.dataviews.worker_subprocesses_dataview')
+        url = urlreverse('celerymanagementapp.dataviews.worker_subprocesses_dataview', kwargs={'name':'all'})
         
         response = self.client.get(url)
         output = json.loads(response.content)
@@ -16,8 +17,9 @@ class WorkerSubprocessesDataview_TestCase(base.CeleryManagement_DBTestCaseBase):
         
 
 class PendingTaskCountDataview_TestCase(base.CeleryManagement_DBTestCaseBase):
+    use_default_procs = True
     def test_basic(self):
-        url = urlreverse('celerymanagementapp.dataviews.pending_task_count_dataview')
+        url = urlreverse('celerymanagementapp.dataviews.pending_task_count_dataview', kwargs={'name':'all'})
         
         response = self.client.get(url)
         output = json.loads(response.content)
@@ -26,8 +28,9 @@ class PendingTaskCountDataview_TestCase(base.CeleryManagement_DBTestCaseBase):
         self.assertTrue(all(isinstance(x,int) for x in output.itervalues()))
         
 class TasksPerWorkerDataview_TestCase(base.CeleryManagement_DBTestCaseBase):
+    use_default_procs = True
     def test_basic(self):
-        url = urlreverse('celerymanagementapp.dataviews.tasks_per_worker_dataview')
+        url = urlreverse('celerymanagementapp.dataviews.tasks_per_worker_dataview', kwargs={'name':'all'})
         
         response = self.client.get(url)
         output = json.loads(response.content)

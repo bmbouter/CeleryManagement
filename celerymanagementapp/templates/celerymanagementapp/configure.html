@@ -2,11 +2,13 @@
 
 {% block content %}
 <div id="configurationManagement">
-    {% if CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static" %}
+    {% if CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "passive" %}
+        {% include "celerymanagementapp/configure_passive.html" %}
+    {% else %}{% if CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static" %}
         {% include "celerymanagementapp/configure_outofbandworker.html" %}
     {% else %}{% if CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "dynamic" %}
         {% include "celerymanagementapp/configure_provider.html" %}
-    {% endif %}{% endif %}
+    {% endif %}{% endif %}{% endif %}
 </div>
 
 {% endblock content %}

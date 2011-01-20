@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import simplejson
 
 from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
-from celerymanagementapp.models import OutOfBandWorkerNode, Provider
+from celerymanagementapp.models import OutOfBandWorkerNode, Provider, InBandWorkerNode
 
 def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
@@ -38,18 +38,24 @@ def configure(request):
         context["outofbandworkernode_form"] = out_of_band_worker_node_form
         context["outofbandworkernodes"] = OutOfBandWorkers
     elif settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "dynamic":
-        provider_form = ProviderForm()
-        providers = []
+        provider = Provider(provider_user_id="test456YUser", celeryd_username="Test Username", 
+                            provider_name=Provider.PROVIDER_CHOICES[3][1], image_id="6sd6aF8dadSSa3")
+        #provider = None
+        providers = {}
+        if provider:
+            provider_form = ProviderForm(instance=provider)
+            providers["provider_form"] = provider_form
+            providers["provider"] = provider
+        else:
+            provider_form = ProviderForm()
+            providers["provider_form"] = provider_form
 
-        for i in range(0,10):
-            provider = Provider(provider_user_id="test456YUser", celeryd_username="Test Username", 
-                                provider_name=Provider.PROVIDER_CHOICES[i][1], image_id="6sd6aF8dadSSa3")
-            provider.id = i;
-            providerForm = ProviderForm(instance=provider)
-            providers.append({ "provider" : provider, "providerForm" : providerForm })
+        inbandnode = InBandWorkerNode(instance_id="adsfatte22d")
+        inbandnode1 = InBandWorkerNode(instance_id="nfgttadfd")
+        inbandnode2 = InBandWorkerNode(instance_id="nk^3764646d")
 
-        context["provider_form"] = provider_form
-        context["providers"] = providers
+        context["provider"] = providers
+        context["instances"] = [inbandnode, inbandnode1, inbandnode2]
 
     return render_to_response('celerymanagementapp/configure.html',
             context,
@@ -139,7 +145,7 @@ def task_demo_test_dataview(request):
     from django.template import RequestContext
     
     name = 'celerymanagementapp.testutil.tasks.simple_test'
-    rate = 0.5
+    rate = 2.0
     runfor = 10.0
     
     send = urlreverse('celerymanagementapp.dataviews.task_demo_dataview')
@@ -149,10 +155,11 @@ def task_demo_test_dataview(request):
     <head>
     <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/jquery.js" ></script>
     <script>
+    
     function json() {{
-    var query = '{{"name": "[NAME]", "rate":[RATE], "runfor":{runfor} }}';
+    var query = '{{"name": "[NAME]", "rate":{rate}, "runfor":{runfor} }}';
     query = query.replace("[NAME]", document.testform.taskname.value)
-    query = query.replace("[RATE]", document.testform.rate.value)
+    
     $.post(
         '{send}',
         query,
@@ -164,22 +171,20 @@ def task_demo_test_dataview(request):
         'json'
     );
     }}
+    
     </script>
     </head>
     <body>
     <form name="testform" action="{send}" method="POST">
-        <table>
-            {{% csrf_token %}}
-            <tr><td>
-            <input type="text" name="taskname" value="{name}" size="90" />
-            </td></tr>
-            <tr><td>
-            <input type="text" name="rate" value="{rate}" size="30" />
-            </td></tr>
-            <tr><td>
-            <input type="button" value="Send" onclick="json();"/>
-            </td></tr>
-        </table>
+      <table>
+        {{% csrf_token %}}
+        <tr><td>
+        <input type="text" name="taskname" value="{name}" size="90" />
+        </td></tr>
+        <tr><td>
+        <input type="button" value="Send" onclick="json();"/>
+        </td></tr>
+      </table>
     </form>
     </body>
     </html>

@@ -59,8 +59,8 @@ ops_dict = {
     '<':    process_op_lt,
     '>=':   process_op_gte,
     '<=':   process_op_lte,
-    '!=':   process_op_eq,
-    '==':   process_op_ne,
+    '!=':   process_op_ne,
+    '==':   process_op_eq,
     }
 
 

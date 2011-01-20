@@ -370,7 +370,7 @@ def system_overview(request):
             context_instance=RequestContext(request))
 
 def configure(request):
-    context= {}
+    context = {}
     if settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static":
         out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
         OutOfBandWorkers = []
@@ -383,16 +383,18 @@ def configure(request):
         context["outofbandworkernode_form"] = out_of_band_worker_node_form
         context["outofbandworkernodes"] = OutOfBandWorkers
     elif settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "dynamic":
-        provider_form = ProviderForm()
-        providers = []
+        provider = Provider.objects.all()
+        providers = {}
+        
+        if provider:
+            provider_form = ProviderForm(instance=provider)
+            providers["provider_form"] = provider_form
+            providers["provider"] = provider
+        else:
+            provider_form = ProviderForm()
+            providers["provider_form"] = provider_form
 
-        providernodes = Provider.objects.all()
-        for provider in providernodes:
-            providerForm = ProviderForm(instance=provider)
-            providers.append({ "provider" : provider, "providerForm" : providerForm })
-
-        context["provider_form"] = provider_form
-        context["providers"] = providers
+        context["provider"] = providers
 
     return render_to_response('celerymanagementapp/configure.html',
             context,

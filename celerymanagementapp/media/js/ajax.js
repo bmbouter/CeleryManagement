@@ -17,7 +17,7 @@ CMA.Core.ajax = (function() {
                 shutdown_worker_url: root_url + "worker/<placeHolder>/shutdown/",
                 query_dispatched_tasks_url: root_url + "xy_query/dispatched_tasks/",
                 task_url: "/celerymanagementapp/view/task/",
-                worker_url: "/celerymanagementapp/view/task/",
+                worker_url: "/celerymanagementapp/view/worker/",
                 create_out_of_band_worker_url: root_url + "outofbandworker/",
                 create_provider_url: root_url + "provider/",
                 get_images_url: root_url + "provider/images/"
@@ -67,12 +67,6 @@ CMA.Core.ajax = (function() {
         getDispatchedTasksData = function(query, callbackFunction) {
             $.post(urls.query_dispatched_tasks_url, query, callbackFunction);
         },
-        postCreateOutOfBandWorkerNode = function(callbackFunction){
-            $.post(urls.create_out_of_band_worker_url, $('#blankOutOfBandForm').serialize(), callbackFunction);
-        },
-        postCreateProvider = function(callbackFunction){
-            $.post(urls.create_provider_url, $('#blankProviderForm').serialize(), callbackFunction);
-        },
         postGetImages = function(callbackFunction){
             $.post(urls.get_images_url, $('#blankProviderForm').serialize(), callbackFunction, "json");
         };
@@ -88,8 +82,6 @@ CMA.Core.ajax = (function() {
         getWorkerProcesses: getWorkerProcesses,
         postShutdownWorker: postShutdownWorker,
         getDispatchedTasksData: getDispatchedTasksData,
-        postCreateOutOfBandWorkerNode: postCreateOutOfBandWorkerNode,
-        postCreateProvider: postCreateProvider,
         postGetImages: postGetImages
     };
 }());
