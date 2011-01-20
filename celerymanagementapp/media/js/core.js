@@ -248,6 +248,20 @@ CMA.Core.providerCreation = function() {
         providerStep2.show();
         CMA.Core.ajax.postGetImages(handleImages);
     });
+    
+    $('#viewProvider').click(function(){
+        //$('#submitProviderButton').text("Close");
+        $('#providerFormWrapper').animate({
+                height: "toggle"
+            },
+            500,
+            function(){}
+        );
+    });
+
+    $('.deleteInstance').click(function() {
+        $(this).parent().remove();
+    });
 
 };
 

@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import simplejson
 
 from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
-from celerymanagementapp.models import OutOfBandWorkerNode, Provider
+from celerymanagementapp.models import OutOfBandWorkerNode, Provider, InBandWorkerNode
 
 def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
@@ -38,9 +38,9 @@ def configure(request):
         context["outofbandworkernode_form"] = out_of_band_worker_node_form
         context["outofbandworkernodes"] = OutOfBandWorkers
     elif settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "dynamic":
-        #provider = Provider(provider_user_id="test456YUser", celeryd_username="Test Username", 
-        #                    provider_name=Provider.PROVIDER_CHOICES[3][1], image_id="6sd6aF8dadSSa3")
-        provider = None
+        provider = Provider(provider_user_id="test456YUser", celeryd_username="Test Username", 
+                            provider_name=Provider.PROVIDER_CHOICES[3][1], image_id="6sd6aF8dadSSa3")
+        #provider = None
         providers = {}
         if provider:
             provider_form = ProviderForm(instance=provider)
@@ -50,7 +50,12 @@ def configure(request):
             provider_form = ProviderForm()
             providers["provider_form"] = provider_form
 
+        inbandnode = InBandWorkerNode(instance_id="adsfatte22d")
+        inbandnode1 = InBandWorkerNode(instance_id="nfgttadfd")
+        inbandnode2 = InBandWorkerNode(instance_id="nk^3764646d")
+
         context["provider"] = providers
+        context["instances"] = [inbandnode, inbandnode1, inbandnode2]
 
     return render_to_response('celerymanagementapp/configure.html',
             context,

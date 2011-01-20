@@ -109,6 +109,7 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
                     }
                 }
             }
+            CMA.SystemDisplay.fire("Redraw");
         },
 
         setPendingTasks = function(data){

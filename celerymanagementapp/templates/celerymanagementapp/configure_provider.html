@@ -1,9 +1,20 @@
     <h1>
-        Provider
+        Current Use Mode: <span>{{ CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE }}</span>
     </h1>
+    {% if instances %}
+    <ul>
+        <li>Instance ID</li>
+        <li class="right click" id="viewProvider">View Provider Information</li>
+    </ul>
+    {% endif %}
+    {% if provider.provider %}
+        <div class="hidden" id="providerFormWrapper">
+            {% endif %}
+            {% if not provider.provider %}
     <div class="fieldWrapper">
         Step 1: Enter provider information, then click "Get Images" to retrieve availible images.
     </div>
+    {% endif %}
     <form method="POST" enctype="multipart/form-data" class="providerForm" id="blankProviderForm" action="/celerymanagementapp/provider/">
         {% csrf_token %}
         {% for field in provider.provider_form %}
@@ -31,5 +42,14 @@
         {% endif %}
         {% endif %}
         {% endfor %}
-        <button class="submitButton hidden click" id="submitProviderButton">Create</button>
+        <button class="submitButton {% if not provider.provider %}hidden{% endif %} click" id="submitProviderButton">Create</button>
     </form>
+    {% if provider.provider %}
+        </div>
+    {% endif %}
+    {% for instance in instances %}
+    <ul class="node">
+        <li class="left">{{ instance.instance_id }}</li>
+        <li class="deleteInstance right click" id="{{ instance.instance_id }}_deleteNode">Delete</li>
+    </ul>
+    {% endfor %}
