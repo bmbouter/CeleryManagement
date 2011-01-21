@@ -25,11 +25,11 @@
     </form>
     {% for policy in policies %}
     <ul class="node">
-        <li class="left">{{ policy.policy.ip }}</li>
-        <li class="editPolicy right click" id="{{ policy.policy.ip }}_deleteWorkerNode">Delete</li>
-        <li class="editPolicy right click" id="{{ policy.policy.ip }}_workerNode">Edit</li>
+        <li class="left">{{ policy.policy.name }}</li>
+        <li class="editPolicy right click" id="{{ policy.policy.name }}_deleteWorkerNode">Delete</li>
+        <li class="editPolicy right click" id="{{ policy.policy.name }}">Edit</li>
     </ul>
-    <form method="POST" enctype="multipart/form-data" class="policyForm" id="{{ policy.policy.ip }}_policyForm">
+    <form method="POST" enctype="multipart/form-data" class="policyForm" id="{{ policy.policy.name }}_policyForm">
         {% csrf_token %}
         {% for field in policy.policyForm %}
         <div class="fieldWrapper">

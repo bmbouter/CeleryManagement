@@ -265,6 +265,25 @@ CMA.Core.providerCreation = function() {
 
 };
 
+CMA.Core.policy = function(){
+    var expandPolicy = function(){
+            console.log("expanding");
+            var elem = document.getElementById($(this).attr("id") + "_policyForm"),
+                formHeight = $(elem).height();
+            
+            $(elem).animate({
+                    height: "toggle"
+                },
+                500,
+                function(){
+                    $(elem).css("height", formHeight + "px");
+                }
+            );
+        };
+
+    $('.editPolicy').click(expandPolicy);
+};
+
 $(document).ready(function() {
 
     var core = CMA.Core;
@@ -272,6 +291,7 @@ $(document).ready(function() {
     core.setupEvents();
     core.setupFormEvents();
     core.providerCreation();
+    core.policy();
 
     core.ajax.getTasks(core.navigation.populateTaskNavigation);
     core.ajax.getWorkers(core.navigation.populateWorkerNavigation);
