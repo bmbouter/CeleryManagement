@@ -334,6 +334,16 @@ def worker_list_dataview(request):
     
 
 #==============================================================================#
+def policy_create(request):
+    # TODO.....
+    json_request = _json_from_post(request)
+    json_request['name']
+    json_request['source']
+    json_request['enabled']
+    
+    return _json_response(json_result)
+
+#==============================================================================#
 TASKDEMO_RUNFOR_MAX = 60.*10  # ten minutes
 
 def validate_task_demo_request(json_request):
