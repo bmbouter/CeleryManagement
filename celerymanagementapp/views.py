@@ -368,6 +368,10 @@ def visualize_runtimes_new(request, taskname=None, interval=0):
 def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
             context_instance=RequestContext(request))
+            
+def chart(request):
+    return render_to_response('celerymanagementapp/chart.html',
+            context_instance=RequestContext(request))
 
 def configure(request):
     context = {}

@@ -25,8 +25,39 @@ var Formatter = function() {
 
         return formattedData;
     };
-
+    
     function runtimeData(dataArray) {
+        var data = [ ];
+        var labels = [ ];
+        
+        for(label in dataArray) {
+            labels[label] = dataArray[label][0];
+        }
+
+        var i;
+        var length = dataArray.length;
+        
+        for(i = 0; i < length; i++) {
+            var j;
+            
+            var methodsLength = dataArray[0][1][0].methods.length;
+            
+            var obj = { };
+            obj.data = [ ];
+            obj.label = dataArray[0][1][0].methods[i].name + " " + "runtime";
+
+            for(j = 0; j < methodsLength; j++) {
+                obj.data.push([j, dataArray[j][1][0].methods[i].value]);
+            }
+
+            data.push(obj);
+            console.log(data);
+        }
+        
+        return data;
+    }
+
+    /*function runtimeData(dataArray) {
         var data = [];
         var count = 0;
 
@@ -57,7 +88,7 @@ var Formatter = function() {
         }
                 
         return data;
-    }
+    }*/
 
     function stateData(dataArray) {
         var data = [];

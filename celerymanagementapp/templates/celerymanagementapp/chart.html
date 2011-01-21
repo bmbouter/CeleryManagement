@@ -1,0 +1,203 @@
+{% extends "celerymanagementapp/base.html" %}
+
+{% block extrajs %}
+
+{% endblock extrajs %}
+
+{% block content %}
+
+<div id="chart" style="width: 600px; height: 500px; float: left; margin: 10px 10px"></div>
+<div id="chartOptions">
+    <form>
+        <fieldset id="filter_set">
+            <legend>Filter</legend>
+            <label for="filter" class="no_padding">Filter</label>
+            <input name="filter" id="filter" type="checkbox" />
+            <br />
+            <div id="filter_options" style="display: none">
+                <label for="filter_fieldname">Fieldname</label>
+                <div class="fields">
+                    <select id="filter_fieldname" name="filter_fieldname" value="filter_fieldname">
+                        <option label="Name" value="taskname">Name</option>
+                        <option label="State" value="state">State</option>
+                        <option label="Task ID" value="task_id">Task ID</option>
+                        <option label="Worker" value="worker">Worker</option>
+                        <option label="Runtime" value="runtime">Runtime</option>
+                        <option label="Wait Time" value="waittime">Wait Time</option>
+                        <option label="Total Time" value="totaltime">Total Time</option>
+                    </select>
+                </div>
+                
+                <label for="filter_option">Option</label>
+                <div class="fields">
+                    <select id="filter_option" name="filter_option" value="filter_option">
+                        <option label="==" value="==">==</option>
+                        <option label="!=" value="!=">!=</option>
+                        <option label="<" value="<">&lt;</option>
+                        <option label=">" value=">">&gt;</option>
+                        <option label="<=" value="<=">&lt;=</option>
+                        <option label=">-" value=">=">&gt;=</option>
+                        <option label="Range" value="range">Range</option>
+                    </select>
+                </div>
+                
+                <label for="filter_arg1">Arg 1</label>
+                <div class="fields">
+                    <input id="filter_arg1" name="filter_arg1" />
+                </div>
+                
+                <label id="filter_arg2" for="filter_arg2" style="display: none">Arg 2</label>
+                <div class="fields" style="display: none">
+                    <input id="filter_arg2" name="filter_arg2" />
+                </div>
+            </div>
+        </fieldset>
+        
+        <fieldset id="exclude_set">
+            <legend>Exclude</legend>
+            <label for="exclude" class="no_padding">Exclude</label>
+            <input name="exclude" id="exclude" type="checkbox" />
+            <br />
+            <div id="exclude_options" style="display: none">
+                <label for="exclude_fieldname">Fieldname</label>
+                <div class="fields">
+                    <select id="exclude_fieldname" name="exclude_fieldname" value="exclude_fieldname">
+                        <option label="Name" value="taskname">Name</option>
+                        <option label="State" value="state">State</option>
+                        <option label="Task ID" value="task_id">Task ID</option>
+                        <option label="Worker" value="worker">Worker</option>
+                        <option label="Runtime" value="runtime">Runtime</option>
+                        <option label="Wait Time" value="waittime">Wait Time</option>
+                        <option label="Total Time" value="totaltime">Total Time</option>
+                    </select>
+                </div>
+            
+                <label for="exclude_option">Option</label>
+                <div class="fields">
+                    <select id="exclude_option" name="exclude_option" value="exclude_option">
+                        <option label="==" value="==">==</option>
+                        <option label="!=" value="!=">!=</option>
+                        <option label="<" value="<">&lt;</option>
+                        <option label=">" value=">">&gt;</option>
+                        <option label="<=" value="<=">&lt;=</option>
+                        <option label=">-" value=">=">&gt;=</option>
+                        <option label="Range" value="range">Range</option>
+                    </select>
+                </div>
+                
+                <label for="exclude_arg1">Arg 1</label>
+                <div class="fields">
+                    <input id="exclude_arg1" name="exclude_arg1" />
+                </div>
+                
+                <label id="exclude_arg2" for="field_arg2" style="display: none">Arg 2</label>
+                <div class="fields" style="display: none">
+                    <input id="exclude_arg2" name="exclude_arg2" />
+                </div>
+            </div>
+        </fieldset>
+    
+        <fieldset id="segmentize_set">
+            <legend>Segmentize</legend>
+            <label for="segmentize" class="no_padding">Segmentize</label>
+            <input name="segmentize" id="segmentize" checked="checked" type="checkbox" />
+            <br />
+            <div id="segmentize_options">
+                <label for="segmentize_field">Field</label>
+                <div class="fields">
+                    <select id="segmentize_field" name="segmentize_field" value="segmentize_field">
+                        <option label="Name" value="taskname">Name</option>
+                        <option label="State" value="state">State</option>
+                        <option label="Worker" value="worker">Worker</option>
+                        <option label="Runtime" value="runtime">Runtime</option>
+                        <option label="Wait Time" value="waittime">Wait Time</option>
+                        <option label="Total Time" value="totaltime">Total Time</option>
+                    </select>
+                </div>
+                
+                <label for="segmentize_method">Method</label>
+                <div class="fields">
+                    <select id="segmentize_method" name="segmentize_method" value="segmentize_method">
+                        <option label="Range" value="range">Range</option>
+                        <option label="All" value="all">All</option>
+                        <option label="Values" value="values">Values</option>
+                        <option label="Each" value="each">Each</option>
+                    </select>
+                </div>
+                
+                <div id="segmentize_range">
+                    <label for="range_min">Range Min</label>
+                    <div class="fields">
+                        <input id="range_min" name="min" />
+                    </div>
+                    <label for="range_max">Range Max</label>
+                    <div class="fields">
+                        <input id="range_max" name="max" />
+                    </div>
+                    <label for="range_interval">Range Interval</label>
+                    <div class="fields">
+                        <input id="range_interval" name="interval" />
+                    </div>
+                </div>
+                
+                <div id="segmentize_values" style="display: none">
+                    <label for="values">Values (comma sep.)</label>
+                    <div class="fields">
+                        <input id="values" name="values" />
+                    </div>
+                </div>
+                
+                <!-- Add a list of name, retrieved using a json call -->
+                
+            </div>
+        </fieldset>
+        <fieldset id="aggregate_set">
+            <legend>Aggregate</legend>
+            <label for="aggregate" class="no_padding">Aggregate</label>
+            <input name="aggragate" id="aggregate" checked="checked" type="checkbox" />
+            <br />
+            <div id="aggregate_options">
+                <label for="aggregate_field">Field</label>
+                <div class="aggregate_field">
+                    <select id="aggregate_field" name="aggregate_field" value="aggregate_field">
+                        <option label="Count" value="count">Count</option>
+                        <option label="Name" value="name">Name</option>
+                        <option label="State" value="state">State</option>
+                        <option label="Task ID" value="task_id">Task ID</option>
+                        <option label="Worker" value="worker">Worker</option>
+                        <option label="Runtime" value="runtime">Runtime</option>
+                        <option label="Wait Time" value="waittime">Wait Time</option>
+                        <option label="Total Time" value="totaltime">Total Time</option>
+                    </select>
+                </div>
+                
+                <label for="aggregate_methods">Methods</label>
+                <div class="fields">
+                    <select id="aggregate_methods" name="aggregate_methods" value="aggregate_methods" size=4 multiple>
+                        <option label="Average" value="average">Average</option>
+                        <option label="Max" value="max">Max</option>
+                        <option label="Min" value="min">Min</option>
+                        <option label="Variance" value="variance">Variance</option>
+                        <option label="Sum" value="sum">Sum</option>
+                        <option label="Enumerate" value="enumerate">Enumerate</option>
+                    </select>
+                </div>
+                <input id="add_aggregation" value="Add Aggregation" type="button" style="width: 120px" />
+            </div>
+        </fieldset>
+    </form>
+    
+    <table id="aggregate_table">
+        <tbody>
+            <tr>
+                <th>Field</th>
+                <th>Methods</th>
+            </tr>
+        </tbody>
+    </table>
+    
+    <input id="submit_query" value="Submit Form" onclick="create_query();" type="button" style="width: 100px; margin-top: 100px" />
+</div>
+
+
+{% endblock content %}

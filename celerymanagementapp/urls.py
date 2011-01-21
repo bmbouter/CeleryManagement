@@ -95,6 +95,7 @@ urlpatterns += patterns('celerymanagementapp.views',
     url(r'^view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url"),
     url(r'^view/dashboard/$', 'dashboard', name="dashboard_url"),
     url(r'^view/configure/$', 'configure', name="configure_url"),
+    url(r'^view/chart/$', 'chart', name="chart_url"),
 )
 
 if settings.DEBUG:
