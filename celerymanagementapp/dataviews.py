@@ -30,7 +30,7 @@ from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
 
 from celerymanagementapp import tasks, jsonutil
 from celerymanagementapp.models import OutOfBandWorkerNode, RegisteredTaskType
-from celerymanagementapp.models import TaskDemoGroup, Provider
+from celerymanagementapp.models import TaskDemoGroup, Provider, InBandWorkerNode
 from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
 
 #==============================================================================#
@@ -216,6 +216,16 @@ def provider_images(request):
     [json_images.append({'name': item.name, 'id': item.id}) for item in images]
     json = simplejson.dumps(json_images)
     return HttpResponse(json)
+
+def delete_worker(request, worker_pk):
+    """Deletes a worker"""
+    try:
+        worker = InBandWorkerNode.objects.get(pk=worker_pk)
+        worker.delete()
+    except Exception as e:
+        failed = { 'failure' : e.args[0]}
+        json = simplejson.dumps(failed)
+        return HttpResponse(json)
 
 def create_outofbandworker(request):
     """Create an OutOfBandWorker"""
