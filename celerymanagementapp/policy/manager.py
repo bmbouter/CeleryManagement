@@ -179,18 +179,32 @@ class TaskSettingsManager(object):
         self.restore()
         
     def _initialize_settings(self):
-        settings = get_all_task_settings()
-        found_tasks = []
-        for taskname, tasksettings in settings.iteritems():
-            if taskname=='error':
-                self.logger.error(
-                    'Error reading task settings: {0}'.format(tasksettings))
-                continue
-                ##print 'cmrun: ERROR: {0}'.format(tasksettings)
-            found_tasks.append(taskname)
-            ##print 'cmrun: Found existing task: {0}'.format(taskname)
-            ts = TaskSettings(taskname, settings)
-            self.data[taskname] = ts
+        tasks_settings = get_all_task_settings()
+        
+        # if not isinstance(settings, dict):
+            # self.logger.error(
+                # 'Error retrieving task settings: {0}'.format(settings) + '\n' +
+                # 'This may indicate a worker is not properly configured for use with\n' +
+                # 'CeleryManagement.  Please check that the celeryconfig.py (and/or settings.py\n' + 
+                # 'for django-celery) contains the CeleryManagement imports in the CELERY_IMPORTS\n' + 
+                # 'setting. ' )
+            # return
+        # found_tasks = []
+        # for taskname, tasksettings in settings.iteritems():
+            # if taskname=='error' or not isinstance(tasksettings, dict):
+                # self.logger.error(
+                    # 'Error reading task settings: {0}'.format(tasksettings))
+                # continue
+            # self.logger.debug(
+                # 'Found task settings -> {0}:\n    {1}'.format(
+                    # taskname, 
+                    # '\n    '.join('{0}: {1}'.format(k,v) for k,v in tasksettings)
+                # )
+            # )
+            # ts = TaskSettings(taskname, settings)
+            # found_tasks.append(taskname)
+            # self.data[taskname] = ts
+        found_tasks = self._store_settings_info(tasks_settings)
         if found_tasks:
             msg = 'Found existing tasks:\n    '
             msg += '\n    '.join(found_tasks)
@@ -199,6 +213,33 @@ class TaskSettingsManager(object):
             msg = 'No existing tasks found.  Is celeryd running?'
             self.logger.warn(msg)
             
+    def _store_settings_info(self, tasks_settings):
+        # verify that task_settings is a dict
+        # return list of tasks found
+        if not isinstance(tasks_settings, dict):
+            self.logger.error(
+                'Error retrieving task settings: {0}'.format(tasks_settings) + '\n' +
+                'This may indicate a worker is not properly configured for use with\n' +
+                'CeleryManagement.  Please check that the celeryconfig.py (and/or settings.py\n' + 
+                'for django-celery) contains the CeleryManagement imports in the CELERY_IMPORTS\n' + 
+                'setting. ' )
+            return
+        found_tasks = []
+        for taskname, tasksettings in tasks_settings.iteritems():
+            if taskname=='error' or not isinstance(tasksettings, dict):
+                self.logger.error(
+                    'Error reading task settings: {0}'.format(tasksettings))
+                continue
+            self.logger.debug(
+                'Found task settings -> {0}:\n    {1}'.format(
+                    taskname, 
+                    '\n    '.join('{0}: {1}'.format(k,v) for k,v in tasksettings.iteritems())
+                )
+            )
+            ts = TaskSettings(taskname, tasksettings)
+            found_tasks.append(taskname)
+            self.data[taskname] = ts
+        return found_tasks
         
     def on_tasks_modified(self, tasknames, setting_name, value):
         self.logger.debug('Tasks modified:: {0}: {1} = {2}'.format(','.join(tasknames), setting_name, value))
@@ -215,10 +256,11 @@ class TaskSettingsManager(object):
         update_tasks_settings(workername, tasks_settings)
         new_tasknames = [s for s in tasknames if s not in self.data]
         new_task_settings = get_task_settings(workername, new_tasknames)
-        for taskname,settings in new_task_settings.iteritems():
-            ts = TaskSettings(taskname, settings)
-            self.data[taskname] = ts
-        msg = 'Worker "{0}" has started.  Found the following tasks:\n    '.format(workername)
+        found_tasks = self._store_settings_info(new_task_settings)
+        #for taskname,settings in new_task_settings.iteritems():
+        #    ts = TaskSettings(taskname, settings)
+        #    self.data[taskname] = ts
+        msg = 'Worker "{0}" has started.\nFound the following tasks:\n    '.format(workername)
         msg += '\n    '.join((name + ('*' if name in new_tasknames else '')) for name in tasknames)
         self.logger.info(msg)
                     
