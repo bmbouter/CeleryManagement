@@ -101,14 +101,18 @@ class JsonFilter(object):
             expression into equivalent Django QuerySet keyword arguments.
         """
         if len(exp)==1:
-            return { '{0}'.format(fieldname): exp[0] }
-        op = exp[0]
-        exp = exp[1:]
-        opfunc = ops_dict.get(op,None)
-        if opfunc is None:
-            msg = "Not able to process filter operator: '{0}'".format(op)
-            raise JsonQueryError(msg)
-        return opfunc(fieldname, exp)
+            ##return { '{0}'.format(fieldname): exp[0] }
+            ##return process_op_eq(fieldname, exp)
+            opfunc = process_op_eq
+        else:
+            op = exp[0]
+            exp = exp[1:]
+            opfunc = ops_dict.get(op,None)
+            if opfunc is None:
+                msg = "Not able to process filter operator: '{0}'".format(op)
+                raise JsonQueryError(msg)
+        conv = self.modelmap.get_conv_to_python(fieldname)
+        return opfunc(fieldname, map(conv,exp))
         
     def _build_query_kwarg(self, exp):
         """ Convert a single filter expression from a Json query into 
