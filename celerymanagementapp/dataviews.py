@@ -35,10 +35,12 @@ from celerymanagementapp.policy import exceptions as policy_exceptions
 
 from celerymanagementapp import tasks, jsonutil
 from celerymanagementapp.models import OutOfBandWorkerNode, RegisteredTaskType
-from celerymanagementapp.models import TaskDemoGroup, Provider, PolicyModel
+from celerymanagementapp.models import TaskDemoGroup, Provider, InBandWorkerNode
+from celerymanagementapp.models import PolicyModel
 from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
 
 #==============================================================================#
+# Utility functions/classes
 def _json_from_post(request, *args, **kwargs):
     """Return the json content of the given request.  The json must be in the 
        request's POST data."""
@@ -162,6 +164,7 @@ def get_worker_subprocesses(dest=None):
     
 
 #==============================================================================#
+# task/worker dataviews
 def task_xy_dataview(request):
     """ Performs a database query and returns the results of that query.  The 
         result is formatted as json.  The query must be contained in the 
@@ -187,67 +190,6 @@ def worker_subprocesses_dataview(request, name=None):
         
     return _json_response(workercounts)
 
-def create_provider(request):
-    """Create a Provider"""
-    if request.method == 'POST':
-        new_obj = ProviderForm(request.POST, request.FILES)
-        if new_obj.is_valid():
-            new_obj.save()
-            providers = Provider.objects.all()
-            return render_to_response('celerymanagementapp/configure.html',
-                {'provider_form': new_obj,
-                "providers" : providers,
-                "load_test_data" : "true" },
-                context_instance=RequestContext(request))
-        else:
-            providers = Provider.objects.all()
-            return render_to_response('celerymanagementapp/configure.html',
-                {'provider_form': new_obj,
-                "providers" : providers,
-                "load_test_data" : "true" },
-                context_instance=RequestContext(request))
-
-def provider_images(request):
-    """Returns a list of images for a Provider"""
-    p = Provider(provider_user_id=request.POST['provider_user_id'],
-            provider_key=request.POST['provider_key'],
-            provider_name=request.POST['provider_name'])
-    if not p.are_credentials_valid():
-        failed = { 'failure' : 'Invalid Provider Credentials'}
-        json = simplejson.dumps(failed)
-        return HttpResponse(json)
-    images = p.conn.list_images()
-    json_images = []
-    [json_images.append({'name': item.name, 'id': item.id}) for item in images]
-    json = simplejson.dumps(json_images)
-    return HttpResponse(json)
-
-def create_outofbandworker(request):
-    """Create an OutOfBandWorker"""
-    if request.method == 'POST':
-        new_obj = OutOfBandWorkerNodeForm(request.POST, request.FILES)
-        if new_obj.is_valid():
-            new_obj.save()
-            OutOfBandWorkers = OutOfBandWorkerNode.objects.all()
-            return HttpResponse("success")
-        else:
-            errors = []
-            for field in new_obj:
-                errors.append({ 'field' : field.html_name,
-                                'error' : field.errors })
-            failed = { 'failure' : errors }
-            json = simplejson.dumps(failed)
-            return HttpResponse("<textarea>" + json + "</textarea>")
-
-def worker_start(request):
-    """Find an available node and start a worker process"""
-    active_nodes = OutOfBandWorkerNode.objects.filter(active=True)
-    for node in active_nodes:
-        if not node.is_celeryd_running():
-            node.celeryd_start()
-            return _json_response({'status': 'success'})
-    return _json_response({'status': 'failure', 'message': 'No Available Worker Nodes'})
-    
 def pending_task_count_dataview(request, name=None):
     """ Return the number of pending DispatchedTasks for each defined task.  An 
         optional filter and/or exclude may be provided in the POST data as a 
@@ -336,9 +278,84 @@ def worker_list_dataview(request):
     """ Returns a list of worker names, formatted as json. """
     workernames = get_workers_live()
     return _json_response(workernames)
-    
 
 #==============================================================================#
+# Provider dataviews.
+def create_provider(request):
+    """Create a Provider"""
+    if request.method == 'POST':
+        new_obj = ProviderForm(request.POST, request.FILES)
+        if new_obj.is_valid():
+            new_obj.save()
+            providers = Provider.objects.all()
+            return render_to_response('celerymanagementapp/configure.html',
+                {'provider_form': new_obj,
+                "providers" : providers,
+                "load_test_data" : "true" },
+                context_instance=RequestContext(request))
+        else:
+            providers = Provider.objects.all()
+            return render_to_response('celerymanagementapp/configure.html',
+                {'provider_form': new_obj,
+                "providers" : providers,
+                "load_test_data" : "true" },
+                context_instance=RequestContext(request))
+
+def provider_images(request):
+    """Returns a list of images for a Provider"""
+    p = Provider(provider_user_id=request.POST['provider_user_id'],
+            provider_key=request.POST['provider_key'],
+            provider_name=request.POST['provider_name'])
+    if not p.are_credentials_valid():
+        failed = { 'failure' : 'Invalid Provider Credentials'}
+        json = simplejson.dumps(failed)
+        return HttpResponse(json)
+    images = p.conn.list_images()
+    json_images = []
+    [json_images.append({'name': item.name, 'id': item.id}) for item in images]
+    json = simplejson.dumps(json_images)
+    return HttpResponse(json)
+
+#==============================================================================#
+# out-of-band/in-band worker dataviews.
+def delete_worker(request, worker_pk):
+    """Deletes a worker"""
+    try:
+        worker = InBandWorkerNode.objects.get(pk=worker_pk)
+        worker.delete()
+    except Exception as e:
+        failed = { 'failure' : e.args[0]}
+        json = simplejson.dumps(failed)
+        return HttpResponse(json)
+
+def create_outofbandworker(request):
+    """Create an OutOfBandWorker"""
+    if request.method == 'POST':
+        new_obj = OutOfBandWorkerNodeForm(request.POST, request.FILES)
+        if new_obj.is_valid():
+            new_obj.save()
+            OutOfBandWorkers = OutOfBandWorkerNode.objects.all()
+            return HttpResponse("success")
+        else:
+            errors = []
+            for field in new_obj:
+                errors.append({ 'field' : field.html_name,
+                                'error' : field.errors })
+            failed = { 'failure' : errors }
+            json = simplejson.dumps(failed)
+            return HttpResponse("<textarea>" + json + "</textarea>")
+
+def worker_start(request):
+    """Find an available node and start a worker process"""
+    active_nodes = OutOfBandWorkerNode.objects.filter(active=True)
+    for node in active_nodes:
+        if not node.is_celeryd_running():
+            node.celeryd_start()
+            return _json_response({'status': 'success'})
+    return _json_response({'status': 'failure', 'message': 'No Available Worker Nodes'})
+    
+#==============================================================================#
+# Policy dataviews
 class PolicyDataviewError(Exception):
     """ Raised to immediately the stop processing of a Policy-related dataview.  
         This exception is caught in PolicyDataviewBase.__call__. 
@@ -554,6 +571,7 @@ def policy_delete(request, id):
     
 
 #==============================================================================#
+# task-demo dataviews
 TASKDEMO_RUNFOR_MAX = 60.*10  # ten minutes
 
 def validate_task_demo_request(json_request):
