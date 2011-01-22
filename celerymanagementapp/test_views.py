@@ -6,8 +6,10 @@ from django.core.urlresolvers import reverse as urlreverse
 from django.contrib.auth.decorators import login_required
 from django.utils import simplejson
 
-from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
-from celerymanagementapp.models import OutOfBandWorkerNode, Provider, InBandWorkerNode
+import random
+
+from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm, PolicyModelForm
+from celerymanagementapp.models import OutOfBandWorkerNode, Provider, InBandWorkerNode, PolicyModel
 
 def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
@@ -20,8 +22,19 @@ def dashboard(request):
             context_instance=RequestContext(request))
 
 def policy(request):
+    policies = []
+    for i in range(0,10):
+        policy = PolicyModel(name="TestPolicy" + str(i), enabled="false", source="")
+        policyForm = PolicyModelForm(instance=policy)
+        policies.append({ "policy" : policy, "policyForm" : policyForm })
+
     return render_to_response('celerymanagementapp/policy.html',
-            { "load_test_data" : "true" },
+            { "load_test_data" : "true",
+                "policies" : policies},
+            context_instance=RequestContext(request))
+
+def chart(request):
+    return render_to_response('celerymanagementapp/chart.html',
             context_instance=RequestContext(request))
 
 def configure(request):
@@ -73,6 +86,10 @@ def worker_view(request, workername=None):
             "workername" : workername, },
             context_instance=RequestContext(request))
 
+
+'''
+Ajax views.
+'''
 def create_outofbandworker(request):
     if request.method == "POST":
         out_of_band_worker_node_form = OutOfBandWorkerNodeForm(request.POST, request.FILES)
@@ -108,10 +125,10 @@ def get_images(request):
     json = simplejson.dumps(images)
     return HttpResponse(json, mimetype="application/json")
 
-'''
+
 def create_policy(request):
     if request.method == "POST":
-        policy_form = PolicyForm(request.POST, request.FILES)
+        policy_form = PolicyModelForm(request.POST)
         if policy_form.is_valid():
             return HttpResponse("success")
         else:
@@ -122,13 +139,20 @@ def create_policy(request):
             failed = { 'failure' : errors }
             json = simplejson.dumps(failed)
             return HttpResponse(json)
-'''
 
-def kill_worker(request, name=None):
-    if request.method == 'POST':
-        return HttpResponse(name)
+
+def delete_worker(request, worker_pk):
+    """Deletes a worker"""
+    random.seed()
+    choice = random.randint(0, 1000)
+    if not (choice % 2):
+        json = simplejson.dumps("success")
+        return HttpResponse(json)
     else:
-        return HttpResponse("failed")
+        failed = { 'failure' : 'Instance failed to delete'}
+        json = simplejson.dumps(failed)
+        return HttpResponse(json)
+
 
 def get_dispatched_tasks_data(request, name=None):
     if request.method == 'POST':
@@ -244,7 +268,4 @@ def worker_commands_test_view(request, name=None):
     t = Template(html)
     c = RequestContext(request)
     return HttpResponse(t.render(c))
-
-
-
 

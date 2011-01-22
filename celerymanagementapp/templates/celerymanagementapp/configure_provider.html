@@ -50,6 +50,6 @@
     {% for instance in instances %}
     <ul class="node">
         <li class="left">{{ instance.instance_id }}</li>
-        <li class="deleteInstance right click" id="{{ instance.instance_id }}_deleteNode">Delete</li>
+        <li class="deleteInstance right click" id="{{ instance.pk }}">Delete</li>
     </ul>
     {% endfor %}

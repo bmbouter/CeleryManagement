@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 
-from celerymanagementapp.models import OutOfBandWorkerNode, Provider
+from celerymanagementapp.models import OutOfBandWorkerNode, Provider, PolicyModel
 
 class OutOfBandWorkerNodeForm(ModelForm):
     class Meta:
@@ -11,3 +11,8 @@ class ProviderForm(ModelForm):
         model = Provider
         fields = ('provider_name', 'provider_user_id', 'provider_key',
                 'celeryd_username', 'ssh_key', 'celeryd_start_cmd', 'celeryd_stop_cmd', 'celeryd_status_cmd')
+
+class PolicyModelForm(ModelForm):
+    class Meta:
+        model = PolicyModel
+        fields = ('name', 'enabled', 'source')

@@ -260,9 +260,40 @@ CMA.Core.providerCreation = function() {
     });
 
     $('.deleteInstance').click(function() {
-        $(this).parent().remove();
+        var pk = $(this).attr("id");
+            element = $(this).parent();
+        CMA.Core.ajax.postDeleteInstance(pk, function(data){
+            if( data.hasOwnProperty("failure") ){
+                $('#statusText').show();
+                $('#statusText').text(data.failure);
+            } else {
+                element.remove();
+                $('#statusText').show();
+                $('#statusText').text("Instance successfully deleted.");
+                $('#statusText').fadeOut(3000, function() {});
+            }
+        });
     });
 
+};
+
+CMA.Core.policy = function(){
+    var expandPolicy = function(){
+            console.log("expanding");
+            var elem = document.getElementById($(this).attr("id") + "_policyForm"),
+                formHeight = $(elem).height();
+            
+            $(elem).animate({
+                    height: "toggle"
+                },
+                500,
+                function(){
+                    $(elem).css("height", formHeight + "px");
+                }
+            );
+        };
+
+    $('.editPolicy').click(expandPolicy);
 };
 
 $(document).ready(function() {
@@ -272,6 +303,7 @@ $(document).ready(function() {
     core.setupEvents();
     core.setupFormEvents();
     core.providerCreation();
+    core.policy();
 
     core.ajax.getTasks(core.navigation.populateTaskNavigation);
     core.ajax.getWorkers(core.navigation.populateWorkerNavigation);
