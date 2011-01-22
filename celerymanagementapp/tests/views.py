@@ -37,7 +37,7 @@ class Configure_TestCase(base.CeleryManagement_TestCaseBase):
         f.close()
         response = self.client.get(self.configure_url)
         self.assertEquals(response.status_code, 200)
-        self.assertEquals("success", response.content)
+        ##self.assertEquals("success", response.content)
         self.assertTrue(OutOfBandWorkerNode.objects.filter(ip=testcase_settings.OUTOFBANDWORKER_IP).count() > 0)
         out_of_band_worker = OutOfBandWorkerNode.objects.filter(ip=testcase_settings.OUTOFBANDWORKER_IP)[0]
         self.assertContains(response, out_of_band_worker )
