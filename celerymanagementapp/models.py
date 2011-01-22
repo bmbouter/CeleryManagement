@@ -208,7 +208,7 @@ class Provider(AbstractWorkerNode):
         except TypeError as type_error:
             if type_error.args[0] == "__init__() got an unexpected keyword argument 'secret'":
                 #Libcloud doesn't have consistant interfaces so some objects that inherit from Driver need to only take one parameter.  This code is designed to detect and workaround this error.
-                Driver(self.provider_user_id)
+                return Driver(self.provider_user_id)
 
     def create_vm(self):
         """Creates and starts a VM on Provider"""
