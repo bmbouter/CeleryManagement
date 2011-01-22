@@ -261,10 +261,18 @@ CMA.Core.providerCreation = function() {
 
     $('.deleteInstance').click(function() {
         var pk = $(this).attr("id");
-        CMA.Core.ajax.postDeleteInstance(pk, function(){
-            console.log(data);   
+            element = $(this).parent();
+        CMA.Core.ajax.postDeleteInstance(pk, function(data){
+            if( data.hasOwnProperty("failure") ){
+                $('#statusText').show();
+                $('#statusText').text(data.failure);
+            } else {
+                element.remove();
+                $('#statusText').show();
+                $('#statusText').text("Instance successfully deleted.");
+                $('#statusText').fadeOut(3000, function() {});
+            }
         });
-        $(this).parent().remove();
     });
 
 };

@@ -6,6 +6,8 @@ from django.core.urlresolvers import reverse as urlreverse
 from django.contrib.auth.decorators import login_required
 from django.utils import simplejson
 
+import random
+
 from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm, PolicyModelForm
 from celerymanagementapp.models import OutOfBandWorkerNode, Provider, InBandWorkerNode, PolicyModel
 
@@ -138,11 +140,19 @@ def create_policy(request):
             json = simplejson.dumps(failed)
             return HttpResponse(json)
 
-def kill_worker(request, name=None):
-    if request.method == 'POST':
-        return HttpResponse(name)
+
+def delete_worker(request, worker_pk):
+    """Deletes a worker"""
+    random.seed()
+    choice = random.randint(0, 1000)
+    if not (choice % 2):
+        json = simplejson.dumps("success")
+        return HttpResponse(json)
     else:
-        return HttpResponse("failed")
+        failed = { 'failure' : 'Instance failed to delete'}
+        json = simplejson.dumps(failed)
+        return HttpResponse(json)
+
 
 def get_dispatched_tasks_data(request, name=None):
     if request.method == 'POST':

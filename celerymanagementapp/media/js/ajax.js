@@ -42,7 +42,7 @@ CMA.Core.ajax = (function() {
                 create_out_of_band_worker_url: post_root_url + "outofbandworker/",
                 create_provider_url: post_root_url + "provider/",
                 get_images_url: post_root_url + "provider/images/",
-                delete_instance_url: post_root_url + "provider/delete_worker/<placeHolder>/"
+                delete_instance_url: post_root_url + "provider/delete_worker/1/"
             };
         },
         getUrls = function(){
@@ -73,7 +73,7 @@ CMA.Core.ajax = (function() {
             $.post(urls.get_images_url, $('#blankProviderForm').serialize(), callbackFunction, "json");
         },
         postDeleteInstance = function(instance, callbackFunction){
-            $.post(urls.delete_instance_url.replace("<placeHolder>", instance), callbackFunction);
+            $.post(urls.delete_instance_url.replace("<placeHolder>", instance), callbackFunction, "json");
         };
 
     return {

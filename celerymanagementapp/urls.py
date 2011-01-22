@@ -113,7 +113,7 @@ if settings.DEBUG:
         url(r'^test/post/outofbandworker/$', 'create_outofbandworker', name="test_create_outofbandworker_url"),
         url(r'^test/post/provider/$', 'create_provider', name="test_create_provider_url"),
         url(r'^test/post/provider/images/$', 'get_images', name="test_get_images_url"),
-        url(r'^test/post/provider/delete_worker/$', 'create_provider', name="test_create_provider_url"),
+        url(r'^test/post/provider/delete_worker/(?P<worker_pk>[\d]+)/$', 'delete_worker', name='test_delete_worker_url'),
     )
 
 if settings.DEBUG:
