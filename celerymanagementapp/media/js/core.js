@@ -260,6 +260,10 @@ CMA.Core.providerCreation = function() {
     });
 
     $('.deleteInstance').click(function() {
+        var pk = $(this).attr("id");
+        CMA.Core.ajax.postDeleteInstance(pk, function(){
+            console.log(data);   
+        });
         $(this).parent().remove();
     });
 

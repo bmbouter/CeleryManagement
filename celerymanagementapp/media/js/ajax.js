@@ -20,7 +20,8 @@ CMA.Core.ajax = (function() {
                 worker_url: "/celerymanagementapp/view/worker/",
                 create_out_of_band_worker_url: root_url + "outofbandworker/",
                 create_provider_url: root_url + "provider/",
-                get_images_url: root_url + "provider/images/"
+                get_images_url: root_url + "provider/images/",
+                delete_instance_url: root_url + "provider/delete_worker/"
             };
         },
         loadTestUrls = function() {
@@ -40,7 +41,8 @@ CMA.Core.ajax = (function() {
                 chart_data_url: root_url + "chart/enumerate-1.json",
                 create_out_of_band_worker_url: post_root_url + "outofbandworker/",
                 create_provider_url: post_root_url + "provider/",
-                get_images_url: post_root_url + "provider/images/"
+                get_images_url: post_root_url + "provider/images/",
+                delete_instance_url: post_root_url + "provider/delete_worker/<placeHolder>/"
             };
         },
         getUrls = function(){
@@ -69,6 +71,9 @@ CMA.Core.ajax = (function() {
         },
         postGetImages = function(callbackFunction){
             $.post(urls.get_images_url, $('#blankProviderForm').serialize(), callbackFunction, "json");
+        },
+        postDeleteInstance = function(instance, callbackFunction){
+            $.post(urls.delete_instance_url.replace("<placeHolder>", instance), callbackFunction);
         };
 
     return {
@@ -82,6 +87,7 @@ CMA.Core.ajax = (function() {
         getWorkerProcesses: getWorkerProcesses,
         postShutdownWorker: postShutdownWorker,
         getDispatchedTasksData: getDispatchedTasksData,
-        postGetImages: postGetImages
+        postGetImages: postGetImages,
+        postDeleteInstance: postDeleteInstance
     };
 }());

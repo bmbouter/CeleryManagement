@@ -31,6 +31,10 @@ def policy(request):
                 "policies" : policies},
             context_instance=RequestContext(request))
 
+def chart(request):
+    return render_to_response('celerymanagementapp/chart.html',
+            context_instance=RequestContext(request))
+
 def configure(request):
     context = { "load_test_data": "true" }
     if settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static":
@@ -80,6 +84,10 @@ def worker_view(request, workername=None):
             "workername" : workername, },
             context_instance=RequestContext(request))
 
+
+'''
+Ajax views.
+'''
 def create_outofbandworker(request):
     if request.method == "POST":
         out_of_band_worker_node_form = OutOfBandWorkerNodeForm(request.POST, request.FILES)
@@ -250,7 +258,4 @@ def worker_commands_test_view(request, name=None):
     t = Template(html)
     c = RequestContext(request)
     return HttpResponse(t.render(c))
-
-
-
 
