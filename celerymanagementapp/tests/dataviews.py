@@ -84,6 +84,7 @@ class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
     fixtures = ['test_policy']
     
     def test_basic(self):
+        now = datetime.datetime.now()
         model_count = PolicyModel.objects.all().count()
         url = urlreverse('celerymanagementapp.dataviews.policy_create')
         json_request = {
@@ -99,7 +100,7 @@ class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
                 'name': 'another_policy', 
                 'source': 'policy:\n schedule:\n  True\n apply:\n  True', 
                 'enabled': True, 
-                'modified': None, 
+                #'modified': None, 
                 'last_run_time': None,
                 },
             'error_info': {
@@ -113,11 +114,14 @@ class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
         response = self.client.post(url, rawjson, content_type='application/json')
         output = json.loads(response.content)
         
+        modified = output['record'].pop('modified')
         self.assertEquals(expected_output, output)
+        self.assertTrue(modified >= timeutil.datetime_from_python(now))
         self.assertEquals(model_count + 1, PolicyModel.objects.all().count())
         
     def test_disabled(self):
         # Create a Policy that is initially disabled.
+        now = datetime.datetime.now()
         model_count = PolicyModel.objects.all().count()
         url = urlreverse('celerymanagementapp.dataviews.policy_create')
         json_request = {
@@ -133,7 +137,7 @@ class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
                 'name': 'another_policy', 
                 'source': 'policy:\n schedule:\n  True\n apply:\n  True', 
                 'enabled': False, 
-                'modified': None, 
+                #'modified': None, 
                 'last_run_time': None,
                 },
             'error_info': {
@@ -147,7 +151,9 @@ class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
         response = self.client.post(url, rawjson, content_type='application/json')
         output = json.loads(response.content)
         
+        modified = output['record'].pop('modified')
         self.assertEquals(expected_output, output)
+        self.assertTrue(modified >= timeutil.datetime_from_python(now))
         self.assertEquals(model_count + 1, PolicyModel.objects.all().count())
         
     def test_nocompile(self):
@@ -220,6 +226,7 @@ class PolicyModify_TestCase(base.CeleryManagement_DBTestCaseBase):
     
     def test_basic(self):
         D = datetime.datetime
+        now = datetime.datetime.now()
         model_count = PolicyModel.objects.all().count()
         url = urlreverse('celerymanagementapp.dataviews.policy_modify', 
                          kwargs={'id': 1} )
@@ -236,7 +243,7 @@ class PolicyModify_TestCase(base.CeleryManagement_DBTestCaseBase):
                 'name': 'another_policy', 
                 'source': 'policy:\n schedule:\n  True\n apply:\n  True', 
                 'enabled': True, 
-                'modified': timeutil.datetime_from_python(D(2010,1,4,hour=12)), 
+                #'modified': timeutil.datetime_from_python(D(2010,1,4,hour=12)), 
                 'last_run_time': timeutil.datetime_from_python(D(2010,1,4,hour=12)),
                 },
             'error_info': {
@@ -253,7 +260,9 @@ class PolicyModify_TestCase(base.CeleryManagement_DBTestCaseBase):
         response = self.client.post(url, rawjson, content_type='application/json')
         output = json.loads(response.content)
         
+        modified = output['record'].pop('modified')
         self.assertEquals(expected_output, output)
+        self.assertTrue(modified >= timeutil.datetime_from_python(now))
         self.assertEquals(model_count, PolicyModel.objects.all().count())
         self.assertEquals('another_policy', PolicyModel.objects.get(id=1).name)
         

@@ -291,6 +291,7 @@ def create_policy(name, source=None, schedule_src=None, condition_srcs=None, app
     if not policy.check_source(source):
         raise RuntimeError('Invariant error:  policy.check_source() returned False.')
     model = PolicyModel(name=name, source=source, enabled=enabled)
+    model.modified = datetime.datetime.now()
     model.save()
     return model
     
@@ -301,6 +302,7 @@ def save_policy(model):
     # The following should throw an exception if it fails.
     if not policy.check_source(model.source):
         raise RuntimeError('Invariant error:  policy.check_source() returned False.')
+    model.modified = datetime.datetime.now()
     model.save()
     
 #==============================================================================#
