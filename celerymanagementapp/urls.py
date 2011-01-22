@@ -68,6 +68,7 @@ urlpatterns += patterns('celerymanagementapp',
     # manipulating provider ...
     (r'^provider/$', 'dataviews.create_provider'),
     (r'^provider/images/$', 'dataviews.provider_images'),
+    (r'^provider/delete_worker/(?P<worker_pk>[\d]+)/$', 'dataviews.delete_worker'),
     
     (r'^taskdemo/launch/$', 'dataviews.task_demo_dataview'),
     (r'^taskdemo/status/(?P<uuid>[A-Fa-f0-9]{32})/$', 'dataviews.task_demo_status_dataview'),
@@ -96,6 +97,7 @@ urlpatterns += patterns('celerymanagementapp.views',
     url(r'^view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url"),
     url(r'^view/dashboard/$', 'dashboard', name="dashboard_url"),
     url(r'^view/configure/$', 'configure', name="configure_url"),
+    url(r'^view/chart/$', 'chart', name="chart_url"),
 )
 
 if settings.DEBUG:
@@ -104,6 +106,7 @@ if settings.DEBUG:
         url(r'^test/view/dashboard/$', 'dashboard', name="test_dashboard_url"),
         url(r'^test/view/configure/$', 'configure', name="test_configure_url"),
         url(r'^test/view/policy/$', 'policy', name="test_policy_url"),
+        url(r'^test/view/chart/$', 'chart', name="test_chart_url"),
         url(r'^test/view/task/(?P<taskname>[-\w\d_.]+)/$', 'task_view', name="task_view_url"),
         url(r'^test/view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url"),
         url(r'^test/post/worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'kill_worker', name="test_kill_worker_url"),
@@ -111,6 +114,7 @@ if settings.DEBUG:
         url(r'^test/post/outofbandworker/$', 'create_outofbandworker', name="test_create_outofbandworker_url"),
         url(r'^test/post/provider/$', 'create_provider', name="test_create_provider_url"),
         url(r'^test/post/provider/images/$', 'get_images', name="test_get_images_url"),
+        url(r'^test/post/provider/delete_worker/(?P<worker_pk>[\d]+)/$', 'delete_worker', name='test_delete_worker_url'),
     )
 
 if settings.DEBUG:

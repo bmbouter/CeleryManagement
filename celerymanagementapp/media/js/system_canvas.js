@@ -554,7 +554,7 @@ CMA.SystemDisplay.Renderer = function(canvas, modelFactory){
             context.textAlign = "left";
             context.font = "15px sans-serif";
             context.fillStyle = "black";
-            context.fillText(connector.numTasks, connector.xCenter+10, connector.yCenter+5);
+            context.fillText(connector.numTasks, connector.getXCenter()+10, connector.getYCenter()+5);
         },
         dimConnector: function(connector){
             context.lineCap = "butt";
@@ -685,8 +685,13 @@ CMA.SystemDisplay.Connector = function(task, worker, numTasks){
         y1 = task.yCenter,
         x2 = worker.xCenter - (worker.width / 2),
         y2 = worker.yCenter,
-        xCenter = (x2 - ((x2 - x1) / 2)),
-        yCenter = (y2 - ((y2 - y1) / 2)),
+
+        getXCenter = function(){ 
+            return ((worker.xCenter - (worker.width / 2)) - ((((worker.xCenter - (worker.width / 2)) - (task.xCenter + (task.width / 2))) / 2)));
+        },
+        getYCenter = function(){
+            return (worker.yCenter - ((worker.yCenter - task.yCenter) / 2));
+        },
         
         getFill = function(){
             return '#CCC';
@@ -700,8 +705,8 @@ CMA.SystemDisplay.Connector = function(task, worker, numTasks){
         x2: x2,
         y2: y2,
         numTasks: numTasks,
-        xCenter: xCenter,
-        yCenter: yCenter,
+        getXCenter: getXCenter,
+        getYCenter: getYCenter,
         getFill: getFill
     };
 };
