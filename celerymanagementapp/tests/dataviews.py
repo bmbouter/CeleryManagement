@@ -1,9 +1,12 @@
 import json
+import datetime
 
 from django.core.urlresolvers import reverse as urlreverse
 
+from celerymanagementapp import timeutil
 from celerymanagementapp.tests import base, testcase_settings
 from celerymanagementapp.models import OutOfBandWorkerNode, Provider
+from celerymanagementapp.models import PolicyModel
 
 
 class XYDataView_TestCase(base.CeleryManagement_DBTestCaseBase):
@@ -77,12 +80,237 @@ class Configuration_TestCase(base.CeleryManagement_TestCaseBase):
         self.assertEquals(len(providers), 1)
 
 
-# class WorkerSubprocessesDataview_TestCase(base.CeleryManagement_DBTestCaseBase):
-    # pass
+class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
+    fixtures = ['test_policy']
+    
+    def test_basic(self):
+        model_count = PolicyModel.objects.all().count()
+        url = urlreverse('celerymanagementapp.dataviews.policy_create')
+        json_request = {
+            'name': 'another_policy',
+            'source': 'policy:\n schedule:\n  True\n apply:\n  True',
+            'enabled': True,
+        }
         
-# class PendingTaskCountDataview_TestCase(base.CeleryManagement_DBTestCaseBase):
-    # pass
+        expected_output = {
+            'success': True,
+            'record': {
+                'id': model_count + 1, 
+                'name': 'another_policy', 
+                'source': 'policy:\n schedule:\n  True\n apply:\n  True', 
+                'enabled': True, 
+                'modified': None, 
+                'last_run_time': None,
+                },
+            'error_info': {
+                'compile_error': False, 
+                'type': '', 
+                'msg': '', 
+                'traceback': '',
+                },
+            }
+        rawjson = json.dumps(json_request)
+        response = self.client.post(url, rawjson, content_type='application/json')
+        output = json.loads(response.content)
         
-# class TasksPerWorkerDataview_TestCase(base.CeleryManagement_DBTestCaseBase):
-    # pass
+        self.assertEquals(expected_output, output)
+        self.assertEquals(model_count + 1, PolicyModel.objects.all().count())
+        
+    def test_disabled(self):
+        # Create a Policy that is initially disabled.
+        model_count = PolicyModel.objects.all().count()
+        url = urlreverse('celerymanagementapp.dataviews.policy_create')
+        json_request = {
+            'name': 'another_policy',
+            'source': 'policy:\n schedule:\n  True\n apply:\n  True',
+            'enabled': False,
+        }
+        
+        expected_output = {
+            'success': True,
+            'record': {
+                'id': model_count + 1, 
+                'name': 'another_policy', 
+                'source': 'policy:\n schedule:\n  True\n apply:\n  True', 
+                'enabled': False, 
+                'modified': None, 
+                'last_run_time': None,
+                },
+            'error_info': {
+                'compile_error': False, 
+                'type': '', 
+                'msg': '', 
+                'traceback': '',
+                },
+            }
+        rawjson = json.dumps(json_request)
+        response = self.client.post(url, rawjson, content_type='application/json')
+        output = json.loads(response.content)
+        
+        self.assertEquals(expected_output, output)
+        self.assertEquals(model_count + 1, PolicyModel.objects.all().count())
+        
+    def test_nocompile(self):
+        # The policy contains source code that is not in the expected format.
+        from celerymanagementapp.policy import exceptions
+        model_count = PolicyModel.objects.all().count()
+        url = urlreverse('celerymanagementapp.dataviews.policy_create')
+        json_request = {
+            'name': 'nocompile_policy',
+            'source': 'This should not compile',  # not legal policy source
+            'enabled': True,
+        }
+        rawjson = json.dumps(json_request)
+        response = self.client.post(url, rawjson, content_type='application/json')
+        output = json.loads(response.content)
+        
+        self.assertEquals(False, output['success'])
+        self.assertEquals(True, output['error_info']['compile_error'])
+        self.assertEquals(str(exceptions.SyntaxError), output['error_info']['type'])
+        self.assertTrue(output['error_info']['msg'])
+        # no model objects should have been created
+        self.assertEquals(model_count, PolicyModel.objects.all().count())
+        
+    def test_duplicate_name(self):
+        # A policy with the given name already exists.  No new policy should be 
+        # created.
+        model_count = PolicyModel.objects.all().count()
+        url = urlreverse('celerymanagementapp.dataviews.policy_create')
+        json_request = {
+            'name': 'normal_policy',  # policy with this name already exists
+            'source': 'policy:\n schedule:\n  True\n apply:\n  True',
+            'enabled': True,
+        }
+        rawjson = json.dumps(json_request)
+        response = self.client.post(url, rawjson, content_type='application/json')
+        output = json.loads(response.content)
+        
+        self.assertEquals(False, output['success'])
+        self.assertEquals(False, output['error_info']['compile_error'])
+        self.assertEquals('DuplicateName', output['error_info']['type'])
+        self.assertEquals('', output['error_info']['traceback'])
+        self.assertTrue(output['error_info']['msg'])
+        # no model objects should have been created
+        self.assertEquals(model_count, PolicyModel.objects.all().count())
+        
+    def test_request_missing_key(self):
+        model_count = PolicyModel.objects.all().count()
+        url = urlreverse('celerymanagementapp.dataviews.policy_create')
+        json_request = {
+            'name': 'a_new_policy',  
+            'source': 'policy:\n schedule:\n  True\n apply:\n  True',
+            # Missing 'enabled' key.
+        }
+        rawjson = json.dumps(json_request)
+        response = self.client.post(url, rawjson, content_type='application/json')
+        output = json.loads(response.content)
+        
+        self.assertEquals(False, output['success'])
+        self.assertEquals(False, output['error_info']['compile_error'])
+        self.assertEquals('KeyError', output['error_info']['type'])
+        self.assertEquals('', output['error_info']['traceback'])
+        self.assertTrue(output['error_info']['msg'])
+        # no model objects should have been created
+        self.assertEquals(model_count, PolicyModel.objects.all().count())
+        
+        
+
+class PolicyModify_TestCase(base.CeleryManagement_DBTestCaseBase):
+    fixtures = ['test_policy']
+    
+    def test_basic(self):
+        D = datetime.datetime
+        model_count = PolicyModel.objects.all().count()
+        url = urlreverse('celerymanagementapp.dataviews.policy_modify', 
+                         kwargs={'id': 1} )
+        json_request = {
+            'name': 'another_policy',
+            'source': 'policy:\n schedule:\n  True\n apply:\n  True',
+            'enabled': True,
+        }
+        
+        expected_output = {
+            'success': True,
+            'record': {
+                'id': 1, 
+                'name': 'another_policy', 
+                'source': 'policy:\n schedule:\n  True\n apply:\n  True', 
+                'enabled': True, 
+                'modified': timeutil.datetime_from_python(D(2010,1,4,hour=12)), 
+                'last_run_time': timeutil.datetime_from_python(D(2010,1,4,hour=12)),
+                },
+            'error_info': {
+                'compile_error': False, 
+                'type': '', 
+                'msg': '', 
+                'traceback': '',
+                },
+            }
+            
+        self.assertNotEqual('another_policy', PolicyModel.objects.get(id=1).name)
+        
+        rawjson = json.dumps(json_request)
+        response = self.client.post(url, rawjson, content_type='application/json')
+        output = json.loads(response.content)
+        
+        self.assertEquals(expected_output, output)
+        self.assertEquals(model_count, PolicyModel.objects.all().count())
+        self.assertEquals('another_policy', PolicyModel.objects.get(id=1).name)
+        
+    def test_nonexistent_id(self):
+        model_count = PolicyModel.objects.all().count()
+        url = urlreverse('celerymanagementapp.dataviews.policy_modify', 
+                         kwargs={'id': model_count+1} )
+        json_request = {
+            'name': 'another_policy',
+            'source': 'policy:\n schedule:\n  True\n apply:\n  True',
+            'enabled': True,
+        }
+        
+        rawjson = json.dumps(json_request)
+        response = self.client.post(url, rawjson, content_type='application/json')
+        output = json.loads(response.content)
+        
+        self.assertEquals(False, output['success'])
+        self.assertEquals(False, output['error_info']['compile_error'])
+        self.assertEquals('ObjectDoesNotExist', output['error_info']['type'])
+        self.assertEquals('', output['error_info']['traceback'])
+        self.assertTrue(output['error_info']['msg'])
+        # no model objects should have been created
+        self.assertEquals(model_count, PolicyModel.objects.all().count())
+        
+    def test_duplicate_name(self):
+        # A policy with the given name already exists.  No new policy should be 
+        # created.
+        model_count = PolicyModel.objects.all().count()
+        url = urlreverse('celerymanagementapp.dataviews.policy_modify', 
+                         kwargs={'id': 2} )
+        json_request = {
+            'name': 'normal_policy',  # policy with this name already exists
+            'source': 'policy:\n schedule:\n  True\n apply:\n  True',
+            'enabled': True,
+        }
+        rawjson = json.dumps(json_request)
+        response = self.client.post(url, rawjson, content_type='application/json')
+        output = json.loads(response.content)
+        
+        self.assertEquals(False, output['success'])
+        self.assertEquals(False, output['error_info']['compile_error'])
+        self.assertEquals('DuplicateName', output['error_info']['type'])
+        self.assertEquals('', output['error_info']['traceback'])
+        self.assertTrue(output['error_info']['msg'])
+        # no model objects should have been created
+        self.assertEquals(model_count, PolicyModel.objects.all().count())
+        
+
+
+
+
+
+
+
+
+
+
+
 

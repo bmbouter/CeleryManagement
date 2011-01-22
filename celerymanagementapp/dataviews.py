@@ -10,6 +10,7 @@ import tempfile
 import os
 import subprocess
 import time
+import traceback
 
 from django.http import HttpResponse
 from django.conf import settings
@@ -24,13 +25,17 @@ from celery import signals
 from celery.task.control import broadcast, inspect
 from djcelery.models import WorkerState
 
+from celerymanagementapp import timeutil
+
 from celerymanagementapp.jsonquery.filter import JsonFilter
 from celerymanagementapp.jsonquery.xyquery import JsonXYQuery
 from celerymanagementapp.jsonquery.modelmap import JsonTaskModelMap
+from celerymanagementapp.policy import create_policy, save_policy
+from celerymanagementapp.policy import exceptions as policy_exceptions
 
 from celerymanagementapp import tasks, jsonutil
 from celerymanagementapp.models import OutOfBandWorkerNode, RegisteredTaskType
-from celerymanagementapp.models import TaskDemoGroup, Provider
+from celerymanagementapp.models import TaskDemoGroup, Provider, PolicyModel
 from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
 
 #==============================================================================#
@@ -334,14 +339,219 @@ def worker_list_dataview(request):
     
 
 #==============================================================================#
+class PolicyDataviewError(Exception):
+    """ Raised to immediately the stop processing of a Policy-related dataview.  
+        This exception is caught in PolicyDataviewBase.__call__. 
+    """
+    pass
+    
+class PolicyDataviewBase(object):
+    """ Base class for handling Policy-related dataviews.  This is meant to be 
+        subclassed.  The behavior specific to particular dataviews is defined 
+        in those subclasses.
+    """
+    def __init__(self):
+        self.success = False
+        self.record = {'id': -1, 'name': '', 'source': '', 'enabled': False, 
+                       'modified': None, 'last_run_time': None,}
+        self.error_info = {'compile_error': False, 'type': '', 'msg': '', 
+                           'traceback': ''}
+    def _result(self):
+        return (self.success, self.record, self.error_info)
+                
+    def _error(self, **kwargs):
+        """ Sets items in the error_info attribute, then raises a 
+            PolicyDataviewError exception.  This exception is caught in the 
+            __call__ method. 
+        """
+        for k,v in kwargs.iteritems():
+            assert k in self.error_info
+            self.error_info[k] = v
+        raise PolicyDataviewError()
+        
+    def __call__(self, *args, **kwargs):
+        """ Process a dataview request.  Specific behavior is delegated to 
+            subclasses. 
+        """
+        # If an error occurs while processing the request, an exception is 
+        # raised which causes the processing to halt immediately.  The 
+        # exception is caught here.
+        try:
+            self.do_dataview(*args, **kwargs)
+        except PolicyDataviewError:
+            pass
+        return self._result()
+        
+    def do_dataview(self, *args, **kwargs):
+        raise NotImplementedError
+        
+    def parse_json_request(self, json_request, names):
+        # Used by derived classes.
+        try:
+            for name in names:
+                setattr(self, name, json_request[name])
+        except KeyError:
+            names = ', '.join('"{0}"'.format(s) for s in names)
+            s = 'Bad request data.  Expected the keys: {0}.'.format(names)
+            self._error(msg=s, type='KeyError')
+        
+    def get_model(self, id):
+        # Used by derived classes.
+        try:
+            m = PolicyModel.objects.get(id=id)
+        except ObjectDoesNotExist:
+            s = 'There is no policy with the given id: {0}.'.format(id)
+            self._error(msg=s, type='ObjectDoesNotExist')
+        return m
+        
+    def verify_name_is_unique(self, name, id=None):
+        # Used by derived classes.
+        objs = PolicyModel.objects.filter(name=name)
+        if id is None:
+            if objs.exists():
+                s = 'A policy with the name {0} already exists.'.format(name)
+                self._error(msg=s, type='DuplicateName')
+            else:
+                return True
+        else:
+            if objs.exists() and objs[0].id != id:
+                s = 'A different policy with the name "{0}" already exists.'.format(name)
+                self._error(msg=s, type='DuplicateName')
+            else:
+                return True
+            
+    def make_record(self, model):
+        # Used by derived classes.
+        return {
+            'id': model.id,
+            'name': model.name,
+            'source': model.source,
+            'enabled': model.enabled,
+            'modified': model.modified and timeutil.datetime_from_python(model.modified),
+            'last_run_time': model.last_run_time and timeutil.datetime_from_python(model.last_run_time),
+            }
+            
+    def create_policy(self):
+        """ Creates the policy model.  If the source cannot be compiled, this will fail. """
+        # Used by derived classes.
+        try:
+            m = create_policy(self.name, source=self.source, enabled=self.enabled)
+            self.record = self.make_record(m)
+            self.success = True
+        except policy_exceptions.Error as e:
+            self._error(compile_error=True, msg=e.formatted_message, 
+                        type=str(type(e)), traceback='')
+        except Exception as e:
+            self._error(compile_error=True, msg=e.msg, type=str(type(e)), 
+                        traceback=traceback.format_exc())
+        return True
+        
+    def save_policy(self, model):
+        """ Modifies the policy model.  If the source cannot be compiled, this will fail. """
+        # Used by derived classes.
+        try:
+            model.name = self.name
+            model.source = self.source
+            model.enabled = self.enabled
+            save_policy(model)  # This throws if it cannot save.
+            self.record = self.make_record(model)
+            self.success = True
+        except policy_exceptions.Error as e:
+            self._error(compile_error=True, msg=e.formatted_message, 
+                        type=str(type(e)), traceback='')
+        except Exception as e:
+            self._error(compile_error=True, msg=e.msg, type=str(type(e)), 
+                        traceback=traceback.format_exc())
+        return True
+        
+    def delete_policy(self, model):
+        # Used by derived classes.
+        self.record = self.make_record(model)
+        model.delete()
+        self.success = True
+        return True
+        
+    def get_policy(self, model):
+        # Used by derived classes.
+        self.record = self.make_record(model)
+        self.success = True
+        return True
+    
+        
+class PolicyCreate(PolicyDataviewBase):
+    def __init__(self):
+        super(PolicyCreate, self).__init__()
+    def do_dataview(self, json_request):
+        self.parse_json_request(json_request, ('name','source','enabled'))
+        self.verify_name_is_unique(self.name)
+        self.create_policy()
+        
+class PolicyModify(PolicyDataviewBase):
+    def __init__(self):
+        super(PolicyModify, self).__init__()
+    def do_dataview(self, json_request, id):
+        self.parse_json_request(json_request, ('name','source','enabled'))
+        model = self.get_model(id)
+        self.verify_name_is_unique(self.name, id)
+        self.save_policy(model)
+        
+class PolicyDelete(PolicyDataviewBase):
+    def __init__(self):
+        super(PolicyModify, self).__init__()
+    def do_dataview(self, id):
+        model = self.get_model(id)
+        self.delete_policy(model)
+        
+class PolicyGet(PolicyDataviewBase):
+    def __init__(self):
+        super(PolicyModify, self).__init__()
+    def do_dataview(self, id):
+        model = self.get_model(id)
+        self.delete_policy(model)
+        
+
 def policy_create(request):
-    # TODO.....
     json_request = _json_from_post(request)
-    json_request['name']
-    json_request['source']
-    json_request['enabled']
+    creator = PolicyCreate()
+    success, record, error_info = creator(json_request)
+        
+    json_result = {'success':       success, 
+                   'record':        record, 
+                   'error_info':    error_info}
     
     return _json_response(json_result)
+    
+def policy_modify(request, id):
+    json_request = _json_from_post(request)
+    modifier = PolicyModify()
+    success, record, error_info = modifier(json_request, id)
+        
+    json_result = {'success':       success, 
+                   'record':        record, 
+                   'error_info':    error_info}
+    
+    return _json_response(json_result)
+    
+def policy_delete(request, id):
+    deleter = PolicyDelete()
+    success, record, error_info = deleter(id)
+        
+    json_result = {'success':       success, 
+                   'record':        record, 
+                   'error_info':    error_info}
+    
+    return _json_response(json_result)
+    
+def policy_delete(request, id):
+    getter = PolicyGet()
+    success, record, error_info = getter(id)
+        
+    json_result = {'success':       success, 
+                   'record':        record, 
+                   'error_info':    error_info}
+    
+    return _json_response(json_result)
+    
 
 #==============================================================================#
 TASKDEMO_RUNFOR_MAX = 60.*10  # ten minutes

@@ -59,6 +59,8 @@ urlpatterns += patterns('celerymanagementapp',
     # The following allow an explicit number of worker subprocess to be added/removed
     (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/grow/(?P<num>\d+)/$', 'views.grow_worker_pool'),
     (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/shrink/(?P<num>\d+)/$', 'views.shrink_worker_pool'),
+    # for manual testing...
+    (r'^worker/(?P<name>[-\w\d_.]+)/test_commands/$', 'test_views.worker_commands_test_view'),
     
     # manipulating outofbandworker ...
     (r'^outofbandworker/$', 'dataviews.create_outofbandworker'),
@@ -66,15 +68,14 @@ urlpatterns += patterns('celerymanagementapp',
     # manipulating provider ...
     (r'^provider/$', 'dataviews.create_provider'),
     (r'^provider/images/$', 'dataviews.provider_images'),
-
-    # for manual testing...
-    (r'^worker/(?P<name>[-\w\d_.]+)/test_commands/$', 'test_views.worker_commands_test_view'),
     
     (r'^taskdemo/launch/$', 'dataviews.task_demo_dataview'),
     (r'^taskdemo/status/(?P<uuid>[A-Fa-f0-9]{32})/$', 'dataviews.task_demo_status_dataview'),
-    
     # for manual testing...
     (r'^taskdemo/test/$', 'test_views.task_demo_test_dataview'),
+    
+    (r'^policy/create/$', 'dataviews.policy_create'),
+    (r'^policy/modify/(?P<id>\d+)/$', 'dataviews.policy_modify'),
 )
 
 urlpatterns += patterns('celerymanagementapp',
