@@ -77,6 +77,9 @@ urlpatterns += patterns('celerymanagementapp',
     
     (r'^policy/create/$', 'dataviews.policy_create'),
     (r'^policy/modify/(?P<id>\d+)/$', 'dataviews.policy_modify'),
+    (r'^policy/delete/(?P<id>\d+)/$', 'dataviews.policy_delete'),
+    (r'^policy/get/(?P<id>\d+)/$', 'dataviews.policy_get'),
+    (r'^policy/list/$', 'dataviews.policy_list'),
 )
 
 urlpatterns += patterns('celerymanagementapp',

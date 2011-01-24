@@ -357,7 +357,7 @@ def worker_start(request):
 #==============================================================================#
 # Policy dataviews
 class PolicyDataviewError(Exception):
-    """ Raised to immediately the stop processing of a Policy-related dataview.  
+    """ Raised to immediately stop the processing of a Policy-related dataview.  
         This exception is caught in PolicyDataviewBase.__call__. 
     """
     pass
@@ -514,17 +514,17 @@ class PolicyModify(PolicyDataviewBase):
         
 class PolicyDelete(PolicyDataviewBase):
     def __init__(self):
-        super(PolicyModify, self).__init__()
+        super(PolicyDelete, self).__init__()
     def do_dataview(self, id):
         model = self.get_model(id)
         self.delete_policy(model)
         
 class PolicyGet(PolicyDataviewBase):
     def __init__(self):
-        super(PolicyModify, self).__init__()
+        super(PolicyGet, self).__init__()
     def do_dataview(self, id):
         model = self.get_model(id)
-        self.delete_policy(model)
+        self.get_policy(model)
         
 
 def policy_create(request):
@@ -559,7 +559,7 @@ def policy_delete(request, id):
     
     return _json_response(json_result)
     
-def policy_delete(request, id):
+def policy_get(request, id):
     getter = PolicyGet()
     success, record, error_info = getter(id)
         
@@ -568,6 +568,19 @@ def policy_delete(request, id):
                    'error_info':    error_info}
     
     return _json_response(json_result)
+    
+def policy_list(request):
+    def make_row(obj):
+        return {
+            'id': obj.id, 
+            'name': obj.name, 
+            'enabled': obj.enabled, 
+            'modified': obj.modified and timeutil.datetime_from_python(obj.modified), 
+            'last_run_time': obj.last_run_time and timeutil.datetime_from_python(obj.last_run_time),
+            }
+    qs = PolicyModel.objects.all()
+    ret = [make_row(obj) for obj in qs]
+    return _json_response(ret)
     
 
 #==============================================================================#
