@@ -4,6 +4,8 @@ from celerymanagementapp.tests import base, testcase_settings
 from celerymanagementapp.models import OutOfBandWorkerNode
 from celerymanagementapp.forms import OutOfBandWorkerNodeForm
 
+from django.conf import settings
+
 class Configure_TestCase(base.CeleryManagement_TestCaseBase):
     def setUp(self):
         self.configure_url = '/celerymanagementapp/view/configure/'
@@ -18,10 +20,11 @@ class Configure_TestCase(base.CeleryManagement_TestCaseBase):
         self.assertTemplateUsed(response, "celerymanagementapp/configure.html")
         
     def test_get_configure_blank_form(self):
+        settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE = 'static'
         response = self.client.get(self.configure_url)
         out_of_band_worker_node_form = OutOfBandWorkerNodeForm()
         for field in out_of_band_worker_node_form:
-            self.assertContains(response, field.html_name )
+            self.assertContains(response, field.html_name)
     
     def test_get_configure_workers(self):
         f = open(testcase_settings.OUTOFBANDWORKER_SSH_KEY_FILE) #path to ssh_key file for testing
