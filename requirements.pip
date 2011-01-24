@@ -3,6 +3,7 @@ django>=1.2.0
 django-celery
 apache-libcloud
 nose
+git+git://github.com/bmbouter/celerymanagementlib.git#egg=celerymanagementlib
 git+git://github.com/cmheisel/nose-xcover.git#egg=nosexcover
 git+git://github.com/jbalogh/django-nose.git#egg=django-nose
 http://google-visualization-python.googlecode.com/files/gviz_api_py-1.7.0.tar.gz

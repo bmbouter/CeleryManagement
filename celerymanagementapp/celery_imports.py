@@ -1,4 +1,4 @@
 import celerymanagementapp.tasks
 import celerymanagementapp.testutil.tasks
-import celerymanagementapp.policy.control
+import celerymanagementlib.celery_imports
 
