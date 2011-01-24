@@ -221,7 +221,6 @@ class Provider(AbstractWorkerNode):
                 new_vm = self.conn.create_node(name=vm_name, image=node_image, size=self.sizes[0]) 
                 break
             except Exception as e:
-                import pdb;pdb.set_trace()
                 if 'Server name already in use' in e.args[0]:
                     pass
         in_band_worker_node = InBandWorkerNode(instance_id=new_vm.id, provider=self)
