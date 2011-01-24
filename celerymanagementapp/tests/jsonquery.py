@@ -4,7 +4,9 @@ import collections
 import calendar
 
 from celerymanagementapp.jsonquery.xyquery import JsonXYQuery
+from celerymanagementapp.jsonquery.filter import JsonFilter, BadFilterOpArguments
 from celerymanagementapp.jsonquery.modelmap import TestModelModelMap
+from celerymanagementapp.jsonquery.exception import JsonQueryError
 from celerymanagementapp.models import TestModel
 from celerymanagementapp.tests import base
 
@@ -162,6 +164,106 @@ class JsonQuery_DateSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
         output = query.do_query()
         output = sort_result(output)
         self.assertEquals(expected_output, output)
+        
+        
+class JsonQuery_Filter_TestCase(base.CeleryManagement_DBTestCaseBase):
+    fixtures = ['test_jsonquery']
+    
+    def test_empty_filter(self):
+        input = {}
+        filter = JsonFilter(TestModelModelMap(), input)
+        qs = filter(TestModel.objects.all())
+        self.assertEquals(6, qs.count())
+    
+    def test_filter_eq1(self):
+        input = { 'filter': [['enumval','A'],], }
+        filter = JsonFilter(TestModelModelMap(), input)
+        qs = filter(TestModel.objects.all())
+        
+        self.assertEquals(3, qs.count())
+        pks = [obj.pk for obj in qs]
+        pks.sort()
+        self.assertEquals([1,4,6], pks)
+    
+    def test_filter_eq2(self):
+        input = { 'filter': [['enumval','==','A'],], }
+        filter = JsonFilter(TestModelModelMap(), input)
+        qs = filter(TestModel.objects.all())
+        
+        self.assertEquals(3, qs.count())
+        pks = [obj.pk for obj in qs]
+        pks.sort()
+        self.assertEquals([1,4,6], pks)
+    
+    def test_filter_ne(self):
+        input = { 'filter': [['enumval','!=','A'],], }
+        filter = JsonFilter(TestModelModelMap(), input)
+        qs = filter(TestModel.objects.all())
+        
+        self.assertEquals(3, qs.count())
+        pks = [obj.pk for obj in qs]
+        pks.sort()
+        self.assertEquals([2,3,5], pks)
+    
+    def test_filter_gt(self):
+        input = { 'filter': [['intval','>',4],], }
+        filter = JsonFilter(TestModelModelMap(), input)
+        qs = filter(TestModel.objects.all())
+        
+        self.assertEquals(3, qs.count())
+        pks = [obj.pk for obj in qs]
+        pks.sort()
+        self.assertEquals([3,4,5], pks)
+    
+    def test_filter_lt(self):
+        input = { 'filter': [['intval','<',4],], }
+        filter = JsonFilter(TestModelModelMap(), input)
+        qs = filter(TestModel.objects.all())
+        
+        self.assertEquals(2, qs.count())
+        pks = [obj.pk for obj in qs]
+        pks.sort()
+        self.assertEquals([1,2], pks)
+    
+    def test_filter_gte(self):
+        input = { 'filter': [['intval','>=',4],], }
+        filter = JsonFilter(TestModelModelMap(), input)
+        qs = filter(TestModel.objects.all())
+        
+        self.assertEquals(4, qs.count())
+        pks = [obj.pk for obj in qs]
+        pks.sort()
+        self.assertEquals([3,4,5,6], pks)
+    
+    def test_filter_lte(self):
+        input = { 'filter': [['intval','<=',4],], }
+        filter = JsonFilter(TestModelModelMap(), input)
+        qs = filter(TestModel.objects.all())
+        
+        self.assertEquals(3, qs.count())
+        pks = [obj.pk for obj in qs]
+        pks.sort()
+        self.assertEquals([1,2,6], pks)
+        
+    def test_filter_range(self):
+        input = { 'filter': [['intval','range',4,6],], }
+        filter = JsonFilter(TestModelModelMap(), input)
+        qs = filter(TestModel.objects.all())
+        
+        self.assertEquals(3, qs.count())
+        pks = [obj.pk for obj in qs]
+        pks.sort()
+        self.assertEquals([3,4,6], pks)
+        
+    def test_bad_filter_args(self):
+        input = { 'filter': [['enumval','==','A','B'],], }
+        self.assertRaises(BadFilterOpArguments, JsonFilter, TestModelModelMap(), input)
+        input = { 'filter': [['enumval','range','A'],], }
+        self.assertRaises(BadFilterOpArguments, JsonFilter, TestModelModelMap(), input)
+        
+    def test_bad_filter_op(self):
+        input = { 'filter': [['enumval','=','A'],], }
+        self.assertRaises(JsonQueryError, JsonFilter, TestModelModelMap(), input)
     
     
 class JsonQuery_UtilConv_TestCase(base.CeleryManagement_TestCaseBase):

@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from celerymanagementapp.jsonquery.exception import JsonQueryError
 
 #==============================================================================#
@@ -14,43 +16,43 @@ def process_op_range(fieldname, args):
     """ op: [field, 'range', min, max] """
     if len(args)!=2:
         raise BadFilterOpArguments("range")
-    return {'{0}__range'.format(fieldname): (args[0],args[1])}
+    return [], {'{0}__range'.format(fieldname): (args[0],args[1])}
     
 def process_op_gt(fieldname, args):
     """ op: [field, '>', val] """
     if len(args)!=1:
         raise BadFilterOpArguments(">")
-    return {'{0}__gt'.format(fieldname): args[0]}
+    return [], {'{0}__gt'.format(fieldname): args[0]}
     
 def process_op_lt(fieldname, args):
     """ op: [field, '<', val] """
     if len(args)!=1:
         raise BadFilterOpArguments("<")
-    return {'{0}__lt'.format(fieldname): args[0]}
+    return [], {'{0}__lt'.format(fieldname): args[0]}
     
 def process_op_gte(fieldname, args):
     """ op: [field, '>=', val] """
     if len(args)!=1:
         raise BadFilterOpArguments(">=")
-    return {'{0}__gte'.format(fieldname): args[0]}
+    return [], {'{0}__gte'.format(fieldname): args[0]}
     
 def process_op_lte(fieldname, args):
     """ op: [field, '<=', val] """
     if len(args)!=1:
         raise BadFilterOpArguments("<=")
-    return {'{0}__lte'.format(fieldname): args[0]}
+    return [], {'{0}__lte'.format(fieldname): args[0]}
     
 def process_op_eq(fieldname, args):
     """ op: [field, '==', val], or [field, val] """
     if len(args)!=1:
         raise BadFilterOpArguments("==")
-    return {'{0}'.format(fieldname): args[0]}
+    return [], {fieldname: args[0]}
     
 def process_op_ne(fieldname, args):
     """ op: [field, '!=', val] """
     if len(args)!=1:
         raise BadFilterOpArguments("!=")
-    return {'{0}__ne'.format(fieldname): args[0]}
+    return [~Q(**{fieldname: args[0]})], {}
     
 # Map from op name to corresponding op function.
 ops_dict = {
@@ -65,6 +67,20 @@ ops_dict = {
 
 
 #==============================================================================#
+class QueryArgs(object):
+    def __init__(self):
+        self.args = []
+        self.kwargs = {}
+        
+    def update(self, args, kwargs):
+        self.args.extend(args)
+        self.kwargs.update(kwargs)
+        
+    def __str__(self):
+        return 'args: {0},  kwargs: {1}'.format(self.args, self.kwargs)
+    
+    
+
 class JsonFilter(object):
     """ Function object for filtering a Django QuerySet using data from a Json 
         query.
@@ -98,11 +114,10 @@ class JsonFilter(object):
         
     def _map_query_args(self, fieldname, exp):
         """ Convert a fieldname and the trailing portion of a single filter 
-            expression into equivalent Django QuerySet keyword arguments.
+            expression into equivalent Django QuerySet positional and keyword 
+            arguments.
         """
         if len(exp)==1:
-            ##return { '{0}'.format(fieldname): exp[0] }
-            ##return process_op_eq(fieldname, exp)
             opfunc = process_op_eq
         else:
             op = exp[0]
@@ -117,7 +132,7 @@ class JsonFilter(object):
     def _build_query_kwarg(self, exp):
         """ Convert a single filter expression from a Json query into 
             equivalent Django QuerySet keyword arguments.  The return value is 
-            a dict containing these keyword arguments and their values. 
+            a tuple containing positional arguments and keyword arguments.
         """
         query_name = exp[0]
         fieldname = self.modelmap.get_fieldname(query_name)
@@ -129,12 +144,12 @@ class JsonFilter(object):
             is a dict whose contents should be passed to QuerySet.filter() as 
             keyword arguments. 
         """
-        qargs = {}
+        args = QueryArgs()
         filterexps = jsondata.get('filter', None)
         if filterexps:
             for exp in filterexps:
-                qargs.update(self._build_query_kwarg(exp))
-        return qargs
+                args.update(*self._build_query_kwarg(exp))
+        return args
         
     def _build_exclude(self, jsondata):
         """ Convert the 'exclude' values in the given jsondata to the format 
@@ -142,24 +157,24 @@ class JsonFilter(object):
             is a dict whose contents should be passed to QuerySet.exclude() as 
             keyword arguments. 
         """
-        qargs = {}
+        args = QueryArgs()
         filterexps = jsondata.get('exclude', None)
         if filterexps:
             for exp in filterexps:
-                qargs.update(self._build_query_kwarg(exp))
-        return qargs
+                args.update(*self._build_query_kwarg(exp))
+        return args
         
     def _do_filter(self, queryset):
         """ Perform a filter operation on the given queryset.  Return the 
             resulting queryset. 
         """
-        return queryset.filter(**self.filter_args)
+        return queryset.filter(*self.filter_args.args, **self.filter_args.kwargs)
         
     def _do_exclude(self, queryset):
         """ Perform an exclude operation on the given queryset.  Return the 
             resulting queryset. 
         """
-        return queryset.exclude(**self.exclude_args)
+        return queryset.exclude(*self.exclude_args.args, **self.exclude_args.kwargs)
 
 #==============================================================================#
 
