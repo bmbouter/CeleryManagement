@@ -3,6 +3,7 @@ from djcelery.models import WorkerState
 
 from celerymanagementapp.models import TestModel
 
+from celerymanagementapp import timeutil
 from celerymanagementapp.jsonquery import util
 from celerymanagementapp.jsonquery.exception import JsonQueryError
 
@@ -75,31 +76,31 @@ class JsonTaskModelMap(JsonModelMap):
         ('totaltime',   'totaltime',    None,   None),
         
         ('tstamp',      'tstamp', 
-            util.datetime_to_python,    util.datetime_from_python),
+            timeutil.datetime_to_python,    timeutil.datetime_from_python),
         ('sent',        'sent',     
-            util.datetime_to_python,    util.datetime_from_python),
+            timeutil.datetime_to_python,    timeutil.datetime_from_python),
         ('received',    'received',
-            util.datetime_to_python,    util.datetime_from_python),
+            timeutil.datetime_to_python,    timeutil.datetime_from_python),
         ('started',     'started',
-            util.datetime_to_python,    util.datetime_from_python),
+            timeutil.datetime_to_python,    timeutil.datetime_from_python),
         ('succeeded',   'succeeded',
-            util.datetime_to_python,    util.datetime_from_python),
+            timeutil.datetime_to_python,    timeutil.datetime_from_python),
         ('failed',      'failed',
-            util.datetime_to_python,    util.datetime_from_python),
+            timeutil.datetime_to_python,    timeutil.datetime_from_python),
         
         ('routing_key', 'routing_key',  None,   None),
         ('expires',     'expires',
-            util.datetime_to_python,    util.datetime_from_python),
+            timeutil.datetime_to_python,    timeutil.datetime_from_python),
         ('result',      'result',       None,   None),
         ('eta',         'eta',
-            util.datetime_to_python,    util.datetime_from_python),
+            timeutil.datetime_to_python,    timeutil.datetime_from_python),
         ]
         
 #==============================================================================#
 class TestModelModelMap(JsonModelMap):
     model = TestModel
     field_info = [
-        ('date',    'date',     util.date_to_python, util.date_from_python),
+        ('date',    'date',     timeutil.date_to_python, timeutil.date_from_python),
         ('floatval','floatval', None,None),
         ('intval',  'intval',   None,None),
         ('charval', 'charval',  None,None),

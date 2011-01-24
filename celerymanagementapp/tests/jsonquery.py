@@ -267,8 +267,10 @@ class JsonQuery_Filter_TestCase(base.CeleryManagement_DBTestCaseBase):
     
     
 class JsonQuery_UtilConv_TestCase(base.CeleryManagement_TestCaseBase):
+    # TODO: move this to its own module.  The tested functions no longer reside 
+    # in the jsonquery package.
     def test_date_to_python(self):
-        from celerymanagementapp.jsonquery.util import date_to_python
+        from celerymanagementapp.timeutil import date_to_python
         today = datetime.date.today()
         ms = int(time.mktime(today.timetuple()) * 1000)
         
@@ -276,7 +278,7 @@ class JsonQuery_UtilConv_TestCase(base.CeleryManagement_TestCaseBase):
         
         
     def test_datetime_to_python(self):
-        from celerymanagementapp.jsonquery.util import datetime_to_python
+        from celerymanagementapp.timeutil import datetime_to_python
         now = datetime.datetime.now()
         now = now.replace(microsecond=0)
         ms = int(time.mktime(now.timetuple()) * 1000)
@@ -285,7 +287,7 @@ class JsonQuery_UtilConv_TestCase(base.CeleryManagement_TestCaseBase):
         
         
     def test_date_from_python(self):
-        from celerymanagementapp.jsonquery.util import date_from_python
+        from celerymanagementapp.timeutil import date_from_python
         today = datetime.date.today()
         ms = int(time.mktime(today.timetuple()) * 1000)
         
@@ -293,7 +295,7 @@ class JsonQuery_UtilConv_TestCase(base.CeleryManagement_TestCaseBase):
         
         
     def test_datetime_from_python(self):
-        from celerymanagementapp.jsonquery.util import datetime_from_python
+        from celerymanagementapp.timeutil import datetime_from_python
         now = datetime.datetime.now()
         now = now.replace(microsecond=0)
         ms = int(time.mktime(now.timetuple()) * 1000)
