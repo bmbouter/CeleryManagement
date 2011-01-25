@@ -111,6 +111,7 @@ class CMRun(DjangoCommand):
         args = freq
         super(CMRun, self).__init__('cmrun', args, **kwargs)
 
+
 #==============================================================================#
 class ProcessSequence(object):
     """ Class that owns processes and destroys them in reverse order of their 
@@ -151,7 +152,7 @@ class ProcessSequence(object):
         
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
-            
+        
     def _close_named_proc(self, procname):
         for i,(name,p) in enumerate(self.processes):
             if name==procname:
@@ -180,8 +181,9 @@ class ProcessSequence(object):
                 exc_type, exc_val, exc_tb = sys.exc_info()
         if exc_type:
             raise exc_type(exc_val)
-    
-    
+
+
+#==============================================================================#
     
     
     

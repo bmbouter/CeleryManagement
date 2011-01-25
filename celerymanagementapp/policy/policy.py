@@ -8,18 +8,22 @@ _policyparser = parser.PolicyParser()
 
 #==============================================================================#
 class Runner(object):
-    def __init__(self, globals, locals):
-        self.globals = globals
-        self.locals = locals
-        # the following are used for testing
-        self.last_globals = {}
-        self.last_locals = {}
+    def __init__(self, envtype):
+        self.env = envtype()
+        self.globals = self.env.globals
+        self.locals = self.env.locals
+        
+    def __enter__(self):
+        return self
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.destroy()
+        
+    def destroy(self):
+        self.env.destroy()
         
     def __call__(self, code, text):
-        globals = self.globals.copy() 
-        locals = self.locals.copy() 
         try:
-            r = eval(code, globals, locals)
+            r = eval(code, self.globals, self.locals)
         except exceptions.StaticError:
             # If the exception is a static Policy exception, reraise it.
             raise
@@ -40,17 +44,7 @@ class Runner(object):
             # ...otherwise re-raise the exception.
             else:
                 raise
-        finally:
-            self.last_globals = globals
-            self.last_locals = locals
         return r
-        
-_schedule_runner = Runner(globals=env.SCHEDULE_GLOBALS, 
-                          locals=env.SCHEDULE_LOCALS)
-_condition_runner = Runner(globals=env.CONDITION_GLOBALS, 
-                           locals=env.CONDITION_LOCALS)
-_apply_runner = Runner(globals=env.APPLY_GLOBALS, 
-                       locals=env.APPLY_LOCALS)
 
 #==============================================================================#
 class Policy(object):
@@ -114,13 +108,16 @@ class Policy(object):
         self.sourcelines = self._source.splitlines()
         ret = _policyparser(self._source)
         schedule_code, self.condition_code, self.apply_code = ret
-        self.schedule = _schedule_runner(schedule_code, self.sourcelines)
+        with Runner(env.ScheduleEnv) as runner:
+            self.schedule = runner(schedule_code, self.sourcelines)
         
     def run_condition(self):
-        return _condition_runner(self.condition_code, self.sourcelines)
+        with Runner(env.ScheduleEnv) as runner:
+            return runner(self.condition_code, self.sourcelines)
         
     def run_apply(self):
-        return _apply_runner(self.apply_code, self.sourcelines)
+        with Runner(env.ScheduleEnv) as runner:
+            return runner(self.apply_code, self.sourcelines)
         
     def is_due(self, last_run_time):
         return self.schedule.is_due(last_run_time)

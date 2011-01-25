@@ -24,9 +24,6 @@ class PolicySectionSplitter(object):
         self.cur = None
         self.peek = None
         self.nexttok()
-        
-    #def untokenize(self, iter):
-    #    return tokenlib.untokenize(iter)
             
     def nexttok(self):
         try:
@@ -239,7 +236,7 @@ class SectionParser(object):
     def check_tokens(self, tokens):
         badnames = self.forbidden_names
         for ty,val,start,end,ln in tokens:
-            if ty==NAME and val in badnames:
+            if ty==NAME and (val in badnames or val.startswith('_')):
                 row,col = start
                 line = self.text[row-1]
                 msg = 'The name "{name}" is not allowed.'.format(name=val)

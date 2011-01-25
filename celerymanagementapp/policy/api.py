@@ -19,7 +19,6 @@ class ApiValidatorError(exceptions.Error):
 
 class TimeIntervalError(exceptions.Error):
     clsname = 'PolicyTimeIntervalError'
-        
 
 
 #==============================================================================#
@@ -118,7 +117,7 @@ class ItemApi(object):
         self._locked = True
         
     def __setattr__(self, name, val):
-        if getattr(self, '_locked', False) and name not in self.assignable_names:
+        if not name.startswith('_') and getattr(self, '_locked', False) and name not in self.assignable_names:
             raise ApiError('Cannot assign to item attribute: {0}'.format(name))
         object.__setattr__(self, name, val)
     
@@ -143,18 +142,21 @@ class ItemsCollectionApi(object):
     def __getitem__(self, names):
         if isinstance(names, basestring):
             names = (names,)
-        return self.ItemApi(names)
+        return self._get_item_api(names)
         
     def all(self):
-        return self.ItemApi(None)
+        return self._get_item_api(None)
+        
+    def _get_item_api(self, names):
+        return self.ItemApi(names)
         
     def __getattr__(self, name):
-        if name not in ('all', '_locked', ):
+        if not name.startswith('_') and name != 'all':
             raise ApiError('Cannot get attribute: {0}'.format(name))
         return object.__getattr__(self, name)
         
     def __setattr__(self, name, val):
-        if getattr(self, '_locked', False):
+        if not name.startswith('_') and getattr(self, '_locked', False):
             raise ApiError('Cannot assign to item collection attribute: {0}'.format(name))
         object.__setattr__(self, name, val)
 
@@ -200,7 +202,7 @@ class TaskSetting(object):
             tmpl = 'Error occurred while setting task attribute: {0}.'
             msg = tmpl.format(self.attrname)
             raise ApiError(msg)
-        signals.on_task_modified(inst.names, self.attrname, value)
+        inst._on_task_modified(self.attrname, value)
         
         
 class TaskApiMeta(type):
@@ -217,14 +219,27 @@ class TaskApi(ItemApi):
     settings_config = TASKAPI_SETTINGS_CONFIG
     assignable_names = set(t[0] for t in settings_config)
     
-    def __init__(self, names=None):
+    def __init__(self, names=None, event_dispatcher=None):
         if not names:
             names = util.get_all_registered_tasks()
+        self._event_dispatcher = event_dispatcher
         super(TaskApi, self).__init__(names)
+        
+    def _on_task_modified(self, attrname, value):
+        print 'TaskApi._on_task_modified(): {0}={1}'.format(attrname, value)
+        self._event_dispatcher.send(signals.CM_TASK_MODIFIED_EVENT, 
+                                    tasknames=self.names, attrname=attrname, 
+                                    value=value)
         
 
 class TasksCollectionApi(ItemsCollectionApi):
     ItemApi = TaskApi
+    def __init__(self, event_dispatcher):
+        self._event_dispatcher = event_dispatcher
+        super(TasksCollectionApi, self).__init__()
+        
+    def _get_item_api(self, names):
+        return self.ItemApi(names, self._event_dispatcher)
     
 #==============================================================================#
 class WorkerPrefetchProxy(object):
@@ -327,6 +342,7 @@ class StatsApi(object):
         return qs.aggregate(Avg('runtime'))['runtime__avg']
 
 
+#==============================================================================#
 
 
 

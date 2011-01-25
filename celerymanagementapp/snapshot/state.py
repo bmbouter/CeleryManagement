@@ -18,8 +18,6 @@ class DispatchedTask(celery_state.Task):
         }
         
     def __init__(self, **fields):
-        ##if 'timestamp' in fields and not fields['timestamp']:
-        ##    fields['timestamp'] = time.time()
         super(DispatchedTask, self).__init__(**dict(self._disptask_defaults, 
                                                     **fields))
         
@@ -53,6 +51,10 @@ class Worker(celery_state.Worker):
 
 
 class State(celery_state.State):
+    def __init__(self):
+        super(State, self).__init__()
+        self.group_handlers['cm'] = self.null_event
+    
     # Overwrite subclass version of this method so we can create DispatchedTasks
     def get_or_create_task(self, uuid):
         """Get or create task by uuid."""
@@ -62,7 +64,6 @@ class State(celery_state.State):
             task = self.tasks[uuid] = DispatchedTask(uuid=uuid)
             return task
     
-    # overwrite...
-    # def get_or_create_worker(self, hostname):
-    #   pass
+    def null_event(self, type, fields):
+        pass
 
