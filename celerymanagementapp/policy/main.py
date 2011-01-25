@@ -130,7 +130,7 @@ def policy_main(app=None, loglevel=0, logfile=None):
                                   logfile=logfile,
                                   name="cm.policy")
     orig_ios = (sys.stdout, sys.stderr)
-    app.log.redirect_stdouts_to_logger(logger, loglevel=logging.INFO)
+    ##app.log.redirect_stdouts_to_logger(logger, loglevel=logging.INFO)
     logger.info('-> cm.policy: Loading policy manager...')
     conn = app.broker_connection()
     try:
