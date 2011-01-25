@@ -66,6 +66,9 @@ APPLY_LOCALS.update(LOCALS)
 
 #==============================================================================#
 class Env(object):
+    """ The environment for an executing a code object.  This provides the 
+        locals and globals dicts. 
+    """
     def __init__(self):
         self._locals = {}
         self._globals = {}

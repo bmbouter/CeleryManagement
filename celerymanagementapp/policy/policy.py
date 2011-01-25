@@ -8,7 +8,11 @@ _policyparser = parser.PolicyParser()
 
 #==============================================================================#
 class Runner(object):
+    """ Execute a code object in a given environment. """
     def __init__(self, envtype):
+        """ envtype:  A callable that takes no arguments and returns an Env 
+                      object. 
+        """
         self.env = envtype()
         self.globals = self.env.globals
         self.locals = self.env.locals
@@ -22,6 +26,10 @@ class Runner(object):
         self.env.destroy()
         
     def __call__(self, code, text):
+        """ Execute the code using the Env object.  text is the source code as 
+            a list of lines.  This is used to write exception information.  The 
+            result of evaluating the code object is returned.
+        """
         try:
             r = eval(code, self.globals, self.locals)
         except exceptions.StaticError:
@@ -87,7 +95,8 @@ class Policy(object):
         self.name = name
         
     def reinit(self, source, name):
-        """ Re-initializes the policy.  This is used """
+        """ Re-initializes the policy.  This is used in specialized 
+            circumstances. """
         assert source is not None
         assert name is not None
         self._initself()
