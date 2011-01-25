@@ -3,8 +3,7 @@ import logging
 
 from celery.task.control import broadcast, inspect
 
-from celerymanagementapp.policy import api
-from celerymanagementapp.policy import util
+from celerymanagementapp.policy import api, signals, util
 
 from celerymanagementapp.testutil import process
 from celerymanagementapp.tests_celery import base
@@ -15,9 +14,9 @@ class PolicyTaskApi_TestCase(base.CeleryManagement_DBTestCaseBase):
         super(PolicyTaskApi_TestCase, self).setUp()
         try:
             print 'Launching celeryd...'
-            self.celeryd = process.DjCeleryd(log='celeryd.log.txt', loglevel='DEBUG')
+            self.celeryd = process.DjCeleryd(log='celeryd.log.txt')
             print 'Launching cmrun...'
-            self.cmrun = process.CMRun(freq=0.1, log='celeryev.log.txt', loglevel='DEBUG')
+            self.cmrun = process.CMRun(freq=0.1, log='celeryev.log.txt')
             time.sleep(2.0)
         except Exception:
             print 'Error encountered while starting celeryd and/or cmrun.'
@@ -52,13 +51,17 @@ class PolicyTaskApi_TestCase(base.CeleryManagement_DBTestCaseBase):
     
     def test_routing_key(self):
         taskname = 'celerymanagementapp.testutil.tasks.simple_test'
-        tasks = api.TasksCollectionApi()
-        self.assertEquals(None, tasks[taskname].routing_key)
-        tasks[taskname].routing_key = 'mykey'
-        self.assertEquals('mykey', tasks[taskname].routing_key)
-        
-        r = self.broadcast('get_task_settings', arguments={'tasknames':[taskname],'setting_names':['routing_key']})
-        self.assertEquals('mykey', r[taskname]['routing_key'])
+        dispatcher = signals.Dispatcher()
+        try:
+            tasks = api.TasksCollectionApi(dispatcher)
+            self.assertEquals(None, tasks[taskname].routing_key)
+            tasks[taskname].routing_key = 'mykey'
+            self.assertEquals('mykey', tasks[taskname].routing_key)
+            
+            r = self.broadcast('get_task_settings', arguments={'tasknames':[taskname],'setting_names':['routing_key']})
+            self.assertEquals('mykey', r[taskname]['routing_key'])
+        finally:
+            dispatcher.close()
         
 
 class PolicyRestoreTaskSettings_TestCase(base.CeleryManagement_DBTestCaseBase):
@@ -75,8 +78,11 @@ class PolicyRestoreTaskSettings_TestCase(base.CeleryManagement_DBTestCaseBase):
         return result
     
     def get_task_setting(self, taskname, settingname):
+        x = ''
         r = self.broadcast('get_task_settings', arguments={'tasknames':[taskname],'setting_names':[settingname]})
-        return r[taskname][settingname]
+        if settingname in r[taskname]:
+            x = r[taskname][settingname]
+        return x
         
     def task_setting_is_undefined(self, taskname, settingname):
         r = self.broadcast('get_task_settings', arguments={'tasknames':[taskname],'setting_names':[settingname]})
@@ -85,20 +91,32 @@ class PolicyRestoreTaskSettings_TestCase(base.CeleryManagement_DBTestCaseBase):
     def test_restore(self):
         taskname = 'celerymanagementapp.testutil.tasks.simple_test'
         with process.ProcessSequence() as procs:
-            procs.add('celeryd', process.DjCeleryd, log='celeryd.log.txt')
-            procs.add('cmrun', process.CMRun, freq=1.0, log='celeryev.log.txt')
-            time.sleep(1.0)
+            dispatcher = signals.Dispatcher()
             
-            tasks = api.TasksCollectionApi()
-            self.assertTrue(self.task_setting_is_undefined(taskname, 'routing_key'))
-            tasks[taskname].routing_key = 'mykey'
-            self.assertEquals('mykey', self.get_task_setting(taskname, 'routing_key'))
-            
-            procs.close('cmrun')
-            # after closing cmrun, any changes should be undone
-            self.assertTrue(self.task_setting_is_undefined(taskname, 'routing_key'), 
-                            'setting = {0}'.format(self.get_task_setting(taskname, 'routing_key'))
-                            )
+            try:
+                procs.add('celeryd', process.DjCeleryd, log='celeryd.log.txt', loglevel='DEBUG')
+                time.sleep(2.0)
+                procs.add('cmrun', process.CMRun, freq=0.1, log='celeryev.log.txt', loglevel='DEBUG')
+                time.sleep(2.0)
+                tasks = api.TasksCollectionApi(dispatcher)
+                self.assertTrue(self.task_setting_is_undefined(taskname, 'routing_key'))
+                print 'A: {0}'.format(time.ctime())
+                tasks[taskname].routing_key = 'mykey'
+                self.assertEquals('mykey', self.get_task_setting(taskname, 'routing_key'))
+                
+                print 'B: {0}'.format(time.ctime())
+                time.sleep(2.0)
+                procs.close('cmrun')
+                print 'C: {0}'.format(time.ctime())
+                time.sleep(1.0)
+                # after closing cmrun, any changes should be undone
+                print 'D: {0}'.format(time.ctime())
+                self.assertTrue(self.task_setting_is_undefined(taskname, 'routing_key'), 
+                                'setting = "{0}"'.format(self.get_task_setting(taskname, 'routing_key'))
+                                )
+                print time.ctime()
+            finally:
+                dispatcher.close()
             
 
 

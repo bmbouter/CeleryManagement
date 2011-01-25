@@ -5,7 +5,7 @@ import math
 
 from celery.schedules import crontab
 
-from celerymanagementapp.policy import api
+from celerymanagementapp.policy import api, signals
 
 
 #==============================================================================#
@@ -49,7 +49,7 @@ SCHEDULE_GLOBALS = {}
 SCHEDULE_LOCALS = { 'crontab': crontab, }
 CONDITION_GLOBALS = { 'stats': api.StatsApi(), }
 CONDITION_LOCALS = {}
-APPLY_GLOBALS = { 'tasks': api.TasksCollectionApi(), 
+APPLY_GLOBALS = { #'tasks': api.TasksCollectionApi(), 
                   'workers': api.WorkersCollectionApi(), 
                   'stats': api.StatsApi(),
                 }
@@ -65,3 +65,52 @@ APPLY_GLOBALS.update(GLOBALS)
 APPLY_LOCALS.update(LOCALS)
 
 #==============================================================================#
+class Env(object):
+    """ The environment for an executing a code object.  This provides the 
+        locals and globals dicts. 
+    """
+    def __init__(self):
+        self._locals = {}
+        self._globals = {}
+        
+    def __enter__(self):
+        return self
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.destroy()
+    def destroy(self):
+        pass
+    
+    @property
+    def globals(self):
+        return self._globals
+    @property
+    def locals(self):
+        return self._locals
+        
+        
+class ScheduleEnv(Env):
+    def __init__(self):
+        super(ScheduleEnv, self).__init__()
+        self._locals.update(SCHEDULE_LOCALS)
+        self._globals.update(SCHEDULE_GLOBALS)
+        
+class ConditionEnv(Env):
+    def __init__(self):
+        super(ConditionEnv, self).__init__()
+        self._locals.update(CONDITION_LOCALS)
+        self._globals.update(CONDITION_GLOBALS)
+        
+class ApplyEnv(Env):
+    def __init__(self):
+        super(ApplyEnv, self).__init__()
+        self._dispatcher = signals.Dispatcher()
+        self._locals.update(APPLY_LOCALS)
+        self._globals.update(APPLY_GLOBALS)
+        self._globals.update({'tasks': api.TasksCollectionApi(self._dispatcher)})
+        
+    def destroy(self):
+        self._dispatcher.close()
+
+#==============================================================================#
+
+

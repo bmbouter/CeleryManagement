@@ -100,14 +100,14 @@ class Camera(DjCeleryCamera):
 
 # evcam function taken from celery.events.snapshot
 def evcam(camera, freq=1.0, maxrate=None, loglevel=0,
-        logfile=None, app=None):
+        logfile=None, app=None, **kwargs):
     app = app_or_default(app)
     if not isinstance(loglevel, int):
         loglevel = LOG_LEVELS[loglevel.upper()]
     logger = app.log.setup_logger(loglevel=loglevel,
                                   logfile=logfile,
                                   name="cm.evcam")
-    app.log.redirect_stdouts_to_logger(logger, loglevel=logging.INFO)
+    ##app.log.redirect_stdouts_to_logger(logger, loglevel=logging.INFO)
     logger.info(
         "-> cm.evcam: Taking snapshots with %s (every %s secs.)\n" % (
             camera, freq))

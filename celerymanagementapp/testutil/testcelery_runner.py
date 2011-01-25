@@ -46,19 +46,22 @@ ENV = os.environ
 
 
 class TestRunner(DjangoTestSuiteRunner):
-    def __init__(self, verbosity=1, interactive=True, failfast=True, tests=[], options={}, **kwargs):
+    def __init__(self, verbosity=1, interactive=True, failfast=True, tests=None, options={}, **kwargs):
         super(TestRunner,self).__init__(verbosity, interactive, failfast, **kwargs)
-        self.testlist = tests
+        self.testlist = tests or []
         self.options = options
     
-    def build_suite(self):
+    def build_suite(self, test_labels=None):
+        test_labels = test_labels or []
         suite = unittest.TestSuite()
         loader = unittest.TestLoader()
         for testcase in self.testlist:
             if isinstance(testcase, unittest.TestCase):
-                suite.addTest(loader.loadTestsFromTestCase(testcase))
+                if not test_labels or testcase.__class__.__name__ in test_labels:
+                    suite.addTest(loader.loadTestsFromTestCase(testcase))
             elif isinstance(testcase, unittest.TestSuite):
-                suite.addTest(testcase)
+                if not test_labels or testcase.__class__.__name__ in test_labels:
+                    suite.addTest(testcase)
             else:
                 msg = 'Unrecognized type for given testcase.  '
                 msg += 'Must be TestSuite or TestCase.\n'
@@ -66,7 +69,7 @@ class TestRunner(DjangoTestSuiteRunner):
                 raise RuntimeError(msg)
         return suite
         
-    def run_tests(self):
+    def run_tests(self, test_labels=None):
         options = {
             'settings': self.options.get('settings',None),
             }
@@ -74,7 +77,7 @@ class TestRunner(DjangoTestSuiteRunner):
         oldconfig = self.setup_databases()
         
         ##with DBContextManager(self):
-        suite = self.build_suite()
+        suite = self.build_suite(test_labels)
         ##with CeleryContextManager(**options):
         result = self.run_suite(suite)
         
@@ -148,9 +151,9 @@ class TestRunner(DjangoTestSuiteRunner):
         # self.terminate()
         
         
-def runtests(tests, verbosity=1, failfast=False):
+def runtests(tests, verbosity=1, failfast=False, test_labels=None):
     runner = TestRunner(verbosity=verbosity, tests=tests, failfast=failfast)
-    runner.run_tests()
+    runner.run_tests(test_labels=test_labels)
 
 
 def get_test_cases():
@@ -173,7 +176,7 @@ def main(*args, **options):
     process.DEFAULT_SETTINGS = settings.SETTINGS_MODULE
     
     testcases = get_test_cases()
-    runtests(tests=testcases)
+    runtests(tests=testcases,test_labels=args)
 
 
 if __name__=='__main__':

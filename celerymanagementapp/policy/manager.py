@@ -12,6 +12,8 @@ from celerymanagementapp.policy import policy, signals, util
 default_time = datetime.datetime(2000,1,1)
 
 class Entry(object):
+    """ An entry in the Policy registry. """
+    
     def __init__(self, policy, modified, last_run_time=None):
         self.policy = policy
         self.last_run_time = last_run_time or default_time
@@ -31,6 +33,7 @@ class Entry(object):
 
 #==============================================================================#
 class Registry(object):
+    """ The collection of enabled Policies within the system. """
     def __init__(self, logger):
         self.logger = logger
         self.data = {}
@@ -47,6 +50,9 @@ class Registry(object):
         return self.data.itervalues()
         
     def register(self, obj):
+        """ Register a PolicyModel object that is not currently in the 
+            Registry. 
+        """
         assert obj.enabled
         assert obj.id not in self.data
         policyobj = policy.Policy(source=obj.source, id=obj.id, name=obj.name)
@@ -54,6 +60,7 @@ class Registry(object):
         self.data[obj.id] = entry
         
     def reregister(self, obj):
+        """ Update the information of a PolicyModel that has been modified. """
         assert obj.enabled
         entry = self.data[obj.id]
         assert obj.last_run_time is None or obj.last_run_time <= entry.last_run_time
@@ -61,25 +68,36 @@ class Registry(object):
         entry.update(modified=obj.modified)
         
     def unregister(self, id):
+        """ Remove a PolicyModel--is was deleted from the database. """
         del self.data[id]
         
     def refresh(self):
+        """ Examine the PolicyModel objects in the database looking for changes. 
+        
+            Newly-enabled Policies are registered, newly-disabled Policies are 
+            unregistered, and enabled Policies with other changes are 
+            reregistered.
+        """
         updated = False
         objects = PolicyModel.objects.all()
         for id,entry in self.data.iteritems():
             try:
                 obj = objects.get(id=id)
+                # existing enabled Policy was modified
                 if obj.enabled and obj.modified > entry.modified:
                     self.reregister(obj)
                     updated = True
+                # existing enabled Policy was disabled
                 elif not obj.enabled:
                     self.unregister(id)
                     updated = True
             except ObjectDoesNotExist:
+                # existing enabled Policy was deleted
                 self.unregister(id)
                 updated = True
         
         for obj in objects:
+            # disabled (or new) Policy was enabled
             if obj.enabled and obj.id not in self.data:
                 self.register(obj)
                 updated = True
@@ -87,6 +105,7 @@ class Registry(object):
         return updated
                 
     def save(self, id, current_time):
+        """ Save the Policy with the given id to the database. """
         entry = self.data[id]
         obj = PolicyModel.objects.get(id=id)
         if obj.modified > entry.modified:
@@ -113,7 +132,6 @@ def get_task_settings(workername, tasknames):
                          arguments={'tasknames': tasknames, 
                          'setting_names': _setting_names}, reply=True)
     settings = util._merge_broadcast_result(settings)
-    #print 'settings: {0}'.format(settings)
     if workername:
         return settings.get(workername)
     else:
@@ -141,6 +159,9 @@ def restore_task_settings(restore_data):
 
 
 class TaskSettings(object):
+    """ The current and initial settings for a Task.  See TaskSettingsManager 
+        for more information.
+    """
     def __init__(self, task_name, initial_settings):
         self.name = task_name
         self.initial_settings = initial_settings.copy()
@@ -165,6 +186,13 @@ class TaskSettings(object):
         
 
 class TaskSettingsManager(object):
+    """ Maintains the Task class settings inforamtion.
+
+        When workers start up, their Task classes are updated with the current 
+        settings so that Tasks are consistent across a cluster.  When the 
+        policy-manager shuts down, Task classes are restored to their initial 
+        settings. 
+    """
     def __init__(self, logger):
         self.logger = logger
         self.data = {}
@@ -181,29 +209,6 @@ class TaskSettingsManager(object):
     def _initialize_settings(self):
         tasks_settings = get_all_task_settings()
         
-        # if not isinstance(settings, dict):
-            # self.logger.error(
-                # 'Error retrieving task settings: {0}'.format(settings) + '\n' +
-                # 'This may indicate a worker is not properly configured for use with\n' +
-                # 'CeleryManagement.  Please check that the celeryconfig.py (and/or settings.py\n' + 
-                # 'for django-celery) contains the CeleryManagement imports in the CELERY_IMPORTS\n' + 
-                # 'setting. ' )
-            # return
-        # found_tasks = []
-        # for taskname, tasksettings in settings.iteritems():
-            # if taskname=='error' or not isinstance(tasksettings, dict):
-                # self.logger.error(
-                    # 'Error reading task settings: {0}'.format(tasksettings))
-                # continue
-            # self.logger.debug(
-                # 'Found task settings -> {0}:\n    {1}'.format(
-                    # taskname, 
-                    # '\n    '.join('{0}: {1}'.format(k,v) for k,v in tasksettings)
-                # )
-            # )
-            # ts = TaskSettings(taskname, settings)
-            # found_tasks.append(taskname)
-            # self.data[taskname] = ts
         found_tasks = self._store_settings_info(tasks_settings)
         if found_tasks:
             msg = 'Found existing tasks:\n    '
@@ -242,12 +247,18 @@ class TaskSettingsManager(object):
         return found_tasks
         
     def on_tasks_modified(self, tasknames, setting_name, value):
+        """ Handles the task modified event so that Task class settings can be 
+            updated accordingly. 
+        """
         self.logger.debug('Tasks modified:: {0}: {1} = {2}'.format(','.join(tasknames), setting_name, value))
         for taskname in tasknames:
             if taskname in self.data:
                 self.data[taskname].set(setting_name, value)
                 
     def on_worker_start(self, workername):
+        """ Handles the worker started event so that they can be given the 
+            current Task class settings. 
+        """
         tasknames = util.get_registered_tasks_for_worker(workername)  # TODO
         tasks_settings = dict( (taskname, self.data[taskname].current()) 
                                for taskname in tasknames 
@@ -257,14 +268,14 @@ class TaskSettingsManager(object):
         new_tasknames = [s for s in tasknames if s not in self.data]
         new_task_settings = get_task_settings(workername, new_tasknames)
         found_tasks = self._store_settings_info(new_task_settings)
-        #for taskname,settings in new_task_settings.iteritems():
-        #    ts = TaskSettings(taskname, settings)
-        #    self.data[taskname] = ts
         msg = 'Worker "{0}" has started.\nFound the following tasks:\n    '.format(workername)
         msg += '\n    '.join((name + ('*' if name in new_tasknames else '')) for name in tasknames)
         self.logger.info(msg)
                     
     def restore(self):
+        """ Restores the Task classes' initial settings.  This is used when the 
+            policy-manager shuts down. 
+        """
         restore_data = {}
         for taskname,settings in self.data.iteritems():
             restore,erase = settings.restore()

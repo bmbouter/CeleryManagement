@@ -5,8 +5,9 @@ import types
 from celerymanagementapp.tests import base
 from celerymanagementapp import policy
 from celerymanagementapp.policy import exceptions
-from celerymanagementapp.policy.policy import _apply_runner
-from celerymanagementapp.policy.env import ModuleWrapper
+##from celerymanagementapp.policy.policy import _apply_runner
+from celerymanagementapp.policy.policy import Runner
+from celerymanagementapp.policy import env
 
 
 
@@ -55,7 +56,7 @@ policy:
 #==============================================================================#
 class Env_TestCase(base.CeleryManagement_TestCaseBase):
     def check_object_dict(self, name, obj):
-        if isinstance(obj, ModuleWrapper):
+        if isinstance(obj, env.ModuleWrapper):
             dict = obj.__dict__['data']
         else:
             dict = obj.__dict__
@@ -69,18 +70,20 @@ class Env_TestCase(base.CeleryManagement_TestCaseBase):
                 raise
         
     def test_modules(self):
-        self.assertFalse(isinstance(_apply_runner.globals['time'], types.ModuleType))
-        self.assertEquals(type(_apply_runner.globals['datetime']), ModuleWrapper)
-        self.assertEquals(type(_apply_runner.globals['calendar']), ModuleWrapper)
-        self.assertEquals(type(_apply_runner.globals['time']), ModuleWrapper)
-        self.assertEquals(type(_apply_runner.globals['math']), ModuleWrapper)
+        with Runner(env.ApplyEnv) as runner:
+            self.assertFalse(isinstance(runner.globals['time'], types.ModuleType))
+            self.assertEquals(type(runner.globals['datetime']), env.ModuleWrapper)
+            self.assertEquals(type(runner.globals['calendar']), env.ModuleWrapper)
+            self.assertEquals(type(runner.globals['time']), env.ModuleWrapper)
+            self.assertEquals(type(runner.globals['math']), env.ModuleWrapper)
         
                 
     def test_names(self):
-        globals = _apply_runner.globals
-        for k,v in _apply_runner.globals.iteritems():
-            if hasattr(v, '__dict__'):
-                self.check_object_dict(k,v)
+        with Runner(env.ApplyEnv) as runner:
+            globals = runner.globals
+            for k,v in runner.globals.iteritems():
+                if hasattr(v, '__dict__'):
+                    self.check_object_dict(k,v)
                 
 
 
@@ -237,14 +240,16 @@ policy:
         expr = 'x = 5'
         testdata = self.src(expr)
         p = policy.Policy(testdata)
-        r = p.run_apply()
-        self.assertEquals(5, _apply_runner.last_locals['x'])
+        with Runner(env.ApplyEnv) as runner:
+            r = runner(p.apply_code, p.sourcelines) # Policy.run_apply()
+        self.assertEquals(5, runner.locals['x'])
     
     def test_basic_api(self):
         testdata = self.src('t = time.time()')
         p = policy.Policy(testdata)
-        r = p.run_apply()
-        self.assertEquals(float, type(_apply_runner.last_locals['t']))
+        with Runner(env.ApplyEnv) as runner:
+            r = runner(p.apply_code, p.sourcelines) # Policy.run_apply()
+        self.assertEquals(float, type(runner.locals['t']))
         
 #==============================================================================#
 

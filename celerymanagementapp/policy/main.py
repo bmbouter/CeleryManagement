@@ -13,6 +13,9 @@ MIN_LOOP_SLEEP_TIME = 30  # seconds
 MAX_LOOP_SLEEP_TIME = 60*2  # seconds
 
 class PolicyMain(object):
+    """ The main Policy application class.  Policies are actually executed 
+        here. 
+    """
     def __init__(self, connection, logger, app=None):
         ##print 'cmrun: Starting PolicyMain...'
         self.logger = logger
@@ -39,6 +42,7 @@ class PolicyMain(object):
         self.logger.debug('PolicyMain.cleanup()... complete.')
         
     def loop(self):
+        """ The main policy-manager loop. """
         ##print 'cmrun: Starting PolicyMain loop...'
         self.logger.debug('Starting PolicyMain loop...')
         try:
@@ -58,12 +62,18 @@ class PolicyMain(object):
         self.registry.refresh()
         
     def handle_messages(self, sleeptime):
+        """ Handles Celery events until sleeptime seconds has elapsed or an 
+            exception is thrown. 
+        """
         try:
             self.event_receiver.capture(limit=None, timeout=sleeptime)
         except socket.timeout:
             pass
         
     def run_ready_policies(self):
+        """ Look for Policies that may be due to be run, and try to run 
+            them. 
+        """
         now = datetime.datetime.now()
         modified_ids = []
         run_deltas = []
@@ -91,6 +101,11 @@ class PolicyMain(object):
         return min(run_deltas+[MAX_LOOP_SLEEP_TIME])
         
     def maybe_run_policy(self, entry):
+        """ Check to see if a Policy is due to be run, and if so, run it.  
+        
+            Exceptions will not propagate from here.  This prevents an 
+            exception from one Policy from denying others the chance to run.
+        """
         was_run = False
         try:
             is_due, next_run_delta = entry.is_due()
@@ -106,11 +121,18 @@ class PolicyMain(object):
             msg += '{0}\n'.format(entry.policy.name)
             msg += 'The following is the traceback:\n'
             msg += traceback.format_exc()
+            # Print excetion traceback to the log so at least the user knows it 
+            # occurred.
             self.logger.error(msg)
             next_run_delta = 0
         return (was_run, next_run_delta)
             
     def run_policy(self, policyobj):
+        """ Run the given Policy.
+            
+            First, the Policy's condition section is run.  If that evaluates to 
+            true, then the apply section is run.
+        """
         name = policyobj.name
         self.logger.debug('Checking policy {0} (condition)'.format(name))
         if policyobj.run_condition():
@@ -120,6 +142,7 @@ class PolicyMain(object):
         
 #==============================================================================#
 def policy_main(app=None, loglevel=0, logfile=None):
+    """ Policy manager entry-point function. """
     ##print 'cmrun: Loading policy manager...'
     import logging
     import sys
@@ -130,7 +153,7 @@ def policy_main(app=None, loglevel=0, logfile=None):
                                   logfile=logfile,
                                   name="cm.policy")
     orig_ios = (sys.stdout, sys.stderr)
-    app.log.redirect_stdouts_to_logger(logger, loglevel=logging.INFO)
+    ##app.log.redirect_stdouts_to_logger(logger, loglevel=logging.INFO)
     logger.info('-> cm.policy: Loading policy manager...')
     conn = app.broker_connection()
     try:
