@@ -2,7 +2,7 @@ from django.core.urlresolvers import reverse as urlreverse
 
 from celerymanagementapp.tests import base, testcase_settings
 from celerymanagementapp.models import OutOfBandWorkerNode
-from celerymanagementapp.forms import OutOfBandWorkerNodeForm
+from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
 
 from django.conf import settings
 
@@ -34,15 +34,15 @@ class Configure_TestCase(base.CeleryManagement_TestCaseBase):
     def test_get_configure_blank_form_dynamic(self):
         settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE = 'dynamic'
         response = self.client.get(self.configure_url)
-        in_band_band_worker_node_form = InBandWorkerNodeForm()
-        for field in in_band_worker_node_form:
+        provider_form = ProviderForm()
+        for field in provider_form:
             self.assertContains(response, field.html_name)
 
     def test_get_configure_workers(self):
         f = open(testcase_settings.OUTOFBANDWORKER_SSH_KEY_FILE) #path to ssh_key file for testing
         self.client.post(self.outofbandworker_url, {
                         'ip' : testcase_settings.OUTOFBANDWORKER_IP,
-                        'username' : testcase_settings.OUTOFBANDWORKER_USERNAME,
+                        'celeryd_username' : testcase_settings.OUTOFBANDWORKER_USERNAME,
                         'ssh_key' : f,
                         'celeryd_start_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_START ,
                         'celeryd_stop_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_STOP,
