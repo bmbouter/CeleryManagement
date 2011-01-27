@@ -312,34 +312,37 @@ class StatsApi(object):
     ## [FAILURE, REVOKED, RETRY]
         
     def tasks_failed(self, interval=None, workers=None, tasknames=None):
-        return self.tasks(states=FAILURE, interval, workers, tasknames)
+        return self.tasks(states=FAILURE, interval=interval, workers=workers, 
+                          tasknames=tasknames)
         
     def tasks_succeeded(self, interval=None, workers=None, tasknames=None):
-        return self.tasks(states=SUCCESS, interval, workers, tasknames)
+        return self.tasks(states=SUCCESS, interval=interval, workers=workers, 
+                          tasknames=tasknames)
         
     def tasks_revoked(self, interval=None, workers=None, tasknames=None):
-        return self.tasks(states=REVOKED, interval, workers, tasknames)
+        return self.tasks(states=REVOKED, interval=interval, workers=workers, 
+                          tasknames=tasknames)
         
     def tasks_ready(self, interval=None, workers=None, tasknames=None):
         """ The number of tasks that have finished executing.  They have 
             succeeded, failed, or been revoked. 
         """
         # READY_STATES = SUCCESS | FAILURE | REVOKED
-        return self.tasks(states=tuple(READY_STATES), interval, workers, 
-                                    tasknames)
+        return self.tasks(states=tuple(READY_STATES), interval=interval, 
+                          workers=workers, tasknames=tasknames)
         
     def tasks_unready(self, interval=None, workers=None, tasknames=None):
         """ The number of tasks that are still in progress.  They have been 
             received, started, retried or are pending. 
         """
         # UNREADY_STATES = PENDING | RECEIVED | STARTED | RETRY
-        return self.tasks(states=tuple(UNREADY_STATES), interval, workers, 
-                                    tasknames)
+        return self.tasks(states=tuple(UNREADY_STATES), interval=interval, 
+                          workers=workers, tasknames=tasknames)
         
     def tasks_sent(self, interval=None, workers=None, tasknames=None):
         """ The number of tasks that have been sent.  This is all tasks. """
-        return self.tasks(states=tuple(ALL_STATES), interval, workers, 
-                                    tasknames)
+        return self.tasks(states=tuple(ALL_STATES), interval=interval, 
+                          workers=workers, tasknames=tasknames)
                                     
     def tasks(self, states=None, interval=None, workers=None, tasknames=None):
         """ The number of tasks that meet the given conditions.
