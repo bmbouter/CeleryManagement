@@ -1,5 +1,6 @@
 import datetime
 import itertools
+import collections
 
 from django.db.models import Avg, Min, Max, Variance
 
@@ -55,19 +56,20 @@ def string_or_sequence(arg):
     return arg
     
 def get_filter_seq_arg(field, arg):
-    if arg:
-        if isinstance(arg, (list, tuple)):
-            return { '{0}__in'.format(field): arg }
+    if arg is not None:
+        if isinstance(arg, collections.Iterable):
+            return { '{0}__in'.format(field): tuple(arg) }
         else:
             return { field: arg }
     return {}
     
-def filter(interval=None, workers=None, tasks=None):
+def filter(states=None, interval=None, workers=None, tasks=None):
     filterargs = {}
     if interval is not None:
         interval = make_time_interval(interval)
         filterargs['sent__gte'] = interval[0]
         filterargs['sent__lt'] = interval[1]
+    filterargs.update(get_filter_seq_arg('state', states))
     filterargs.update(get_filter_seq_arg('worker__hostname', workers))
     filterargs.update(get_filter_seq_arg('name', tasks))
     return DispatchedTask.objects.filter(**filterargs)
@@ -306,39 +308,79 @@ class StatsApi(object):
     def __init__(self):
         pass
         
-    [PENDING, RECEIVED, STARTED, SUCCESS]
-    [FAILURE, REVOKED, RETRY]
-    
-    def tasks_by_states(self, states, interval=None, workers=None, tasknames=None):
-        qs = filter(interval, workers, tasknames)
-        if isinstance(states, (tuple, list)):
-            return qs.filter(state__in=states).count()
-        else:
-            return qs.filter(state=states).count()
+    ## [PENDING, RECEIVED, STARTED, SUCCESS]
+    ## [FAILURE, REVOKED, RETRY]
         
     def tasks_failed(self, interval=None, workers=None, tasknames=None):
-        return self.tasks_by_states(FAILURE, interval, workers, tasknames)
+        return self.tasks(states=FAILURE, interval, workers, tasknames)
         
     def tasks_succeeded(self, interval=None, workers=None, tasknames=None):
-        return self.tasks_by_states(SUCCESS, interval, workers, tasknames)
+        return self.tasks(states=SUCCESS, interval, workers, tasknames)
         
     def tasks_revoked(self, interval=None, workers=None, tasknames=None):
-        return self.tasks_by_states(REVOKED, interval, workers, tasknames)
+        return self.tasks(states=REVOKED, interval, workers, tasknames)
         
     def tasks_ready(self, interval=None, workers=None, tasknames=None):
-        return self.tasks_by_states(tuple(READY_STATES), interval, workers, 
+        """ The number of tasks that have finished executing.  They have 
+            succeeded, failed, or been revoked. 
+        """
+        # READY_STATES = SUCCESS | FAILURE | REVOKED
+        return self.tasks(states=tuple(READY_STATES), interval, workers, 
+                                    tasknames)
+        
+    def tasks_unready(self, interval=None, workers=None, tasknames=None):
+        """ The number of tasks that are still in progress.  They have been 
+            received, started, retried or are pending. 
+        """
+        # UNREADY_STATES = PENDING | RECEIVED | STARTED | RETRY
+        return self.tasks(states=tuple(UNREADY_STATES), interval, workers, 
                                     tasknames)
         
     def tasks_sent(self, interval=None, workers=None, tasknames=None):
-        return self.tasks_by_states(tuple(UNREADY_STATES), interval, workers, 
+        """ The number of tasks that have been sent.  This is all tasks. """
+        return self.tasks(states=tuple(ALL_STATES), interval, workers, 
                                     tasknames)
+                                    
+    def tasks(self, states=None, interval=None, workers=None, tasknames=None):
+        """ The number of tasks that meet the given conditions.
+        
+            states: 
+                A single Celery Task state or an iterable of many states.
+                
+            interval: 
+                The interval of time in which tasks started.  This can be a 
+                single timedelta, or a pair of timedeltas, datetimes, or one of 
+                each.  The meanings of each are as follows:
+                timedelta
+                    The interval of time between now and timedelta before now.
+                (timedelta a, timedelta b)
+                    The interval of time between timedelta a and timedelta b 
+                    before now.
+                (datetime a, timedelta b)
+                    The interval of time between a and timedelta b after a.
+                (timedelta a, datetime b)
+                    The interval of time between timedelta a before b and b.
+                (datetime a, datetime b)
+                    The interval of time between a and b.
+                In all cases, the pair is corrected after applying the above 
+                changes so that the minimum value is on the left and the 
+                maximum is on the right.
+                
+            workers:
+                The name of a worker as a string, or an iterable of such 
+                strings.
+                
+            tasknames:
+                The name of a task as a string, or an iterable of such strings.
+        """
+        return filter(states, interval, workers, tasknames).count()
     
-    def mean_waittime(self, interval=None, workers=None, tasknames=None):
-        qs = filter(interval, workers, tasknames).exclude(waittime=None)
+    def mean_waittime(self, states=None, interval=None, workers=None, tasknames=None):
+        qs = filter(states, interval, workers, tasknames).exclude(waittime=None)
         return qs.aggregate(Avg('waittime'))['waittime__avg']
     
-    def mean_runtime(self, interval=None, workers=None, tasknames=None):
-        qs = filter(interval, workers, tasknames).exclude(runtime=None)
+    def mean_runtime(self, states=None, interval=None, workers=None, tasknames=None):
+        qs = filter(states, interval, workers, tasknames).exclude(runtime=None)
         return qs.aggregate(Avg('runtime'))['runtime__avg']
 
 
