@@ -72,45 +72,40 @@ CMA.Core.DataParser = (function() {
     }
     
     var stateData = function(dataArray) {
-        var data = [];
-        var count = 0;
+        var data = [ ];
+        var workerLabels = [ ];
+        var axisLabels = [ ];
         
-        for(var item in dataArray) {
-            if(dataArray.hasOwnProperty(item)) {
-                var arr = dataArray[item];
-            
-                var label = arr[0];
-            
-                for(var method in arr[1]) {
-                    if(arr[1].hasOwnProperty(method)) {
-                        var methodsArray = arr[1][method].methods;
-                    
-                        if(methodsArray[0].name === 'enumerate') {
-                            valueArray = methodsArray[0].value;
-                        
-                        
-                            for(var value in valueArray) {
-                                if(valueArray.hasOwnProperty(value)) {
-                                    var obj = { };
-                                    obj.data = [];
-    
-                                    obj.label = label + ' - ' + valueArray[value][0];
-                                    obj.data.push([count, valueArray[value][1]]);
-    
-                                    data.push(obj);
-                                }
-                            }
-                         
-                            count+=1;
-                        }
-                    }
-                }
-            }
+        var i, j;
+        var length = dataArray.length;
+        var valueLength = dataArray[0][1][0].methods[0].value.length;
+        
+        for(i = 0; i < length; i++) {
+            workerLabels[i] = dataArray[i][0];
         }
+        
+        for(i = 0; i < valueLength; i++) {
+            axisLabels[i] = dataArray[0][1][0].methods[0].value[i][0];
+        }
+        
+        for(i = 0; i < valueLength; i++) {
+            var obj = { };
+            obj.data = [ ];
+            obj.label = workerLabels[i];
+            
+            for(j = 0; j < length; j++) {
+                obj.data.push([j, dataArray[i][1][0].methods[0].value[j][1]]);
+            }
+            
+            data.push(obj);
+            console.log(data);
+        }
+        
+        setTicks(axisLabels);
         
         return data;
     };
-    
+        
     var countData = function(dataArray) {
         var data = [];
         var chartData = [];
