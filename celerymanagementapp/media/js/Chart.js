@@ -1,12 +1,11 @@
-function Chart(loc, data, options) {
+function Chart(loc, d, opt) {
     var chart = loc; //The location of the chart in the DOM (div, span, etc)
-    var data = data; //The data in the chart
-    var options = options; //The options used to display the data
+    var data = d; //The data in the chart
+    var options = opt; //The options used to display the data
     var plot = null; //A variable to hold the Flot object
     var overview = null; //A variable to hold the Flot object that displays an overview
     var typeOfChart = null;
-    this.test = null; //Test variable, not necessary for functioning class
-    
+        
     /**
      * Display the chart using the global data and options
      * This should be called whenever changes are made to the chart
@@ -22,7 +21,7 @@ function Chart(loc, data, options) {
      * @param {Double} point the point (x-value) to change
      * @param {Double} value the new value (y-value)
      */
-    this.changePoint = function(label, point, value) {
+    var changePoint = function(label, point, value) {
         $.each(data, function(i, obj) {
             if(obj.label == label) {
                 $.each(obj.data, function(j, arr) {
@@ -37,7 +36,7 @@ function Chart(loc, data, options) {
         });
 
         displayChart();
-    }
+    };
     
     /**
      * Change a data plot in its entirety (destroys the previous data plot)
@@ -45,7 +44,7 @@ function Chart(loc, data, options) {
      * @param {String} label the data plot to change
      * @param {Array} data the new data
      */
-    this.changeDataPlot = function(label, data) {
+    var changeDataPlot = function(label, data) {
         $.each(this.data, function(i, obj) {
             if(obj.label == label) {
                 obj.data = data;
@@ -54,35 +53,39 @@ function Chart(loc, data, options) {
         });
 
         displayChart();
-    }
+    };
     
     /**
      * Add a data plot to the chart
      *
      * @param {Object} data the data object containing a label and array of data
      */
-    this.addDataPlot = function(data) {
-        this.data.push(data);
+    var addDataPlot = function(d) {
+        data.push(d);
 
         displayChart();
-    }
+    };
     
     /**
      * Displays a bar chart of the current data, using the current options
      *
      * @param {Boolean} stacking true if you want a stacking bar chart, false otherwise
      */
-    this.displayBarChart = function(stacking) {
-        if(options.series == null) {
+    var displayBarChart = function(stacking) {
+        if(options.series === undefined) {
             options.series = { };
         }
         
-        options.series.stack = stacking;
-
-        if(options.series.lines != null) {
+        if(stacking !== undefined && stacking === true) {
+            options.series.stack = true;
+        } else {
+            delete options.series.stack;
+        }
+        
+        if(options.series.lines !== undefined) {
             options.series.lines.show = false;
             
-            if(options.series.points != null) {
+            if(options.series.points !== null) {
                 options.series.points.show = false;
             }
         }
@@ -92,17 +95,21 @@ function Chart(loc, data, options) {
         typeOfChart = 'bar';
 
         displayChart();
-    }
+    };
     
     /**
      * Displays a line chart of the current data, using the current options
      */
-    this.displayLineChart = function() {
-        if(options.series == null) {
+    var displayLineChart = function() {
+        if(options.series === undefined) {
             options.series = { points: { show: true } };
         }
 
-        if(options.series.bars != null) {
+        if(options.series.stack !== undefined) {
+            delete options.series.stack;
+        }
+
+        if(options.series.bars !== undefined) {
             options.series.bars.show = false;
         }
 
@@ -112,28 +119,28 @@ function Chart(loc, data, options) {
         typeOfChart = 'line';
 
         displayChart();
-    }
+    };
     
     /**
      * Enables points on the chart
      */
-    this.enablePoints = function() {
+    var enablePoints = function() {
         options.series.points = {show: true};
 
         displayChart();
-    }
+    };
     
     /**
      * Disables points on the chart
      */
-    this.disablePoints = function() {
+    var disablePoints = function() {
         options.series.points = {show: false};
 
         displayChart();
-    }
+    };
     
-    this.enableLegend = function() {
-        if(options.legend != null) {
+    var enableLegend = function() {
+        if(options.legend !== null) {
             options.legend.show = true;
         } else {
             options.legend = { };
@@ -141,10 +148,10 @@ function Chart(loc, data, options) {
         }
         
         displayChart();
-    }
+    };
     
-    this.disableLegend = function() {
-        if(options.legend != null) {
+    var disableLegend = function() {
+        if(options.legend !== null) {
             options.legend.show = false;
         } else {
             options.legend = { };
@@ -152,7 +159,7 @@ function Chart(loc, data, options) {
         }
         
         displayChart();
-    }
+    };
     
     /**
      * Enable an overview chart at a certain location in the DOM
@@ -161,7 +168,7 @@ function Chart(loc, data, options) {
      *
      * @param {String} loc the location of the overview graph in the DOM
      */
-    this.enableOverview = function(loc) {
+    var enableOverview = function(loc) {
         var opt = {
             series: {
                 lines: { show: true, lineWidth: 1 },
@@ -186,7 +193,7 @@ function Chart(loc, data, options) {
         $(chart).bind('plotselected', function(event, ranges) {
             plotRef = $.plot($(chartRef), dataRef, 
                 $.extend(true, {}, optionsRef, {
-                    xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to },
+                    xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to }
                 }));
             
             overviewRef.setSelection(ranges, true);
@@ -199,41 +206,41 @@ function Chart(loc, data, options) {
         /*$(this.chart).bind('plotselected', function(event, ranges) {
             overviewRef.setSelection(ranges);
         });*/
-    }
+    };
     
     /**
      * Disable an overview chart at a certain location in the DOM
      * 
      * @param {String} loc the location of the overview chart in the DOM
      */
-    this.disableOverview = function(loc) {
+    var disableOverview = function(loc) {
         $(loc).html("");
 
         options.selection.mode = 'none';
 
         displayChart();
-    }
+    };
     
     /**
      * Add a secondary y-axis with some initial data
      * 
      * @param {Object} obj the data to add to the secondary y-axis
      */
-    this.addSecondaryAxis = function(obj) {
-        if(options.y2axis == null) {
+    var addSecondaryAxis = function(obj) {
+        if(options.y2axis === null) {
             obj.yaxis = 2;
             data.push(obj);
-            options.y2axis = { }
+            options.y2axis = { };
         }
             
         displayChart();
-    }
+    };
     
     /**
      * Remove the secondary y-axis and any data associated with it
      */
-    this.removeSecondaryAxis = function() {
-        if(options.y2axis != null) {
+    var removeSecondaryAxis = function() {
+        if(options.y2axis !== null) {
             $.each(data, function(i, obj) {
                 if(obj.yaxis == 2) {
                     data.splice(i, 1);
@@ -244,7 +251,7 @@ function Chart(loc, data, options) {
         }
 
         displayChart();
-    }
+    };
     
     /**
      * Display a checkbox selection for the data that allows you to enable/disable
@@ -252,15 +259,15 @@ function Chart(loc, data, options) {
      * 
      * @param {String} loc the location in the dom to insert the list of checkboxes
      */
-    this.enableDataSelection = function(loc) {
+    var enableDataSelection = function(loc) {
         alert("Not implemented yet!");
-    }
+    };
     
     /**
      * Enable a tooltip display on the chart when you hover over points
      */
-    this.enableTooltips = function() {
-        if(options.grid == null) {
+    var enableTooltips = function() {
+        if(options.grid === null) {
             options.grid = { hoverable: true, clickable: true };
         }
         
@@ -283,10 +290,11 @@ function Chart(loc, data, options) {
 
         $(chart).bind('plothover', function(event, pos, item) {
             if(item) {
-                if($('#tooltip').length != 0 && typeOfChart == 'line') {
+                if($('#tooltip').length !== 0 && typeOfChart === 'line') {
                     //Do nothing if the tooltip is displayed on a point
                     //This makes the tooltip not redraw when we hover on the same point
                     //Only enabled for line charts
+                    var test;
                 } else if(previousPoint != item.datapoint) {
                     previousPoint = item.datapoint;
 
@@ -308,20 +316,20 @@ function Chart(loc, data, options) {
                 $('#tooltip').remove();
             }
         });
-    }
+    };
     
     /**
      * Disable the tooltip display
      */
-    this.disableTooltips = function() {
+    var disableTooltips = function() {
         $('#tooltip').remove();
 
-        if(options.grid != null) {
+        if(options.grid !== null) {
             delete options.grid;
         }
 
         displayChart();
-    }
+    };
 
     /**
      * Enable an annotation on a point on a specific data plot
@@ -330,7 +338,7 @@ function Chart(loc, data, options) {
      * @param {Double} point the x-value to add an annotation to
      * @param {String} text the string of text to use in the annotation
      */
-    this.addAnnotation = function(label, point, text) {
+    var addAnnotation = function(label, point, text) {
         var value = null;
 
         $.each(data, function(i, obj) {
@@ -368,7 +376,7 @@ function Chart(loc, data, options) {
         context.stroke();
         
         context.fillText(text, arrow.left - offset*4, arrow.top - offset*3 + offset/2);
-    }
+    };
     
     /**
      * Remove an annotation that is on a point on a specific data plot
@@ -376,15 +384,51 @@ function Chart(loc, data, options) {
      * @param {String} label the label of the data plot containing the point
      * @param {Double} point the x-value the has the annotation
      */
-    this.removeAnnotation = function(label, point) {
+    var removeAnnotation = function(label, point) {
         $('.' + label + '_' + point).remove();
-    }
+    };
+    
+    /**
+     * Set the ticks on either axis. Currently only takes a valid Flot options
+     * object in the form of:
+     *     {xaxis: { ticks: [[x1, 'label'], [x2, 'label'], ...] }}
+     * 
+     * @param {Object} ticks the options object for ticks
+     */
+    var setTicks = function(ticks) {
+        options = ticks;
+        
+        displayChart();
+    };
 
-    this.getData = function() {
+    var getData = function() {
         return data;
-    }
+    };
 
-    this.getPlot = function() {
+    var getPlot = function() {
         return plot;
-    }
-};
+    };
+
+    return {
+        changePoint: changePoint,
+        changeDataPlot: changeDataPlot,
+        addDataPlot: addDataPlot,
+        displayBarChart: displayBarChart,
+        displayLineChart: displayLineChart,
+        enablePoints: enablePoints,
+        disablePoint: disablePoints,
+        enableLegend: enableLegend,
+        disableLegend: disableLegend,
+        enableOverview: disableOverview,
+        addSecondaryAxis: addSecondaryAxis,
+        removeSecondaryAxis: removeSecondaryAxis,
+        enableDataSelection: enableDataSelection,
+        enableTooltips: enableTooltips,
+        disableTooltips: disableTooltips,
+        addAnnotation: addAnnotation,
+        removeAnnotation: removeAnnotation,
+        setTicks: setTicks,
+        getData: getData,
+        getPlot: getPlot
+    };
+}
