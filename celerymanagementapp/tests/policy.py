@@ -80,10 +80,15 @@ class Env_TestCase(base.CeleryManagement_TestCaseBase):
                 
     def test_names(self):
         with Runner(env.ApplyEnv) as runner:
-            globals = runner.globals
             for k,v in runner.globals.iteritems():
                 if hasattr(v, '__dict__'):
                     self.check_object_dict(k,v)
+                    
+    def test_celery_states(self):
+        states = ['PENDING','RECEIVED','STARTED','SUCCESS','FAILURE','REVOKED','RETRY']
+        with Runner(env.ApplyEnv) as runner:
+            for state in states:
+                self.assertEquals(state, runner.globals[state])
                 
 
 
