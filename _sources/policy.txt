@@ -15,14 +15,14 @@ schedule object.  The `condition` section is also somewhat restricted, and the
 Common API
 ==========
 
-The standard modules ``datetime``, ``time``, ``calendar`` and ``math`` are 
+The standard modules :mod:`datetime`, :mod:`time`, :mod:`calendar` and :mod:`math` are 
 available in all policy sections.  Also available are two utility functions: 
 ``now()`` and ``today()``.  The former returns the current time as a 
 ``datetime.datetime`` object.  The latter returns the current date as a 
 ``datetime.date`` object.
 
 Many of the standard builtin functions are available.  But some, like 
-``eval()`` and ``__import__()`` are not allowed.  The following are available::
+:func:`eval()` and :func:`__import__()` are not allowed.  The following are available::
 
     abs all any basestring bin bool bytearray callable chr cmp complex dict 
     divmod enumerate filter float format frozenset hash help hex id int 
@@ -39,9 +39,9 @@ The following Celery states are available as constants::
     
     PENDING, RECEIVED, STARTED, SUCCESS, FAILURE, REVOKED, RETRY
     
-The following names provide access to the APIs described below::
+The following names provide access to the APIs described below:
 
-    tasks, workers, stats
+    :data:`tasks`, :data:`workers`, :data:`stats`
     
 
 .. _collection: collections_
@@ -49,7 +49,7 @@ The following names provide access to the APIs described below::
 Collections
 ===========
 
-The APIs for tasks_ and workers_ follow the same general pattern.  This is 
+The APIs for :data:`tasks` and :data:`workers` follow the same general pattern.  This is 
 probably easier to demonstrate with a couple of examples.::
 
     tasks.all().the_attribute = value
@@ -94,8 +94,8 @@ equivalent behavior.  Indeed, there may not even be a class by this name.
         :returns: An object which allows setting the attributes of *all* items within the collection.
 
 
-Tasks
-~~~~~
+Tasks Collection
+~~~~~~~~~~~~~~~~
 
 .. data:: tasks
 
@@ -143,8 +143,8 @@ Tasks
 
 
 
-Workers
-~~~~~~~
+Workers Collection
+~~~~~~~~~~~~~~~~~~
 
 .. data:: workers
 
@@ -171,13 +171,13 @@ Workers
             TODO
 
 
-Stats
-=====
+Status & History
+================
 
 .. data:: stats
     
     The `stats` object provides several methods to inspect the current status 
-    of tasks.  The following are the available methods:
+    and past performance of tasks.  The following are the available methods:
     
     .. method:: tasks(states=None, interval=None, workers=None, tasknames=None)
     
@@ -189,17 +189,18 @@ Stats
         :param interval: A single datetime.timedelta object, or a pair of 
             datetime.timedelta and/or datetime.datetime objects (as a tuple).  
             When it is a single timedelta object, the interval spans the time 
-            from timedelta seconds* before now up to now.  When it is a pair, 
-            the interpretation depends on the element types:
+            from timedelta seconds [1]_ before now up to now.  When it is a 
+            pair, the interpretation depends on the element types:
             
-            :timedelta i, datetime j:
-                The time between j and i seconds* before j.
-            :datetime i, timedelta j:
-                The time between i and j seconds* after i.
-            :timedelta i, timedelta j:
-                The time between i seconds* before now and j seconds* before now.
-            :datetime i, datetime j:
-                The time between i and j.
+            ``(timedelta i, datetime j)``:
+                The time between time `j` and `i` seconds [1]_ before time `j`.
+            ``(datetime i, timedelta j)``:
+                The time between time `i` and `j` seconds [1]_ after time `i`.
+            ``(timedelta i, timedelta j)``:
+                The time between `i` seconds [1]_ before now and `j` seconds [1]_ 
+                before now.
+            ``(datetime i, datetime j)``:
+                The time between time `i` and time `j`.
                 
             In all cases, the calculated date pairs are adjusted so the left 
             datetime is less than the right.
@@ -247,6 +248,8 @@ Stats
     
         The average run time of the tasks that meet the given conditions.
         
+.. [1] ``timedelta`` is not restricted to seconds, but using some concrete unit 
+   of time here is clearer.  
 
 Schedules
 =========

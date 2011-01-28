@@ -45,7 +45,7 @@
           <div class="body">
             
   <div class="section" id="policies-api">
-<h1><a class="toc-backref" href="#id2">Policies API</a><a class="headerlink" href="#policies-api" title="Permalink to this headline">¶</a></h1>
+<h1><a class="toc-backref" href="#id8">Policies API</a><a class="headerlink" href="#policies-api" title="Permalink to this headline">¶</a></h1>
 <p>Policies consist of three sections: schedule, condition, and apply.  The API
 varies depending on the section it is in.  The first section, <cite>schedule</cite>,
 provides the most restrictive API since its only purpose is to return a
@@ -54,30 +54,30 @@ schedule object.  The <cite>condition</cite> section is also somewhat restricted
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#policies-api" id="id2">Policies API</a><ul>
-<li><a class="reference internal" href="#common-api" id="id3">Common API</a></li>
-<li><a class="reference internal" href="#collections" id="id4">Collections</a><ul>
-<li><a class="reference internal" href="#tasks" id="id5">Tasks</a></li>
-<li><a class="reference internal" href="#workers" id="id6">Workers</a></li>
+<li><a class="reference internal" href="#policies-api" id="id8">Policies API</a><ul>
+<li><a class="reference internal" href="#common-api" id="id9">Common API</a></li>
+<li><a class="reference internal" href="#collections" id="id10">Collections</a><ul>
+<li><a class="reference internal" href="#tasks-collection" id="id11">Tasks Collection</a></li>
+<li><a class="reference internal" href="#workers-collection" id="id12">Workers Collection</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#stats" id="id7">Stats</a></li>
-<li><a class="reference internal" href="#schedules" id="id8">Schedules</a></li>
-<li><a class="reference internal" href="#examples" id="id9">Examples</a></li>
-<li><a class="reference internal" href="#api-by-section" id="id10">API by Section</a></li>
+<li><a class="reference internal" href="#status-history" id="id13">Status &amp; History</a></li>
+<li><a class="reference internal" href="#schedules" id="id14">Schedules</a></li>
+<li><a class="reference internal" href="#examples" id="id15">Examples</a></li>
+<li><a class="reference internal" href="#api-by-section" id="id16">API by Section</a></li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="section" id="common-api">
-<h2><a class="toc-backref" href="#id3">Common API</a><a class="headerlink" href="#common-api" title="Permalink to this headline">¶</a></h2>
-<p>The standard modules <tt class="docutils literal"><span class="pre">datetime</span></tt>, <tt class="docutils literal"><span class="pre">time</span></tt>, <tt class="docutils literal"><span class="pre">calendar</span></tt> and <tt class="docutils literal"><span class="pre">math</span></tt> are
+<h2><a class="toc-backref" href="#id9">Common API</a><a class="headerlink" href="#common-api" title="Permalink to this headline">¶</a></h2>
+<p>The standard modules <a class="reference external" href="http://docs.python.org/2.7/library/datetime.html#module-datetime" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">datetime</span></tt></a>, <a class="reference external" href="http://docs.python.org/2.7/library/time.html#module-time" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">time</span></tt></a>, <a class="reference external" href="http://docs.python.org/2.7/library/calendar.html#module-calendar" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">calendar</span></tt></a> and <a class="reference external" href="http://docs.python.org/2.7/library/math.html#module-math" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">math</span></tt></a> are
 available in all policy sections.  Also available are two utility functions:
 <tt class="docutils literal"><span class="pre">now()</span></tt> and <tt class="docutils literal"><span class="pre">today()</span></tt>.  The former returns the current time as a
 <tt class="docutils literal"><span class="pre">datetime.datetime</span></tt> object.  The latter returns the current date as a
 <tt class="docutils literal"><span class="pre">datetime.date</span></tt> object.</p>
 <p>Many of the standard builtin functions are available.  But some, like
-<tt class="docutils literal"><span class="pre">eval()</span></tt> and <tt class="docutils literal"><span class="pre">__import__()</span></tt> are not allowed.  The following are available:</p>
+<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a> and <a class="reference external" href="http://docs.python.org/2.7/library/functions.html#__import__" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">__import__()</span></tt></a> are not allowed.  The following are available:</p>
 <div class="highlight-python"><pre>abs all any basestring bin bool bytearray callable chr cmp complex dict
 divmod enumerate filter float format frozenset hash help hex id int
 isinstance issubclass iter len list long map max memoryview min next
@@ -93,13 +93,12 @@ sum tuple unichr unicode xrange zip</pre>
 </pre></div>
 </div>
 <p>The following names provide access to the APIs described below:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">tasks</span><span class="p">,</span> <span class="n">workers</span><span class="p">,</span> <span class="n">stats</span>
-</pre></div>
-</div>
+<blockquote>
+<div><a class="reference internal" href="#tasks" title="tasks"><tt class="xref py py-data docutils literal"><span class="pre">tasks</span></tt></a>, <a class="reference internal" href="#workers" title="workers"><tt class="xref py py-data docutils literal"><span class="pre">workers</span></tt></a>, <a class="reference internal" href="#stats" title="stats"><tt class="xref py py-data docutils literal"><span class="pre">stats</span></tt></a></div></blockquote>
 </div>
 <div class="section" id="collections">
-<h2><a class="toc-backref" href="#id4">Collections</a><a class="headerlink" href="#collections" title="Permalink to this headline">¶</a></h2>
-<p>The APIs for <a class="reference internal" href="#tasks">tasks</a> and <a class="reference internal" href="#workers">workers</a> follow the same general pattern.  This is
+<h2><a class="toc-backref" href="#id10">Collections</a><a class="headerlink" href="#collections" title="Permalink to this headline">¶</a></h2>
+<p>The APIs for <a class="reference internal" href="#tasks" title="tasks"><tt class="xref py py-data docutils literal"><span class="pre">tasks</span></tt></a> and <a class="reference internal" href="#workers" title="workers"><tt class="xref py py-data docutils literal"><span class="pre">workers</span></tt></a> follow the same general pattern.  This is
 probably easier to demonstrate with a couple of examples.:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">tasks</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">the_attribute</span> <span class="o">=</span> <span class="n">value</span>
 <span class="n">tasks</span><span class="p">[</span><span class="s">&#39;taskname&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">the_attribute</span> <span class="o">=</span> <span class="n">value</span>
@@ -171,11 +170,11 @@ group of objects.  Currently, two Collections are available: <tt class="docutils
 
 </dd></dl>
 
-<div class="section" id="tasks">
-<h3><a class="toc-backref" href="#id5">Tasks</a><a class="headerlink" href="#tasks" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="tasks-collection">
+<h3><a class="toc-backref" href="#id11">Tasks Collection</a><a class="headerlink" href="#tasks-collection" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
-<dt>
-<tt class="descname">tasks</tt></dt>
+<dt id="tasks">
+<tt class="descname">tasks</tt><a class="headerlink" href="#tasks" title="Permalink to this definition">¶</a></dt>
 <dd><p>An instance of <a class="reference internal" href="#Collection" title="Collection"><tt class="xref py py-class docutils literal"><span class="pre">Collection</span></tt></a> that allows one to inspect and modify
 selected Celery Task class attributes.  The methods on this object return
 instances of <a class="reference internal" href="#TaskItem" title="TaskItem"><tt class="xref py py-class docutils literal"><span class="pre">TaskItem</span></tt></a>.</p>
@@ -185,7 +184,7 @@ instances of <a class="reference internal" href="#TaskItem" title="TaskItem"><tt
 <dt id="TaskItem">
 <em class="property">class </em><tt class="descname">TaskItem</tt><a class="headerlink" href="#TaskItem" title="Permalink to this definition">¶</a></dt>
 <dd><p>An object which represents one or more Celery Task types.  Such an object
-may be retrieved via the <tt class="xref py py-data docutils literal"><span class="pre">tasks</span></tt> object within a Policy.</p>
+may be retrieved via the <a class="reference internal" href="#tasks" title="tasks"><tt class="xref py py-data docutils literal"><span class="pre">tasks</span></tt></a> object within a Policy.</p>
 <dl class="attribute">
 <dt id="TaskItem.ignore_result">
 <tt class="descname">ignore_result</tt><a class="headerlink" href="#TaskItem.ignore_result" title="Permalink to this definition">¶</a></dt>
@@ -237,11 +236,11 @@ may be retrieved via the <tt class="xref py py-data docutils literal"><span clas
 </dd></dl>
 
 </div>
-<div class="section" id="workers">
-<h3><a class="toc-backref" href="#id6">Workers</a><a class="headerlink" href="#workers" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="workers-collection">
+<h3><a class="toc-backref" href="#id12">Workers Collection</a><a class="headerlink" href="#workers-collection" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
-<dt>
-<tt class="descname">workers</tt></dt>
+<dt id="workers">
+<tt class="descname">workers</tt><a class="headerlink" href="#workers" title="Permalink to this definition">¶</a></dt>
 <dd><p>An instance of <a class="reference internal" href="#Collection" title="Collection"><tt class="xref py py-class docutils literal"><span class="pre">Collection</span></tt></a> that allows one to inspect and modify
 selected attributes of running Celery Workers.  The methods on this object
 return instances of <a class="reference internal" href="#WorkerItem" title="WorkerItem"><tt class="xref py py-class docutils literal"><span class="pre">WorkerItem</span></tt></a>.</p>
@@ -251,7 +250,7 @@ return instances of <a class="reference internal" href="#WorkerItem" title="Work
 <dt id="WorkerItem">
 <em class="property">class </em><tt class="descname">WorkerItem</tt><a class="headerlink" href="#WorkerItem" title="Permalink to this definition">¶</a></dt>
 <dd><p>An object which represents one or more running Celery Workers.  Such an
-object may be retrieved via the <tt class="xref py py-data docutils literal"><span class="pre">workers</span></tt> object within a Policy.</p>
+object may be retrieved via the <a class="reference internal" href="#workers" title="workers"><tt class="xref py py-data docutils literal"><span class="pre">workers</span></tt></a> object within a Policy.</p>
 <dl class="attribute">
 <dt id="WorkerItem.prefetch">
 <tt class="descname">prefetch</tt><a class="headerlink" href="#WorkerItem.prefetch" title="Permalink to this definition">¶</a></dt>
@@ -276,13 +275,13 @@ object may be retrieved via the <tt class="xref py py-data docutils literal"><sp
 
 </div>
 </div>
-<div class="section" id="stats">
-<h2><a class="toc-backref" href="#id7">Stats</a><a class="headerlink" href="#stats" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="status-history">
+<h2><a class="toc-backref" href="#id13">Status &amp; History</a><a class="headerlink" href="#status-history" title="Permalink to this headline">¶</a></h2>
 <dl class="data">
-<dt>
-<tt class="descname">stats</tt></dt>
+<dt id="stats">
+<tt class="descname">stats</tt><a class="headerlink" href="#stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>The <cite>stats</cite> object provides several methods to inspect the current status
-of tasks.  The following are the available methods:</p>
+and past performance of tasks.  The following are the available methods:</p>
 <dl class="method">
 <dt>
 <tt class="descname">tasks</tt><big>(</big><em>states=None</em>, <em>interval=None</em>, <em>workers=None</em>, <em>tasknames=None</em><big>)</big></dt>
@@ -297,26 +296,19 @@ constants.</li>
 <li><strong>interval</strong> &#8211; <p>A single datetime.timedelta object, or a pair of
 datetime.timedelta and/or datetime.datetime objects (as a tuple).
 When it is a single timedelta object, the interval spans the time
-from timedelta seconds* before now up to now.  When it is a pair,
-the interpretation depends on the element types:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name" colspan="2">timedelta i, datetime j:</th></tr>
-<tr><td>&nbsp;</td><td class="field-body">The time between j and i seconds* before j.</td>
-</tr>
-<tr class="field"><th class="field-name" colspan="2">datetime i, timedelta j:</th></tr>
-<tr><td>&nbsp;</td><td class="field-body">The time between i and j seconds* after i.</td>
-</tr>
-<tr class="field"><th class="field-name" colspan="2">timedelta i, timedelta j:</th></tr>
-<tr><td>&nbsp;</td><td class="field-body">The time between i seconds* before now and j seconds* before now.</td>
-</tr>
-<tr class="field"><th class="field-name" colspan="2">datetime i, datetime j:</th></tr>
-<tr><td>&nbsp;</td><td class="field-body">The time between i and j.</td>
-</tr>
-</tbody>
-</table>
+from timedelta seconds <a class="footnote-reference" href="#id6" id="id1">[1]</a> before now up to now.  When it is a
+pair, the interpretation depends on the element types:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">(timedelta</span> <span class="pre">i,</span> <span class="pre">datetime</span> <span class="pre">j)</span></tt>:</dt>
+<dd>The time between time <cite>j</cite> and <cite>i</cite> seconds <a class="footnote-reference" href="#id6" id="id2">[1]</a> before time <cite>j</cite>.</dd>
+<dt><tt class="docutils literal"><span class="pre">(datetime</span> <span class="pre">i,</span> <span class="pre">timedelta</span> <span class="pre">j)</span></tt>:</dt>
+<dd>The time between time <cite>i</cite> and <cite>j</cite> seconds <a class="footnote-reference" href="#id6" id="id3">[1]</a> after time <cite>i</cite>.</dd>
+<dt><tt class="docutils literal"><span class="pre">(timedelta</span> <span class="pre">i,</span> <span class="pre">timedelta</span> <span class="pre">j)</span></tt>:</dt>
+<dd>The time between <cite>i</cite> seconds <a class="footnote-reference" href="#id6" id="id4">[1]</a> before now and <cite>j</cite> seconds <a class="footnote-reference" href="#id6" id="id5">[1]</a>
+before now.</dd>
+<dt><tt class="docutils literal"><span class="pre">(datetime</span> <span class="pre">i,</span> <span class="pre">datetime</span> <span class="pre">j)</span></tt>:</dt>
+<dd>The time between time <cite>i</cite> and time <cite>j</cite>.</dd>
+</dl>
 <p>In all cases, the calculated date pairs are adjusted so the left
 datetime is less than the right.</p>
 </li>
@@ -334,7 +326,7 @@ datetime is less than the right.</p>
 <tt class="descname">tasks_failed</tt><big>(</big><em>interval=None</em>, <em>workers=None</em>, <em>tasknames=None</em><big>)</big><a class="headerlink" href="#tasks_failed" title="Permalink to this definition">¶</a></dt>
 <dd><p>The number of tasks that meet the given conditions and that have
 failed.  The parameters <cite>interval</cite>, <cite>workers</cite>, and <cite>tasknames</cite> have the
-same meaning as in <tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt>.</p>
+same meaning as in <a class="reference internal" href="#tasks" title="tasks"><tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -342,7 +334,7 @@ same meaning as in <tt class="xref py py-meth docutils literal"><span class="pre
 <tt class="descname">tasks_succeeded</tt><big>(</big><em>interval=None</em>, <em>workers=None</em>, <em>tasknames=None</em><big>)</big><a class="headerlink" href="#tasks_succeeded" title="Permalink to this definition">¶</a></dt>
 <dd><p>The number of tasks that meet the given conditions and that have
 succeeded.  The parameters <cite>interval</cite>, <cite>workers</cite>, and <cite>tasknames</cite> have
-the same meaning as in <tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt>.</p>
+the same meaning as in <a class="reference internal" href="#tasks" title="tasks"><tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -350,7 +342,7 @@ the same meaning as in <tt class="xref py py-meth docutils literal"><span class=
 <tt class="descname">tasks_revoked</tt><big>(</big><em>interval=None</em>, <em>workers=None</em>, <em>tasknames=None</em><big>)</big><a class="headerlink" href="#tasks_revoked" title="Permalink to this definition">¶</a></dt>
 <dd><p>The number of tasks that meet the given conditions and that have been
 revoked.  The parameters <cite>interval</cite>, <cite>workers</cite>, and <cite>tasknames</cite> have
-the same meaning as in <tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt>.</p>
+the same meaning as in <a class="reference internal" href="#tasks" title="tasks"><tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -358,7 +350,7 @@ the same meaning as in <tt class="xref py py-meth docutils literal"><span class=
 <tt class="descname">tasks_ready</tt><big>(</big><em>interval=None</em>, <em>workers=None</em>, <em>tasknames=None</em><big>)</big><a class="headerlink" href="#tasks_ready" title="Permalink to this definition">¶</a></dt>
 <dd><p>The number of tasks that meet the given conditions and that are in a
 ready state.  The parameters <cite>interval</cite>, <cite>workers</cite>, and <cite>tasknames</cite>
-have the same meaning as in <tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt>.</p>
+have the same meaning as in <a class="reference internal" href="#tasks" title="tasks"><tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -366,7 +358,7 @@ have the same meaning as in <tt class="xref py py-meth docutils literal"><span c
 <tt class="descname">tasks_sent</tt><big>(</big><em>interval=None</em>, <em>workers=None</em>, <em>tasknames=None</em><big>)</big><a class="headerlink" href="#tasks_sent" title="Permalink to this definition">¶</a></dt>
 <dd><p>The number of tasks that meet the given conditions and that are in an
 unready state.  The parameters <cite>interval</cite>, <cite>workers</cite>, and <cite>tasknames</cite>
-have the same meaning as in <tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt>.</p>
+have the same meaning as in <a class="reference internal" href="#tasks" title="tasks"><tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -383,9 +375,16 @@ have the same meaning as in <tt class="xref py py-meth docutils literal"><span c
 
 </dd></dl>
 
+<table class="docutils footnote" frame="void" id="id6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>, <a class="fn-backref" href="#id3">3</a>, <a class="fn-backref" href="#id4">4</a>, <a class="fn-backref" href="#id5">5</a>)</em> <tt class="docutils literal"><span class="pre">timedelta</span></tt> is not restricted to seconds, but using some concrete unit
+of time here is clearer.</td></tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="schedules">
-<h2><a class="toc-backref" href="#id8">Schedules</a><a class="headerlink" href="#schedules" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id14">Schedules</a><a class="headerlink" href="#schedules" title="Permalink to this headline">¶</a></h2>
 <p>The schedule section provides functions that (strangely enough) can create
 schedules.  The evaluation of the section must result in a schedule object.</p>
 <dl class="function">
@@ -428,7 +427,7 @@ hours (8am-5pm).</dd>
 
 </div>
 <div class="section" id="examples">
-<h2><a class="toc-backref" href="#id9">Examples</a><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id15">Examples</a><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -456,7 +455,7 @@ old records in the database are cleared periodically.)</p>
 <p>Get the <tt class="docutils literal"><span class="pre">ignore_result</span></tt> setting for tasks of type <tt class="docutils literal"><span class="pre">my_task</span></tt>.</p>
 </div>
 <div class="section" id="api-by-section">
-<h2><a class="toc-backref" href="#id10">API by Section</a><a class="headerlink" href="#api-by-section" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id16">API by Section</a><a class="headerlink" href="#api-by-section" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><pre>schedule
     crontab
 
@@ -482,11 +481,11 @@ apply
 <li><a class="reference internal" href="#">Policies API</a><ul>
 <li><a class="reference internal" href="#common-api">Common API</a></li>
 <li><a class="reference internal" href="#collections">Collections</a><ul>
-<li><a class="reference internal" href="#tasks">Tasks</a></li>
-<li><a class="reference internal" href="#workers">Workers</a></li>
+<li><a class="reference internal" href="#tasks-collection">Tasks Collection</a></li>
+<li><a class="reference internal" href="#workers-collection">Workers Collection</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#stats">Stats</a></li>
+<li><a class="reference internal" href="#status-history">Status &amp; History</a></li>
 <li><a class="reference internal" href="#schedules">Schedules</a></li>
 <li><a class="reference internal" href="#examples">Examples</a></li>
 <li><a class="reference internal" href="#api-by-section">API by Section</a></li>
