@@ -1,19 +1,17 @@
-CMA.Core.ajax.loadUrls();
-        
+if(CMA.Core.testUrls) {
+        CMA.Core.ajax.loadTestUrls();
+} else {
+    CMA.Core.ajax.loadUrls(); 
+}
+
 var c1 = null;
-var data = null;
-var options = { };
-var json = null;
-var formatter = null;
-var query = null;
-var xhr = null;
 
 $(document).ready(function() {
-    formatter = new Formatter();
+    System.Handlers.loadHandlers();
     
     var q = '{"segmentize":{"field":"worker","method":["all"]},"aggregate":[{"field":"waittime","methods":["average","max","min"]}]}';
     
-    submit_query(q);
+    submitQuery(q);
     
     $(':checkbox').change(function() {
         if($(this).attr('checked')) {
@@ -136,27 +134,25 @@ function create_query() {
     }
     
     console.log(JSON.stringify(object));
-    submit_query(JSON.stringify(object));
+    submitQuery(JSON.stringify(object));
 }
 
-function submit_query(query) {
-    CMA.Core.ajax.getDispatchedTasksData(query, format_data);
+function submitQuery(query) {
+    CMA.Core.ajax.getDispatchedTasksData(query, formatData);
 }
 
-$(document).ready(function() {
-    //xhr = $.getJSON(CMA.Core.ajax.urls.chart_data_url, format_data);
-});
-
-function format_data(response) {
-    console.log(response);
-    data = formatter.formatData(response);
-    show_chart();
+function formatData(response) {
+    if(CMA.Core.testUrls) {
+        response = JSON.parse(response);
+    }
+    
+    System.EventBus.fireEvent('formatData', response);
 }
 
-function show_chart() {
-    c1 = new Chart("#chart", data, options);
+function startChart(data) {
+    var options = CMA.Core.DataParser.getTicks();
+    c1 = Chart("#chart", data, options);
     c1.displayBarChart(true);
     c1.enableTooltips();
-    c1.disableLegend();
 }
 

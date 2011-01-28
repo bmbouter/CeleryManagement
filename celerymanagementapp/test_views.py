@@ -35,6 +35,7 @@ def policy(request):
 
 def chart(request):
     return render_to_response('celerymanagementapp/chart.html',
+            { "load_test_data" : "true" },
             context_instance=RequestContext(request))
 
 def configure(request):
