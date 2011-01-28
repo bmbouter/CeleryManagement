@@ -318,8 +318,8 @@ def provider_images(request):
 
 #==============================================================================#
 # out-of-band/in-band worker dataviews.
-def delete_worker(request, worker_pk):
-    """Deletes a worker"""
+def delete_inbandworker(request, worker_pk):
+    """Deletes an InBandWorkerNode object"""
     try:
         worker = InBandWorkerNode.objects.get(pk=worker_pk)
         worker.delete()
@@ -328,10 +328,30 @@ def delete_worker(request, worker_pk):
         json = simplejson.dumps(failed)
         return HttpResponse(json)
 
-def create_outofbandworker(request):
+def delete_provider(request, provider_pk):
+    """Deletes a provider object and all corresponding InBandWorkerNode objects"""
+    for inbandworker in InBandWorkerNode.objects.filter(provider=provider_pk):
+        inbandworker.delete()
+    Provider.objects.get(pk=provider_pk).delete()
+
+def delete_outofbandworker(request, worker_pk):
+    """Deletes an OutOfBandWorkerNode"""
+    try:
+        worker = OutOfBandWorkerNode.objects.get(pk=worker_pk)
+        worker.delete()
+    except Exception as e:
+        failed = { 'failure' : e.args[0]}
+        json = simplejson.dumps(failed)
+        return HttpResponse(json)
+
+def create_or_update_outofbandworker(request, worker_pk=None):
     """Create an OutOfBandWorker"""
     if request.method == 'POST':
-        new_obj = OutOfBandWorkerNodeForm(request.POST, request.FILES)
+        if worker_pk is None:
+            new_obj = OutOfBandWorkerNodeForm(request.POST, request.FILES)
+        else:
+            worker_node = OutOfBandWorkerNode.objects.get(pk=worker_pk)
+            new_obj = OutOfBandWorkerNodeForm(request.POST, instance=worker_node)
         if new_obj.is_valid():
             new_obj.save()
             OutOfBandWorkers = OutOfBandWorkerNode.objects.all()

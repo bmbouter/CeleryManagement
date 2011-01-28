@@ -63,12 +63,15 @@ urlpatterns += patterns('celerymanagementapp',
     (r'^worker/(?P<name>[-\w\d_.]+)/test_commands/$', 'test_views.worker_commands_test_view'),
     
     # manipulating outofbandworker ...
-    (r'^outofbandworker/$', 'dataviews.create_outofbandworker'),
+    (r'^outofbandworker/$', 'dataviews.create_or_update_outofbandworker'),
+    (r'^outofbandworker/(?P<worker_pk>[\d]+)/delete/$', 'dataviews.delete_outofbandworker'),
+    (r'^outofbandworker/(?P<worker_pk>[\d]+)/update/$', 'dataviews.create_or_update_outofbandworker'),
 
     # manipulating provider ...
     (r'^provider/$', 'dataviews.create_provider'),
     (r'^provider/images/$', 'dataviews.provider_images'),
-    (r'^provider/delete_worker/(?P<worker_pk>[\d]+)/$', 'dataviews.delete_worker'),
+    (r'^provider/delete_worker/(?P<worker_pk>[\d]+)/$', 'dataviews.delete_inbandworker'),
+    (r'^provider/(?P<provider_pk>[\d]+)/delete/$', 'dataviews.delete_provider'),
     
     (r'^taskdemo/launch/$', 'dataviews.task_demo_dataview'),
     (r'^taskdemo/status/(?P<uuid>[A-Fa-f0-9]{32})/$', 'dataviews.task_demo_status_dataview'),
