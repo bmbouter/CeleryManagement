@@ -4,6 +4,7 @@ import calendar
 import math
 
 from celery.schedules import crontab
+from celery import states
 
 from celerymanagementapp.policy import api, signals
 
@@ -44,6 +45,9 @@ GLOBALS = { 'datetime': ModuleWrapper(datetime, exclude='datetime_CAPI'),
             'now': datetime.datetime.now, 'today': datetime.date.today,
           }
 LOCALS = {}
+
+for state in states.ALL_STATES:
+    GLOBALS[state] = state
 
 SCHEDULE_GLOBALS = {}
 SCHEDULE_LOCALS = { 'crontab': crontab, }
