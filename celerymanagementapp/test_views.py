@@ -25,12 +25,14 @@ def policy(request):
     policies = []
     for i in range(0,10):
         policy = PolicyModel(name="TestPolicy" + str(i), enabled="false", source="")
+        policy.pk = i
         policyForm = PolicyModelForm(instance=policy)
         policies.append({ "policy" : policy, "policyForm" : policyForm })
-
+    blank_policy_form = PolicyModelForm()
     return render_to_response('celerymanagementapp/policy.html',
             { "load_test_data" : "true",
-                "policies" : policies},
+            "policies" : policies,
+            "blank_policy_form": blank_policy_form},
             context_instance=RequestContext(request))
 
 def chart(request):
@@ -46,6 +48,7 @@ def configure(request):
 
         for i in range(0,10):
             worker = OutOfBandWorkerNode(ip="4.5.6." + str(i), celeryd_username="Test Username")
+            worker.pk = i
             workerForm = OutOfBandWorkerNodeForm(instance=worker)
             OutOfBandWorkers.append({ "worker" : worker, "workerForm" : workerForm })
 
@@ -88,22 +91,40 @@ def worker_view(request, workername=None):
             context_instance=RequestContext(request))
 
 
-'''
-Ajax views.
-'''
-def create_outofbandworker(request):
+
+#######  Ajax views.  #####################
+def create_or_update_outofbandworker(request, worker_pk=None):
     if request.method == "POST":
-        out_of_band_worker_node_form = OutOfBandWorkerNodeForm(request.POST, request.FILES)
+        if worker_pk is None:
+            out_of_band_worker_node_form = OutOfBandWorkerNodeForm(request.POST, request.FILES)
+        else:
+            worker = OutOfBandWorkerNode()
+            out_of_band_worker_node_form = OutOfBandWorkerNodeForm(request.POST, request.FILES, instance=worker)
+
         if out_of_band_worker_node_form.is_valid():
-            return HttpResponse("success")
+            json = simplejson.dumps("success")
         else:
             errors = []
             for field in out_of_band_worker_node_form:
                 errors.append({ 'field' : field.html_name,
                                 'error' : field.errors })
-            failed = { 'failure' : errors }
+            failed = { 'failure' : errors,
+                        'id': worker_pk }
             json = simplejson.dumps(failed)
-            return HttpResponse(json)
+        
+        return HttpResponse(json)
+
+def delete_outofbandworker(request, worker_pk=None):
+    """Deletes a worker"""
+    random.seed()
+    choice = random.randint(0, 1000)
+    if not (choice % 2):
+        json = simplejson.dumps("success")
+    else:
+        failed = { 'failure' : 'Worker Node failed to delete'}
+        json = simplejson.dumps(failed)
+    return HttpResponse(json)
+
 
 def create_provider(request):
     if request.method == "POST":
@@ -127,7 +148,7 @@ def get_images(request):
     return HttpResponse(json, mimetype="application/json")
 
 
-def create_policy(request):
+def policy_create(request):
     if request.method == "POST":
         policy_form = PolicyModelForm(request.POST)
         if policy_form.is_valid():
@@ -140,6 +161,25 @@ def create_policy(request):
             failed = { 'failure' : errors }
             json = simplejson.dumps(failed)
             return HttpResponse(json)
+
+def policy_modify(request):
+    if request.method == "POST":
+        policy_form = PolicyModelForm(request.POST)
+        if policy_form.is_valid():
+            return HttpResponse("success")
+        else:
+            errors = []
+            for field in policy_form:
+                errors.append({ 'field' : field.html_name,
+                                'error' : field.errors })
+            failed = { 'failure' : errors }
+            json = simplejson.dumps(failed)
+            return HttpResponse(json)
+
+
+def policy_delete(request, id=None):
+    json = simplejson.dumps("success")
+    return HttpResponse(json, mimetype="application/json")
 
 
 def delete_worker(request, worker_pk):

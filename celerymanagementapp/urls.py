@@ -103,8 +103,10 @@ urlpatterns += patterns('celerymanagementapp.views',
     url(r'^view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url"),
     url(r'^view/dashboard/$', 'dashboard', name="dashboard_url"),
     url(r'^view/configure/$', 'configure', name="configure_url"),
+    url(r'^view/policy/$', 'policy', name="policy_url"),
     url(r'^view/chart/$', 'chart', name="chart_url"),
 )
+
 
 if settings.DEBUG:
     urlpatterns += patterns('celerymanagementapp.test_views',
@@ -113,17 +115,29 @@ if settings.DEBUG:
         url(r'^test/view/configure/$', 'configure', name="test_configure_url"),
         url(r'^test/view/policy/$', 'policy', name="test_policy_url"),
         url(r'^test/view/chart/$', 'chart', name="test_chart_url"),
-        url(r'^test/view/task/(?P<taskname>[-\w\d_.]+)/$', 'task_view', name="task_view_url"),
-        url(r'^test/view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url"),
+        #url(r'^test/view/task/(?P<taskname>[-\w\d_.]+)/$', 'task_view', name="task_view_url"),
+        #url(r'^test/view/worker/(?P<workername>[-\w\d_.]+)/$', 'worker_view', name="worker_view_url")
+    )
+    urlpatterns += patterns('celerymanagementapp.test_views',
         #url(r'^test/post/worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'kill_worker', name="test_kill_worker_url"),  # not found in test_views
         url(r'^test/post/xy_query/dispatched_tasks/$', 'get_dispatched_tasks_data', name='test_get_dispatched_tasks_url'),
-        url(r'^test/post/outofbandworker/$', 'create_outofbandworker', name="test_create_outofbandworker_url"),
+    )
+    urlpatterns += patterns('celerymanagementapp.test_views',
+        url(r'^test/post/outofbandworker/$', 'create_or_update_outofbandworker', name="test_create_outofbandworker_url"),
+        url(r'^test/post/outofbandworker/(?P<worker_pk>[\d]+)/update/$', 'create_or_update_outofbandworker', name="test_update_outofbandworker_url"),
+        url(r'^test/post/outofbandworker/(?P<worker_pk>[\d]+)/delete/$', 'delete_outofbandworker', name="test_delete_outofbandworker_url"),
+    )
+    urlpatterns += patterns('celerymanagementapp.test_views',
         url(r'^test/post/provider/$', 'create_provider', name="test_create_provider_url"),
         url(r'^test/post/provider/images/$', 'get_images', name="test_get_images_url"),
         url(r'^test/post/provider/delete_worker/(?P<worker_pk>[\d]+)/$', 'delete_worker', name='test_delete_worker_url'),
     )
+    urlpatterns += patterns('celerymanagementapp.test_views',
+        url(r'^test/post/policy/create/$', 'policy_create', name="test_create_policy_url"),
+        url(r'^test/post/policy/modify/(?P<id>\d+)/$', 'policy_modify', name="test_modify_policy_url"),
+        url(r'^test/post/policy/delete/(?P<id>\d+)/$', 'policy_delete', name="test_delete_policy_url"),
+    )
 
-if settings.DEBUG:
     urlpatterns += patterns('',
         (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
             { 'document_root' : settings.BASE_DIR + '/celerymanagementapp/media/' }),

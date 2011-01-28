@@ -14,6 +14,56 @@ function createTable(data) {
     });
 }
 
+CMA.Core.util = (function(){
+
+    var expand = function(elem) {
+            $(elem).animate(
+                { height: "toggle" },
+                500,
+                function(){}
+            );
+        },
+        formReturn = function(data){
+            var setText = function(){
+                    var errLength = data.failure[i].error.length,
+                        text = "";
+                    for( j=0; j < errLength; j += 1){
+                        text += data.failure[i].error[j];
+                    }
+                    return text;
+                };
+
+            if( !data.hasOwnProperty("failure") ){
+                console.log("success");
+            } else {
+                var i = 0,
+                    elem,
+                    length = data.failure.length,
+                    id = data.id;
+                
+                for( i=0; i < length; i += 1){
+                    if( id !== null ){
+                        elem = document.getElementById(id + "_" + data.failure[i].field + "_error");
+                    } else {
+                        elem = document.getElementById(data.failure[i].field + "_error");
+                    }
+                    $(elem).text(setText);
+                    if( $(elem).text() !== ""){                
+                        $(elem).show();
+                    } else {
+                        $(elem).hide();
+                    }
+                }
+            }
+        };
+
+    return {
+        expand: expand,
+        formReturn: formReturn
+    };
+}());
+
+
 CMA.Core.init = function(){
     if( typeof CMA.Core.testUrls === "undefined" ){
         CMA.Core.ajax.loadUrls();
@@ -105,82 +155,29 @@ CMA.Core.setupEvents = function(){
 };
 
 CMA.Core.setupFormEvents = function(){
-    var formReturn = function(data){
-        console.log(data);
-        var setText = function(){
-                var errLength = data.failure[i].error.length,
-                    text = "";
-                for( j=0; j < errLength; j += 1){
-                    text += data.failure[i].error[j];
-                }
-                return text;
-            };
+    var ajax = CMA.Core.ajax;
 
-        if( !data.hasOwnProperty("failure") ){
-            console.log("success");
-        } else {
-            var i = 0,
-                elem,
-                length = data.failure.length;
-            
-            for( i=0; i < length; i += 1){
-                elem = document.getElementById(data.failure[i].field + "_error");
-                $(elem).text(setText);
-                if( $(elem).text() !== ""){                
-                    $(elem).show();
-                } else {
-                    $(elem).hide();
-                }
-            }
-        }
-    };
 
     $('.outOfBandForm').hide();
     $('.policyForm').hide();
 
+
+    /*
     $('#blankOutOfBandForm').ajaxForm({
         dataType: 'json',
-        url: CMA.Core.ajax.getUrls().create_out_of_band_worker_url,
+        url: CMA.Core.ajax.getUrls().out_of_band_worker_create_url,
         success: formReturn
     });
-    
-    $('#blankProviderForm').ajaxForm({
-        dataType: 'json',
-        url: CMA.Core.ajax.getUrls().create_provider_url,
-        success: formReturn
-    });
+    */
 
-    $('.createNewOutOfBand').click(function() {
-        var formHeight = $('#blankOutOfBandForm').height();
-        $('#blankOutOfBandForm').animate({
-                height: "toggle"
-            },
-            500,
-            function(){
-                $('#blankOutOfBandForm').css("height", formHeight + "px");
-            }
-        );
-    });
-
-    $('.editWorkerNode').click(function(){
-        var elem = document.getElementById($(this).attr("id") + "Form");
-        var formHeight = $(elem).height();
-        $(elem).animate({
-                height: "toggle"
-            },
-            500,
-            function(){
-                $(elem).css("height", formHeight + "px");
-            }
-        );
-    });
     
 };
 
 
 CMA.Core.navigation = (function() {
     
-    var addNavigationElements = function(names, list, linkUrl, activeItem){
+    var ajax = CMA.Core.ajax,
+        addNavigationElements = function(names, list, linkUrl, activeItem){
             var color = "#7D7D7D",
                 clone = list.clone(),
                 length = names.length,
@@ -203,10 +200,10 @@ CMA.Core.navigation = (function() {
             list.replaceWith(clone);
         },
         populateTaskNavigation = function(data){
-            addNavigationElements(data, $('#taskNavigation'), CMA.Core.ajax.getUrls().task_url, CMA.Core.taskname);
+            addNavigationElements(data, $('#taskNavigation'), ajax.getUrls().task_url, CMA.Core.taskname);
         },
         populateWorkerNavigation = function(data){
-            addNavigationElements(data, $('#workerNavigation'), CMA.Core.ajax.getUrls().worker_url, CMA.Core.workername);
+            addNavigationElements(data, $('#workerNavigation'), ajax.getUrls().worker_url, CMA.Core.workername);
         };
 
     return {
@@ -278,23 +275,119 @@ CMA.Core.providerCreation = function() {
 };
 
 CMA.Core.policy = function(){
-    var expandPolicy = function(){
-            console.log("expanding");
-            var elem = document.getElementById($(this).attr("id") + "_policyForm"),
-                formHeight = $(elem).height();
+    var ajax = CMA.Core.ajax,
+        util = CMA.Core.util,
+
+        submitPolicy = function(){
+            var form = {},
+                
+                formReturn = function(data){
+                    var setText = function(){
+                        var errLength = data.failure[i].error.length,
+                            text = "";
+                        for( j=0; j < errLength; j += 1){
+                            text += data.failure[i].error[j];
+                        }
+                        return text;
+                    };
+                    console.log(data);
+                    if( !data.hasOwnProperty("failure") ){
+                        console.log("success");
+                    } else {
+                        var i = 0,
+                            elem,
+                            length = data.failure.length;
+                        
+                        for( i=0; i < length; i += 1){
+                            elem = document.getElementById(data.failure[i].field + "_error");
+                            $(elem).text(setText);
+                            if( $(elem).text() !== ""){                
+                                $(elem).show();
+                            } else {
+                                $(elem).hide();
+                            }
+                        }
+                    }
+                };
             
-            $(elem).animate({
-                    height: "toggle"
-                },
-                500,
-                function(){
-                    $(elem).css("height", formHeight + "px");
-                }
-            );
+            form.name = $('#id_name').val();
+            form.enabled = $('#id_enabled').attr("checked");
+            form.source = $('#id_source').val();
+         
+            ajax.postCreatePolicy(form, formReturn);
+        },
+        deletePolicy = function(elem){
+            var deleteReturn = function(data){
+                    console.log(data);
+                    if( !data.hasOwnProperty("failure") ){
+                        elem.parent().remove();
+                    }
+                };
+            ajax.postDeletePolicy(elem.attr("id"), deleteReturn);
+        },
+        editPolicy = function(id){
+            var editReturn = function(data){
+                console.log(data);
+            };
+            ajax.postEditPolicy(id, editReturn);
         };
 
-    $('.editPolicy').click(expandPolicy);
+
+    $('.editPolicy').click(function(){
+        var elem = document.getElementById($(this).attr("id") + "_policyForm");
+        util.expand(elem);
+    });
+    $('.createPolicy').click(function() {
+        util.expand($('#blankPolicyForm'));
+    });
+    $('#submitPolicyButton').click(submitPolicy);
+    $('.deletePolicy').click(function(){
+            deletePolicy($(this));
+    });
+    $('.submitPolicyEdit').click(function(){
+            editPolicy($(this).attr("id"));
+    });
 };
+
+CMA.Core.configure = (function(){
+    var util = CMA.Core.util,
+        ajax = CMA.Core.ajax,
+
+        registerEvents = function() {
+            if( CMA.Core.USE_MODE === "static" ){
+                $('.editWorkerNode').click(function(){
+                    var id = $(this).attr("id"),
+                        split = id.split("_"),
+                        that = this;
+                    if( split[1] === "update" ){
+                        util.expand(document.getElementById(split[0] + "_Form"));
+                    } else if( split[1] === "delete" ){
+                        ajax.postDeleteOutOfBandWorker(split[0], function(data){
+                            if( !data.hasOwnProperty("failure") ){
+                                $(that).parent().remove();
+                            }
+                        });        
+                    }
+                });
+                $('.createNewOutOfBand').click(function() {
+                    util.expand($('#blankOutOfBandForm'));
+                });
+                $('.updateOutOfBandButton').click(function(){
+                    var id = $(this).attr("id"),
+                        split = id.split("_"),
+                        form = document.getElementById(split[0] + "_Form");
+                        ajax.postUpdateOutOfBandWorker($(form), split[0], util.formReturn);
+                });
+                ajax.postCreateOutOfBandWorker($('#blankOutOfBandForm'), util.formReturn);
+            } else if( CMA.Core.USE_MODE === "dyamic" ){
+                ajax.postCreateProvider($('#blankProviderForm'), util.formReturn);
+            }
+        };
+    
+    return {
+        registerEvents: registerEvents
+    };
+}());
 
 $(document).ready(function() {
 
@@ -304,8 +397,9 @@ $(document).ready(function() {
     core.setupFormEvents();
     core.providerCreation();
     core.policy();
+    core.configure.registerEvents();
 
-    core.ajax.getTasks(core.navigation.populateTaskNavigation);
-    core.ajax.getWorkers(core.navigation.populateWorkerNavigation);
+    //core.ajax.getTasks(core.navigation.populateTaskNavigation);
+    //core.ajax.getWorkers(core.navigation.populateWorkerNavigation);
     
 });

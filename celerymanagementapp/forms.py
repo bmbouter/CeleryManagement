@@ -15,4 +15,4 @@ class ProviderForm(ModelForm):
 class PolicyModelForm(ModelForm):
     class Meta:
         model = PolicyModel
-        fields = ('name', 'enabled', 'source')
+        fields = ('name', 'enabled', 'source', 'modified', 'last_run_time')

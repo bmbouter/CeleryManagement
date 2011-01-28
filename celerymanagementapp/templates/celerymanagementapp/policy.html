@@ -10,9 +10,10 @@
         <li class="createPolicy right click">Policy</li>
         <li class="createPolicy right click"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png"/></li>
     </ul>
-    <form method="POST" enctype="multipart/form-data" class="policyForm" id="policyForm" action="/celerymanagementapp/policy/">
+    <form method="POST" enctype="multipart/form-data" class="policyForm" id="blankPolicyForm" action="/celerymanagementapp/policy/">
         {% csrf_token %}
-        {% for field in outofbandworkernode_form %}
+        {% for field in blank_policy_form %}
+        {% if forloop.counter < 4 %}
         <div class="fieldWrapper">
             <div class="field">
                 {{ field.label_tag }} 
@@ -20,16 +21,17 @@
                 <span class="errorWrapper" id="{{ field.html_name }}_error"></span>
             </div>
         </div>
+        {% endif %}
         {% endfor %}
-        <button class="submitButton" id="submitPolicyButton" >Submit</button>
+        <button type="button" class="submitButton" id="submitPolicyButton" >Submit</button>
     </form>
     {% for policy in policies %}
     <ul class="node">
         <li class="left">{{ policy.policy.name }}</li>
-        <li class="editPolicy right click" id="{{ policy.policy.name }}_deleteWorkerNode">Delete</li>
-        <li class="editPolicy right click" id="{{ policy.policy.name }}">Edit</li>
+        <li class="deletePolicy right click" id="{{ policy.policy.pk }}">Delete</li>
+        <li class="editPolicy right click" id="{{ policy.policy.pk }}">Edit</li>
     </ul>
-    <form method="POST" enctype="multipart/form-data" class="policyForm" id="{{ policy.policy.name }}_policyForm">
+    <form method="POST" enctype="multipart/form-data" class="policyForm" id="{{ policy.policy.pk }}_policyForm">
         {% csrf_token %}
         {% for field in policy.policyForm %}
         <div class="fieldWrapper">
@@ -39,7 +41,7 @@
             </div>
         </div>
         {% endfor %}
-        <input type="submit" class="submitPolicyEdit submitButton" value="Submit"/>
+        <input type="submit" class="submitPolicyEdit submitButton" id="{{ policy.policy.pk }}_editButton"value="Submit"/>
     </form>
     {% endfor %}
 </div>
