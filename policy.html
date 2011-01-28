@@ -1,0 +1,539 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Policies API &mdash; CeleryManagement v0.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="CeleryManagement v0.0 documentation" href="index.html" />
+    <link rel="prev" title="Welcome to CeleryManagement’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to CeleryManagement’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">CeleryManagement v0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="policies-api">
+<h1><a class="toc-backref" href="#id2">Policies API</a><a class="headerlink" href="#policies-api" title="Permalink to this headline">¶</a></h1>
+<p>Policies consist of three sections: schedule, condition, and apply.  The API
+varies depending on the section it is in.  The first section, <cite>schedule</cite>,
+provides the most restrictive API since its only purpose is to return a
+schedule object.  The <cite>condition</cite> section is also somewhat restricted, and the
+<cite>apply</cite> section has the most feature-filled API.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#policies-api" id="id2">Policies API</a><ul>
+<li><a class="reference internal" href="#common-api" id="id3">Common API</a></li>
+<li><a class="reference internal" href="#collections" id="id4">Collections</a><ul>
+<li><a class="reference internal" href="#tasks" id="id5">Tasks</a></li>
+<li><a class="reference internal" href="#workers" id="id6">Workers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stats" id="id7">Stats</a></li>
+<li><a class="reference internal" href="#schedules" id="id8">Schedules</a></li>
+<li><a class="reference internal" href="#examples" id="id9">Examples</a></li>
+<li><a class="reference internal" href="#api-by-section" id="id10">API by Section</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="common-api">
+<h2><a class="toc-backref" href="#id3">Common API</a><a class="headerlink" href="#common-api" title="Permalink to this headline">¶</a></h2>
+<p>The standard modules <tt class="docutils literal"><span class="pre">datetime</span></tt>, <tt class="docutils literal"><span class="pre">time</span></tt>, <tt class="docutils literal"><span class="pre">calendar</span></tt> and <tt class="docutils literal"><span class="pre">math</span></tt> are
+available in all policy sections.  Also available are two utility functions:
+<tt class="docutils literal"><span class="pre">now()</span></tt> and <tt class="docutils literal"><span class="pre">today()</span></tt>.  The former returns the current time as a
+<tt class="docutils literal"><span class="pre">datetime.datetime</span></tt> object.  The latter returns the current date as a
+<tt class="docutils literal"><span class="pre">datetime.date</span></tt> object.</p>
+<p>Many of the standard builtin functions are available.  But some, like
+<tt class="docutils literal"><span class="pre">eval()</span></tt> and <tt class="docutils literal"><span class="pre">__import__()</span></tt> are not allowed.  The following are available:</p>
+<div class="highlight-python"><pre>abs all any basestring bin bool bytearray callable chr cmp complex dict
+divmod enumerate filter float format frozenset hash help hex id int
+isinstance issubclass iter len list long map max memoryview min next
+oct ord pow print range reduce repr reversed round set slice sorted str
+sum tuple unichr unicode xrange zip</pre>
+</div>
+<p>The following standard builtin constants are also available:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">None</span>
+</pre></div>
+</div>
+<p>The following Celery states are available as constants:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">PENDING</span><span class="p">,</span> <span class="n">RECEIVED</span><span class="p">,</span> <span class="n">STARTED</span><span class="p">,</span> <span class="n">SUCCESS</span><span class="p">,</span> <span class="n">FAILURE</span><span class="p">,</span> <span class="n">REVOKED</span><span class="p">,</span> <span class="n">RETRY</span>
+</pre></div>
+</div>
+<p>The following names provide access to the APIs described below:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tasks</span><span class="p">,</span> <span class="n">workers</span><span class="p">,</span> <span class="n">stats</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="collections">
+<h2><a class="toc-backref" href="#id4">Collections</a><a class="headerlink" href="#collections" title="Permalink to this headline">¶</a></h2>
+<p>The APIs for <a class="reference internal" href="#tasks">tasks</a> and <a class="reference internal" href="#workers">workers</a> follow the same general pattern.  This is
+probably easier to demonstrate with a couple of examples.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tasks</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">the_attribute</span> <span class="o">=</span> <span class="n">value</span>
+<span class="n">tasks</span><span class="p">[</span><span class="s">&#39;taskname&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">the_attribute</span> <span class="o">=</span> <span class="n">value</span>
+<span class="n">tasks</span><span class="p">[(</span><span class="s">&#39;task1&#39;</span><span class="p">,</span><span class="s">&#39;task2&#39;</span><span class="p">,</span><span class="s">&#39;task3&#39;</span><span class="p">,)]</span><span class="o">.</span><span class="n">the_attribute</span> <span class="o">=</span> <span class="n">value</span>
+</pre></div>
+</div>
+<p>The first example above assigns to the same attribute on all known task types.
+The second assigns to the attribute on only one task type.  The third example
+assigns to the same attribute on each of the explicitly listed task types.</p>
+<p>Retrieving values is more restricted.  The attribute can be retrieved from only
+one task type at a time.  Otherwise, a dict of attrbute values with task types
+as keys would be required.  This would be too complicated, especially for the
+common case where one is interested in only a single type.</p>
+<p>Therefore, when retrieving values, only the following pattern is allowed:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">value</span> <span class="o">=</span> <span class="n">tasks</span><span class="p">[</span><span class="s">&#39;taskname&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">the_attribute</span>
+</pre></div>
+</div>
+<p>The following description of the &#8220;Collection&#8221; class is for documentation
+purposes only.  It may be implemented in using any means which provides
+equivalent behavior.  Indeed, there may not even be a class by this name.</p>
+<dl class="class">
+<dt id="Collection">
+<em class="property">class </em><tt class="descname">Collection</tt><a class="headerlink" href="#Collection" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class which provides access to an item or items within a homogeneous
+group of objects.  Currently, two Collections are available: <tt class="docutils literal"><span class="pre">tasks</span></tt> and
+<tt class="docutils literal"><span class="pre">workers</span></tt>.  The user may not create objects of this class.</p>
+<dl class="method">
+<dt id="Collection.__getitem__">
+<tt class="descname">__getitem__</tt><big>(</big><em>itemname</em><big>)</big><a class="headerlink" href="#Collection.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itemname</strong> &#8211; A single itemname as a string.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">An object which allows the item&#8217;s attributes to be queried.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Collection.__setitem__">
+<tt class="descname">__setitem__</tt><big>(</big><em>itemnames</em>, <em>value</em><big>)</big><a class="headerlink" href="#Collection.__setitem__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itemnames</strong> &#8211; A single itemname as a string, or an iterable of itemnames.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">An object which allows setting of the items&#8217; attributes.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Collection.all">
+<tt class="descname">all</tt><big>(</big><big>)</big><a class="headerlink" href="#Collection.all" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">An object which allows setting the attributes of <em>all</em> items within the collection.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="tasks">
+<h3><a class="toc-backref" href="#id5">Tasks</a><a class="headerlink" href="#tasks" title="Permalink to this headline">¶</a></h3>
+<dl class="data">
+<dt>
+<tt class="descname">tasks</tt></dt>
+<dd><p>An instance of <a class="reference internal" href="#Collection" title="Collection"><tt class="xref py py-class docutils literal"><span class="pre">Collection</span></tt></a> that allows one to inspect and modify
+selected Celery Task class attributes.  The methods on this object return
+instances of <a class="reference internal" href="#TaskItem" title="TaskItem"><tt class="xref py py-class docutils literal"><span class="pre">TaskItem</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="TaskItem">
+<em class="property">class </em><tt class="descname">TaskItem</tt><a class="headerlink" href="#TaskItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>An object which represents one or more Celery Task types.  Such an object
+may be retrieved via the <tt class="xref py py-data docutils literal"><span class="pre">tasks</span></tt> object within a Policy.</p>
+<dl class="attribute">
+<dt id="TaskItem.ignore_result">
+<tt class="descname">ignore_result</tt><a class="headerlink" href="#TaskItem.ignore_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TaskItem.routing_key">
+<tt class="descname">routing_key</tt><a class="headerlink" href="#TaskItem.routing_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>str or None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TaskItem.exchange">
+<tt class="descname">exchange</tt><a class="headerlink" href="#TaskItem.exchange" title="Permalink to this definition">¶</a></dt>
+<dd><p>str or None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TaskItem.default_retry_delay">
+<tt class="descname">default_retry_delay</tt><a class="headerlink" href="#TaskItem.default_retry_delay" title="Permalink to this definition">¶</a></dt>
+<dd><p>int</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TaskItem.rate_limit">
+<tt class="descname">rate_limit</tt><a class="headerlink" href="#TaskItem.rate_limit" title="Permalink to this definition">¶</a></dt>
+<dd><p>str or None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TaskItem.store_errors_even_if_ignored">
+<tt class="descname">store_errors_even_if_ignored</tt><a class="headerlink" href="#TaskItem.store_errors_even_if_ignored" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TaskItem.acks_late">
+<tt class="descname">acks_late</tt><a class="headerlink" href="#TaskItem.acks_late" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TaskItem.expires">
+<tt class="descname">expires</tt><a class="headerlink" href="#TaskItem.expires" title="Permalink to this definition">¶</a></dt>
+<dd><p>int or None</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="workers">
+<h3><a class="toc-backref" href="#id6">Workers</a><a class="headerlink" href="#workers" title="Permalink to this headline">¶</a></h3>
+<dl class="data">
+<dt>
+<tt class="descname">workers</tt></dt>
+<dd><p>An instance of <a class="reference internal" href="#Collection" title="Collection"><tt class="xref py py-class docutils literal"><span class="pre">Collection</span></tt></a> that allows one to inspect and modify
+selected attributes of running Celery Workers.  The methods on this object
+return instances of <a class="reference internal" href="#WorkerItem" title="WorkerItem"><tt class="xref py py-class docutils literal"><span class="pre">WorkerItem</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="WorkerItem">
+<em class="property">class </em><tt class="descname">WorkerItem</tt><a class="headerlink" href="#WorkerItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>An object which represents one or more running Celery Workers.  Such an
+object may be retrieved via the <tt class="xref py py-data docutils literal"><span class="pre">workers</span></tt> object within a Policy.</p>
+<dl class="attribute">
+<dt id="WorkerItem.prefetch">
+<tt class="descname">prefetch</tt><a class="headerlink" href="#WorkerItem.prefetch" title="Permalink to this definition">¶</a></dt>
+<dd><p>The object returned has the following methods:</p>
+<dl class="method">
+<dt id="WorkerItem.increment">
+<tt class="descname">increment</tt><big>(</big><span class="optional">[</span><em>n</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#WorkerItem.increment" title="Permalink to this definition">¶</a></dt>
+<dt id="WorkerItem.decrement">
+<tt class="descname">decrement</tt><big>(</big><span class="optional">[</span><em>n</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#WorkerItem.decrement" title="Permalink to this definition">¶</a></dt>
+<dd><p>If not given, the <cite>n</cite> argument defaults to 1.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="WorkerItem.get">
+<tt class="descname">get</tt><big>(</big><big>)</big><a class="headerlink" href="#WorkerItem.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO</p>
+</dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="stats">
+<h2><a class="toc-backref" href="#id7">Stats</a><a class="headerlink" href="#stats" title="Permalink to this headline">¶</a></h2>
+<dl class="data">
+<dt>
+<tt class="descname">stats</tt></dt>
+<dd><p>The <cite>stats</cite> object provides several methods to inspect the current status
+of tasks.  The following are the available methods:</p>
+<dl class="method">
+<dt>
+<tt class="descname">tasks</tt><big>(</big><em>states=None</em>, <em>interval=None</em>, <em>workers=None</em>, <em>tasknames=None</em><big>)</big></dt>
+<dd><p>The number of tasks that meet the given conditions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>states</strong> &#8211; A single Celery state constant or an iterable of such
+constants.</li>
+<li><strong>interval</strong> &#8211; <p>A single datetime.timedelta object, or a pair of
+datetime.timedelta and/or datetime.datetime objects (as a tuple).
+When it is a single timedelta object, the interval spans the time
+from timedelta seconds* before now up to now.  When it is a pair,
+the interpretation depends on the element types:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name" colspan="2">timedelta i, datetime j:</th></tr>
+<tr><td>&nbsp;</td><td class="field-body">The time between j and i seconds* before j.</td>
+</tr>
+<tr class="field"><th class="field-name" colspan="2">datetime i, timedelta j:</th></tr>
+<tr><td>&nbsp;</td><td class="field-body">The time between i and j seconds* after i.</td>
+</tr>
+<tr class="field"><th class="field-name" colspan="2">timedelta i, timedelta j:</th></tr>
+<tr><td>&nbsp;</td><td class="field-body">The time between i seconds* before now and j seconds* before now.</td>
+</tr>
+<tr class="field"><th class="field-name" colspan="2">datetime i, datetime j:</th></tr>
+<tr><td>&nbsp;</td><td class="field-body">The time between i and j.</td>
+</tr>
+</tbody>
+</table>
+<p>In all cases, the calculated date pairs are adjusted so the left
+datetime is less than the right.</p>
+</li>
+<li><strong>workers</strong> &#8211; TODO</li>
+<li><strong>tasknames</strong> &#8211; TODO</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tasks_failed">
+<tt class="descname">tasks_failed</tt><big>(</big><em>interval=None</em>, <em>workers=None</em>, <em>tasknames=None</em><big>)</big><a class="headerlink" href="#tasks_failed" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of tasks that meet the given conditions and that have
+failed.  The parameters <cite>interval</cite>, <cite>workers</cite>, and <cite>tasknames</cite> have the
+same meaning as in <tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tasks_succeeded">
+<tt class="descname">tasks_succeeded</tt><big>(</big><em>interval=None</em>, <em>workers=None</em>, <em>tasknames=None</em><big>)</big><a class="headerlink" href="#tasks_succeeded" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of tasks that meet the given conditions and that have
+succeeded.  The parameters <cite>interval</cite>, <cite>workers</cite>, and <cite>tasknames</cite> have
+the same meaning as in <tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tasks_revoked">
+<tt class="descname">tasks_revoked</tt><big>(</big><em>interval=None</em>, <em>workers=None</em>, <em>tasknames=None</em><big>)</big><a class="headerlink" href="#tasks_revoked" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of tasks that meet the given conditions and that have been
+revoked.  The parameters <cite>interval</cite>, <cite>workers</cite>, and <cite>tasknames</cite> have
+the same meaning as in <tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tasks_ready">
+<tt class="descname">tasks_ready</tt><big>(</big><em>interval=None</em>, <em>workers=None</em>, <em>tasknames=None</em><big>)</big><a class="headerlink" href="#tasks_ready" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of tasks that meet the given conditions and that are in a
+ready state.  The parameters <cite>interval</cite>, <cite>workers</cite>, and <cite>tasknames</cite>
+have the same meaning as in <tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tasks_sent">
+<tt class="descname">tasks_sent</tt><big>(</big><em>interval=None</em>, <em>workers=None</em>, <em>tasknames=None</em><big>)</big><a class="headerlink" href="#tasks_sent" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of tasks that meet the given conditions and that are in an
+unready state.  The parameters <cite>interval</cite>, <cite>workers</cite>, and <cite>tasknames</cite>
+have the same meaning as in <tt class="xref py py-meth docutils literal"><span class="pre">tasks()</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mean_waittime">
+<tt class="descname">mean_waittime</tt><big>(</big><em>states</em>, <em>interval</em>, <em>workers</em>, <em>tasknames</em><big>)</big><a class="headerlink" href="#mean_waittime" title="Permalink to this definition">¶</a></dt>
+<dd><p>The average wait time of the tasks that meet the given conditions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mean_runtime">
+<tt class="descname">mean_runtime</tt><big>(</big><em>states</em>, <em>interval</em>, <em>workers</em>, <em>tasknames</em><big>)</big><a class="headerlink" href="#mean_runtime" title="Permalink to this definition">¶</a></dt>
+<dd><p>The average run time of the tasks that meet the given conditions.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="schedules">
+<h2><a class="toc-backref" href="#id8">Schedules</a><a class="headerlink" href="#schedules" title="Permalink to this headline">¶</a></h2>
+<p>The schedule section provides functions that (strangely enough) can create
+schedules.  The evaluation of the section must result in a schedule object.</p>
+<dl class="function">
+<dt id="crontab">
+<tt class="descname">crontab</tt><big>(</big><em>minute</em>, <em>hour</em>, <em>day_of_week</em><big>)</big><a class="headerlink" href="#crontab" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a schedule that allows cron-like scheduling.  The
+class itself is provided by Celery, so please see the <a class="reference external" href="http://ask.github.com/celery/userguide/periodic-tasks.html#crontab-schedules">documentation
+there</a> for more infomation.</p>
+<p>Examples (reproduced here from the Celery documentation):</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">crontab()</span></tt></dt>
+<dd>Execute every minute.</dd>
+<dt><tt class="docutils literal"><span class="pre">crontab(minute=0,</span> <span class="pre">hour=0)</span></tt></dt>
+<dd>Execute daily at midnight.</dd>
+<dt><tt class="docutils literal"><span class="pre">crontab(minute=0,</span> <span class="pre">hour=&quot;*/3&quot;)</span></tt></dt>
+<dd>Execute every three hours: 3am, 6am, 9am, noon, 3pm, 6pm, 9pm.</dd>
+<dt><tt class="docutils literal"><span class="pre">crontab(minute=0,</span> <span class="pre">hour=[0,3,6,9,12,15,18,21])</span></tt></dt>
+<dd>Same as previous.</dd>
+<dt><tt class="docutils literal"><span class="pre">crontab(minute=&quot;*/15&quot;)</span></tt></dt>
+<dd>Execute every 15 minutes.</dd>
+<dt><tt class="docutils literal"><span class="pre">crontab(day_of_week=&quot;sunday&quot;)</span></tt></dt>
+<dd>Execute every minute (!) at Sundays.</dd>
+<dt><tt class="docutils literal"><span class="pre">crontab(minute=&quot;*&quot;,</span> <span class="pre">hour=&quot;*&quot;,</span> <span class="pre">day_of_week=&quot;sun&quot;)</span></tt></dt>
+<dd>Same as previous.</dd>
+<dt><tt class="docutils literal"><span class="pre">crontab(minute=&quot;*/10&quot;,</span> <span class="pre">hour=&quot;3,17,22&quot;,</span> <span class="pre">day_of_week=&quot;thu,fri&quot;)</span></tt></dt>
+<dd>Execute every ten minutes, but only between 3-4 am, 5-6 pm and
+10-11 pm on Thursdays or Fridays.</dd>
+<dt><tt class="docutils literal"><span class="pre">crontab(minute=0,</span> <span class="pre">hour=&quot;*/2,*/3&quot;)</span></tt></dt>
+<dd>Execute every even hour, and every hour divisible by three. This
+means: at every hour <cite>except</cite>: 1am, 5am, 7am, 11am, 1pm, 5pm, 7pm, 11pm</dd>
+<dt><tt class="docutils literal"><span class="pre">crontab(minute=0,</span> <span class="pre">hour=&quot;*/5&quot;)</span></tt></dt>
+<dd>Execute hour divisible by 5. This means that it is triggered at 3pm,
+not 5pm (since 3pm equals the 24-hour clock value of “15”, which is
+divisible by 5).</dd>
+<dt><tt class="docutils literal"><span class="pre">crontab(minute=0,</span> <span class="pre">hour=&quot;*/3,8-17&quot;)</span></tt></dt>
+<dd>Execute every hour divisible by 3, and every hour during office
+hours (8am-5pm).</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="examples">
+<h2><a class="toc-backref" href="#id9">Examples</a><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The number of tasks sent.  (This will not be all tasks ever sent because
+old records in the database are cleared periodically.)</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The number of tasks sent over the last hour.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>The number of tasks sent between one hour and two hours ago.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">(</span><span class="n">tasknames</span><span class="o">=</span><span class="s">&quot;my_task&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The number of tasks of type <tt class="docutils literal"><span class="pre">my_task</span></tt> sent.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">(</span><span class="n">tasknames</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;my_task&quot;</span><span class="p">,</span><span class="s">&quot;your_task&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The number of tasks of type <tt class="docutils literal"><span class="pre">my_task</span></tt> <cite>or</cite> <tt class="docutils literal"><span class="pre">your_task</span></tt> sent.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">tasks</span><span class="p">[</span><span class="s">&quot;my_task&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ignore_result</span>
+</pre></div>
+</div>
+<p>Get the <tt class="docutils literal"><span class="pre">ignore_result</span></tt> setting for tasks of type <tt class="docutils literal"><span class="pre">my_task</span></tt>.</p>
+</div>
+<div class="section" id="api-by-section">
+<h2><a class="toc-backref" href="#id10">API by Section</a><a class="headerlink" href="#api-by-section" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>schedule
+    crontab
+
+condition
+    stats
+
+apply
+    stats
+    tasks
+    workers</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Policies API</a><ul>
+<li><a class="reference internal" href="#common-api">Common API</a></li>
+<li><a class="reference internal" href="#collections">Collections</a><ul>
+<li><a class="reference internal" href="#tasks">Tasks</a></li>
+<li><a class="reference internal" href="#workers">Workers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stats">Stats</a></li>
+<li><a class="reference internal" href="#schedules">Schedules</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#api-by-section">API by Section</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to CeleryManagement&#8217;s documentation!</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/policy.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to CeleryManagement’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">CeleryManagement v0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, ITng Services.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
