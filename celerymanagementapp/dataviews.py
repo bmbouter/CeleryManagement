@@ -551,7 +551,7 @@ def policy_create(request):
     json_request = _json_from_post(request)
     creator = PolicyCreate()
     success, record, error_info = creator(json_request)
-        
+    
     json_result = {'success':       success, 
                    'record':        record, 
                    'error_info':    error_info}
