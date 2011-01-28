@@ -134,7 +134,7 @@ function create_query() {
     }
     
     console.log(JSON.stringify(object));
-    submit_query(JSON.stringify(object));
+    submitQuery(JSON.stringify(object));
 }
 
 function submitQuery(query) {
