@@ -12,6 +12,11 @@ from celerymanagementapp.policy import env
 
 
 #==============================================================================#
+class Imports_TestCase(base.CeleryManagement_TestCaseBase):
+    def test_basic(self):
+        import celerymanagementlib.celery_imports
+        
+#==============================================================================#
 class Policy_TestCase(base.CeleryManagement_TestCaseBase):
     def test_basic(self):
         _testdata = '''\
