@@ -49,11 +49,16 @@
         {% endif %}
         {% if forloop.counter == 3 %}
         {% if not provider.provider %}
-            <button type="button" class="submitButton click" id="getImagesButton">Get Images</button>
+            <button type="button" class="submitButton positiveButton click" id="getImagesButton">Get Images</button>
         {% endif %}
         {% endif %}
         {% endfor %}
-        <button class="submitButton {% if not provider.provider %}hidden{% endif %} click" id="submitProviderButton">Create</button>
+        {% if not provider.provider %}
+        <button class="submitButton {% if not provider.provider %}hidden{% endif %} positiveButton click" id="submitProviderButton">Create</button>
+        {% else %}
+        <label class="hidden" id="providerID">{{ provider.provider.pk }}</label>
+        <button class="submitButton negativeButton click" id="submitProviderButton">Delete</button>
+        {% endif %}
     </form>
     {% if provider.provider %}
         </div>

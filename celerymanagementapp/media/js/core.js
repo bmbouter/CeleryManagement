@@ -42,7 +42,7 @@ CMA.Core.util = (function(){
                     id = data.id;
                 
                 for( i=0; i < length; i += 1){
-                    if( id !== null ){
+                    if( id !== null && id !== undefined ){
                         elem = document.getElementById(id + "_" + data.failure[i].field + "_error");
                     } else {
                         elem = document.getElementById(data.failure[i].field + "_error");
@@ -55,11 +55,46 @@ CMA.Core.util = (function(){
                     }
                 }
             }
+        },
+        createPopup = function(text, buttonText){
+            var leftPos, topPos, container,
+                html = '<div id="boxes">' +
+                            '<div id="popupContainer">' + 
+                                '<div id="popupTextBox">' + 
+                                    text +
+                                '</div>' +
+                                '<div id="popupButtonContainer">' + 
+                                    '<button class="popupButton click left positiveButton" id="" >' + 'Yes' + '</button>' +
+                                    '<button class="popupButton click left negativeButton" id="popupCancelButton" >' + 'Cancel' + '</button>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div id="mask"></div>' +
+                        '</div>',
+                windowHeight = $(window).height(),
+                windowWidth = $(window).width();
+
+                $("body").append(html);
+                container = $('#popupContainer');
+                leftPos = (windowWidth / 2) - (container.width() / 2);
+                topPos = (windowHeight / 2) - (container.height() / 2);
+                container.css({ "left": leftPos, "top": topPos });
+
+                $('#mask').css({ "width": windowWidth + "px", "height": windowHeight + "px" });
+                $('#mask').click(function(){
+                    $('#boxes').remove();
+                });
+
+                $('#popupCancelButton').click(function(){
+                    $('#boxes').remove();
+                });
+
+                container.show();
         };
 
     return {
         expand: expand,
-        formReturn: formReturn
+        formReturn: formReturn,
+        createPopup: createPopup
     };
 }());
 
@@ -77,7 +112,7 @@ CMA.Core.init = function(){
     CMA.Core.expandedTasks = false;
     CMA.Core.expandedWorkers = false;
     
-    $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 10) + "px");
+    $('#content').css("width", ($(window).width() - $('#dummy').css("width").split("px")[0] - 30) + "px");
     if( $(window).height() > $('#container').css("min-height").split("px")[0] ){
         $('#navigation').css("height", ($(window).height() - $('#header').css("height").split("px")[0] - 2) + "px");
     } else {
@@ -154,26 +189,6 @@ CMA.Core.setupEvents = function(){
     $(window).resize(resizer);
 };
 
-CMA.Core.setupFormEvents = function(){
-    var ajax = CMA.Core.ajax;
-
-
-    $('.outOfBandForm').hide();
-    $('.policyForm').hide();
-
-
-    /*
-    $('#blankOutOfBandForm').ajaxForm({
-        dataType: 'json',
-        url: CMA.Core.ajax.getUrls().out_of_band_worker_create_url,
-        success: formReturn
-    });
-    */
-
-    
-};
-
-
 CMA.Core.navigation = (function() {
     
     var ajax = CMA.Core.ajax,
@@ -212,67 +227,6 @@ CMA.Core.navigation = (function() {
     };
 }());
 
-CMA.Core.providerCreation = function() {
-    var handleImages = function(data) {
-            var providerStep2 = $('#providerStep2'),
-                div, length, i, element;
-
-            if( !data.hasOwnProperty("failure") ){
-                div = '<div class="fieldWrapper">';
-                length = data.length;
-                
-                for(i=0; i < length; i += 1){
-                    div += '<input class="imageID" type="radio" name="image_id" value="' + data[i].id + '">' + data[i].name + '<br/>';
-                }
-                div += '</div>';
-                
-                providerStep2.text("Step 2: Please choose the image ID to be used.");
-                element = $(div);
-                providerStep2.append(element);
-                $('#providerStep3').show();
-                $('#submitProviderButton').show();
-                $('.fieldWrapper').show();
-            } else {
-                providerStep2.text(originalText);
-            }
-        };
-    
-    $('#getImagesButton').click(function() {
-        var providerStep2 = $('#providerStep2');
-        
-        $(this).hide();
-        providerStep2.text("Please wait while we determine the availible images...");
-        providerStep2.show();
-        CMA.Core.ajax.postGetImages(handleImages);
-    });
-    
-    $('#viewProvider').click(function(){
-        //$('#submitProviderButton').text("Close");
-        $('#providerFormWrapper').animate({
-                height: "toggle"
-            },
-            500,
-            function(){}
-        );
-    });
-
-    $('.deleteInstance').click(function() {
-        var pk = $(this).attr("id");
-            element = $(this).parent();
-        CMA.Core.ajax.postDeleteInstance(pk, function(data){
-            if( data.hasOwnProperty("failure") ){
-                $('#statusText').show();
-                $('#statusText').text(data.failure);
-            } else {
-                element.remove();
-                $('#statusText').show();
-                $('#statusText').text("Instance successfully deleted.");
-                $('#statusText').fadeOut(3000, function() {});
-            }
-        });
-    });
-
-};
 
 CMA.Core.policy = function(){
     var ajax = CMA.Core.ajax,
@@ -332,6 +286,7 @@ CMA.Core.policy = function(){
             ajax.postEditPolicy(id, editReturn);
         };
 
+    $('.policyForm').hide();
 
     $('.editPolicy').click(function(){
         var elem = document.getElementById($(this).attr("id") + "_policyForm");
@@ -355,6 +310,7 @@ CMA.Core.configure = (function(){
 
         registerEvents = function() {
             if( CMA.Core.USE_MODE === "static" ){
+                $('.outOfBandForm').hide();
                 $('.editWorkerNode').click(function(){
                     var id = $(this).attr("id"),
                         split = id.split("_"),
@@ -362,6 +318,7 @@ CMA.Core.configure = (function(){
                     if( split[1] === "update" ){
                         util.expand(document.getElementById(split[0] + "_Form"));
                     } else if( split[1] === "delete" ){
+                        util.createPopup("test", "Yes");
                         ajax.postDeleteOutOfBandWorker(split[0], function(data){
                             if( !data.hasOwnProperty("failure") ){
                                 $(that).parent().remove();
@@ -379,8 +336,83 @@ CMA.Core.configure = (function(){
                         ajax.postUpdateOutOfBandWorker($(form), split[0], util.formReturn);
                 });
                 ajax.postCreateOutOfBandWorker($('#blankOutOfBandForm'), util.formReturn);
-            } else if( CMA.Core.USE_MODE === "dyamic" ){
-                ajax.postCreateProvider($('#blankProviderForm'), util.formReturn);
+
+            } else if( CMA.Core.USE_MODE === "dynamic" ){
+                var handleImages = function(data) {
+                        var providerStep2 = $('#providerStep2'),
+                            div, length, i, element;
+
+                        if( !data.hasOwnProperty("failure") ){
+                            div = '<div class="fieldWrapper">';
+                            length = data.length;
+                            
+                            for(i=0; i < length; i += 1){
+                                div += '<input class="imageID" type="radio" name="image_id" value="' + data[i].id + '">' + data[i].name + '<br/>';
+                            }
+                            div += '</div>';
+                            
+                            providerStep2.text("Step 2: Please choose the image ID to be used.");
+                            element = $(div);
+                            providerStep2.append(element);
+                            $('#providerStep3').show();
+                            $('#submitProviderButton').show();
+                            $('.fieldWrapper').show();
+                        } else {
+                            providerStep2.text(originalText);
+                        }
+                    };
+                
+                $('#getImagesButton').click(function() {
+                    var providerStep2 = $('#providerStep2');
+                    
+                    $(this).hide();
+                    providerStep2.text("Please wait while we determine the availible images...");
+                    providerStep2.show();
+                    ajax.postGetImages(handleImages);
+                });
+                
+                $('#viewProvider').click(function(){
+                    //$('#submitProviderButton').text("Close");
+                    util.expand($('#providerFormWrapper'));
+                });
+
+                $('.deleteInstance').click(function() {
+                    var pk = $(this).attr("id");
+                        element = $(this).parent();
+                    
+                    ajax.postDeleteInstance(pk, function(data){
+                        if( data.hasOwnProperty("failure") ){
+                            $('#statusText').show();
+                            $('#statusText').text(data.failure);
+                        } else {
+                            element.remove();
+                            $('#statusText').show();
+                            $('#statusText').text("Instance successfully deleted.");
+                            $('#statusText').fadeOut(3000, function() {});
+                        }
+                    });
+                });
+                
+                $('#blankProviderForm').submit(function(){ return false; });
+                if( $('#submitProviderButton').hasClass("positiveButton") ){
+                    $('#submitProviderButton').click(function(){
+                        ajax.postCreateProvider($('#blankProviderForm'), util.formReturn);
+                    });
+                } else if( $('#submitProviderButton').hasClass("negativeButton") ){
+                    $('#submitProviderButton').click(function(){
+                        //util.createPopup();
+                        ajax.postDeleteProvider($('#providerID').text(),function(data){
+                            if( !data.hasOwnProperty("failure") ){
+                                $('#configurationManagement').children().remove();
+                                var elem = $(data);
+                                $('#configurationManagement').append(elem);
+                                CMA.Core.configure.registerEvents();
+                                $('textarea').attr("rows", "3");
+                                $('textarea').css("resize", "none");
+                            }
+                        });
+                    });
+                }
             }
         };
     
@@ -394,8 +426,6 @@ $(document).ready(function() {
     var core = CMA.Core;
     core.init();
     core.setupEvents();
-    core.setupFormEvents();
-    core.providerCreation();
     core.policy();
     core.configure.registerEvents();
 

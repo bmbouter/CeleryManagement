@@ -57,6 +57,7 @@ def configure(request):
     elif settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "dynamic":
         provider = Provider(provider_user_id="test456YUser", celeryd_username="Test Username", 
                             provider_name=Provider.PROVIDER_CHOICES[3][1], image_id="6sd6aF8dadSSa3")
+        provider.pk = 0
         #provider = None
         providers = {}
         if provider:
@@ -72,7 +73,8 @@ def configure(request):
         inbandnode2 = InBandWorkerNode(instance_id="nk^3764646d")
 
         context["provider"] = providers
-        context["instances"] = [inbandnode, inbandnode1, inbandnode2]
+        if provider is not None:
+            context["instances"] = [inbandnode, inbandnode1, inbandnode2]
 
     return render_to_response('celerymanagementapp/configure.html',
             context,
@@ -130,7 +132,7 @@ def create_provider(request):
     if request.method == "POST":
         provider_form = ProviderForm(request.POST, request.FILES)
         if provider_form.is_valid():
-            return HttpResponse("success")
+            json = simplejson.dumps("success")
         else:
             errors = []
             for field in provider_form:
@@ -138,7 +140,27 @@ def create_provider(request):
                                 'error' : field.errors })
             failed = { 'failure' : errors }
             json = simplejson.dumps(failed)
-            return HttpResponse(json)
+        return HttpResponse(json)
+
+def delete_provider(request, provider_pk=None):
+    """Deletes a worker"""
+    random.seed()
+    choice = random.randint(0, 1000)
+    if not (choice % 2):
+        provider_form = ProviderForm()
+        providers = { "provider_form": provider_form }
+        context = { "provider": providers }
+        
+        html = render_to_response("celerymanagementapp/configure_provider.html",
+                context,
+                context_instance=RequestContext(request))
+        json = simplejson.dumps(html.content)
+
+    else:
+        failed = { 'failure' : 'Worker Node failed to delete'}
+        json = simplejson.dumps(failed)
+    return HttpResponse(json)
+
 
 def get_images(request):
     images = [{ 'name': "Ubuntu34-postgresql", "id": "9ad9adf88dsa"}, 

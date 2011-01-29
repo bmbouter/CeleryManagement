@@ -22,6 +22,7 @@ CMA.Core.ajax = (function() {
                 out_of_band_worker_update_url: root_url + "outofbandworker/<placeHolder>/update/",
                 out_of_band_worker_delete_url: root_url + "outofbandworker/<placeHolder>/delete/",
                 provider_create_url: root_url + "provider/",
+                provider_delete_url: root_url + "provider/<placeHolder>/delete/",
                 get_images_url: root_url + "provider/images/",
                 delete_instance_url: root_url + "provider/delete_worker/",
                 create_policy_url: root_url + "policy/create/",
@@ -48,6 +49,7 @@ CMA.Core.ajax = (function() {
                 out_of_band_worker_update_url: post_root_url + "outofbandworker/<placeHolder>/update/",
                 out_of_band_worker_delete_url: post_root_url + "outofbandworker/<placeHolder>/delete/",
                 provider_create_url: post_root_url + "provider/",
+                provider_delete_url: post_root_url + "provider/<placeHolder>/delete/",
                 get_images_url: post_root_url + "provider/images/",
                 delete_instance_url: post_root_url + "provider/delete_worker/1/",
                 create_policy_url: post_root_url + "policy/create/",
@@ -103,11 +105,15 @@ CMA.Core.ajax = (function() {
             $.post(urls.out_of_band_worker_delete_url.replace("<placeHolder>", workerID), {}, callback, "json");
         },
         postCreateProvider = function(form, callback){
-            form.ajaxForm({
+            console.log("test");
+            form.ajaxSubmit({
                 dataType: 'json',
                 url: urls.provider_create_url,
                 success: callback
             });
+        },
+        postDeleteProvider = function(providerID, callback){
+            $.post(urls.provider_delete_url.replace("<placeHolder>", providerID), {}, callback, "json");
         },
         postCreatePolicy = function(data, callbackFunction){
             $.post(urls.create_policy_url, data, callbackFunction, "json");
@@ -136,6 +142,7 @@ CMA.Core.ajax = (function() {
         postUpdateOutOfBandWorker: postUpdateOutOfBandWorker,
         postDeleteOutOfBandWorker: postDeleteOutOfBandWorker,
         postCreateProvider: postCreateProvider,
+        postDeleteProvider: postDeleteProvider,
         postCreatePolicy: postCreatePolicy,
         postUpdatePolicy: postUpdatePolicy,
         postDeletePolicy: postDeletePolicy
