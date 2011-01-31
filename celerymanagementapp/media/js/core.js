@@ -56,7 +56,7 @@ CMA.Core.util = (function(){
                 }
             }
         },
-        createPopup = function(text, buttonText){
+        createPopup = function(text, successCallback){
             var leftPos, topPos, container,
                 html = '<div id="boxes">' +
                             '<div id="popupContainer">' + 
@@ -64,7 +64,7 @@ CMA.Core.util = (function(){
                                     text +
                                 '</div>' +
                                 '<div id="popupButtonContainer">' + 
-                                    '<button class="popupButton click left positiveButton" id="" >' + 'Yes' + '</button>' +
+                                    '<button class="popupButton click left positiveButton" id="popupYesButton" >' + 'Yes' + '</button>' +
                                     '<button class="popupButton click left negativeButton" id="popupCancelButton" >' + 'Cancel' + '</button>' +
                                 '</div>' +
                             '</div>' +
@@ -85,6 +85,10 @@ CMA.Core.util = (function(){
                 });
 
                 $('#popupCancelButton').click(function(){
+                    $('#boxes').remove();
+                });
+                $('#popupYesButton').click(function(){ 
+                    successCallback();
                     $('#boxes').remove();
                 });
 
@@ -400,17 +404,19 @@ CMA.Core.configure = (function(){
                     });
                 } else if( $('#submitProviderButton').hasClass("negativeButton") ){
                     $('#submitProviderButton').click(function(){
-                        //util.createPopup();
-                        ajax.postDeleteProvider($('#providerID').text(),function(data){
-                            if( !data.hasOwnProperty("failure") ){
-                                $('#configurationManagement').children().remove();
-                                var elem = $(data);
-                                $('#configurationManagement').append(elem);
-                                CMA.Core.configure.registerEvents();
-                                $('textarea').attr("rows", "3");
-                                $('textarea').css("resize", "none");
-                            }
-                        });
+                        util.createPopup("WARNING: Deleting a provider will delete all Worker instances.  Are you sure you wish to continue?",
+                            function(){
+                                ajax.postDeleteProvider($('#providerID').text(), function(data){
+                                    if( !data.hasOwnProperty("failure") ){
+                                        $('#configurationManagement').children().remove();
+                                        var elem = $(data);
+                                        $('#configurationManagement').append(elem);
+                                        CMA.Core.configure.registerEvents();
+                                        $('textarea').attr("rows", "3");
+                                        $('textarea').css("resize", "none");
+                                    }
+                                });
+                            });
                     });
                 }
             }
