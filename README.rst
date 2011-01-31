@@ -4,9 +4,9 @@ Quick Start Instructions
 Overview of Steps
 =================
 
-    -Create your Python virtual environment containing the correct requirements
-    -Configure your settings
-    -Start the required processes
+    - Create your Python virtual environment containing the correct requirements
+    - Configure your settings
+    - Start the required processes
 
 .. contents::
 
