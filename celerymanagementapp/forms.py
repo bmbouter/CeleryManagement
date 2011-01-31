@@ -19,8 +19,11 @@ class ProviderForm(ModelForm):
         fields = ('provider_name', 'provider_user_id', 'provider_key', 'image_id',
                 'celeryd_username', 'ssh_key', 'celeryd_start_cmd', 'celeryd_stop_cmd', 'celeryd_status_cmd')
 
-
 class PolicyModelForm(ModelForm):
+    # Important: errors from the 'source' field contain newlines and should be 
+    # formatted in a monospace font... for instance in html it should probably 
+    # be in a <pre></pre> element.
+    
     class Meta:
         model = PolicyModel
         fields = ('name', 'enabled', 'source', 'modified', 'last_run_time')
