@@ -36,19 +36,30 @@ $(document).ready(function() {
         }
     });
     
-    $('#add_aggregation').click(function() {
+    function add_aggregation() {
         var table = $('#aggregate_table tr:last');
         
         if(!$('#aggregate_methods').val()) {
             alert("Select methods for field: " + $('#aggregate_field').val());
         } else {
+            var aggregate_field = $('#aggregate_field').val();
+            var aggregate_methods = $('#aggregate_methods').val();
+            
             table.after(
-                '<tr><td>' + $('#aggregate_field').val() + '</td>' +
-                '<td>' + $('#aggregate_methods').val() + '</td>' +
+                '<tr><td>' + aggregate_field + '</td>' +
+                '<td>' + aggregate_methods + '</td>' +
+                '<td><a href="#" class="' + aggregate_field +
+                    '-delete"><strong>x</strong></span></td>' + 
                 '</tr>'
             );
+            
+            $('.' + aggregate_field + '-delete').click(function() {
+                $(this).parent().parent().remove(); 
+            });
         }
-    });
+    }
+    
+    $('#add_aggregation').click(add_aggregation);
     
     $('#filter_option').change(function() {
         var field = $('#filter_arg2');
