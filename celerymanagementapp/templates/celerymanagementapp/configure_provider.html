@@ -29,7 +29,15 @@
             </div>
             {% endif %}
             {% if field.html_name != "image_id" %}
-            <div class="fieldWrapper {% if not provider.provider %}{% if forloop.counter > 3 %}hidden{% endif %}{% endif %}">
+            <div class="fieldWrapper {% if forloop.counter > 3 %}hidden{% endif %}">
+                <div class="field">
+                    {{ field.label_tag }} {{ field }}
+                    <span class="errorWrapper" id="{{ field.html_name }}_error"></span>
+                    {{ field.errors }}
+                </div>
+            </div>
+            {% else %}
+            <div class="hidden">
                 <div class="field">
                     {{ field.label_tag }} {{ field }}
                     <span class="errorWrapper" id="{{ field.html_name }}_error"></span>
