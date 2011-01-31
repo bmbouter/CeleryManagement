@@ -79,8 +79,8 @@ urlpatterns += patterns('celerymanagementapp',
     (r'^taskdemo/test/$', 'test_views.task_demo_test_dataview'),
     
     (r'^policy/create/$', 'dataviews.policy_create'),
-    (r'^policy/modify/(?P<id>\d+)/$', 'dataviews.policy_modify'),
-    (r'^policy/delete/(?P<id>\d+)/$', 'dataviews.policy_delete'),
+    (r'^policy/modify/(?P<policy_id>\d+)/$', 'dataviews.policy_modify'),
+    (r'^policy/delete/(?P<policy_id>\d+)/$', 'dataviews.policy_delete'),
     (r'^policy/get/(?P<id>\d+)/$', 'dataviews.policy_get'),
     (r'^policy/list/$', 'dataviews.policy_list'),
     (r'^policy/test_form/$', 'test_views.policy_form_test'),
@@ -136,8 +136,8 @@ if settings.DEBUG:
     )
     urlpatterns += patterns('celerymanagementapp.test_views',
         url(r'^test/post/policy/create/$', 'policy_create', name="test_create_policy_url"),
-        url(r'^test/post/policy/modify/(?P<id>\d+)/$', 'policy_modify', name="test_modify_policy_url"),
-        url(r'^test/post/policy/delete/(?P<id>\d+)/$', 'policy_delete', name="test_delete_policy_url"),
+        url(r'^test/post/policy/modify/(?P<policy_id>\d+)/$', 'policy_modify', name="test_modify_policy_url"),
+        url(r'^test/post/policy/delete/(?P<policy_id>\d+)/$', 'policy_delete', name="test_delete_policy_url"),
     )
 
     urlpatterns += patterns('',

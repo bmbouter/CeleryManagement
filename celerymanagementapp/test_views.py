@@ -143,7 +143,7 @@ def create_provider(request):
         return HttpResponse(json)
 
 def delete_provider(request, provider_pk=None):
-    """Deletes a worker"""
+    """Deletes a Provider"""
     random.seed()
     choice = random.randint(0, 1000)
     if not (choice % 2):
@@ -161,7 +161,6 @@ def delete_provider(request, provider_pk=None):
         json = simplejson.dumps(failed)
     return HttpResponse(json)
 
-
 def get_images(request):
     images = [{ 'name': "Ubuntu34-postgresql", "id": "9ad9adf88dsa"}, 
                 {'name': "Fedora-14-postgresql-Django", "id": "36d6a6gGHT"}, 
@@ -174,7 +173,7 @@ def policy_create(request):
     if request.method == "POST":
         policy_form = PolicyModelForm(request.POST)
         if policy_form.is_valid():
-            return HttpResponse("success")
+            json = simplejson.dumps("Policy successfully created.")
         else:
             errors = []
             for field in policy_form:
@@ -182,26 +181,34 @@ def policy_create(request):
                                 'error' : field.errors })
             failed = { 'failure' : errors }
             json = simplejson.dumps(failed)
-            return HttpResponse(json)
+        return HttpResponse(json)
 
-def policy_modify(request):
+def policy_modify(request, policy_id=None):
     if request.method == "POST":
+        policy = PolicyModel()
         policy_form = PolicyModelForm(request.POST)
         if policy_form.is_valid():
-            return HttpResponse("success")
+            json = simplejson.dumps("Policy successfully updated.")
         else:
             errors = []
             for field in policy_form:
                 errors.append({ 'field' : field.html_name,
                                 'error' : field.errors })
-            failed = { 'failure' : errors }
+            failed = { 'failure' : errors,
+                        'id': policy_id }
             json = simplejson.dumps(failed)
-            return HttpResponse(json)
+        return HttpResponse(json)
 
-
-def policy_delete(request, id=None):
-    json = simplejson.dumps("success")
-    return HttpResponse(json, mimetype="application/json")
+def policy_delete(request, policy_id=None):
+    """Deletes a policy"""
+    random.seed()
+    choice = random.randint(0, 1000)
+    if not (choice % 2):
+        json = simplejson.dumps("Policy successfully deleted.")
+    else:
+        failed = { 'failure' : 'Policy failed to delete'}
+        json = simplejson.dumps(failed)
+    return HttpResponse(json)
 
 
 def delete_worker(request, worker_pk):

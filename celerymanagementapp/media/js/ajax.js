@@ -25,9 +25,9 @@ CMA.Core.ajax = (function() {
                 provider_delete_url: root_url + "provider/<placeHolder>/delete/",
                 get_images_url: root_url + "provider/images/",
                 delete_instance_url: root_url + "provider/delete_worker/",
-                create_policy_url: root_url + "policy/create/",
-                edit_policy_url: root_url + "policy/modify/<placeHolder>/",
-                delete_policy_url: root_url + "policy/delete/<placeHolder>/"
+                policy_create_url: root_url + "policy/create/",
+                policy_update_url: root_url + "policy/modify/<placeHolder>/",
+                policy_delete_url: root_url + "policy/delete/<placeHolder>/"
             };
         },
         loadTestUrls = function() {
@@ -52,9 +52,9 @@ CMA.Core.ajax = (function() {
                 provider_delete_url: post_root_url + "provider/<placeHolder>/delete/",
                 get_images_url: post_root_url + "provider/images/",
                 delete_instance_url: post_root_url + "provider/delete_worker/1/",
-                create_policy_url: post_root_url + "policy/create/",
-                edit_policy_url: post_root_url + "policy/modify/<placeHolder>/",
-                delete_policy_url: post_root_url + "policy/delete/<placeHolder>/"
+                policy_create_url: post_root_url + "policy/create/",
+                policy_update_url: post_root_url + "policy/modify/<placeHolder>/",
+                policy_delete_url: post_root_url + "policy/delete/<placeHolder>/"
             };
         },
         getUrls = function(){
@@ -116,13 +116,13 @@ CMA.Core.ajax = (function() {
             $.post(urls.provider_delete_url.replace("<placeHolder>", providerID), {}, callback, "json");
         },
         postCreatePolicy = function(data, callbackFunction){
-            $.post(urls.create_policy_url, data, callbackFunction, "json");
+            $.post(urls.policy_create_url, data, callbackFunction, "json");
         },
         postDeletePolicy = function(policy, callbackFunction){
-            $.post(urls.delete_policy_url.replace("<placeHolder>", policy), {}, callbackFunction, "json");
+            $.post(urls.policy_delete_url.replace("<placeHolder>", policy), {}, callbackFunction, "json");
         },
-        postUpdatePolicy = function(policy, callbackkFunction){
-            $.post(urls.edit_policy_url.replace("<placeHolder>", policy), {}, callbackFunction, "json");
+        postUpdatePolicy = function(data, policy, callbackFunction){
+            $.post(urls.policy_update_url.replace("<placeHolder>", policy), data, callbackFunction, "json");
         };
 
     return {
