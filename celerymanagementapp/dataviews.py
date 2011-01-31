@@ -395,7 +395,7 @@ class PolicyDataviewBase(object):
                            'traceback': ''}
     def _result(self):
         return (self.success, self.record, self.error_info)
-                
+        
     def _error(self, **kwargs):
         """ Sets items in the error_info attribute, then raises a 
             PolicyDataviewError exception.  This exception is caught in the 
