@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Controlling the Cloud &mdash; CeleryManagement v0.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '#',
+        VERSION:     '0.0',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="CeleryManagement v0.0 documentation" href="index.html" />
+    <link rel="prev" title="Policies API" href="policy.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="policy.html" title="Policies API"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">CeleryManagement v0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="controlling-the-cloud">
+<h1><a class="toc-backref" href="#id1">Controlling the Cloud</a><a class="headerlink" href="#controlling-the-cloud" title="Permalink to this headline">¶</a></h1>
+<p>CeleryManagement is fully integrated with <a class="reference external" href="http://incubator.apache.org/libcloud/">libcloud</a> allowing you to operate
+your CeleryManagement infrastructure on the cloud computing provider of your
+choice.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#controlling-the-cloud" id="id1">Controlling the Cloud</a><ul>
+<li><a class="reference internal" href="#supported-clouds" id="id2">Supported Clouds</a></li>
+<li><a class="reference internal" href="#building-your-image-on-the-cloud" id="id3">Building Your Image on the Cloud</a></li>
+<li><a class="reference internal" href="#configuring-your-system" id="id4">Configuring Your System</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="supported-clouds">
+<h2><a class="toc-backref" href="#id2">Supported Clouds</a><a class="headerlink" href="#supported-clouds" title="Permalink to this headline">¶</a></h2>
+<p>CeleryManagement currently supports the following cloud environments:</p>
+<blockquote>
+<ul class="simple">
+<li><a class="reference external" href="http://www.dreamhost.com/hosting-vps.html">DreamHost</a></li>
+<li><a class="reference external" href="http://aws.amazon.com/ec2/">Amazon</a></li>
+<li><a class="reference external" href="http://www.enomaly.com/">Enomaly ECP</a></li>
+<li><a class="reference external" href="http://www.elastichosts.com/">ElasticHosts</a></li>
+<li><a class="reference external" href="http://www.gogrid.com/">GoGrid</a></li>
+<li><a class="reference external" href="http://www-935.ibm.com/services/us/igs/cloud-development/">IBM Developer Cloud</a></li>
+<li><a class="reference external" href="http://www.linode.com/">Linode</a></li>
+<li><a class="reference external" href="http://www.opennebula.org/">OpenNebula</a></li>
+<li><a class="reference external" href="http://www.rackspacecloud.com/index.php">Rackspace</a></li>
+<li><a class="reference external" href="http://rimuhosting.com/">RimuHosting</a></li>
+<li><a class="reference external" href="http://www.slicehost.com/">Slicehost</a></li>
+<li><a class="reference external" href="http://www.softlayer.com/">Softlayer</a></li>
+<li><a class="reference external" href="http://www.voxel.net/">VoxCloud</a></li>
+<li><a class="reference external" href="http://www.vps.net/">VPS.net</a></li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="building-your-image-on-the-cloud">
+<h2><a class="toc-backref" href="#id3">Building Your Image on the Cloud</a><a class="headerlink" href="#building-your-image-on-the-cloud" title="Permalink to this headline">¶</a></h2>
+<p>To begin running your celery infrastructure in cloud computing environments,
+you will need to first build a cloud image that meets the following
+requirements:</p>
+<blockquote>
+<ul class="simple">
+<li>celery or django-celery installed</li>
+<li>SSH server start by default at boot</li>
+<li>Your Task code</li>
+<li>Have installed <a class="reference external" href="https://github.com/bmbouter/CeleryManagementLib">CeleryManagementLib</a> (optional but recommended)</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="configuring-your-system">
+<h2><a class="toc-backref" href="#id4">Configuring Your System</a><a class="headerlink" href="#configuring-your-system" title="Permalink to this headline">¶</a></h2>
+<p>If you want to have CeleryManagement manage and control your infrastructure
+dynamically set the following variable in the settings.py file:</p>
+<p><tt class="docutils literal"><span class="pre">CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE</span> <span class="pre">=</span> <span class="pre">&quot;dynamic&quot;</span></tt></p>
+<p>Once set, all configuration and management happens through the web interface at
+this location:</p>
+<p><tt class="docutils literal"><span class="pre">/celerymanagementapp/view/configure/</span></tt></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Controlling the Cloud</a><ul>
+<li><a class="reference external" href="#supported-clouds">Supported Clouds</a></li>
+<li><a class="reference external" href="#building-your-image-on-the-cloud">Building Your Image on the Cloud</a></li>
+<li><a class="reference external" href="#configuring-your-system">Configuring Your System</a></li>
+</ul>
+</li>
+</ul>
+
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="policy.html"
+                                  title="previous chapter">Policies API</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/cloud.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="policy.html" title="Policies API"
+             >previous</a> |</li>
+        <li><a href="index.html">CeleryManagement v0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2011, ITng Services.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>
