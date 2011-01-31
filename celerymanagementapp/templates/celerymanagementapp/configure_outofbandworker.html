@@ -17,7 +17,7 @@
             </div>
         </div>
         {% endfor %}
-        <button class="submitButton click" id="submitOutOfBandButton" >Submit</button>
+        <button class="submitButton click positiveButton" id="submitOutOfBandButton" >Submit</button>
     </form>
     {% for worker in outofbandworkernodes %}
     <ul class="node">
@@ -35,6 +35,6 @@
             </div>
         </div>
         {% endfor %}
-        <button class="updateOutOfBandButton submitButton click" id="{{ worker.worker.pk }}_button">Update</button>
+        <button class="updateOutOfBandButton submitButton click positiveButton" id="{{ worker.worker.pk }}_button">Update</button>
     </form>
     {% endfor %}

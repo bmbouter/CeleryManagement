@@ -23,7 +23,7 @@
         </div>
         {% endif %}
         {% endfor %}
-        <button type="button" class="submitButton" id="submitPolicyButton" >Submit</button>
+        <button type="button" class="submitButton click positiveButton" id="submitPolicyButton" >Submit</button>
     </form>
     {% for policy in policies %}
     <ul class="node">
@@ -41,7 +41,7 @@
             </div>
         </div>
         {% endfor %}
-        <input type="submit" class="submitPolicyEdit submitButton" id="{{ policy.policy.pk }}_editButton"value="Submit"/>
+        <input type="submit" class="submitPolicyEdit submitButton click positiveButton" id="{{ policy.policy.pk }}_editButton"value="Submit"/>
     </form>
     {% endfor %}
 </div>

@@ -122,6 +122,13 @@ CMA.Core.init = function(){
     } else {
         $('#navigation').css("height", $('#container').css("min-height"));
     }
+
+    $('li').hover(function(){
+        $(this).css({ "color": "orange" });
+        },
+        function(){
+        $(this).css({ "color": "#000000" });
+    });
 };
 
 CMA.Core.setupEvents = function(){
@@ -232,54 +239,31 @@ CMA.Core.navigation = (function() {
 }());
 
 
-CMA.Core.policy = function(){
+CMA.Core.policy = (function(){
     var ajax = CMA.Core.ajax,
         util = CMA.Core.util,
 
         submitPolicy = function(){
-            var form = {},
+            var form = {};
                 
-                formReturn = function(data){
-                    var setText = function(){
-                        var errLength = data.failure[i].error.length,
-                            text = "";
-                        for( j=0; j < errLength; j += 1){
-                            text += data.failure[i].error[j];
-                        }
-                        return text;
-                    };
-                    console.log(data);
-                    if( !data.hasOwnProperty("failure") ){
-                        console.log("success");
-                    } else {
-                        var i = 0,
-                            elem,
-                            length = data.failure.length;
-                        
-                        for( i=0; i < length; i += 1){
-                            elem = document.getElementById(data.failure[i].field + "_error");
-                            $(elem).text(setText);
-                            if( $(elem).text() !== ""){                
-                                $(elem).show();
-                            } else {
-                                $(elem).hide();
-                            }
-                        }
-                    }
-                };
-            
             form.name = $('#id_name').val();
             form.enabled = $('#id_enabled').attr("checked");
             form.source = $('#id_source').val();
          
-            ajax.postCreatePolicy(form, formReturn);
+            ajax.postCreatePolicy(form, util.formReturn);
         },
         deletePolicy = function(elem){
             var deleteReturn = function(data){
-                    console.log(data);
-                    if( !data.hasOwnProperty("failure") ){
-                        elem.parent().remove();
-                    }
+                    util.createPopup("Are you sure you wish to delete policy " + $(elem).parent().children(':first').text()  + " ?",
+                        function(){
+                            if( !data.hasOwnProperty("failure") ){
+                                elem.parent().remove();
+                            } else {
+                                $('#statusText').show();
+                                $('#statusText').text(data.failure);
+                            }
+                        }
+                    );
                 };
             ajax.postDeletePolicy(elem.attr("id"), deleteReturn);
         },
@@ -288,25 +272,31 @@ CMA.Core.policy = function(){
                 console.log(data);
             };
             ajax.postEditPolicy(id, editReturn);
+        },
+        registerEvents = function(){ 
+
+            $('.policyForm').hide();
+
+            $('.editPolicy').click(function(){
+                var elem = document.getElementById($(this).attr("id") + "_policyForm");
+                util.expand(elem);
+            });
+            $('.createPolicy').click(function() {
+                util.expand($('#blankPolicyForm'));
+            });
+            $('#submitPolicyButton').click(submitPolicy);
+            $('.deletePolicy').click(function(){
+                    deletePolicy($(this));
+            });
+            $('.submitPolicyEdit').click(function(){
+                    editPolicy($(this).attr("id"));
+            });
         };
 
-    $('.policyForm').hide();
-
-    $('.editPolicy').click(function(){
-        var elem = document.getElementById($(this).attr("id") + "_policyForm");
-        util.expand(elem);
-    });
-    $('.createPolicy').click(function() {
-        util.expand($('#blankPolicyForm'));
-    });
-    $('#submitPolicyButton').click(submitPolicy);
-    $('.deletePolicy').click(function(){
-            deletePolicy($(this));
-    });
-    $('.submitPolicyEdit').click(function(){
-            editPolicy($(this).attr("id"));
-    });
-};
+    return {
+        registerEvents: registerEvents
+    };
+}());
 
 CMA.Core.configure = (function(){
     var util = CMA.Core.util,
@@ -322,12 +312,17 @@ CMA.Core.configure = (function(){
                     if( split[1] === "update" ){
                         util.expand(document.getElementById(split[0] + "_Form"));
                     } else if( split[1] === "delete" ){
-                        util.createPopup("test", "Yes");
-                        ajax.postDeleteOutOfBandWorker(split[0], function(data){
-                            if( !data.hasOwnProperty("failure") ){
-                                $(that).parent().remove();
-                            }
-                        });        
+                        util.createPopup("Are you sure you wish to delete worker instance " + $(that).parent().children(':first').text() + "?", 
+                            function(){
+                                ajax.postDeleteOutOfBandWorker(split[0], function(data){
+                                    if( !data.hasOwnProperty("failure") ){
+                                        $(that).parent().remove();
+                                    } else {
+                                        $('#statusText').show();
+                                        $('#statusText').text(data.failure);
+                                    }
+                                });        
+                            });
                     }
                 });
                 $('.createNewOutOfBand').click(function() {
@@ -432,7 +427,9 @@ $(document).ready(function() {
     var core = CMA.Core;
     core.init();
     core.setupEvents();
-    core.policy();
+    if( CMA.Core.USE_MODE === "dynamic" ){
+        core.policy.registerEvents();
+    }
     core.configure.registerEvents();
 
     //core.ajax.getTasks(core.navigation.populateTaskNavigation);
