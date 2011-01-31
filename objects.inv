@@ -1,7 +1,28 @@
-# Sphinx inventory version 2
+# Sphinx inventory version 1
 # Project: CeleryManagement
 # Version: 0.0
-# The remainder of this file is compressed using zlib.
-xÚT»nÃ0ÜóÚ5ºfí”¡@è(0ÒÙ¢G@ÑIü÷•í¼
-¤¶Vê<ÏöÑØ`p®’˜µ£-\µ|«İÒ_V;ñî¥úˆ¦u¨6}iÑ <!]«ÆM Ö»¿À±v}€Oj°Jû”‡¯	UYFtVw#ğµZ.¾óûFàWI"C9rR8"([+Û„\5=ŸDØn[Á“&ÃÅ ÓõPÙEó÷yÆÙ A&	šcÚö˜ºZlÿOsÍn«â|°Œ4·Õ^ï(4˜#xPP'²"ÖcRJ’©«ÜêAÚQJOPïÑ9¦¬È¹É§¡aQ˜ÊYoenßûü)•×pã~LRI<Jâ1Îm˜õû’VkÀÌ¨¸A:s\v£8(ãç’wM­›uïaÛR ¿&ë
-µOİã¦Ö ¦¬3Ëî”£®üâ+¥²j›û(5)é%Qœ90jHş™•€c+64jÙe~TsúG
+tasks data policy.html
+WorkerItem.decrement method policy.html
+tasks_ready method policy.html
+WorkerItem.increment method policy.html
+crontab function policy.html
+tasks_sent method policy.html
+TaskItem.expires attribute policy.html
+TaskItem.store_errors_even_if_ignored attribute policy.html
+mean_waittime method policy.html
+stats data policy.html
+WorkerItem class policy.html
+WorkerItem.prefetch attribute policy.html
+workers data policy.html
+TaskItem.rate_limit attribute policy.html
+tasks_revoked method policy.html
+mean_runtime method policy.html
+tasks_succeeded method policy.html
+TaskItem.acks_late attribute policy.html
+TaskItem.ignore_result attribute policy.html
+WorkerItem.get method policy.html
+tasks_failed method policy.html
+TaskItem class policy.html
+TaskItem.default_retry_delay attribute policy.html
+TaskItem.routing_key attribute policy.html
+TaskItem.exchange attribute policy.html
