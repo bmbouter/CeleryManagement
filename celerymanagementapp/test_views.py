@@ -332,3 +332,43 @@ def worker_commands_test_view(request, name=None):
     c = RequestContext(request)
     return HttpResponse(t.render(c))
 
+@login_required
+def policy_form_test(request):
+    from django.template import Template
+    
+    html = '''\
+    <html>
+    <head><title>Policy Form</title></head>
+    <body>
+    <form action="/celerymanagementapp/policy/test_form/" method="post">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <td>Name:</td>
+            <td>{{form.name}}</td>
+            <td>{{form.name.errors}}</td>
+        </tr>
+        <tr>
+            <td>Source:</td>
+            <td>{{form.source}}</td>
+            <td><pre>{{form.source.errors}}</pre></td>
+        </tr>
+    </table>
+    <input type="submit" value="Submit" />
+    </form>
+    </body>
+    '''
+    
+    if request.method == 'POST': # If the form has been submitted...
+        form = PolicyModelForm(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            
+            return HttpResponse('success!')
+    else:
+        form = PolicyModelForm() # An unbound form
+    
+    t = Template(html)
+    c = RequestContext(request, {'form': form})
+    return HttpResponse(t.render(c))
+
+
