@@ -23,8 +23,8 @@ from celery.task.control import inspect, broadcast
 #from celery.task.control import Control
 #from celery.app import app_or_default
 from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes#, CeleryStats
-from celerymanagementapp.models import DispatchedTask, OutOfBandWorkerNode, Provider
-from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
+from celerymanagementapp.models import DispatchedTask, OutOfBandWorkerNode, Provider, PolicyModel
+from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm, PolicyModelForm
 
 import gviz_api
 import json
@@ -419,7 +419,15 @@ def dashboard(request):
             context_instance=RequestContext(request))
     
 def policy(request):
+    pols = PolicyModel.objects.all()
+    policies = []
+    for policy in pols:
+        policyForm = PolicyModelForm(instance=policy)
+        policies.append({ "policy" : policy, "policyForm" : policyForm })
+    blank_policy_form = PolicyModelForm()
     return render_to_response('celerymanagementapp/policy.html',
+            { 'policies': policies,
+            'blank_policy_form': blank_policy_form },
             context_instance=RequestContext(request))
 
 #==============================================================================#

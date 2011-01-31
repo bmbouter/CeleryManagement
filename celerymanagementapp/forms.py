@@ -19,15 +19,11 @@ class ProviderForm(ModelForm):
         fields = ('provider_name', 'provider_user_id', 'provider_key', 'image_id',
                 'celeryd_username', 'ssh_key', 'celeryd_start_cmd', 'celeryd_stop_cmd', 'celeryd_status_cmd')
 
-#class PolicyModelForm(ModelForm):
-#    class Meta:
-#        model = PolicyModel
-#        fields = ('name', 'enabled', 'source')
-
 
 class PolicyModelForm(ModelForm):
     class Meta:
         model = PolicyModel
+        fields = ('name', 'enabled', 'source', 'modified', 'last_run_time')
     
     def clean_source(self):
         # check that it compiles

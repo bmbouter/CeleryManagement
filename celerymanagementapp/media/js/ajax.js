@@ -18,10 +18,16 @@ CMA.Core.ajax = (function() {
                 query_dispatched_tasks_url: root_url + "xy_query/dispatched_tasks/",
                 task_url: "/celerymanagementapp/view/task/",
                 worker_url: "/celerymanagementapp/view/worker/",
-                create_out_of_band_worker_url: root_url + "outofbandworker/",
-                create_provider_url: root_url + "provider/",
+                out_of_band_worker_create_url: root_url + "outofbandworker/",
+                out_of_band_worker_update_url: root_url + "outofbandworker/<placeHolder>/update/",
+                out_of_band_worker_delete_url: root_url + "outofbandworker/<placeHolder>/delete/",
+                provider_create_url: root_url + "provider/",
+                provider_delete_url: root_url + "provider/<placeHolder>/delete/",
                 get_images_url: root_url + "provider/images/",
-                delete_instance_url: root_url + "provider/delete_worker/"
+                delete_instance_url: root_url + "provider/delete_worker/",
+                create_policy_url: root_url + "policy/create/",
+                edit_policy_url: root_url + "policy/modify/<placeHolder>/",
+                delete_policy_url: root_url + "policy/delete/<placeHolder>/"
             };
         },
         loadTestUrls = function() {
@@ -39,10 +45,16 @@ CMA.Core.ajax = (function() {
                 task_url: "/celerymanagementapp/test/view/task/",
                 worker_url: "/celerymanagementapp/test/view/worker/",
                 chart_data_url: root_url + "chart/enumerate-1.json",
-                create_out_of_band_worker_url: post_root_url + "outofbandworker/",
-                create_provider_url: post_root_url + "provider/",
+                out_of_band_worker_create_url: post_root_url + "outofbandworker/",
+                out_of_band_worker_update_url: post_root_url + "outofbandworker/<placeHolder>/update/",
+                out_of_band_worker_delete_url: post_root_url + "outofbandworker/<placeHolder>/delete/",
+                provider_create_url: post_root_url + "provider/",
+                provider_delete_url: post_root_url + "provider/<placeHolder>/delete/",
                 get_images_url: post_root_url + "provider/images/",
-                delete_instance_url: post_root_url + "provider/delete_worker/1/"
+                delete_instance_url: post_root_url + "provider/delete_worker/1/",
+                create_policy_url: post_root_url + "policy/create/",
+                edit_policy_url: post_root_url + "policy/modify/<placeHolder>/",
+                delete_policy_url: post_root_url + "policy/delete/<placeHolder>/"
             };
         },
         getUrls = function(){
@@ -74,6 +86,43 @@ CMA.Core.ajax = (function() {
         },
         postDeleteInstance = function(instance, callbackFunction){
             $.post(urls.delete_instance_url.replace("<placeHolder>", instance), callbackFunction, "json");
+        },
+        postCreateOutOfBandWorker = function(form, callback){
+            form.ajaxForm({
+                dataType: 'json',
+                url: urls.out_of_band_worker_create_url,
+                success: callback
+            });
+        },
+        postUpdateOutOfBandWorker = function(form, workerID, callback){
+            form.ajaxForm({
+                dataType: 'json',
+                url: urls.out_of_band_worker_update_url.replace("<placeHolder>", workerID),
+                success: callback
+            });
+        },
+        postDeleteOutOfBandWorker = function(workerID, callback){
+            $.post(urls.out_of_band_worker_delete_url.replace("<placeHolder>", workerID), {}, callback, "json");
+        },
+        postCreateProvider = function(form, callback){
+            console.log("test");
+            form.ajaxSubmit({
+                dataType: 'json',
+                url: urls.provider_create_url,
+                success: callback
+            });
+        },
+        postDeleteProvider = function(providerID, callback){
+            $.post(urls.provider_delete_url.replace("<placeHolder>", providerID), {}, callback, "json");
+        },
+        postCreatePolicy = function(data, callbackFunction){
+            $.post(urls.create_policy_url, data, callbackFunction, "json");
+        },
+        postDeletePolicy = function(policy, callbackFunction){
+            $.post(urls.delete_policy_url.replace("<placeHolder>", policy), {}, callbackFunction, "json");
+        },
+        postUpdatePolicy = function(policy, callbackkFunction){
+            $.post(urls.edit_policy_url.replace("<placeHolder>", policy), {}, callbackFunction, "json");
         };
 
     return {
@@ -88,6 +137,14 @@ CMA.Core.ajax = (function() {
         postShutdownWorker: postShutdownWorker,
         getDispatchedTasksData: getDispatchedTasksData,
         postGetImages: postGetImages,
-        postDeleteInstance: postDeleteInstance
+        postDeleteInstance: postDeleteInstance,
+        postCreateOutOfBandWorker: postCreateOutOfBandWorker,
+        postUpdateOutOfBandWorker: postUpdateOutOfBandWorker,
+        postDeleteOutOfBandWorker: postDeleteOutOfBandWorker,
+        postCreateProvider: postCreateProvider,
+        postDeleteProvider: postDeleteProvider,
+        postCreatePolicy: postCreatePolicy,
+        postUpdatePolicy: postUpdatePolicy,
+        postDeletePolicy: postDeletePolicy
     };
 }());

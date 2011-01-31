@@ -351,10 +351,9 @@ def create_or_update_outofbandworker(request, worker_pk=None):
             new_obj = OutOfBandWorkerNodeForm(request.POST, request.FILES)
         else:
             worker_node = OutOfBandWorkerNode.objects.get(pk=worker_pk)
-            new_obj = OutOfBandWorkerNodeForm(request.POST, instance=worker_node)
+            new_obj = OutOfBandWorkerNodeForm(request.POST, request.FILES, instance=worker_node)
         if new_obj.is_valid():
             new_obj.save()
-            OutOfBandWorkers = OutOfBandWorkerNode.objects.all()
             return HttpResponse("success")
         else:
             errors = []

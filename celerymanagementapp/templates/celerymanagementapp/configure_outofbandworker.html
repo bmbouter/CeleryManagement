@@ -17,25 +17,24 @@
             </div>
         </div>
         {% endfor %}
-        <button class="submitButton" id="submitOutOfBandButton" >Submit</button>
-        <!--<input type="submit" id="submitOutOfBandButton" value="Submit" class="button" />-->
+        <button class="submitButton click positiveButton" id="submitOutOfBandButton" >Submit</button>
     </form>
     {% for worker in outofbandworkernodes %}
     <ul class="node">
         <li class="left">{{ worker.worker.ip }}</li>
-        <li class="editWorkerNode right click" id="{{ worker.worker.ip }}_deleteWorkerNode">Delete</li>
-        <li class="editWorkerNode right click" id="{{ worker.worker.ip }}_workerNode">Edit</li>
+        <li class="editWorkerNode right click" id="{{ worker.worker.pk }}_delete">Delete</li>
+        <li class="editWorkerNode right click" id="{{ worker.worker.pk }}_update">Edit</li>
     </ul>
-    <form method="POST" enctype="multipart/form-data" class="outOfBandForm" id="{{ worker.worker.ip }}_workerNodeForm">
+    <form method="POST" enctype="multipart/form-data" class="outOfBandForm" id="{{ worker.worker.pk }}_Form">
         {% csrf_token %}
         {% for field in worker.workerForm %}
         <div class="fieldWrapper">
             <div class="field">
                 {{ field.label_tag }} {{ field }}
-                <label id="{{ field.label }}_error"></label>
+                <span class="errorWrapper" id="{{ worker.worker.pk }}_{{ field.html_name }}_error"></span>
             </div>
         </div>
         {% endfor %}
-        <input type="submit" class="submitOutOfBandButtonEdit submitButton" value="Submit"/>
+        <button class="updateOutOfBandButton submitButton click positiveButton" id="{{ worker.worker.pk }}_button">Update</button>
     </form>
     {% endfor %}
