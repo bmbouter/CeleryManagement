@@ -33,7 +33,13 @@ def date_timestamp(y,m,d):
     # takes a python datetime.date and converts into a timestamp in milliseconds
     tt = datetime.date(y,m,d).timetuple()
     unixtime = time.mktime(tt)
+    ##print unixtime
     return unixtime*1000
+    
+def timedelta_ms(days=0, seconds=0, milliseconds=0):
+    seconds += days * 60*60*24
+    milliseconds += seconds * 1000
+    return milliseconds
 
 #==============================================================================#
 class JsonQuery_SimpleSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
@@ -158,6 +164,202 @@ class JsonQuery_DateSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
                 (D(2010,1,13),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
                 (D(2010,1,20),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
                 (D(2010,1,24),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                ]
+            }
+        query = JsonXYQuery(TestModelModelMap(), input)
+        output = query.do_query()
+        output = sort_result(output)
+        self.assertEquals(expected_output, output)
+        
+    def test_date_range(self):
+        D = date_timestamp
+        input = {
+            "segmentize": {
+                "field":"date",
+                "method": ["range", {"min": D(2010,1,10), "max": D(2010,1,22), "interval": timedelta_ms(days=6)}]
+                },
+            "aggregate": [
+                { "field":"count",
+                  "methods":["enumerate"] }
+                ]
+            }
+        expected_output = {
+            'data': [
+                (D(2010,1,13), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 2}] }] ),
+                (D(2010,1,19), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                ]
+            }
+        
+        query = JsonXYQuery(TestModelModelMap(), input)
+        output = query.do_query()
+        output = sort_result(output)
+        self.assertEquals(expected_output, output)
+        
+    def test_date_values(self):
+        D = date_timestamp
+        input = {
+            "segmentize": {
+                "field":"date",
+                "method": ["values", [D(2010,1,1), D(2010,1,4), D(2010,1,13),]],
+                },
+            "aggregate": [
+                { "field":"count", }
+                ]
+            }
+        expected_output = {
+            'data': [
+                (D(2010,1,1), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 0}] }] ),
+                (D(2010,1,4), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 2}] }] ),
+                (D(2010,1,13),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                ]
+            }
+        
+        query = JsonXYQuery(TestModelModelMap(), input)
+        ##print 'filter args:  {0}\n'.format(query.filter.filter_args)
+        ##print 'exclude args: {0}\n'.format(query.filter.exclude_args)
+        output = query.do_query()
+        output = sort_result(output)
+        self.assertEquals(expected_output, output)
+        
+    def test_date_each(self):
+        D = date_timestamp
+        input = {
+            "segmentize": {
+                "field":"date",
+                "method": ["each"],
+                },
+            "aggregate": [
+                { "field":"count", }
+                ]
+            }
+        expected_output = {
+            'data': [
+                (D(2010,1,4),  [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,4),  [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,11), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,13), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,20), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,24), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                ]
+            }
+        
+        query = JsonXYQuery(TestModelModelMap(), input)
+        output = query.do_query()
+        output = sort_result(output)
+        self.assertEquals(expected_output, output)
+        
+
+class JsonQuery_SimpleAggregate_TestCase(base.CeleryManagement_DBTestCaseBase):
+    fixtures = ['test_jsonquery']
+    
+    def test_simple_min(self):
+        input = {
+            'segmentize': {
+                'field': 'enumval',
+                'method': ['all'],
+                },
+            'aggregate': [
+                { 'field': 'floatval', 
+                  'methods': ['min'] }
+                ]
+            }
+        expected_output = {
+            'data': [
+                (u'A',[{ 'fieldname':'floatval', 'methods': [{'name':'min', 'value': 4.0}] }] ),
+                (u'B',[{ 'fieldname':'floatval', 'methods': [{'name':'min', 'value': 3.0}] }] ),
+                (u'C',[{ 'fieldname':'floatval', 'methods': [{'name':'min', 'value': 88.0}] }] ),
+                ]
+            }
+        query = JsonXYQuery(TestModelModelMap(), input)
+        output = query.do_query()
+        output = sort_result(output)
+        self.assertEquals(expected_output, output)
+    
+    def test_simple_max(self):
+        input = {
+            'segmentize': {
+                'field': 'enumval',
+                'method': ['all'],
+                },
+            'aggregate': [
+                { 'field': 'floatval', 
+                  'methods': ['max'] }
+                ]
+            }
+        expected_output = {
+            'data': [
+                (u'A',[{ 'fieldname':'floatval', 'methods': [{'name':'max', 'value': 7.0}] }] ),
+                (u'B',[{ 'fieldname':'floatval', 'methods': [{'name':'max', 'value': 5.0}] }] ),
+                (u'C',[{ 'fieldname':'floatval', 'methods': [{'name':'max', 'value': 88.0}] }] ),
+                ]
+            }
+        query = JsonXYQuery(TestModelModelMap(), input)
+        output = query.do_query()
+        output = sort_result(output)
+        self.assertEquals(expected_output, output)
+    
+    def test_simple_average(self):
+        input = {
+            'segmentize': {
+                'field': 'enumval',
+                'method': ['all'],
+                },
+            'aggregate': [
+                { 'field': 'floatval', 
+                  'methods': ['average'] }
+                ]
+            }
+        expected_output = {
+            'data': [
+                (u'A',[{ 'fieldname':'floatval', 'methods': [{'name':'average', 'value': 5.0}] }] ),
+                (u'B',[{ 'fieldname':'floatval', 'methods': [{'name':'average', 'value': 4.0}] }] ),
+                (u'C',[{ 'fieldname':'floatval', 'methods': [{'name':'average', 'value': 88.0}] }] ),
+                ]
+            }
+        query = JsonXYQuery(TestModelModelMap(), input)
+        output = query.do_query()
+        output = sort_result(output)
+        self.assertEquals(expected_output, output)
+    
+    def test_simple_sum(self):
+        input = {
+            'segmentize': {
+                'field': 'enumval',
+                'method': ['all'],
+                },
+            'aggregate': [
+                { 'field': 'floatval', 
+                  'methods': ['sum'] }
+                ]
+            }
+        expected_output = {
+            'data': [
+                (u'A',[{ 'fieldname':'floatval', 'methods': [{'name':'sum', 'value': 15.0}] }] ),
+                (u'B',[{ 'fieldname':'floatval', 'methods': [{'name':'sum', 'value': 8.0}] }] ),
+                (u'C',[{ 'fieldname':'floatval', 'methods': [{'name':'sum', 'value': 88.0}] }] ),
+                ]
+            }
+        query = JsonXYQuery(TestModelModelMap(), input)
+        output = query.do_query()
+        output = sort_result(output)
+        self.assertEquals(expected_output, output)
+    
+    def test_simple_enumerate(self):
+        input = {
+            'segmentize': {
+                'field': 'enumval',
+                'method': ['all'],
+                },
+            'aggregate': [
+                { 'field': 'floatval', 
+                  'methods': ['enumerate'] }
+                ]
+            }
+        expected_output = {
+            'data': [
+                (u'A',[{ 'fieldname':'floatval', 'methods': [{'name':'enumerate', 'value': {4.0: 2, 7.0: 1}}] }] ),
+                (u'B',[{ 'fieldname':'floatval', 'methods': [{'name':'enumerate', 'value': {3.0: 1, 5.0: 1}}] }] ),
+                (u'C',[{ 'fieldname':'floatval', 'methods': [{'name':'enumerate', 'value': {88.0: 1}       }] }] ),
                 ]
             }
         query = JsonXYQuery(TestModelModelMap(), input)

@@ -126,7 +126,8 @@ class JsonFilter(object):
             if opfunc is None:
                 msg = "Not able to process filter operator: '{0}'".format(op)
                 raise JsonQueryError(msg)
-        conv = self.modelmap.get_conv_to_python(fieldname)
+        ##conv = self.modelmap.get_conv_to_python(fieldname)
+        conv = self.modelmap.get_fieldconv(fieldname).to_python()
         return opfunc(fieldname, map(conv,exp))
         
     def _build_query_kwarg(self, exp):

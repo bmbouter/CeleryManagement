@@ -155,11 +155,12 @@ class JsonXYQuery(JsonQuery):
     def _build_segmentizer(self):
         method_spec = self.segspec.method_spec
         fieldname = self.modelmap.get_fieldname(self.segspec.query_name)
-        to_python = self.modelmap.get_conv_to_python(fieldname)
-        from_python = self.modelmap.get_conv_from_python(fieldname)
+        ##to_python = self.modelmap.get_conv_to_python(fieldname)
+        ##from_python = self.modelmap.get_conv_from_python(fieldname)
         segmentizer_factory = self._get_segmentizer_factory(method_spec[0])
         method_args = []  if len(method_spec)==1 else  method_spec[1]
-        seg = segmentizer_factory(fieldname, method_args, to_python, from_python)
+        fieldconv = self.modelmap.get_fieldconv(fieldname)
+        seg = segmentizer_factory(fieldname, method_args, fieldconv)
         return seg
         
     def _get_aggregator_factory(self, aggname):
@@ -171,12 +172,13 @@ class JsonXYQuery(JsonQuery):
         return aggregator_factory
         
     def _build_method_aggregator(self, fieldname, method_specs):
-        from_python = self.modelmap.get_conv_from_python(fieldname)
+        ##from_python = self.modelmap.get_conv_from_python(fieldname)
+        fieldconv = self.modelmap.get_fieldconv(fieldname)
         methodlist_agg = aggregator.CompoundAggregator()
         methodlist = []
         for method_spec in method_specs:
             aggregator_factory = self._get_aggregator_factory(method_spec)
-            agg = aggregator_factory(fieldname, from_python)
+            agg = aggregator_factory(fieldname, fieldconv)
             method_agg = MethodAggregator(method_spec, agg)
             methodlist.append(method_agg)
         return methodlist

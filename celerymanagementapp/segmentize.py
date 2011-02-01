@@ -121,8 +121,14 @@ class Segmentizer(object):
         """Returns an iterator over tuples of (label, querysubset) pairs.  The 
            'label' is the x-value which corresponds to every item in the 
            'querysubset'."""
-        return ( (lbl, queryset.filter(**qargs)) 
+        def filter(qargs):
+            return queryset.filter(**qargs)
+        
+        return ( (lbl, filter(qargs)) 
                  for (lbl,qargs) in self.queryseq )
+        
+        #return ( (lbl, queryset.filter(**qargs)) 
+        #         for (lbl,qargs) in self.queryseq )
 
 #==============================================================================#
 def avg_aggregator(fieldname):
