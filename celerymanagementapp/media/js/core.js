@@ -23,37 +23,46 @@ CMA.Core.util = (function(){
                 function(){}
             );
         },
-        formReturn = function(data){
-            var setText = function(){
-                    var errLength = data.failure[i].error.length,
-                        text = "";
-                    for( j=0; j < errLength; j += 1){
-                        text += data.failure[i].error[j];
-                    }
-                    return text;
-                };
+        formSubmit = function(element, submitFunction, form, urlID){
+            var formReturn = function(data){
+                    var setText = function(){
+                            var errLength = data.failure[i].error.length,
+                                text = "";
+                            for( j=0; j < errLength; j += 1){
+                                text += data.failure[i].error[j];
+                            }
+                            return text;
+                        };
 
-            if( !data.hasOwnProperty("failure") ){
-                console.log("success");
+                    if( !data.hasOwnProperty("failure") ){
+                        $('#statusText').show();
+                        $('#statusText').text(data);
+                        expand(element);
+                    } else {
+                        var i = 0,
+                            elem,
+                            length = data.failure.length,
+                            id = data.id;
+                        
+                        for( i=0; i < length; i += 1){
+                            if( id !== null && id !== undefined ){
+                                elem = document.getElementById(id + "_" + data.failure[i].field + "_error");
+                            } else {
+                                elem = document.getElementById(data.failure[i].field + "_error");
+                            }
+                            $(elem).text(setText);
+                            if( $(elem).text() !== ""){                
+                                $(elem).show();
+                            } else {
+                                $(elem).hide();
+                            }
+                        }
+                    }
+                };
+            if( urlID !== undefined ){
+                submitFunction(form, urlID, formReturn);
             } else {
-                var i = 0,
-                    elem,
-                    length = data.failure.length,
-                    id = data.id;
-                
-                for( i=0; i < length; i += 1){
-                    if( id !== null && id !== undefined ){
-                        elem = document.getElementById(id + "_" + data.failure[i].field + "_error");
-                    } else {
-                        elem = document.getElementById(data.failure[i].field + "_error");
-                    }
-                    $(elem).text(setText);
-                    if( $(elem).text() !== ""){                
-                        $(elem).show();
-                    } else {
-                        $(elem).hide();
-                    }
-                }
+                submitFunction(form, formReturn);
             }
         },
         createPopup = function(text, successCallback){
@@ -93,12 +102,74 @@ CMA.Core.util = (function(){
                 });
 
                 container.show();
+        },
+        checkTab = function(evt){
+            var t = evt.target,
+                ss = t.selectionStart,
+                se = t.selectionEnd,
+                tab = "    ";
+         
+            // Tab key - insert tab expansion
+            if (evt.keyCode == 9) {
+                evt.preventDefault();
+                       
+                // Special case of multi line selection
+                if (ss != se && t.value.slice(ss,se).indexOf("\n") != -1) {
+                    // In case selection was not of entire lines (e.g. selection begins in the middle of a line)
+                    // we ought to tab at the beginning as well as at the start of every following line.
+                    var pre = t.value.slice(0,ss);
+                    var sel = t.value.slice(ss,se).replace(/\n/g,"\n"+tab);
+                    var post = t.value.slice(se,t.value.length);
+                    t.value = pre.concat(tab).concat(sel).concat(post);
+                           
+                    t.selectionStart = ss + tab.length;
+                    t.selectionEnd = se + tab.length;
+                }
+                       
+                // "Normal" case (no selection or selection on one line only)
+                else {
+                    t.value = t.value.slice(0,ss).concat(tab).concat(t.value.slice(ss,t.value.length));
+                    if (ss == se) {
+                        t.selectionStart = t.selectionEnd = ss + tab.length;
+                    }
+                    else {
+                        t.selectionStart = ss + tab.length;
+                        t.selectionEnd = se + tab.length;
+                    }
+                }
+            }
+                   
+            // Backspace key - delete preceding tab expansion, if exists
+           else if (evt.keyCode==8 && t.value.slice(ss - 4,ss) == tab) {
+                evt.preventDefault();
+                       
+                t.value = t.value.slice(0,ss - 4).concat(t.value.slice(ss,t.value.length));
+                t.selectionStart = t.selectionEnd = ss - tab.length;
+            }
+                   
+            // Delete key - delete following tab expansion, if exists
+            else if (evt.keyCode==46 && t.value.slice(se,se + 4) == tab) {
+                evt.preventDefault();
+                     
+                t.value = t.value.slice(0,ss).concat(t.value.slice(ss + 4,t.value.length));
+                t.selectionStart = t.selectionEnd = ss;
+            }
+            // Left/right arrow keys - move across the tab in one go
+            else if (evt.keyCode == 37 && t.value.slice(ss - 4,ss) == tab) {
+                evt.preventDefault();
+                t.selectionStart = t.selectionEnd = ss - 4;
+            }
+            else if (evt.keyCode == 39 && t.value.slice(ss,ss + 4) == tab) {
+                evt.preventDefault();
+                t.selectionStart = t.selectionEnd = ss + 4;
+            }
         };
 
     return {
         expand: expand,
-        formReturn: formReturn,
-        createPopup: createPopup
+        formSubmit: formSubmit,
+        createPopup: createPopup,
+        checkTab: checkTab
     };
 }());
 
@@ -110,9 +181,6 @@ CMA.Core.init = function(){
         CMA.Core.ajax.loadTestUrls();
     }
  
-    $('textarea').attr("rows", "3");
-    $('textarea').css("resize", "none");
-
     CMA.Core.expandedTasks = false;
     CMA.Core.expandedWorkers = false;
     
@@ -250,35 +318,32 @@ CMA.Core.policy = (function(){
             form.enabled = $('#id_enabled').attr("checked");
             form.source = $('#id_source').val();
          
-            ajax.postCreatePolicy(form, util.formReturn);
+            util.formSubmit($(this).parent(), ajax.postCreatePolicy, form);
         },
         deletePolicy = function(elem){
-            var deleteReturn = function(data){
-                    util.createPopup("Are you sure you wish to delete policy " + $(elem).parent().children(':first').text()  + " ?",
-                        function(){
-                            if( !data.hasOwnProperty("failure") ){
-                                elem.parent().remove();
-                            } else {
-                                $('#statusText').show();
-                                $('#statusText').text(data.failure);
-                            }
+            util.createPopup("Are you sure you wish to delete policy " + $(elem).parent().children(':first').text()  + " ?",
+                function(){
+                    ajax.postDeletePolicy(elem.attr("id"), function(data){
+                        if( !data.hasOwnProperty("failure") ){
+                            elem.parent().remove();
+                            var elemID = elem.attr("id").split("_")[0];
+                            $('#' + elemID + "_Form").remove();
+                        } else {
+                            $('#statusText').show();
+                            $('#statusText').text(data.failure);
                         }
-                    );
-                };
-            ajax.postDeletePolicy(elem.attr("id"), deleteReturn);
-        },
-        editPolicy = function(id){
-            var editReturn = function(data){
-                console.log(data);
-            };
-            ajax.postEditPolicy(id, editReturn);
+                    });
+                }
+            );
         },
         registerEvents = function(){ 
 
+            $('textarea').attr("rows", "10");
+            $('textarea').css("resize", "none");
             $('.policyForm').hide();
 
             $('.editPolicy').click(function(){
-                var elem = document.getElementById($(this).attr("id") + "_policyForm");
+                var elem = document.getElementById($(this).attr("id") + "_Form");
                 util.expand(elem);
             });
             $('.createPolicy').click(function() {
@@ -289,8 +354,12 @@ CMA.Core.policy = (function(){
                     deletePolicy($(this));
             });
             $('.submitPolicyEdit').click(function(){
-                    editPolicy($(this).attr("id"));
+                var id = $(this).attr("id"),
+                    split = id.split("_"),
+                    form = document.getElementById(split[0] + "_Form");
+                util.formSubmit($(this).parent(), ajax.postUpdatePolicy, $(form).serialize(), split[0]);
             });
+            $('#id_source').keydown(util.checkTab);
         };
 
     return {
@@ -317,6 +386,7 @@ CMA.Core.configure = (function(){
                                 ajax.postDeleteOutOfBandWorker(split[0], function(data){
                                     if( !data.hasOwnProperty("failure") ){
                                         $(that).parent().remove();
+                                        $('#' + split[0] + "_Form").remove();
                                     } else {
                                         $('#statusText').show();
                                         $('#statusText').text(data.failure);
@@ -332,9 +402,9 @@ CMA.Core.configure = (function(){
                     var id = $(this).attr("id"),
                         split = id.split("_"),
                         form = document.getElementById(split[0] + "_Form");
-                        ajax.postUpdateOutOfBandWorker($(form), split[0], util.formReturn);
+                        util.formSubmit($(this).parent(), ajax.postUpdateOutOfBandWorker, $(form), split[0]);
                 });
-                ajax.postCreateOutOfBandWorker($('#blankOutOfBandForm'), util.formReturn);
+                util.formSubmit($('#blankOutOfBandForm'), ajax.postCreateOutOfBandWorker, $('#blankOutOfBandForm'));
 
             } else if( CMA.Core.USE_MODE === "dynamic" ){
                 var handleImages = function(data) {
@@ -371,7 +441,8 @@ CMA.Core.configure = (function(){
                 });
                 
                 $('#viewProvider').click(function(){
-                    //$('#submitProviderButton').text("Close");
+                    $('textarea').attr("rows", "3");
+                    $('textarea').css("resize", "none");
                     util.expand($('#providerFormWrapper'));
                 });
 
@@ -395,7 +466,7 @@ CMA.Core.configure = (function(){
                 $('#blankProviderForm').submit(function(){ return false; });
                 if( $('#submitProviderButton').hasClass("positiveButton") ){
                     $('#submitProviderButton').click(function(){
-                        ajax.postCreateProvider($('#blankProviderForm'), util.formReturn);
+                        util.formSubmit($(this).parent(), ajax.postCreateProvider, $('#blankProviderForm'));
                     });
                 } else if( $('#submitProviderButton').hasClass("negativeButton") ){
                     $('#submitProviderButton').click(function(){

@@ -547,36 +547,47 @@ class PolicyGet(PolicyDataviewBase):
         
 
 def policy_create(request):
-    json_request = _json_from_post(request)
-    creator = PolicyCreate()
-    success, record, error_info = creator(json_request)
+    if request.method == "POST":
+        policy_form = PolicyModelForm(request.POST)
+        if policy_form.is_valid():
+            policy_form.save()
+            json = simplejson.dumps("Policy successfully created.")
+        else:
+            errors = []
+            for field in policy_form:
+                errors.append({ 'field' : field.html_name,
+                                'error' : field.errors })
+            failed = { 'failure' : errors }
+            json = simplejson.dumps(failed)
+        return HttpResponse(json)
     
-    json_result = {'success':       success, 
-                   'record':        record, 
-                   'error_info':    error_info}
+def policy_modify(request, policy_id=None):
+    if request.method == "POST":
+        policy = PolicyModel.objects.get(pk=policy_id)
+        policy_form = PolicyModelForm(request.POST, instance=policy)
+        if policy_form.is_valid():
+            policy_form.save()
+            json = simplejson.dumps("Policy successfully updated.")
+        else:
+            errors = []
+            for field in policy_form:
+                errors.append({ 'field' : field.html_name,
+                                'error' : field.errors })
+            failed = { 'failure' : errors,
+                        'id': policy_id }
+            json = simplejson.dumps(failed)
+        return HttpResponse(json)
     
-    return _json_response(json_result)
-    
-def policy_modify(request, id):
-    json_request = _json_from_post(request)
-    modifier = PolicyModify()
-    success, record, error_info = modifier(json_request, id)
-        
-    json_result = {'success':       success, 
-                   'record':        record, 
-                   'error_info':    error_info}
-    
-    return _json_response(json_result)
-    
-def policy_delete(request, id):
-    deleter = PolicyDelete()
-    success, record, error_info = deleter(id)
-        
-    json_result = {'success':       success, 
-                   'record':        record, 
-                   'error_info':    error_info}
-    
-    return _json_response(json_result)
+def policy_delete(request, policy_id=None):
+    """Deletes a Policy"""
+    try:
+        policy = Policy.objects.get(pk=policy_id)
+        policy.delete()
+        json = simplejson.dumps("Policy successfully deleted.")
+    except Exception as e:
+        failed = { 'failure' : e.args[0]}
+        json = simplejson.dumps(failed)
+    return HttpResponse(json)
     
 def policy_get(request, id):
     getter = PolicyGet()
