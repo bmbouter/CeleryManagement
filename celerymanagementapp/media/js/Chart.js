@@ -86,7 +86,7 @@ function Chart(loc, d, opt) {
             options.series.lines.show = false;
             
             if(options.series.points !== null) {
-                options.series.points.show = false;
+                disablePoints();
             }
         }
         
@@ -114,8 +114,9 @@ function Chart(loc, d, opt) {
         }
 
         options.series.lines = {show: true};
-        options.series.points = {show: true};
         
+        enablePoints();
+                
         typeOfChart = 'line';
 
         displayChart();
@@ -140,7 +141,7 @@ function Chart(loc, d, opt) {
     };
     
     var enableLegend = function() {
-        if(options.legend !== null) {
+        if(options.legend !== undefined) {
             options.legend.show = true;
         } else {
             options.legend = { };
@@ -151,7 +152,7 @@ function Chart(loc, d, opt) {
     };
     
     var disableLegend = function() {
-        if(options.legend !== null) {
+        if(options.legend !== undefined) {
             options.legend.show = false;
         } else {
             options.legend = { };
@@ -169,11 +170,19 @@ function Chart(loc, d, opt) {
      * @param {String} loc the location of the overview graph in the DOM
      */
     var enableOverview = function(loc) {
+        options.selection = { };
+        
+        var chartMax = plot.getAxes().xaxis.max;
+        var chartMin = plot.getAxes().xaxis.min;
+        
+        if(typeOfChart === 'line') {
+            var seriesOpt = { lines: { show: true, lineWidth: 1 }, shadowSize: 0 };
+        } else {
+            var seriesOpt = { bars: { show: true }, shadowSize: 0 };
+        }
+        
         var opt = {
-            series: {
-                lines: { show: true, lineWidth: 1 },
-                shadowSize: 0
-            },
+            series: seriesOpt,
             xaxis: { ticks: [] },
             yaxis: { ticks: [], autoscaleMargin: 0.1 },
             y2axis: { ticks: [], autoscaleMargin: 0.1 },
@@ -191,16 +200,24 @@ function Chart(loc, d, opt) {
         var chartRef = chart;
         
         $(chart).bind('plotselected', function(event, ranges) {
-            plotRef = $.plot($(chartRef), dataRef, 
-                $.extend(true, {}, optionsRef, {
+            plotRef = $.plot($(chart), data, 
+                $.extend(true, {}, options, {
                     xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to }
                 }));
             
-            overviewRef.setSelection(ranges, true);
+            overview.setSelection(ranges, true);
         });
 
         $(loc).bind('plotselected', function(event, ranges) {
-            plotRef.setSelection(ranges);
+            plot.setSelection(ranges);
+        });
+        
+        $(loc).after('<button id="zoom_out">Zoom Out</button>');
+        
+        $('#zoom_out').click(function() {
+             options.xaxis = { min: chartMin, max: chartMax };
+             overview.setSelection({ }, true);
+             displayChart();
         });
 
         /*$(this.chart).bind('plotselected', function(event, ranges) {
@@ -214,7 +231,7 @@ function Chart(loc, d, opt) {
      * @param {String} loc the location of the overview chart in the DOM
      */
     var disableOverview = function(loc) {
-        $(loc).html("");
+        $(loc).html("").next().remove();
 
         options.selection.mode = 'none';
 
@@ -267,7 +284,7 @@ function Chart(loc, d, opt) {
      * Enable a tooltip display on the chart when you hover over points
      */
     var enableTooltips = function() {
-        if(options.grid === null) {
+        if(options.grid === undefined) {
             options.grid = { hoverable: true, clickable: true };
         }
         
@@ -294,7 +311,7 @@ function Chart(loc, d, opt) {
                     //Do nothing if the tooltip is displayed on a point
                     //This makes the tooltip not redraw when we hover on the same point
                     //Only enabled for line charts
-                    var test;
+                    var test; //Done to pass lint test
                 } else if(previousPoint != item.datapoint) {
                     previousPoint = item.datapoint;
 
@@ -324,7 +341,7 @@ function Chart(loc, d, opt) {
     var disableTooltips = function() {
         $('#tooltip').remove();
 
-        if(options.grid !== null) {
+        if(options.grid !== undefined) {
             delete options.grid;
         }
 
@@ -416,10 +433,11 @@ function Chart(loc, d, opt) {
         displayBarChart: displayBarChart,
         displayLineChart: displayLineChart,
         enablePoints: enablePoints,
-        disablePoint: disablePoints,
+        disablePoints: disablePoints,
         enableLegend: enableLegend,
         disableLegend: disableLegend,
-        enableOverview: disableOverview,
+        enableOverview: enableOverview,
+        disableOverview: disableOverview,
         addSecondaryAxis: addSecondaryAxis,
         removeSecondaryAxis: removeSecondaryAxis,
         enableDataSelection: enableDataSelection,
