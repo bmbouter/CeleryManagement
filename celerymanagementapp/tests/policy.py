@@ -262,6 +262,21 @@ policy:
         self.assertEquals(float, type(runner.locals['t']))
         
 #==============================================================================#
+class StatsApi_TestCase(base.CeleryManagement_DBTestCaseBase):
+    fixtures = ['test_policy_statsapi']
+    
+    def test_alltasks(self):
+        stats = env.ConditionEnv().globals['stats']
+        self.assertEquals(9, stats.tasks())
+    
+    def test_tasks_workers(self):
+        stats = env.ConditionEnv().globals['stats']
+        self.assertEquals(5, stats.tasks(workers='worker1'))
+        self.assertEquals(5, stats.tasks(workers=['worker1']))
+        self.assertEquals(9, stats.tasks(workers=['worker1','worker2']))
+        self.assertEquals(4, stats.tasks(workers='worker2'))
+
+#==============================================================================#
 
 
 

@@ -23,8 +23,8 @@ class TimeIntervalError(exceptions.Error):
 
 
 #==============================================================================#
-def make_time_interval(arg):
-    now = datetime.datetime.now()
+def make_time_interval(arg, now=None):
+    now = now or datetime.datetime.now()
     if isinstance(arg, datetime.timedelta):
         result = (now-arg, now)
     elif isinstance(arg, (tuple, list)):
@@ -57,16 +57,16 @@ def string_or_sequence(arg):
     
 def get_filter_seq_arg(field, arg):
     if arg is not None:
-        if isinstance(arg, collections.Iterable):
+        if isinstance(arg, collections.Iterable) and not isinstance(arg, basestring):
             return { '{0}__in'.format(field): tuple(arg) }
         else:
             return { field: arg }
     return {}
     
-def filter(states=None, interval=None, workers=None, tasks=None):
+def filter(states=None, interval=None, workers=None, tasks=None, now=None):
     filterargs = {}
     if interval is not None:
-        interval = make_time_interval(interval)
+        interval = make_time_interval(interval, now)
         filterargs['sent__gte'] = interval[0]
         filterargs['sent__lt'] = interval[1]
     filterargs.update(get_filter_seq_arg('state', states))
