@@ -17,8 +17,12 @@
         <div class="fieldWrapper">
             <div class="field">
                 {{ field.label_tag }} 
-                {{ field }}
+                <div class="left">{{ field }}</div>
+                {% if field.html_name == "source" %}
+                <pre class="errorWrapper right BS" id="{{ field.html_name }}_error"></pre>
+                {% else %}
                 <span class="errorWrapper" id="{{ field.html_name }}_error"></span>
+                {% endif %}
             </div>
         </div>
         {% endif %}
@@ -31,17 +35,31 @@
         <li class="deletePolicy right click" id="{{ policy.policy.pk }}">Delete</li>
         <li class="editPolicy right click" id="{{ policy.policy.pk }}">Edit</li>
     </ul>
-    <form method="POST" enctype="multipart/form-data" class="policyForm" id="{{ policy.policy.pk }}_policyForm">
+    <form method="POST" enctype="multipart/form-data" class="policyForm" id="{{ policy.policy.pk }}_Form">
         {% csrf_token %}
         {% for field in policy.policyForm %}
+        {% if field.html_name == "modified" or field.html_name == "last_run_time" %}
         <div class="fieldWrapper">
             <div class="field">
-                {{ field.label_tag }} {{ field }}
-                <label id="{{ field.label }}_error"></label>
+                {{ field.label_tag }} 
+                <div class="left"><input class="disabledInput" disabled="disabled" value="{{ field.data }}" /></div>
             </div>
         </div>
+        {% else %}
+        <div class="fieldWrapper">
+            <div class="field">
+                {{ field.label_tag }} 
+                <div class="left">{{ field }}</div>
+                {% if field.html_name == "source" %}
+                <pre class="errorWrapper right BS" id="{{ policy.policy.pk }}_{{ field.html_name }}_error"></pre>
+                {% else %}
+                <span class="errorWrapper" id="{{ policy.policy.pk  }}_{{ field.html_name }}_error"></span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
         {% endfor %}
-        <input type="submit" class="submitPolicyEdit submitButton click positiveButton" id="{{ policy.policy.pk }}_editButton"value="Submit"/>
+        <button type="button" class="submitPolicyEdit submitButton click positiveButton" id="{{ policy.policy.pk }}_editButton">Update</button>
     </form>
     {% endfor %}
 </div>

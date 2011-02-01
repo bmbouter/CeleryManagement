@@ -393,9 +393,7 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
         var entity = getEntity(e.pageX, e.pageY);
         if( entity !== undefined && entity.objectType === "Task" ){
             window.location = ajax.getUrls().task_url + entity.fullName + "/";
-        } else if( entity !== undefined && entity.objectType === "Worker" ){
-            window.location = ajax.getUrls().worker_url + entity.fullName + "/";
-        }
+        }     
     };
  
     handlers.handleHover = function(e){
