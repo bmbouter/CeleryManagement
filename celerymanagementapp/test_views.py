@@ -173,7 +173,17 @@ def policy_create(request):
     if request.method == "POST":
         policy_form = PolicyModelForm(request.POST)
         if policy_form.is_valid():
-            json = simplejson.dumps("Policy successfully created.")
+            policy = policy_form.save(commit=False)
+            policy.pk = 120
+            context = { 'policy': {'policy': policy,
+                        'policyForm': policy_form }}
+            html = render_to_response("celerymanagementapp/policy_instance.html",
+                    context,
+                    context_instance=RequestContext(request))
+            success = { 'success': 'Policy successfully created.',
+                        'html': html.content,
+                        'pk': policy.pk }
+            json = simplejson.dumps(success)
         else:
             errors = []
             for field in policy_form:

@@ -126,7 +126,7 @@ class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
         response = self.client.post(url, post_data)
         output = json.loads(response.content)
         
-        self.assertEquals('Policy successfully created.', output)
+        self.assertContains(response, 'Policy successfully created.')
         self.assertEquals(model_count + 1, PolicyModel.objects.all().count())
         id = model_count + 1
         obj = PolicyModel.objects.get(id=id)
@@ -150,7 +150,7 @@ class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
         response = self.client.post(url, post_data)
         output = json.loads(response.content)
         
-        self.assertEquals('Policy successfully created.', output)
+        self.assertContains(response, 'Policy successfully created.')
         self.assertEquals(model_count + 1, PolicyModel.objects.all().count())
         id = model_count + 1
         obj = PolicyModel.objects.get(id=id)
