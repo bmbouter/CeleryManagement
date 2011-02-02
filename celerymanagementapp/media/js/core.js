@@ -43,8 +43,8 @@ CMA.Core.util = (function(){
                             showStatus(data);
                             expand(element);
                         } else {
-                            expand(element);
                             successCallback(data);
+                            expand(element);
                         }
                     } else {
                         var i = 0,
@@ -323,7 +323,6 @@ CMA.Core.policy = (function(){
         submitPolicy = function(){
             var form = {},
                 success = function(data){
-                    console.log(data);
                     util.showStatus(data.success);
                     $('#configurationManagement').append(data.html);
                     $('.policyForm').hide();
@@ -403,6 +402,8 @@ CMA.Core.configure = (function(){
 
         registerEvents = function() {
             if( CMA.Core.USE_MODE === "static" ){
+                $('textarea').attr("rows", "3");
+                $('textarea').css("resize", "none");
                 $('.outOfBandForm').hide();
                 $('.editWorkerNode').click(function(){
                     var id = $(this).attr("id"),

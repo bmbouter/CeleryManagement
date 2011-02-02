@@ -104,7 +104,7 @@ def create_or_update_outofbandworker(request, worker_pk=None):
             out_of_band_worker_node_form = OutOfBandWorkerNodeForm(request.POST, request.FILES, instance=worker)
 
         if out_of_band_worker_node_form.is_valid():
-            json = simplejson.dumps("success")
+            json = simplejson.dumps("Worker successfully created.")
         else:
             errors = []
             for field in out_of_band_worker_node_form:
@@ -226,7 +226,7 @@ def delete_worker(request, worker_pk):
     random.seed()
     choice = random.randint(0, 1000)
     if not (choice % 2):
-        json = simplejson.dumps("success")
+        json = simplejson.dumps("Worker successfully deleted.")
         return HttpResponse(json)
     else:
         failed = { 'failure' : 'Instance failed to delete'}
