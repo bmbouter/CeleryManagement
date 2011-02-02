@@ -39,6 +39,35 @@ class XYDataView_TestCase(base.CeleryManagement_DBTestCaseBase):
         
         self.assertEquals(expected_output, output)
 
+class PendingTaskCount_TestCase(base.CeleryManagement_DBTestCaseBase):
+    fixtures = ['test_pending_taskcount']
+    
+    def test_basic(self):
+        url = urlreverse('celerymanagementapp.dataviews.pending_task_count_dataview', kwargs={'name': 'all'})
+        expected_output = {
+            'task1': 2,
+            'task2': 1,
+            }
+        response = self.client.post(url, '', content_type='application/json')
+        output = json.loads(response.content)
+        
+        self.assertEquals(expected_output, output)
+
+class TasksPerWorker_TestCase(base.CeleryManagement_DBTestCaseBase):
+    fixtures = ['test_pending_taskcount']
+    
+    def test_basic(self):
+        url = urlreverse('celerymanagementapp.dataviews.tasks_per_worker_dataview', kwargs={'name':'all'})
+        expected_output = {
+            'task1': {'worker1': 3, 'worker2': 2}, 
+            'task2': {'worker1': 2, 'worker2': 2},
+            }
+        response = self.client.post(url, '', content_type='application/json')
+        output = json.loads(response.content)
+        
+        self.assertEquals(expected_output, output)
+        
+
 
 class Configuration_TestCase(base.CeleryManagement_TestCaseBase):
     def setUp(self):

@@ -1,3 +1,5 @@
+import datetime
+
 from celerymanagementapp.models import DispatchedTask
 from djcelery.models import WorkerState
 
@@ -23,20 +25,24 @@ class JsonModelMap(object):
     
     def __init__(self):
         self.fieldname_map = dict((r[1],r[0]) for r in self.field_info)
-        self.conv_to_python = dict((r[0],r[2]) for r in self.field_info if r[2] is not None)
-        self.conv_from_python = dict((r[0],r[3]) for r in self.field_info if r[3] is not None)
+        self.fieldconv_map = dict((r[0],r[2]) for r in self.field_info)
+        ##self.conv_to_python = dict((r[0],r[2]) for r in self.field_info if r[2] is not None)
+        ##self.conv_from_python = dict((r[0],r[3]) for r in self.field_info if r[3] is not None)
         
-    def get_conv_to_python(self, fieldname):
-        conv = self.conv_to_python.get(fieldname, None)
-        if not conv:
-            conv = util.noop_conv
-        return conv
+    # def get_conv_to_python(self, fieldname):
+        # conv = self.conv_to_python.get(fieldname, None)
+        # if not conv:
+            # conv = util.noop_conv
+        # return conv
         
-    def get_conv_from_python(self, fieldname):
-        conv = self.conv_from_python.get(fieldname, None)
-        if not conv:
-            conv = util.noop_conv
-        return conv
+    # def get_conv_from_python(self, fieldname):
+        # conv = self.conv_from_python.get(fieldname, None)
+        # if not conv:
+            # conv = util.noop_conv
+        # return conv
+        
+    def get_fieldconv(self, fieldname):
+        return self.fieldconv_map[fieldname]
         
     def get_fieldname(self, query_name):
         """ Retrieve the model field name corresponding to the given 
@@ -59,6 +65,72 @@ def worker_name_to_id(name):
     
 def worker_id_to_name(id):
     return WorkerState.objects.get(id=id).hostname
+    
+#==============================================================================#
+class FieldConv(object):
+    """ Class for converting between Python and JSON types. """
+    @classmethod
+    def to_python(cls):
+        def conv(val):
+            return val
+        return conv
+    
+    @classmethod
+    def from_python(cls):
+        def conv(val):
+            return val
+        return conv
+    
+    @classmethod
+    def interval_to_python(cls):
+        return cls.to_python()
+        
+DefaultConv = FieldConv
+
+
+class WorkerNameConv(FieldConv):
+    @classmethod
+    def to_python(cls):
+        return worker_name_to_id
+    
+    @classmethod
+    def from_python(cls):
+        return worker_id_to_name
+
+
+class DateConv(FieldConv):
+    @classmethod
+    def to_python(cls):
+        return timeutil.date_to_python
+    
+    @classmethod
+    def from_python(cls):
+        return timeutil.date_from_python
+    
+    @classmethod
+    def interval_to_python(cls):
+        TD = datetime.timedelta
+        def conv(val):
+            return TD(milliseconds=val)
+        return conv
+
+
+class DateTimeConv(FieldConv):
+    @classmethod
+    def to_python(cls):
+        return timeutil.datetime_to_python
+    
+    @classmethod
+    def from_python(cls):
+        return timeutil.datetime_from_python
+    
+    @classmethod
+    def interval_to_python(cls):
+        TD = datetime.timedelta
+        def conv(val):
+            return TD(milliseconds=val)
+        return conv
+
 
 #==============================================================================#
 class JsonTaskModelMap(JsonModelMap):
@@ -66,45 +138,37 @@ class JsonTaskModelMap(JsonModelMap):
     # field_info:
     #   (field in model, field in query, conv_to_python, conv_from_python)
     field_info = [
-        ('name',        'taskname',     None,   None),
-        ('state',       'state',        None,   None),
-        ('task_id',     'task_id',      None,   None),
-        ('worker',      'worker',       worker_name_to_id,   worker_id_to_name),
+        ('name',        'taskname',     DefaultConv),
+        ('state',       'state',        DefaultConv),
+        ('task_id',     'task_id',      DefaultConv),
+        ('worker',      'worker',       WorkerNameConv),
         
-        ('runtime',     'runtime',      None,   None),
-        ('waittime',    'waittime',     None,   None),
-        ('totaltime',   'totaltime',    None,   None),
+        ('runtime',     'runtime',      DefaultConv),
+        ('waittime',    'waittime',     DefaultConv),
+        ('totaltime',   'totaltime',    DefaultConv),
         
-        ('tstamp',      'tstamp', 
-            timeutil.datetime_to_python,    timeutil.datetime_from_python),
-        ('sent',        'sent',     
-            timeutil.datetime_to_python,    timeutil.datetime_from_python),
-        ('received',    'received',
-            timeutil.datetime_to_python,    timeutil.datetime_from_python),
-        ('started',     'started',
-            timeutil.datetime_to_python,    timeutil.datetime_from_python),
-        ('succeeded',   'succeeded',
-            timeutil.datetime_to_python,    timeutil.datetime_from_python),
-        ('failed',      'failed',
-            timeutil.datetime_to_python,    timeutil.datetime_from_python),
+        ('tstamp',      'tstamp',       DateTimeConv),
+        ('sent',        'sent',         DateTimeConv),
+        ('received',    'received',     DateTimeConv),
+        ('started',     'started',      DateTimeConv),
+        ('succeeded',   'succeeded',    DateTimeConv),
+        ('failed',      'failed',       DateTimeConv),
         
-        ('routing_key', 'routing_key',  None,   None),
-        ('expires',     'expires',
-            timeutil.datetime_to_python,    timeutil.datetime_from_python),
-        ('result',      'result',       None,   None),
-        ('eta',         'eta',
-            timeutil.datetime_to_python,    timeutil.datetime_from_python),
+        ('routing_key', 'routing_key',  DefaultConv),
+        ('expires',     'expires',      DateTimeConv),
+        ('result',      'result',       DefaultConv),
+        ('eta',         'eta',          DateTimeConv),
         ]
         
 #==============================================================================#
 class TestModelModelMap(JsonModelMap):
     model = TestModel
     field_info = [
-        ('date',    'date',     timeutil.date_to_python, timeutil.date_from_python),
-        ('floatval','floatval', None,None),
-        ('intval',  'intval',   None,None),
-        ('charval', 'charval',  None,None),
-        ('enumval', 'enumval',  None,None),
+        ('date',    'date',     DateConv),
+        ('floatval','floatval', DefaultConv),
+        ('intval',  'intval',   DefaultConv),
+        ('charval', 'charval',  DefaultConv),
+        ('enumval', 'enumval',  DefaultConv),
         ]
 
 #==============================================================================#

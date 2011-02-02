@@ -1,0 +1,270 @@
+[
+  {
+    "pk": 1, 
+    "model": "celerymanagementapp.dispatchedtask", 
+    "fields": {
+      "name": "task1", 
+      "state": "SUCCESS", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f81", 
+      "worker": 1, 
+      "runtime": 1.0,
+      "waittime": null,
+      "totaltime": null,
+      
+      "tstamp": "2010-01-01 12:00:00", 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
+      "result": "None", 
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
+    }
+  },
+  {
+    "pk": 2, 
+    "model": "celerymanagementapp.dispatchedtask", 
+    "fields": {
+      "name": "task2", 
+      "state": "SUCCESS", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f82", 
+      "worker": 1, 
+      "runtime": 2.0,
+      "waittime": null,
+      "totaltime": null,
+      
+      "tstamp": "2010-01-01 12:00:00", 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
+      "result": "None", 
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
+    }
+  },
+  {
+    "pk": 3, 
+    "model": "celerymanagementapp.dispatchedtask", 
+    "fields": {
+      "name": "task1", 
+      "state": "SUCCESS", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f83", 
+      "worker": 2, 
+      "runtime": 3.0,
+      "waittime": null,
+      "totaltime": null,
+      
+      "tstamp": "2010-01-01 13:00:00", 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
+      "result": "None", 
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
+    }
+  },
+  {
+    "pk": 4, 
+    "model": "celerymanagementapp.dispatchedtask", 
+    "fields": {
+      "name": "task2", 
+      "state": "SUCCESS", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f84", 
+      "worker": 2, 
+      "runtime": 1.0,
+      "waittime": null,
+      "totaltime": null,
+      
+      "tstamp": "2010-01-01 13:00:00", 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
+      "result": "None", 
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
+    }
+  },
+  {
+    "pk": 5, 
+    "model": "celerymanagementapp.dispatchedtask", 
+    "fields": {
+      "name": "task1", 
+      "state": "STARTED", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f85", 
+      "worker": 1, 
+      "runtime": 2.0,
+      "waittime": null,
+      "totaltime": null,
+      
+      "tstamp": "2010-01-01 14:00:00", 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
+      "result": "None", 
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
+    }
+  },
+  {
+    "pk": 6, 
+    "model": "celerymanagementapp.dispatchedtask", 
+    "fields": {
+      "name": "task2", 
+      "state": "PENDING", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f86", 
+      "worker": 1, 
+      "runtime": 3.0,
+      "waittime": null,
+      "totaltime": null,
+      
+      "tstamp": "2010-01-01 14:00:00", 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
+      "result": "None", 
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
+    }
+  },
+  {
+    "pk": 7, 
+    "model": "celerymanagementapp.dispatchedtask", 
+    "fields": {
+      "name": "task1", 
+      "state": "PENDING", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f87", 
+      "worker": 1, 
+      "runtime": 4.0,
+      "waittime": null,
+      "totaltime": null,
+      
+      "tstamp": "2010-01-01 15:00:00", 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
+      "result": "None", 
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
+    }
+  },
+  {
+    "pk": 8, 
+    "model": "celerymanagementapp.dispatchedtask", 
+    "fields": {
+      "name": "task2", 
+      "state": "STARTED", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f88", 
+      "worker": 2, 
+      "runtime": 4.0,
+      "waittime": null,
+      "totaltime": null,
+      
+      "tstamp": "2010-01-01 15:00:00", 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
+      "result": "None", 
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
+    }
+  },
+  {
+    "pk": 9, 
+    "model": "celerymanagementapp.dispatchedtask", 
+    "fields": {
+      "name": "task1", 
+      "state": "PENDING", 
+      "task_id": "8ad84a35-6db1-4ad8-9579-cdb742760f89", 
+      "worker": 2, 
+      "runtime": 3.0,
+      "waittime": null,
+      "totaltime": null,
+      
+      "tstamp": "2010-01-01 15:00:00", 
+      "sent": null,
+      "received": null,
+      "started": null,
+      "succeeded": null,
+      "failed": null,
+      
+      "expires": null, 
+      "result": "None", 
+      "retries": 0, 
+      "eta": null, 
+      "hidden": false
+    }
+  },
+  
+  {
+    "pk": 1,
+    "model": "celerymanagementapp.registeredtasktype",
+    "fields": {
+      "name": "task1",
+      "worker": "worker1",
+      "modified": "2010-01-01 15:00:00"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "celerymanagementapp.registeredtasktype",
+    "fields": {
+      "name": "task2",
+      "worker": "worker1",
+      "modified": "2010-01-01 15:00:00"
+    }
+  },
+  
+  {
+    "pk": 1,
+    "model": "djcelery.workerstate",
+    "fields": {
+      "hostname": "worker1"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "djcelery.workerstate",
+    "fields": {
+      "hostname": "worker2"
+    }
+  }
+]

@@ -36,7 +36,7 @@ class ListAggregator(object):
         self.aggs.extend(aggregators)
         
 
-def max(fieldname, *args):
+def max(fieldname, fieldconv):
     """ Return a max value aggregator function.  The returned function can be 
         used to aggregate a queryset on the maximum value found in the field 
         *fieldname*. 
@@ -46,7 +46,7 @@ def max(fieldname, *args):
         return queryset.aggregate(Max(fieldname))[key]
     return _aggregator
 
-def min(fieldname, *args):
+def min(fieldname, fieldconv):
     """ Return a min value aggregator function.  The returned function can be 
         used to aggregate a queryset on the minimum value found in the field 
         *fieldname*. 
@@ -56,7 +56,7 @@ def min(fieldname, *args):
         return queryset.aggregate(Min(fieldname))[key]
     return _aggregator
 
-def average(fieldname, *args):
+def average(fieldname, fieldconv):
     """ Return an average aggregator function.  The returned function can be 
         used to aggregate a queryset on the average of the values found in the 
         field *fieldname*. 
@@ -66,7 +66,7 @@ def average(fieldname, *args):
         return queryset.aggregate(Avg(fieldname))[key]
     return _aggregator
 
-def variance(fieldname, *args):
+def variance(fieldname, fieldconv):
     """ Return a variance value aggregator function.  The returned function can 
         be used to aggregate a queryset on the variance of the values found in 
         the field *fieldname*. 
@@ -76,7 +76,7 @@ def variance(fieldname, *args):
         return queryset.aggregate(Var(fieldname))[key]
     return _aggregator
 
-def sum(fieldname, *args):
+def sum(fieldname, fieldconv):
     """ Return a sum aggregator function.  The returned function can be used to 
         aggregate a queryset on the sum of the values found in the field 
         *fieldname*. 
@@ -86,11 +86,12 @@ def sum(fieldname, *args):
         return queryset.aggregate(Sum(fieldname))[key]
     return _aggregator
 
-def enumerate(fieldname, from_python, *args):
+def enumerate(fieldname, fieldconv):
     """ Return an enumerate aggregator function.  The returned function can be 
         used to aggregate a queryset on the number of occurrences of each value 
         in the field *fieldname*. 
     """
+    from_python = fieldconv.from_python()
     def _aggregator(queryset):
         unique_vals = set(queryset.values_list(fieldname, flat=True))
         return dict( (from_python(val), queryset.filter(**{fieldname: val}).count()) 
