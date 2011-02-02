@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Introduction &mdash; CeleryManagement v0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="CeleryManagement v0.0 documentation" href="../index.html" />
+    <link rel="up" title="Getting Started" href="index.html" />
+    <link rel="next" title="Policies API" href="../policy.html" />
+    <link rel="prev" title="Getting Started" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../policy.html" title="Policies API"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Getting Started"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">CeleryManagement v0.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Getting Started</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="introduction">
+<span id="intro"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>CeleryManagement is an open source Management Library designed to monitor and
+manage <a class="reference external" href="http://celeryq.org/docs/getting-started/introduction.html">Celery</a> installations.  It has two primary functions:</p>
+<blockquote>
+<ul>
+<li><p class="first">Visualize task and worker performance and statistics</p>
+</li>
+<li><dl class="first docutils">
+<dt>Policy driven monitoring of celery infrastructure to achieve</dt>
+<dd><ul class="first last simple">
+<li>task latency</li>
+<li>task throughput</li>
+<li>worker utilization</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</blockquote>
+<p>Celery can be a critical component in server and web service architectures.
+Having knowledge about the performance and reliability of those celery
+functions is valuable.  Through monitoring CeleryManagement can help identify
+problems before they happen.  If problems have already happened,
+CeleryManagement can assist in visualizing any strange occurances.</p>
+<p>CeleryManagement is also designed to be fully interoperable with celery add on
+packages <a class="reference external" href="http://pypi.python.org/pypi/django-celery">django-celery</a>, <a class="reference external" href="http://pypi.python.org/pypi/celery-pylons">celery-pylons</a>, and <a class="reference external" href="http://github.com/ask/flask-celery/">Flask-Celery</a> add-on
+packages.  This ensures that CeleryManagement can provide value to the
+<a class="reference external" href="http://djangoproject.com/">Django</a>, <a class="reference external" href="http://pylonshq.com/">Pylons</a> and <a class="reference external" href="http://flask.pocoo.org/">Flask</a> communities.</p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#overview" id="id1">Overview</a></li>
+<li><a class="reference internal" href="#example" id="id2">Example</a></li>
+<li><a class="reference internal" href="#features" id="id3">Features</a></li>
+<li><a class="reference internal" href="#documentation" id="id4">Documentation</a></li>
+<li><a class="reference internal" href="#installation" id="id5">Installation</a><ul>
+<li><a class="reference internal" href="#downloading-and-installing-from-source" id="id6">Downloading and installing from source</a></li>
+<li><a class="reference internal" href="#using-the-development-version" id="id7">Using the development version</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="overview">
+<span id="celery-management-overview"></span><h2><a class="toc-backref" href="#id1">Overview</a><a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>This is a high level overview of the architecure.</p>
+<p>Event data is enabled on all celery workers by using the <a class="reference external" href="http://ask.github.com/celery/reference/celery.bin.celeryd.html#cmdoption-celeryd-E">-E option on
+celeryd</a>.  This event data is sent through your existing AMQP message bus and
+received by CeleryManagement which delivers this information into a database.
+The celery data is examined and displayed such that.</p>
+</div>
+<div class="section" id="example">
+<span id="celery-example"></span><h2><a class="toc-backref" href="#id2">Example</a><a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>&#64;TODO link to the examples page with pretty graphs</p>
+</div>
+<div class="section" id="features">
+<span id="celery-features"></span><h2><a class="toc-backref" href="#id3">Features</a><a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<table border="1" class="docutils">
+<colgroup>
+<col width="26%" />
+<col width="74%" />
+</colgroup>
+<tbody valign="top">
+<tr><td>Visualization</td>
+<td>Graphically renders all worker and task data
+visually.  This helps give you a quick look at
+what your celery infrastructure is organized.</td>
+</tr>
+<tr><td>Analytics</td>
+<td>Drill down into your task and worker performance
+data visually.</td>
+</tr>
+<tr><td>Auto-scaling</td>
+<td>Brings online and offline worker nodes to
+dynamically grow and shrink the number of worker
+nodes.</td>
+</tr>
+<tr><td>Cloud Enabled</td>
+<td>Full cloud management and provisiong capabilities
+through <a href="#id8"><span class="problematic" id="id9">`libcloud`_</span></a>.</td>
+</tr>
+<tr><td>Monitoring</td>
+<td>Celery event monitoring with email notifications
+capability.  Monitoring can happen continuously on
+definable schedules.</td>
+</tr>
+<tr><td>Scheduling</td>
+<td>Supports recurring tasks like cron, or specifying
+an exact date or countdown for when after the task
+should be executed.</td>
+</tr>
+<tr><td>Policy Driven</td>
+<td>Control all monitoring of your system through a
+simple policy language.  This allows you to fully
+customize the policies that govern your
+infrastructure.</td>
+</tr>
+<tr><td>Routing</td>
+<td>Using AMQP&#8217;s flexible routing model you can route
+tasks to different workers, or select different
+message topologies, by configuration or even at
+runtime.</td>
+</tr>
+<tr><td>Managed Settings</td>
+<td>Remote contorl functions have been added to manage
+and modify worker settings at runtime</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+</div>
+<div class="section" id="documentation">
+<span id="celery-management-documentation"></span><h2><a class="toc-backref" href="#id4">Documentation</a><a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference external" href="http://bmbouter.github.com/CeleryManagement/">latest documentation</a> with user guides and tutorials is hosted at Github.</p>
+</div>
+<div class="section" id="installation">
+<span id="celery-management-installation"></span><h2><a class="toc-backref" href="#id5">Installation</a><a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>You can install CeleryManagement either via the Python Package Index (PyPI)
+or from source.</p>
+<p>To install using <cite>pip</cite>,:</p>
+<div class="highlight-python"><pre>$ pip install CeleryManagement</pre>
+</div>
+<p>To install using <cite>easy_install</cite>,:</p>
+<div class="highlight-python"><pre>$ easy_install CeleryManagement</pre>
+</div>
+<div class="section" id="downloading-and-installing-from-source">
+<span id="celery-management-installing-from-source"></span><h3><a class="toc-backref" href="#id6">Downloading and installing from source</a><a class="headerlink" href="#downloading-and-installing-from-source" title="Permalink to this headline">¶</a></h3>
+<p>Download the latest version of CeleryManagement from
+<a class="reference external" href="http://pypi.python.org/pypi/celerymanagement/">http://pypi.python.org/pypi/celerymanagement/</a></p>
+<p>You can install it by doing the following,:</p>
+<div class="highlight-python"><pre>$ tar xvfz celery-management-0.0.0.tar.gz
+$ cd celery-management-0.0.0
+$ python setup.py build
+# python setup.py install # as root</pre>
+</div>
+</div>
+<div class="section" id="using-the-development-version">
+<span id="celery-management-installing-from-git"></span><h3><a class="toc-backref" href="#id7">Using the development version</a><a class="headerlink" href="#using-the-development-version" title="Permalink to this headline">¶</a></h3>
+<p>You can clone the repository by doing the following:</p>
+<div class="highlight-python"><pre>$ git clone git://github.com/bmbouter/CeleryManagement.git</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="../index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Introduction</a><ul>
+<li><a class="reference external" href="#overview">Overview</a></li>
+<li><a class="reference external" href="#example">Example</a></li>
+<li><a class="reference external" href="#features">Features</a></li>
+<li><a class="reference external" href="#documentation">Documentation</a></li>
+<li><a class="reference external" href="#installation">Installation</a><ul>
+<li><a class="reference external" href="#downloading-and-installing-from-source">Downloading and installing from source</a></li>
+<li><a class="reference external" href="#using-the-development-version">Using the development version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="index.html"
+                                  title="previous chapter">Getting Started</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="../policy.html"
+                                  title="next chapter">Policies API</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="../_sources/getting-started/introduction.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../policy.html" title="Policies API"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Getting Started"
+             >previous</a> |</li>
+        <li><a href="../index.html">CeleryManagement v0.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Getting Started</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2011, ITng Services.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>
