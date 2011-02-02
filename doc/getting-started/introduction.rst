@@ -17,10 +17,11 @@ manage `Celery`_ installations.  It has two primary functions:
          * task throughput
          * worker utilization
 
-Celery be a critical component in server and web service architectures and
-having knowledge about the performance and reliability of those celery
-functions is valuable.  CeleryManagement can be used to help identify problems
-before they happen or after a strange Celery event has occurred.
+Celery can be a critical component in server and web service architectures.
+Having knowledge about the performance and reliability of those celery
+functions is valuable.  Through monitoring CeleryManagement can help identify
+problems before they happen.  If problems have already happened,
+CeleryManagement can assist in visualizing any strange occurances.
 
 CeleryManagement is also designed to be fully interoperable with celery add on
 packages `django-celery`_, `celery-pylons`_, and `Flask-Celery`_ add-on
@@ -44,7 +45,10 @@ Overview
 
 This is a high level overview of the architecure.
 
-Event data is enabled on all celery workers by using the `-E option on celeryd`_.  This event data is sent through your existing AMQP message bus and received by CeleryManagement which delivers this information into a database.  The celery data is examined and displayed such that.
+Event data is enabled on all celery workers by using the `-E option on
+celeryd`_.  This event data is sent through your existing AMQP message bus and
+received by CeleryManagement which delivers this information into a database.
+The celery data is examined and displayed such that.
 
 .. _`-E option on celeryd`: http://ask.github.com/celery/reference/celery.bin.celeryd.html#cmdoption-celeryd-E
 
@@ -86,7 +90,7 @@ Features
     | Policy Driven    | Control all monitoring of your system through a    |
     |                  | simple policy language.  This allows you to fully  |
     |                  | customize the policies that govern your            |
-    |                  | infrastructure.                                  |
+    |                  | infrastructure.                                    |
     +------------------+----------------------------------------------------+
     | Routing          | Using AMQP's flexible routing model you can route  |
     |                  | tasks to different workers, or select different    |
