@@ -7,7 +7,7 @@
 {% block content %}
 
 <div id="chart" style="width: 600px; height: 500px; float: left; margin: 10px 10px"></div>
-<div id="chartOptions">
+<div id="queryOptions">
     <form>
         <fieldset id="filter_set">
             <legend>Filter</legend>
@@ -204,6 +204,35 @@
     
     <input id="submit_query" value="Submit Form" onclick="create_query();" type="button" style="width: 100px; margin-top: 100px" />
 </div>
+
+<div id="chartOptions">
+    <div id="options">
+        <div class="option">
+            <label for="displayBarChart">Display bar chart</label>
+            <input name="displayBarChart" id="displayBarChart" checked="checked" type="checkbox" />
+        </div><br />
+        <div class="option">
+            <label for="displayLineChart">Display line chart</label>
+            <input name="displayLineChart" id="displayLineChart" type="checkbox" />
+        </div><br /><br />
+        <div class="option">
+            <label for="enableTooltips">Enable tooltips</label>
+            <input name="enableTooltips" id="enableTooltips" checked="checked" type="checkbox" />
+        </div><br />
+        <div class="option">
+            <label for="disableTooltips">Disable tooltips</label>
+            <input name="disableTooltips" id="disableTooltips" type="checkbox" />
+        </div><br /><br />
+        <div class="option">
+            <label for="enableLegend">Enable legend</label>
+            <input name="enableLegend" id="enableLegend" checked="checked" type="checkbox" />
+        </div><br />
+        <div class="option">
+            <label for="disableLegend">Enable tooltips</label>
+            <input name="disableLegend" id="disableLegend" type="checkbox" />
+        </div><br />
+    </div>
+</dvv>
 
 
 {% endblock content %}
