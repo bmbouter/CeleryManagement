@@ -167,3 +167,72 @@ function startChart(data) {
     c1.enableTooltips();
 }
 
+$(function() {
+    var displayBarChart = $('#displayBarChart'),
+        displayLineChart = $('#displayLineChart'),
+        enableTooltips = $('#enableTooltips'),
+        disableTooltips = $('#disableTooltips'),
+        enableLegend = $('#enableLegend'),
+        disableLegend = $('#disableLegend');
+    
+    displayBarChart.click(function() {
+        if($(this).attr('checked')) {
+            displayLineChart.attr('checked', false);
+            c1.displayBarChart();
+        } else {
+            displayLineChart.attr('checked', true);
+            c1.displayLineChart();
+        }
+    });
+    
+    displayLineChart.click(function() {
+        if($(this).attr('checked')) {
+            displayBarChart.attr('checked', false);
+            c1.displayLineChart();
+        } else {
+            displayBarChart.attr('checked', true);
+            c1.displayBarChart();
+        }
+    });
+    
+    enableTooltips.click(function() {
+        if($(this).attr('checked')) {
+            disableTooltips.attr('checked', false);
+            c1.enableTooltips();
+        } else {
+            disableTooltips.attr('checked', true);
+            c1.disableTooltips();
+        }
+    });
+    
+    disableTooltips.click(function() {
+        if($(this).attr('checked')) {
+            enableTooltips.attr('checked', false);
+            c1.disableTooltips();
+        } else {
+            enableTooltips.attr('checked', true);
+            c1.disableTooltips();
+        }
+    });
+    
+    enableLegend.click(function() {
+        if($(this).attr('checked')) {
+            disableLegend.attr('checked', false);
+            c1.enableLegend();
+        } else {
+            disableLegend.attr('checked', true);
+            c1.disableLegend();
+        }
+    });
+    
+    disableLegend.click(function() {
+        if($(this).attr('checked')) {
+            enableLegend.attr('checked', false);
+            c1.disableLegend();
+        } else {
+            enableLegend.attr('checked', true);
+            c1.enableLegend();
+        }
+    });
+});
+

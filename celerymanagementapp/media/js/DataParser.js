@@ -176,7 +176,7 @@ CMA.Core.DataParser = (function() {
         var length = labels.length, i;
         
         for(i = 0; i < length; i++) {
-            ticks.xaxis.ticks.push([i + 0.3, labels[i]]);
+            ticks.xaxis.ticks.push([i, labels[i]]);
         }
         
         //console.log(ticks);
