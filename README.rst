@@ -25,7 +25,9 @@ Configure your settings
 
 #.  Change into the cloned CeleryManagement directory (where this README is contained)
 #.  Create your settings.py file from the template by running:  ``cp settings.py.sample settings.py``
-#.  Open up your settings.py file in a text editor and fill out the following configuration values::
+#.  Open up your settings.py file in a text editor and fill out the following configuration values:
+
+::
 
     BROKER_HOST = ''
     BROKER_PORT = ''
