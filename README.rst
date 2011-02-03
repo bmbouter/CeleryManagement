@@ -24,16 +24,16 @@ Configure your settings
 =======================
 
 #.  Change into the cloned CeleryManagement directory (where this README is contained)
-#.  Create your settings.py file from the template by running:  cp settings.py.sample settings.py
-#.  Open up your settings.py file and fill out the following configuration values::
+#.  Create your settings.py file from the template by running:  ``cp settings.py.sample settings.py``
+#.  Open up your settings.py file in a text editor and fill out the following configuration values::
 
-|    **BROKER_HOST**
+|   **BROKER_HOST**
 |    **BROKER_PORT**
 |    **BROKER_USER**
 |    **BROKER_PASSWORD**
 |    **BROKER_VHOST**
 
-#.  Create your database by running:  python manage.py syncdb
+#.  Create your database by running:  ``python manage.py syncdb``
 
 Start the required processes
 ============================
