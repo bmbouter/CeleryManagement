@@ -1,5 +1,5 @@
 if(CMA.Core.testUrls) {
-        CMA.Core.ajax.loadTestUrls();
+    CMA.Core.ajax.loadTestUrls();
 } else {
     CMA.Core.ajax.loadUrls(); 
 }
@@ -9,78 +9,29 @@ var c1 = null;
 $(document).ready(function() {
     System.Handlers.loadHandlers();
     
-    var q = '{"segmentize":{"field":"worker","method":["all"]},"aggregate":[{"field":"waittime","methods":["average","max","min"]}]}';
+    var q = {"segmentize":{"field":"worker","method":["all"]},"aggregate":[{"field":"waittime","methods":["average","max","min"]}]};
     
-    submitQuery(q);
-    
-    $(':checkbox').change(function() {
-        if($(this).attr('checked')) {
-            $(this).siblings('div').show();
-        } else {
-            $(this).siblings('div').hide();
-        }
-    });
-    
-    $('#segmentize_method').change(function() {
-        if($(this).val() == 'range') {
-            $('#segmentize_range').show();
-            $('#segmentize_values').hide();
-            $('#segmentize_taskname').hide();
-        } else if($(this).val() == 'values') {
-            $('#segmentize_values').show()
-            $('#segmentize_range').hide();
-            $('#segmentize_taskname').hide();
-        } else {
-            $('#segmentize_range').hide();
-            $('#segmentize_values').hide();
-        }
-    });
-    
-    function add_aggregation() {
-        var table = $('#aggregate_table tr:last');
-        
-        if(!$('#aggregate_methods').val()) {
-            alert("Select methods for field: " + $('#aggregate_field').val());
-        } else {
-            var aggregate_field = $('#aggregate_field').val();
-            var aggregate_methods = $('#aggregate_methods').val();
-            
-            table.after(
-                '<tr><td>' + aggregate_field + '</td>' +
-                '<td>' + aggregate_methods + '</td>' +
-                '<td><a href="#" class="' + aggregate_field +
-                    '-delete"><strong>x</strong></span></td>' + 
-                '</tr>'
-            );
-            
-            $('.' + aggregate_field + '-delete').click(function() {
-                $(this).parent().parent().remove(); 
-            });
-        }
+    submitQuery(JSON.stringify(q));
+});
+
+function startChart(data) {
+    var options = CMA.Core.DataParser.getTicks();
+    c1 = Chart("#chart", data, options);
+    c1.displayBarChart(true);
+    c1.enableTooltips();
+}
+
+function submitQuery(query) {
+    CMA.Core.ajax.getDispatchedTasksData(query, formatData);
+}
+
+function formatData(response) {
+    if(CMA.Core.testUrls) {
+        response = JSON.parse(response);
     }
     
-    $('#add_aggregation').click(add_aggregation);
-    
-    $('#filter_option').change(function() {
-        var field = $('#filter_arg2');
-        
-        if($(this).val() === 'range') {
-            field.show().next().show();
-        } else {
-            field.hide().next().hide();
-        } 
-    });
-    
-    $('#exclude_option').change(function() {
-        var field = $('#exclude_arg2');
-        
-        if($(this).val() === 'range') {
-            field.show().next().show();
-        } else {
-            field.hide().next().hide();
-        }
-    });
-});
+    System.EventBus.fireEvent('formatData', response);
+}
 
 function create_query() {
     var object = { };
@@ -148,25 +99,100 @@ function create_query() {
     submitQuery(JSON.stringify(object));
 }
 
-function submitQuery(query) {
-    CMA.Core.ajax.getDispatchedTasksData(query, formatData);
-}
-
-function formatData(response) {
-    if(CMA.Core.testUrls) {
-        response = JSON.parse(response);
+//Query options panel event listeners
+$(function() {
+    function add_aggregation() {
+        var table = $('#aggregate_table tr:last');
+        
+        if(!$('#aggregate_methods').val()) {
+            alert("Select methods for field: " + $('#aggregate_field').val());
+        } else {
+            var aggregate_field = $('#aggregate_field').val();
+            var aggregate_methods = $('#aggregate_methods').val();
+            
+            table.after(
+                '<tr><td>' + aggregate_field + '</td>' +
+                '<td>' + aggregate_methods + '</td>' +
+                '<td><a href="#" class="' + aggregate_field +
+                    '-delete"><strong>x</strong></span></td>' + 
+                '</tr>'
+            );
+            
+            $('.' + aggregate_field + '-delete').click(function() {
+                $(this).parent().parent().remove(); 
+            });
+        }
     }
     
-    System.EventBus.fireEvent('formatData', response);
-}
+    function change_segmentize_method() {
+        var that = $('#segmentize_method');
+        
+        if(that.val() == 'range') {
+            $('#segmentize_range').show();
+            $('#segmentize_values').hide();
+            $('#segmentize_taskname').hide();
+        } else if(that.val() == 'values') {
+            $('#segmentize_values').show()
+            $('#segmentize_range').hide();
+            $('#segmentize_taskname').hide();
+        } else {
+            $('#segmentize_range').hide();
+            $('#segmentize_values').hide();
+        }
+    }
+    
+    function change_segmentize_field() {
+        var enum = $('#segmentize_field optgroup[id=enum]'),
+            time = $('#segmentize_field optgroup[id=time]'),
+            range = $('#segmentize_method option[value=range]');
+        
+        if(enum.children('[value=' + $(this).val() + ']').length !== 0) {
+            range.attr('disabled', 'disabled');
+            range.next().attr('selected', 'selected');
+            change_segmentize_method();
+        } else {
+            range.attr('disabled', false);
+            range.attr('selected', 'selected');
+            change_segmentize_method();
+        }
+    }
+    
+    $(':checkbox').change(function() {
+        if($(this).attr('checked')) {
+            $(this).siblings('div').show();
+        } else {
+            $(this).siblings('div').hide();
+        }
+    });
+    
+    $('#segmentize_field').change(change_segmentize_field);
+    
+    $('#segmentize_method').change(change_segmentize_method);
+    
+    $('#add_aggregation').click(add_aggregation);
+    
+    $('#filter_option').change(function() {
+        var field = $('#filter_arg2');
+        
+        if($(this).val() === 'range') {
+            field.show().next().show();
+        } else {
+            field.hide().next().hide();
+        } 
+    });
+    
+    $('#exclude_option').change(function() {
+        var field = $('#exclude_arg2');
+        
+        if($(this).val() === 'range') {
+            field.show().next().show();
+        } else {
+            field.hide().next().hide();
+        }
+    });
+});
 
-function startChart(data) {
-    var options = CMA.Core.DataParser.getTicks();
-    c1 = Chart("#chart", data, options);
-    c1.displayBarChart(true);
-    c1.enableTooltips();
-}
-
+//Chart options panel event listeners
 $(function() {
     var displayBarChart = $('#displayBarChart'),
         displayLineChart = $('#displayLineChart'),

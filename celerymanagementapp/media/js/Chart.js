@@ -213,7 +213,7 @@ function Chart(loc, d, opt) {
             legend: { show: false }
         };
 
-        overview = $.plot($(loc), data, opt);
+        var overview = $.plot($(loc), data, opt);
         
         $(chart).bind('plotselected', function(event, ranges) {
             plotRef = $.plot($(chart), data, 

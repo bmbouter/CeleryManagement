@@ -23,7 +23,7 @@
                             <option label="State" value="state">State</option>
                             <option label="Task ID" value="task_id">Task ID</option>
                             <option label="Worker" value="worker">Worker</option>
-                            <option label="Runtime" value="runtime">Runtime</option>
+                            <option label="Run Time" value="runtime">Run Time</option>
                             <option label="Wait Time" value="waittime">Wait Time</option>
                             <option label="Total Time" value="totaltime">Total Time</option>
                         </select>
@@ -67,7 +67,7 @@
                             <option label="State" value="state">State</option>
                             <option label="Task ID" value="task_id">Task ID</option>
                             <option label="Worker" value="worker">Worker</option>
-                            <option label="Runtime" value="runtime">Runtime</option>
+                            <option label="Run Time" value="runtime">Run Time</option>
                             <option label="Wait Time" value="waittime">Wait Time</option>
                             <option label="Total Time" value="totaltime">Total Time</option>
                         </select>
@@ -107,17 +107,21 @@
                     <label for="segmentize_field">Field</label>
                     <div class="fields">
                         <select id="segmentize_field" name="segmentize_field" value="segmentize_field">
-                            <option label="Task Name" value="taskname">Task Name</option>
-                            <option label="State" value="state">State</option>
-                            <option label="Worker" value="worker">Worker</option>
-                            <option label="Runtime" value="runtime">Runtime</option>
-                            <option label="Wait Time" value="waittime">Wait Time</option>
-                            <option label="Total Time" value="totaltime">Total Time</option>
-                            <option label="Sent Time" value="sent">Sent Time</option>
-                            <option label="Received Time" value="received">Recieved Time</option>
-                            <option label="Start Time" value="started">Start Time</option>
-                            <option label="Success Time" value="succeeded">Success Time</option>
-                            <option label="Failed Time" value="failed">Failed Time</option>
+                            <optgroup label="Enumerated data" id="enum">
+                                <option label="Task Name" value="taskname">Task Name</option>
+                                <option label="State" value="state">State</option>
+                                <option label="Worker" value="worker">Worker</option>
+                            </optgroup>
+                            <optgroup label="Time data" id="time">
+                                <option label="Run Time" value="runtime" selected="selected">Run Time</option>
+                                <option label="Wait Time" value="waittime">Wait Time</option>
+                                <option label="Total Time" value="totaltime">Total Time</option>
+                                <option label="Sent Time" value="sent">Sent Time</option>
+                                <option label="Received Time" value="received">Recieved Time</option>
+                                <option label="Start Time" value="started">Start Time</option>
+                                <option label="Success Time" value="succeeded">Success Time</option>
+                                <option label="Failed Time" value="failed">Failed Time</option>
+                            </optgroup>
                         </select>
                     </div>
                     
@@ -171,7 +175,7 @@
                             <option label="State" value="state">State</option>
                             <option label="Task ID" value="task_id">Task ID</option>
                             <option label="Worker" value="worker">Worker</option>
-                            <option label="Runtime" value="runtime">Runtime</option>
+                            <option label="Run Time" value="runtime">Run Time</option>
                             <option label="Wait Time" value="waittime">Wait Time</option>
                             <option label="Total Time" value="totaltime">Total Time</option>
                         </select>
