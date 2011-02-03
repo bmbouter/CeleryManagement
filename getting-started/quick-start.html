@@ -84,20 +84,20 @@
 </div>
 <div class="section" id="configure-your-settings">
 <h2><a class="toc-backref" href="#id4">Configure your settings</a><a class="headerlink" href="#configure-your-settings" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic">
-<li><p class="first">Change into the cloned CeleryManagement directory (where this README is contained)</p>
-</li>
-<li><p class="first">Create your settings.py file from the template by running:  cp settings.py.sample settings.py</p>
-</li>
-<li><p class="first">Open up your settings.py file and fill out the following configuration values:</p>
-<p>BROKER_HOST
-BROKER_PORT
-BROKER_USER
-BROKER_PASSWORD
-BROKER_VHOST</p>
-</li>
-<li><p class="first">Create your database by running:  python manage.py syncdb</p>
-</li>
+<ol class="arabic simple">
+<li>Change into the cloned CeleryManagement directory (where this README is contained)</li>
+<li>Create your settings.py file from the template by running:  <tt class="docutils literal"><span class="pre">cp</span> <span class="pre">settings.py.sample</span> <span class="pre">settings.py</span></tt></li>
+<li>Open up your settings.py file in a text editor and fill out the following configuration values:</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">BROKER_HOST</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+<span class="n">BROKER_PORT</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+<span class="n">BROKER_USER</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+<span class="n">BROKER_PASSWORD</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+<span class="n">BROKER_VHOST</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li>Create your database by running:  <tt class="docutils literal"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">syncdb</span></tt></li>
 </ol>
 </div>
 <div class="section" id="start-the-required-processes">
