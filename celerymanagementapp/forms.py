@@ -26,11 +26,13 @@ class PolicyModelForm(ModelForm):
     
     class Meta:
         model = PolicyModel
-        fields = ('name', 'enabled', 'source', 'modified', 'last_run_time')
+        # fields does *not* include last_run_time... that is set elsewhere, and 
+        # should not be modified through user action.
+        fields = ('name', 'enabled', 'source', 'modified',)
     
     def clean_source(self):
         # check that it compiles
-        print 'Cleaning Policy source...'
+        ##print 'Cleaning Policy source...'
         source = self.cleaned_data['source']
         try:
             check_policy_source(source)
@@ -42,5 +44,5 @@ class PolicyModelForm(ModelForm):
         
     def clean_modified(self):
         # we update the modified field, so we don't care about the old value
-        print 'Cleaning Policy modified...'
+        ##print 'Cleaning Policy modified...'
         return datetime.datetime.now()

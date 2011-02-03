@@ -38,6 +38,7 @@ from celerymanagementapp.models import OutOfBandWorkerNode, RegisteredTaskType
 from celerymanagementapp.models import TaskDemoGroup, Provider, InBandWorkerNode
 from celerymanagementapp.models import PolicyModel
 from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
+from celerymanagementapp.forms import PolicyModelForm
 
 #==============================================================================#
 # Utility functions/classes
@@ -550,8 +551,16 @@ def policy_create(request):
     if request.method == "POST":
         policy_form = PolicyModelForm(request.POST)
         if policy_form.is_valid():
-            policy_form.save()
-            json = simplejson.dumps("Policy successfully created.")
+            policy = policy_form.save()
+            context = { 'policy': {'policy': policy,
+                        'policyForm': policy_form }}
+            html = render_to_response("celerymanagementapp/policy_instance.html",
+                    context,
+                    context_instance=RequestContext(request))
+            success = { 'success': 'Policy successfully created.',
+                        'html': html.content,
+                        'pk': policy.pk }
+            json = simplejson.dumps(success)
         else:
             errors = []
             for field in policy_form:
@@ -563,25 +572,32 @@ def policy_create(request):
     
 def policy_modify(request, policy_id=None):
     if request.method == "POST":
-        policy = PolicyModel.objects.get(pk=policy_id)
-        policy_form = PolicyModelForm(request.POST, instance=policy)
-        if policy_form.is_valid():
-            policy_form.save()
-            json = simplejson.dumps("Policy successfully updated.")
-        else:
-            errors = []
-            for field in policy_form:
-                errors.append({ 'field' : field.html_name,
-                                'error' : field.errors })
-            failed = { 'failure' : errors,
+        try:
+            policy = PolicyModel.objects.get(pk=policy_id)
+        except ObjectDoesNotExist:
+            m = 'No Policy with the given ID ({0}) was found.'.format(policy_id)
+            failed = { 'failure' : m,
                         'id': policy_id }
             json = simplejson.dumps(failed)
+        else:
+            policy_form = PolicyModelForm(request.POST, instance=policy)
+            if policy_form.is_valid():
+                policy_form.save()
+                json = simplejson.dumps("Policy successfully updated.")
+            else:
+                errors = []
+                for field in policy_form:
+                    errors.append({ 'field' : field.html_name,
+                                    'error' : field.errors })
+                failed = { 'failure' : errors,
+                            'id': policy_id }
+                json = simplejson.dumps(failed)
         return HttpResponse(json)
     
 def policy_delete(request, policy_id=None):
     """Deletes a Policy"""
     try:
-        policy = Policy.objects.get(pk=policy_id)
+        policy = PolicyModel.objects.get(pk=policy_id)
         policy.delete()
         json = simplejson.dumps("Policy successfully deleted.")
     except Exception as e:

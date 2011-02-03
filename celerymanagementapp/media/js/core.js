@@ -15,7 +15,6 @@ function createTable(data) {
 }
 
 CMA.Core.util = (function(){
-
     var expand = function(elem) {
             $(elem).animate(
                 { height: "toggle" },
@@ -23,7 +22,12 @@ CMA.Core.util = (function(){
                 function(){}
             );
         },
-        formSubmit = function(element, submitFunction, form, urlID){
+        showStatus = function(text){
+            $('#statusText').text(text);
+            $('#statusText').show();
+            $('#statusText').fadeOut(6000, function() {});
+        },
+        formSubmit = function(element, submitFunction, form, urlID, successCallback){
             var formReturn = function(data){
                     var setText = function(){
                             var errLength = data.failure[i].error.length,
@@ -33,11 +37,15 @@ CMA.Core.util = (function(){
                             }
                             return text;
                         };
-
+                    
                     if( !data.hasOwnProperty("failure") ){
-                        $('#statusText').show();
-                        $('#statusText').text(data);
-                        expand(element);
+                        if( typeof successCallback === "undefined" ){
+                            showStatus(data);
+                            expand(element);
+                        } else {
+                            expand(element);
+                            successCallback(data);
+                        }
                     } else {
                         var i = 0,
                             elem,
@@ -169,7 +177,8 @@ CMA.Core.util = (function(){
         expand: expand,
         formSubmit: formSubmit,
         createPopup: createPopup,
-        checkTab: checkTab
+        checkTab: checkTab,
+        showStatus: showStatus
     };
 }());
 
@@ -312,25 +321,46 @@ CMA.Core.policy = (function(){
         util = CMA.Core.util,
 
         submitPolicy = function(){
-            var form = {};
+            var form = {},
+                success = function(data){
+                    console.log(data);
+                    util.showStatus(data.success);
+                    $('#configurationManagement').append(data.html);
+                    $('.policyForm').hide();
+
+                    $('#' + data.pk + '_update').click(function(){
+                        var elem = document.getElementById($(this).attr("id").split("_")[0] + "_Form");
+                        util.expand(elem);
+                    });
+                    $('#' + data.pk + "_delete").click(function(){
+                            deletePolicy($(this));
+                    });
+                    $('#' + data.pk + "_editButton").click(function(){
+                        var id = $(this).attr("id"),
+                            split = id.split("_"),
+                            form = document.getElementById(split[0] + "_Form");
+                        util.formSubmit($(this).parent(), ajax.postUpdatePolicy, $(form).serialize(), split[0]);
+                    });
+                    $('textarea').keydown(util.checkTab);
+                };
                 
             form.name = $('#id_name').val();
             form.enabled = $('#id_enabled').attr("checked");
             form.source = $('#id_source').val();
          
-            util.formSubmit($(this).parent(), ajax.postCreatePolicy, form);
+            util.formSubmit($(this).parent(), ajax.postCreatePolicy, form, success);
         },
         deletePolicy = function(elem){
             util.createPopup("Are you sure you wish to delete policy " + $(elem).parent().children(':first').text()  + " ?",
                 function(){
-                    ajax.postDeletePolicy(elem.attr("id"), function(data){
+                    ajax.postDeletePolicy(elem.attr("id").split("_")[0], function(data){
                         if( !data.hasOwnProperty("failure") ){
                             elem.parent().remove();
                             var elemID = elem.attr("id").split("_")[0];
                             $('#' + elemID + "_Form").remove();
+                            util.showStatus(data);
                         } else {
-                            $('#statusText').show();
-                            $('#statusText').text(data.failure);
+                            util.showStatus(data.failure);
                         }
                     });
                 }
@@ -343,7 +373,7 @@ CMA.Core.policy = (function(){
             $('.policyForm').hide();
 
             $('.editPolicy').click(function(){
-                var elem = document.getElementById($(this).attr("id") + "_Form");
+                var elem = document.getElementById($(this).attr("id").split("_")[0] + "_Form");
                 util.expand(elem);
             });
             $('.createPolicy').click(function() {
@@ -359,7 +389,7 @@ CMA.Core.policy = (function(){
                     form = document.getElementById(split[0] + "_Form");
                 util.formSubmit($(this).parent(), ajax.postUpdatePolicy, $(form).serialize(), split[0]);
             });
-            $('#id_source').keydown(util.checkTab);
+            $('textarea').keydown(util.checkTab);
         };
 
     return {
@@ -388,8 +418,7 @@ CMA.Core.configure = (function(){
                                         $(that).parent().remove();
                                         $('#' + split[0] + "_Form").remove();
                                     } else {
-                                        $('#statusText').show();
-                                        $('#statusText').text(data.failure);
+                                        util.showStatus(data.failure);
                                     }
                                 });        
                             });
@@ -452,13 +481,10 @@ CMA.Core.configure = (function(){
                     
                     ajax.postDeleteInstance(pk, function(data){
                         if( data.hasOwnProperty("failure") ){
-                            $('#statusText').show();
-                            $('#statusText').text(data.failure);
+                            util.showStatus(data.failure);
                         } else {
                             element.remove();
-                            $('#statusText').show();
-                            $('#statusText').text("Instance successfully deleted.");
-                            $('#statusText').fadeOut(3000, function() {});
+                            util.showStatus(data);
                         }
                     });
                 });
