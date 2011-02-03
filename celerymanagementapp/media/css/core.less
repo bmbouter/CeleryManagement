@@ -265,65 +265,103 @@ body {
                 }
             }
             
-            #chartOptions {
+            #chartPage {
+                width: 1000px;
+                min-height: 800px;
                 float: left;
-                width: 300px;
-                min-height: 450px;
-                background: #444444;
-                margin: 10px 0px 0px 0px;
-                color: #FFFFFF;
                 
-                .rounded_borders;
-                
-                padding: 5px;
-                font-size: .8em;
-                
-                fieldset {
-                    color: #FFFFFF;
+                #queryOptions {
                     float: left;
-                    width: 100%;
+                    width: 300px;
+                    min-height: 450px;
+                    background: #444444;
+                    margin: 10px 0px 0px 0px;
+                    color: #FFFFFF;
                     
-                    legend {
-                        color: inherit;
-                        font-size: 1.2em;
-                        font-weight: bold;
-                    }
+                    .rounded_borders;
                     
-                    label {
-                        margin: 0px 0px 0px 10px;
-                        padding: 2px 0px 0px 0px;
+                    padding: 5px;
+                    font-size: .8em;
+                    
+                    fieldset {
+                        color: #FFFFFF;
                         float: left;
-                        width: 175px;
-                        height: 10px;
+                        width: 100%;
+                        
+                        legend {
+                            color: inherit;
+                            font-size: 1.2em;
+                            font-weight: bold;
+                        }
+                        
+                        label {
+                            margin: 0px 0px 0px 10px;
+                            padding: 2px 0px 0px 0px;
+                            float: left;
+                            width: 175px;
+                            height: 10px;
+                        }
+                        
+                        input {
+                            width: 100px;
+                            margin: 0px 0px 0px 2px;
+                        }
+                        
+                        .fields {
+                            float: left;
+                            width: 75px;
+                        }
+                        
+                        .no_padding {
+                            padding: 0;
+                        }
                     }
                     
-                    input {
-                        width: 100px;
-                        margin: 0px 0px 0px 2px;
-                    }
-                    
-                    .fields {
+                    #aggregate_table {
+                        width: 100%;
+                        margin: 10px 0px 0px 0px;
                         float: left;
-                        width: 75px;
-                    }
-                    
-                    .no_padding {
-                        padding: 0;
+    
+                        a {
+                            text-decoration: none;
+                            color: #FF0000;
+                        }
+                        
+                        th {
+                            font-weight: bold;
+                        }
                     }
                 }
                 
-                #aggregate_table {
-                    width: 100%;
-                    margin: 10px 0px 0px 0px;
+                #chartOptions {
+                    width: 400px;
+                    min-height: 200px;
                     float: left;
-
-                    a {
-                        text-decoration: none;
-                        color: #FF0000;
-                    }
+                    background: #444444;
                     
-                    th {
-                        font-weight: bold;
+                    .rounded_borders;
+                    
+                    margin: 10px;
+                    padding: 5px;
+                    
+                    #options {
+                        margin: 5px;
+                        color: #FFFFFF;
+                        
+                        .option {
+                            width: auto;
+                            float: left;
+                            font-size: 0.8em;
+                            margin: 0px 0px 0px 0px;
+                            
+                            label {
+                                margin: 0px 0px 0px 0px;
+                                padding: 0px 0px 0px 0px;
+                                float: left;
+                                width: 175px;
+                                height: 10px;
+                            }
+                        }
                     }
                 }
             }

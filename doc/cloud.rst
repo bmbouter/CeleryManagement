@@ -1,6 +1,7 @@
+.. _cloud:
 
-Controlling the Cloud
-#####################
+Cloud Enabled
+#############
 
 .. _libcloud: http://incubator.apache.org/libcloud/
 .. _DreamHost: http://www.dreamhost.com/hosting-vps.html
@@ -26,6 +27,7 @@ choice.
 
 .. contents::
 
+.. _supported_clouds:
 
 Supported Clouds
 ================
@@ -48,6 +50,8 @@ CeleryManagement currently supports the following cloud environments:
     - VPS.net_
 
 
+.. _building_your_cloud_image:
+
 Building Your Image on the Cloud
 ================================
 
@@ -61,6 +65,8 @@ requirements:
     - SSH server start by default at boot
     - Your Task code
     - Have installed CeleryManagementLib_ (optional but recommended)
+
+.. _configuring_your_cloud_system:
 
 Configuring Your System
 =======================

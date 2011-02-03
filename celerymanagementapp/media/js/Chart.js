@@ -94,6 +94,8 @@ function Chart(loc, d, opt) {
         
         typeOfChart = 'bar';
 
+        updateTicks();
+
         displayChart();
     };
     
@@ -114,13 +116,34 @@ function Chart(loc, d, opt) {
         }
 
         options.series.lines = {show: true};
-        
-        enablePoints();
                 
         typeOfChart = 'line';
 
+        enablePoints();
+        updateTicks();
+
         displayChart();
     };
+    
+    /**
+     * Update the x-axis tick/labels depending on the type of chart being displayed (line or bar)
+     */
+    function updateTicks() {
+        if(options.xaxis !== undefined && (options.xaxis.ticks !== undefined || options.xaxis.ticks !== null)) {
+            var i,
+                length = options.xaxis.ticks.length;
+
+            if(typeOfChart === 'line') {
+                for(i = 0; i < length; i++) {
+                    options.xaxis.ticks[i][0] -= 0.3
+                }
+            } else {
+                for(i = 0; i < length; i++) {
+                    options.xaxis.ticks[i][0] += 0.3
+                }
+            }
+        }
+    }
     
     /**
      * Enables points on the chart
@@ -191,13 +214,6 @@ function Chart(loc, d, opt) {
         };
 
         overview = $.plot($(loc), data, opt);
-    
-        //Need references to the global objects to access them inside inner functions
-        var plotRef = plot;
-        var overviewRef = overview;
-        var optionsRef = options;
-        var dataRef = data;
-        var chartRef = chart;
         
         $(chart).bind('plotselected', function(event, ranges) {
             plotRef = $.plot($(chart), data, 
