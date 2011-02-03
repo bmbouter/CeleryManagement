@@ -141,8 +141,9 @@ def get_all_task_settings():
     # don't do anything if there are no workers
     if len(util.get_all_worker_names()) == 0:
         return {}
-    settings = broadcast('get_all_task_settings', 
-                         arguments={'setting_names': _setting_names}, 
+    settings = broadcast('get_task_settings', 
+                         arguments={'tasknames': None, 
+                         'setting_names': _setting_names}, 
                          reply=True)
     settings = util._merge_broadcast_result(settings)
     return util._condense_broadcast_result(settings) or {}
@@ -198,7 +199,6 @@ class TaskSettingsManager(object):
         self.data = {}
         signals.on_task_modified.register(self.on_tasks_modified)
         signals.on_worker_started.register(self.on_worker_start)
-        # TODO: get data from existing workers
         self._initialize_settings()
         
     def cleanup(self):
