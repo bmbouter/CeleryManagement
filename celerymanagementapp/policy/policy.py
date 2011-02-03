@@ -121,11 +121,11 @@ class Policy(object):
             self.schedule = runner(schedule_code, self.sourcelines)
         
     def run_condition(self):
-        with Runner(env.ScheduleEnv) as runner:
+        with Runner(env.ConditionEnv) as runner:
             return runner(self.condition_code, self.sourcelines)
         
     def run_apply(self):
-        with Runner(env.ScheduleEnv) as runner:
+        with Runner(env.ApplyEnv) as runner:
             return runner(self.apply_code, self.sourcelines)
         
     def is_due(self, last_run_time):
