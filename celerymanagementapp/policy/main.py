@@ -9,8 +9,8 @@ from celerymanagementapp.policy.signals import Receiver
 from celerymanagementapp.policy import util
 
 #==============================================================================#
-MIN_LOOP_SLEEP_TIME = 30  # seconds
-MAX_LOOP_SLEEP_TIME = 60*2  # seconds
+MIN_LOOP_SLEEP_TIME = 20  # seconds
+MAX_LOOP_SLEEP_TIME = 45  # seconds
 
 class PolicyMain(object):
     """ The main Policy application class.  Policies are actually executed 
@@ -74,7 +74,7 @@ class PolicyMain(object):
         """ Look for Policies that may be due to be run, and try to run 
             them. 
         """
-        now = datetime.datetime.now()
+        start = datetime.datetime.now()
         modified_ids = []
         run_deltas = []
         
@@ -85,7 +85,7 @@ class PolicyMain(object):
                 for entry in self.registry:
                     was_run, next_run_delta = self.maybe_run_policy(entry)
                     if was_run:
-                        entry.set_last_run_time(now)
+                        entry.set_last_run_time(start)
                         modified_ids.append(entry.policy.id)
                     if next_run_delta:
                         run_deltas.append(next_run_delta)
@@ -121,7 +121,7 @@ class PolicyMain(object):
             msg += '{0}\n'.format(entry.policy.name)
             msg += 'The following is the traceback:\n'
             msg += traceback.format_exc()
-            # Print excetion traceback to the log so at least the user knows it 
+            # Print exception traceback to the log so at least the user knows it 
             # occurred.
             self.logger.error(msg)
             next_run_delta = 0

@@ -261,8 +261,10 @@ def task_demo_test_dataview(request):
     <script>
     
     function json() {{
-    var query = '{{"name": "[NAME]", "rate":{rate}, "runfor":{runfor} }}';
+    var query = '{{"name": "[NAME]", "rate":[RATE], "runfor":[RUNFOR] }}';
     query = query.replace("[NAME]", document.testform.taskname.value)
+    query = query.replace("[RATE]", document.testform.rate.value)
+    query = query.replace("[RUNFOR]", document.testform.runfor.value)
     
     $.post(
         '{send}',
@@ -282,9 +284,18 @@ def task_demo_test_dataview(request):
     <form name="testform" action="{send}" method="POST">
       <table>
         {{% csrf_token %}}
-        <tr><td>
-        <input type="text" name="taskname" value="{name}" size="90" />
-        </td></tr>
+        <tr>
+            <td>Task name:</td>
+            <td><input type="text" name="taskname" value="{name}" size="90" /></td>
+        </tr>
+        <tr>
+            <td>Rate (tasks/sec):</td>
+            <td><input type="text" name="rate" value="{rate}" size="30" /></td>
+        </tr>
+        <tr>
+            <td>Run for (sec):</td>
+            <td><input type="text" name="runfor" value="{runfor}" size="30" /></td>
+        </tr>
         <tr><td>
         <input type="button" value="Send" onclick="json();"/>
         </td></tr>
