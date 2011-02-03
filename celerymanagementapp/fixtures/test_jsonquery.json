@@ -1,26 +1,26 @@
 [
   {
     "pk": 1, "model": "celerymanagementapp.testmodel", 
-    "fields": { "date": "2010-01-04",   "floatval": 4.0,    "intval":   2,  "charval":  "",     "enumval":  "A" }
+    "fields": { "date": "2010-01-04",   "datetime": "2010-01-04 12:00", "floatval": 4.0,    "intval":   2,  "charval":  "",     "enumval":  "A" }
   },
   {
     "pk": 2, "model": "celerymanagementapp.testmodel", 
-    "fields": { "date": "2010-01-04",   "floatval": 88.0,   "intval":   3,  "charval":  "",     "enumval":  "C" }
+    "fields": { "date": "2010-01-04",   "datetime": "2010-01-04 12:00", "floatval": 88.0,   "intval":   3,  "charval":  "",     "enumval":  "C" }
   },
   {
     "pk": 3, "model": "celerymanagementapp.testmodel", 
-    "fields": { "date": "2010-01-11",   "floatval": 3.0,    "intval":   6,  "charval":  "",     "enumval":  "B" }
+    "fields": { "date": "2010-01-11",   "datetime": "2010-01-11 12:00", "floatval": 3.0,    "intval":   6,  "charval":  "",     "enumval":  "B" }
   },
   {
     "pk": 4, "model": "celerymanagementapp.testmodel", 
-    "fields": { "date": "2010-01-13",   "floatval": 4.0,    "intval":   5,  "charval":  "",     "enumval":  "A" }
+    "fields": { "date": "2010-01-13",   "datetime": "2010-01-13 12:00", "floatval": 4.0,    "intval":   5,  "charval":  "",     "enumval":  "A" }
   },
   {
     "pk": 5, "model": "celerymanagementapp.testmodel", 
-    "fields": { "date": "2010-01-20",   "floatval": 5.0,    "intval":   8,  "charval":  "",     "enumval":  "B" }
+    "fields": { "date": "2010-01-20",   "datetime": "2010-01-20 12:00", "floatval": 5.0,    "intval":   8,  "charval":  "",     "enumval":  "B" }
   },
   {
     "pk": 6, "model": "celerymanagementapp.testmodel", 
-    "fields": { "date": "2010-01-24",   "floatval": 7.0,    "intval":   4,  "charval":  "",     "enumval":  "A" }
+    "fields": { "date": "2010-01-24",   "datetime": "2010-01-24 12:00", "floatval": 7.0,    "intval":   4,  "charval":  "",     "enumval":  "A" }
   }
 ]

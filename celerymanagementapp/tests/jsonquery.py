@@ -36,6 +36,13 @@ def date_timestamp(y,m,d):
     ##print unixtime
     return unixtime*1000
     
+def datetime_timestamp(y,m,d,h=0,mi=0,s=0):
+    # takes a python datetime.date and converts into a timestamp in milliseconds
+    tt = datetime.datetime(y,m,d,h,mi,s).timetuple()
+    unixtime = time.mktime(tt)
+    ##print unixtime
+    return unixtime*1000
+    
 def timedelta_ms(days=0, seconds=0, milliseconds=0):
     seconds += days * 60*60*24
     milliseconds += seconds * 1000
@@ -240,6 +247,59 @@ class JsonQuery_DateSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
                 (D(2010,1,13), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
                 (D(2010,1,20), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
                 (D(2010,1,24), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                ]
+            }
+        
+        query = JsonXYQuery(TestModelModelMap(), input)
+        output = query.do_query()
+        output = sort_result(output)
+        self.assertEquals(expected_output, output)
+        
+
+class JsonQuery_DateTimeSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
+    fixtures = ['test_jsonquery']
+    
+    def test_date_all(self):
+        D = datetime_timestamp
+        input = {
+            'segmentize': {
+                'field': 'datetime',
+                'method': ['all'],
+                },
+            'aggregate': [
+                { 'field': 'count', }
+                ]
+            }
+        expected_output = {
+            'data': [
+                (D(2010,1,4,12), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 2}] }] ),
+                (D(2010,1,11,12),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,13,12),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,20,12),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,24,12),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                ]
+            }
+        query = JsonXYQuery(TestModelModelMap(), input)
+        output = query.do_query()
+        output = sort_result(output)
+        self.assertEquals(expected_output, output)
+        
+    def test_date_range(self):
+        D = datetime_timestamp
+        input = {
+            "segmentize": {
+                "field":"datetime",
+                "method": ["range", {"min": D(2010,1,10,12), "max": D(2010,1,22,12), "interval": timedelta_ms(days=6)}]
+                },
+            "aggregate": [
+                { "field":"count",
+                  "methods":["enumerate"] }
+                ]
+            }
+        expected_output = {
+            'data': [
+                (D(2010,1,13,12), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 2}] }] ),
+                (D(2010,1,19,12), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
                 ]
             }
         

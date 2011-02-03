@@ -351,6 +351,7 @@ class PolicyModel(models.Model):
 class TestModel(models.Model):
     """A model solely for use in testing."""
     date =      models.DateField(null=True)
+    datetime =  models.DateTimeField(null=True)
     floatval =  models.FloatField()
     intval =    models.IntegerField()
     charval =   models.CharField(max_length=128)
