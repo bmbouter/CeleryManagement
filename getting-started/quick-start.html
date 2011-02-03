@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Quick Start Instructions &mdash; CeleryManagement v0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="CeleryManagement v0.0 documentation" href="../index.html" />
+    <link rel="up" title="Getting Started" href="index.html" />
+    <link rel="next" title="Policies API" href="../policy.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../policy.html" title="Policies API"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">CeleryManagement v0.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Getting Started</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="quick-start-instructions">
+<span id="getting-started"></span><h1><a class="toc-backref" href="#id1">Quick Start Instructions</a><a class="headerlink" href="#quick-start-instructions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview-of-steps">
+<h2><a class="toc-backref" href="#id2">Overview of Steps</a><a class="headerlink" href="#overview-of-steps" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<ul class="simple">
+<li>Create your Python virtual environment containing the correct requirements</li>
+<li>Configure your settings</li>
+<li>Start the required processes</li>
+</ul>
+</blockquote>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#quick-start-instructions" id="id1">Quick Start Instructions</a><ul>
+<li><a class="reference internal" href="#overview-of-steps" id="id2">Overview of Steps</a></li>
+<li><a class="reference internal" href="#create-your-virtual-environment-containing-the-correct-requirements" id="id3">Create your virtual environment containing the correct requirements</a></li>
+<li><a class="reference internal" href="#configure-your-settings" id="id4">Configure your settings</a></li>
+<li><a class="reference internal" href="#start-the-required-processes" id="id5">Start the required processes</a></li>
+<li><a class="reference internal" href="#starting-a-worker-daemon-optional" id="id6">Starting a worker daemon: (Optional)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="create-your-virtual-environment-containing-the-correct-requirements">
+<h2><a class="toc-backref" href="#id3">Create your virtual environment containing the correct requirements</a><a class="headerlink" href="#create-your-virtual-environment-containing-the-correct-requirements" title="Permalink to this headline">¶</a></h2>
+<p>Make sure you have pip and virtualenv installed on your system already.</p>
+<ol class="arabic simple">
+<li>Change into the cloned CeleryManagement directory (where this README is contained)</li>
+<li>Run the following:   <tt class="docutils literal"><span class="pre">virtualenv</span> <span class="pre">--no-site-packages</span> <span class="pre">ve</span></tt></li>
+<li>Activate your virtual environment by running:  <tt class="docutils literal"><span class="pre">source</span> <span class="pre">ve/bin/activate</span></tt></li>
+<li>Install the requirements by running:  <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.pip</span></tt></li>
+</ol>
+</div>
+<div class="section" id="configure-your-settings">
+<h2><a class="toc-backref" href="#id4">Configure your settings</a><a class="headerlink" href="#configure-your-settings" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Change into the cloned CeleryManagement directory (where this README is contained)</p>
+</li>
+<li><p class="first">Create your settings.py file from the template by running:  cp settings.py.sample settings.py</p>
+</li>
+<li><p class="first">Open up your settings.py file and fill out the following configuration values:</p>
+<p>BROKER_HOST
+BROKER_PORT
+BROKER_USER
+BROKER_PASSWORD
+BROKER_VHOST</p>
+</li>
+<li><p class="first">Create your database by running:  python manage.py syncdb</p>
+</li>
+</ol>
+</div>
+<div class="section" id="start-the-required-processes">
+<h2><a class="toc-backref" href="#id5">Start the required processes</a><a class="headerlink" href="#start-the-required-processes" title="Permalink to this headline">¶</a></h2>
+<p>You will need two terminal sessions to run both the event listener and the web application at the same time</p>
+<ol class="arabic simple">
+<li>Change into the cloned CeleryManagement directory (where this README is contained)</li>
+<li>Make sure your virtual environment is active by running:  <tt class="docutils literal"><span class="pre">source</span> <span class="pre">ve/bin/activate</span></tt></li>
+<li>Start the event listener by running:  <tt class="docutils literal"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">cmrun</span></tt></li>
+<li>Open a new session/terminal</li>
+<li>Change into the cloned CeleryManagement directory (where this README is contained)</li>
+<li>Make sure your virtual environment is active by running:  <tt class="docutils literal"><span class="pre">source</span> <span class="pre">ve/bin/activate</span></tt></li>
+<li>Start the web application by running:  <tt class="docutils literal"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">runserver</span> <span class="pre">0.0.0.0:9253</span></tt></li>
+</ol>
+</div>
+<div class="section" id="starting-a-worker-daemon-optional">
+<h2><a class="toc-backref" href="#id6">Starting a worker daemon: (Optional)</a><a class="headerlink" href="#starting-a-worker-daemon-optional" title="Permalink to this headline">¶</a></h2>
+<p>All workers must be started WITH events using the -E option to celeryd.  To start a worker on the same node you installed this web application do the following:</p>
+<ol class="arabic simple">
+<li>Change into the cloned CeleryManagement directory (where this README is contained)</li>
+<li>Make sure your virtual environment is active by running:  <tt class="docutils literal"><span class="pre">source</span> <span class="pre">ve/bin/activate</span></tt></li>
+<li>Start a worker node by running:  <tt class="docutils literal"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">celeryd</span> <span class="pre">-E</span></tt></li>
+</ol>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="../index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Quick Start Instructions</a><ul>
+<li><a class="reference external" href="#overview-of-steps">Overview of Steps</a></li>
+<li><a class="reference external" href="#create-your-virtual-environment-containing-the-correct-requirements">Create your virtual environment containing the correct requirements</a></li>
+<li><a class="reference external" href="#configure-your-settings">Configure your settings</a></li>
+<li><a class="reference external" href="#start-the-required-processes">Start the required processes</a></li>
+<li><a class="reference external" href="#starting-a-worker-daemon-optional">Starting a worker daemon: (Optional)</a></li>
+</ul>
+</li>
+</ul>
+
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="introduction.html"
+                                  title="previous chapter">Introduction</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="../policy.html"
+                                  title="next chapter">Policies API</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="../_sources/getting-started/quick-start.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../policy.html" title="Policies API"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             >previous</a> |</li>
+        <li><a href="../index.html">CeleryManagement v0.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Getting Started</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2011, ITng Services.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>
