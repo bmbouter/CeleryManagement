@@ -35,7 +35,7 @@ Configure your settings
     BROKER_PASSWORD = ''
     BROKER_VHOST = ''
 
-#.  Create your database by running:  ``python manage.py syncdb``
+4.  Create your database by running:  ``python manage.py syncdb``
 
 Start the required processes
 ============================
