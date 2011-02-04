@@ -9,8 +9,8 @@ from celerymanagementapp.policy.signals import Receiver
 from celerymanagementapp.policy import util
 
 #==============================================================================#
-MIN_LOOP_SLEEP_TIME = 20  # seconds
-MAX_LOOP_SLEEP_TIME = 45  # seconds
+MIN_LOOP_SLEEP_TIME = 30    # seconds
+MAX_LOOP_SLEEP_TIME = 60*2  # seconds
 
 class PolicyMain(object):
     """ The main Policy application class.  Policies are actually executed 
@@ -20,6 +20,7 @@ class PolicyMain(object):
         ##print 'cmrun: Starting PolicyMain...'
         self.logger = logger
         self.logger.debug('Starting PolicyMain...')
+        self.connection = connection
         self.task_settings = TaskSettingsManager(logger)
         self.event_receiver = Receiver(connection, logger, app=app)
         self.registry = Registry(logger)
@@ -101,7 +102,7 @@ class PolicyMain(object):
         
         delta = datetime.datetime.now() - start
         secs = delta.seconds + delta.microseconds/1000000.
-        self.logger.debug(
+        self.logger.info(
             'Ran {0} policies in {1} seconds'.format(len(modified_ids), secs))
         
         return min(run_deltas+[MAX_LOOP_SLEEP_TIME])
@@ -141,9 +142,9 @@ class PolicyMain(object):
         """
         name = policyobj.name
         self.logger.debug('Checking policy {0} (condition)'.format(name))
-        if policyobj.run_condition():
+        if policyobj.run_condition(connection=self.connection):
             self.logger.info('Running policy {0} (apply)'.format(name))
-            policyobj.run_apply()
+            policyobj.run_apply(connection=self.connection)
         
         
 #==============================================================================#

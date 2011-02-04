@@ -139,8 +139,9 @@ class ItemsCollectionApi(object):
     """
     ItemApi = None
     
-    def __init__(self):
+    def __init__(self, connection=None):
         self._locked = True
+        self._connection = connection
         
     def __getitem__(self, names):
         if isinstance(names, basestring):
@@ -162,6 +163,8 @@ class ItemsCollectionApi(object):
         return n
         
     def _broadcast(self, *args, **kwargs):
+        ##print 'self._connection = {0}'.format(self._connection)
+        kwargs['connection'] = self._connection
         if 'destination' in kwargs and isinstance(kwargs['destination'], list):
             kwargs['limit'] = len(kwargs['destination'])
         else:
@@ -252,21 +255,22 @@ class TaskApi(ItemApi):
 
 class TasksCollectionApi(ItemsCollectionApi):
     ItemApi = TaskApi
-    def __init__(self, event_dispatcher):
+    def __init__(self, event_dispatcher, connection=None):
         self._event_dispatcher = event_dispatcher
-        super(TasksCollectionApi, self).__init__()
+        super(TasksCollectionApi, self).__init__(connection=connection)
         
     def _get_item_api(self, *args):
         return self.ItemApi(*args, event_dispatcher=self._event_dispatcher)
     
 #==============================================================================#
 class WorkerPrefetchProxy(object):
-    def __init__(self, names):
+    def __init__(self, broadcast, names):
         self.names = names
+        self._broadcast = broadcast
     def get(self):
         if len(self.names) != 1:
             raise ApiError('Cannot retrieve this attribute for multiple workers.')
-        r = broadcast('stats', destination=self.names, reply=True)
+        r = self._broadcast('stats', destination=self.names, reply=True)
         r = util._merge_broadcast_result(r)
         if not r:
             raise ApiError('Unable to retrieve worker attribute: prefetch.')
@@ -277,7 +281,7 @@ class WorkerPrefetchProxy(object):
         
     def increment(self, n=1):
         n = validate_int(n)
-        r = broadcast('prefetch_increment', arguments={'n':n}, reply=True)
+        r = self._broadcast('prefetch_increment', arguments={'n':n}, reply=True)
         r = util._merge_broadcast_result(r)
         if not r:
             raise ApiError('Unable to increment prefetch.')
@@ -288,7 +292,7 @@ class WorkerPrefetchProxy(object):
         
     def decrement(self, n=1):
         n = validate_int(n)
-        r = broadcast('prefetch_decrement', arguments={'n':n}, reply=True)
+        r = self._broadcast('prefetch_decrement', arguments={'n':n}, reply=True)
         r = util._merge_broadcast_result(r)
         if not r:
             raise ApiError('Unable to decrement prefetch.')
@@ -300,10 +304,10 @@ class WorkerPrefetchProxy(object):
 class WorkerSetting(object):
     def __init__(self, cls):
         self.cls = cls
-    def __get__(self, inst, owner):
-        assert inst is not None
-        return self.cls(inst.names)
-    def __set__(self, inst, value):
+    def __get__(self, workerapi, owner):
+        assert workerapi is not None
+        return self.cls(workerapi._broadcast, workerapi.names)
+    def __set__(self, workerapi, value):
         raise ApiError('Cannot set attribute')
 
 class WorkerApi(ItemApi):
@@ -321,7 +325,7 @@ class WorkersCollectionApi(ItemsCollectionApi):
 
 #==============================================================================#
 class StatsApi(object):
-    def __init__(self):
+    def __init__(self, connection=None):
         pass
         
     ## [PENDING, RECEIVED, STARTED, SUCCESS]
