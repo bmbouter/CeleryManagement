@@ -98,6 +98,12 @@ class PolicyMain(object):
             msg = 'Not running policies -- no workers are available.'
             self.logger.warn(msg)
             run_deltas.append(MIN_LOOP_SLEEP_TIME)
+        
+        delta = datetime.datetime.now() - start
+        secs = delta.seconds + delta.microseconds/1000000.
+        self.logger.debug(
+            'Ran {0} policies in {1} seconds'.format(len(modified_ids), secs))
+        
         return min(run_deltas+[MAX_LOOP_SLEEP_TIME])
         
     def maybe_run_policy(self, entry):
