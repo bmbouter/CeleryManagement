@@ -9,11 +9,11 @@ _policyparser = parser.PolicyParser()
 #==============================================================================#
 class Runner(object):
     """ Execute a code object in a given environment. """
-    def __init__(self, envtype):
+    def __init__(self, envtype, connection=None):
         """ envtype:  A callable that takes no arguments and returns an Env 
                       object. 
         """
-        self.env = envtype()
+        self.env = envtype(connection)
         self.globals = self.env.globals
         self.locals = self.env.locals
         
@@ -120,12 +120,12 @@ class Policy(object):
         with Runner(env.ScheduleEnv) as runner:
             self.schedule = runner(schedule_code, self.sourcelines)
         
-    def run_condition(self):
-        with Runner(env.ScheduleEnv) as runner:
+    def run_condition(self, connection=None):
+        with Runner(env.ConditionEnv, connection) as runner:
             return runner(self.condition_code, self.sourcelines)
         
-    def run_apply(self):
-        with Runner(env.ScheduleEnv) as runner:
+    def run_apply(self, connection=None):
+        with Runner(env.ApplyEnv, connection) as runner:
             return runner(self.apply_code, self.sourcelines)
         
     def is_due(self, last_run_time):

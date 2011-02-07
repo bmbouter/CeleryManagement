@@ -17,7 +17,7 @@ class Entry(object):
     def __init__(self, policy, modified, last_run_time=None):
         self.policy = policy
         self.last_run_time = last_run_time or default_time
-        self.modified = modified
+        self.modified = modified  # this comes from PolicyModel.modified
         
     def is_due(self):
         return self.policy.is_due(self.last_run_time)
@@ -103,7 +103,7 @@ class Registry(object):
                 updated = True
         
         return updated
-                
+        
     def save(self, id, current_time):
         """ Save the Policy with the given id to the database. """
         entry = self.data[id]
@@ -111,7 +111,7 @@ class Registry(object):
         if obj.modified > entry.modified:
             self.reregister(obj)
         obj.last_run_time = entry.last_run_time
-        obj.modified, entry.modified = current_time, current_time
+        ##obj.modified, entry.modified = current_time, current_time
         obj.save()
         
     def close(self):
@@ -119,8 +119,6 @@ class Registry(object):
         
 
 #==============================================================================#
-
-    
 _setting_names = ('ignore_result', 'routing_key', 'exchange', 
                   'default_retry_delay', 'rate_limit', 
                   'store_errors_even_if_ignored', 'acks_late', 'expires',
@@ -141,8 +139,9 @@ def get_all_task_settings():
     # don't do anything if there are no workers
     if len(util.get_all_worker_names()) == 0:
         return {}
-    settings = broadcast('get_all_task_settings', 
-                         arguments={'setting_names': _setting_names}, 
+    settings = broadcast('get_task_settings', 
+                         arguments={'tasknames': None, 
+                         'setting_names': _setting_names}, 
                          reply=True)
     settings = util._merge_broadcast_result(settings)
     return util._condense_broadcast_result(settings) or {}
@@ -198,7 +197,6 @@ class TaskSettingsManager(object):
         self.data = {}
         signals.on_task_modified.register(self.on_tasks_modified)
         signals.on_worker_started.register(self.on_worker_start)
-        # TODO: get data from existing workers
         self._initialize_settings()
         
     def cleanup(self):
