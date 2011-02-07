@@ -106,10 +106,10 @@ def evcam(camera, freq=1.0, maxrate=None, loglevel=0,
         loglevel = LOG_LEVELS[loglevel.upper()]
     logger = app.log.setup_logger(loglevel=loglevel,
                                   logfile=logfile,
-                                  name="cm.evcam")
+                                  name="cm.events")
     ##app.log.redirect_stdouts_to_logger(logger, loglevel=logging.INFO)
-    logger.info(
-        "-> cm.evcam: Taking snapshots with %s (every %s secs.)\n" % (
+    logger.warning(
+        "-> cmevents: Taking snapshots with %s (every %s secs.)" % (
             camera, freq))
     
     state = State()
@@ -128,4 +128,5 @@ def evcam(camera, freq=1.0, maxrate=None, loglevel=0,
         #traceback.print_exc()
         cam.cancel()
         conn.close()
+        logger.warning("-> cmevents: Shut down.\n")
 

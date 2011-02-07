@@ -148,9 +148,8 @@ class PolicyMain(object):
         
         
 #==============================================================================#
-def policy_main(app=None, loglevel=0, logfile=None):
+def policy_main(app=None, loglevel=0, logfile=None, **kwargs):
     """ Policy manager entry-point function. """
-    ##print 'cmrun: Loading policy manager...'
     import logging
     import sys
     app = app_or_default(app)
@@ -161,7 +160,7 @@ def policy_main(app=None, loglevel=0, logfile=None):
                                   name="cm.policy")
     orig_ios = (sys.stdout, sys.stderr)
     ##app.log.redirect_stdouts_to_logger(logger, loglevel=logging.INFO)
-    logger.info('-> cm.policy: Loading policy manager...')
+    logger.warning('-> cmpolicy: Loading policy manager...')
     conn = app.broker_connection()
     try:
         try:
@@ -180,7 +179,6 @@ def policy_main(app=None, loglevel=0, logfile=None):
         #import traceback
         #traceback.print_exc()
         conn.close()
-        logger.info('-> cm.policy: Policy manager shut down.')
+        logger.warning('-> cmpolicy: Policy manager shut down.\n')
         sys.stdout, sys.stderr = orig_ios
-        ##print 'cmrun: Policy manager shut down.'
         
