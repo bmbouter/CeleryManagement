@@ -1,6 +1,7 @@
 import signal
 import subprocess
 import time
+import sys
 
 from optparse import make_option
 
@@ -8,10 +9,9 @@ from django.core.management.base import BaseCommand, CommandError
 
 
 class Proc(object):
-    djadmin = 'django-admin.py'
     
-    def __init__(self, name, args):
-        args = [self.djadmin, name] + args
+    def __init__(self, basecmd, name, args):
+        args = ['python', basecmd, name] + args
         self.name = name
         self.error = False
         self.proc = None
@@ -37,7 +37,8 @@ class Proc(object):
 
     
 class Processes(object):
-    def __init__(self):
+    def __init__(self, basecmd=None):
+        self.basecmd = basecmd or 'django-admin.py'
         self.procs = {}
         self.error = False
         
@@ -49,7 +50,7 @@ class Processes(object):
         
         try:
             print 'cmrun: starting {0}.'.format(procname)
-            proc = Proc(procname, args)
+            proc = Proc(self.basecmd, procname, args)
             self.procs[procname] = proc
         except Exception:
             print 'cmrun: Error! Exception while starting {0}.'.format(procname)
@@ -96,7 +97,7 @@ def make_args(args, options, optslist):
 def run(args, options):
     evargs = make_args(args, options, ev_optslist)
     poargs = make_args(args, options, po_optslist)
-    procs = Processes()
+    procs = Processes(sys.argv[0])
     try:
         procs.start_cmevents(evargs)
         procs.start_cmpolicy(poargs)

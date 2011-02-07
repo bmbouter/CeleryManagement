@@ -16,7 +16,7 @@ from celerymanagementapp.models import DispatchedTask, RegisteredTaskType
 
 
 REFRESH_REGISTERED_TASKS_EVERY = 60  #seconds
-CLEAR_REGISTERED_TASKS_AFTER = 24  #hours
+CLEAR_REGISTERED_TASKS_AFTER = 24*7  #hours
 
 
 class Camera(DjCeleryCamera):
