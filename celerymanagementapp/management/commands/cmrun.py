@@ -106,8 +106,7 @@ def run(args, options):
         pass
     finally:
         procs.stop()
-    
-    
+
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (

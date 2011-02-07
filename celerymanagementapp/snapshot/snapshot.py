@@ -101,6 +101,11 @@ class Camera(DjCeleryCamera):
 # evcam function taken from celery.events.snapshot
 def evcam(camera, freq=1.0, maxrate=None, loglevel=0,
         logfile=None, app=None, **kwargs):
+    
+    # Set process name that appears in logging messages.
+    import multiprocessing
+    multiprocessing.current_process().name = 'cm-event-handler'
+    
     app = app_or_default(app)
     if not isinstance(loglevel, int):
         loglevel = LOG_LEVELS[loglevel.upper()]
@@ -121,8 +126,8 @@ def evcam(camera, freq=1.0, maxrate=None, loglevel=0,
     try:
         try:
             recv.capture(limit=None)
-        except KeyboardInterrupt:
-            raise SystemExit
+        except (KeyboardInterrupt, SystemExit):
+            pass
     finally:
         #import traceback
         #traceback.print_exc()
