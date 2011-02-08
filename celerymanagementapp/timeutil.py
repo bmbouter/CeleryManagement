@@ -13,7 +13,7 @@ def date_to_python(datestamp):
         :returns: A Python datetime.date object in local time corresponding to 
             the datestamp parameter, or None if datestamp was None.
     """
-    if datestamp:
+    if datestamp is not None:
         return datetime.date.fromtimestamp(datestamp/1000.)
     return datestamp
 
@@ -27,7 +27,7 @@ def datetime_to_python(timestamp):
         :returns: A Python datetime.datetime object in local time corresponding 
             to the timestamp parameter, or None if timestamp was None.
     """
-    if timestamp:
+    if timestamp is not None:
         return datetime.datetime.fromtimestamp(timestamp/1000.)
     return timestamp
     
@@ -40,7 +40,7 @@ def date_from_python(dateobj):
         :returns: An int represeting UTC time in milliseconds since Jan 1, 1970 
             corresponding to the dateobj parameter, or None if dateobj was None.
     """
-    if dateobj:
+    if dateobj is not None:
         tt = dateobj.timetuple()
         unixtime = time.mktime(tt)
         return int(unixtime*1000)
@@ -57,7 +57,7 @@ def datetime_from_python(datetimeobj):
             corresponding to the datetimeobj parameter, or None if datetimeobj 
             was None.
     """
-    if datetimeobj:
+    if datetimeobj is not None:
         tt = datetimeobj.timetuple()  # removes fractional seconds
         unixtime = time.mktime(tt)
         # use datetime.microsecond to reapply fractional seconds:
