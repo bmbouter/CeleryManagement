@@ -113,7 +113,10 @@ class Policy(object):
         
     def _compile_src(self, source=None, schedule_src=None, condition_srcs=None, apply_src=None):
         #if source is None:
-        self._source = source or parser.combine_section_sources(schedule_src, condition_srcs, apply_src)
+        if source is not None:
+            self._source = source
+        else:
+            self._source = parser.combine_section_sources(schedule_src, condition_srcs, apply_src)
         self.sourcelines = self._source.splitlines()
         ret = _policyparser(self._source)
         schedule_code, self.condition_code, self.apply_code = ret

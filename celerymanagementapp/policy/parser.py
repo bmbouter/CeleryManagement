@@ -48,8 +48,12 @@ class PolicySectionSplitter(object):
             return self.nexttok()
         else:
             if not msg:
-                tok0 = tokenlib.tok_name[toktype]
-                tok1 = tokenlib.tok_name[self.peek[0]]
+                if val is not None and isinstance(val, basestring):
+                    tok0 = val
+                    tok1 = self.peek[1]
+                else:
+                    tok0 = tokenlib.tok_name[toktype]
+                    tok1 = tokenlib.tok_name[self.peek[0]]
                 msg = 'expected "{0}", found "{1}"'.format(tok0,tok1)
             row,col = self.peek[2]
             line = self.peek[4]
@@ -456,6 +460,9 @@ section_tpl = '''\
 '''
 
 def combine_section_sources(schedule_src, condition_srcs, apply_src):
+    schedule_src = schedule_src or ''
+    condition_srcs = condition_srcs or ''
+    apply_src = apply_src or ''
     schedule_src = smart_indent(schedule_src, 2)
     condition_srcs = [smart_indent(src, 2) for src in condition_srcs]
     apply_src = smart_indent(apply_src, 2)

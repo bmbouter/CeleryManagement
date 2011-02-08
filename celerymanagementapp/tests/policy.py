@@ -5,7 +5,6 @@ import types
 from celerymanagementapp.tests import base
 from celerymanagementapp import policy
 from celerymanagementapp.policy import exceptions
-##from celerymanagementapp.policy.policy import _apply_runner
 from celerymanagementapp.policy.policy import Runner
 from celerymanagementapp.policy import env
 
@@ -58,6 +57,81 @@ policy:
         self.assertEquals(None, p.run_apply())
         self.assertEquals((False,240), p.is_due(lastrun))
         
+    def test_empty_input(self):
+        _testdata = ''
+        try:
+            p = policy.Policy(_testdata)
+        except exceptions.SyntaxError as e:
+            self.assertEquals('expected "policy", found ""', e._msg)
+        else:
+            self.fail('Expected a syntax error.')
+        
+    def test_missing_policy_header1(self):
+        # name
+        _testdata = 'zombie'
+        try:
+            p = policy.Policy(_testdata)
+        except exceptions.SyntaxError as e:
+            self.assertEquals('expected "policy", found "zombie"', e._msg)
+        else:
+            self.fail('Expected a syntax error.')
+        
+    def test_missing_policy_header2(self):
+        # digit
+        _testdata = '5'
+        try:
+            p = policy.Policy(_testdata)
+        except exceptions.SyntaxError as e:
+            self.assertEquals('expected "policy", found "5"', e._msg)
+        else:
+            self.fail('Expected a syntax error.')
+        
+    def test_missing_policy_header3(self):
+        # indent only
+        _testdata = '    '
+        try:
+            p = policy.Policy(_testdata)
+        except exceptions.SyntaxError as e:
+            self.assertEquals('expected "policy", found ""', e._msg)
+        else:
+            self.fail('Expected a syntax error.')
+        
+    def test_missing_policy_header4(self):
+        # indented 'policy'
+        _testdata = ' policy:'
+        try:
+            p = policy.Policy(_testdata)
+        except exceptions.SyntaxError as e:
+            self.assertEquals('expected "policy", found " "', e._msg)
+        else:
+            self.fail('Expected a syntax error.')
+        
+    def test_missing_schedule_header1(self):
+        # no 'schedule'
+        _testdata = '''\
+policy:
+
+'''
+        try:
+            p = policy.Policy(_testdata)
+        except exceptions.SyntaxError as e:
+            self.assertEquals('expected "INDENT", found "ENDMARKER"', e._msg)
+        else:
+            self.fail('Expected a syntax error.')
+        
+    def test_missing_schedule_header2(self):
+        # 'apply' in place of 'schedule'
+        _testdata = '''\
+policy:
+    apply:
+'''
+        try:
+            p = policy.Policy(_testdata)
+        except exceptions.SyntaxError as e:
+            self.assertEquals('expected "schedule", found "apply"', e._msg)
+        else:
+            self.fail('Expected a syntax error.')
+        
 #==============================================================================#
 class Env_TestCase(base.CeleryManagement_TestCaseBase):
     def check_object_dict(self, name, obj):
@@ -99,7 +173,8 @@ class Env_TestCase(base.CeleryManagement_TestCaseBase):
 
 #==============================================================================#
 class Section_TestCaseBase(base.CeleryManagement_TestCaseBase):
-    _tmpl = None  # must be a string containing {src}
+    _tmpl = None  # Must be a string containing {src}.
+                  # {src} will be indented by 8 chars.
     def src(self, src):
         """ Indents source code.  Embedded newlines are allowed. """
         indent = ' '*4*2
@@ -132,6 +207,7 @@ policy:
                   '(a for b in c if d)',
                   'a if b else c',
                   'func(keyword=value)',
+                  'func(tasks=value)',  # 'tasks' is normally unassignable
                 ]
         for expr in exprs:
             testdata = self.src(expr)
@@ -142,13 +218,15 @@ policy:
                 msg = 'condition compilation failed for expr: {0}\n'.format(expr)
                 msg += 'original exception: \n{0}\n'.format(exc)
                 self.fail(msg)
-        
+    
     def test_syntax_error(self):
         exprs = [ 'if True: pass',
                   'while true: pass',
                   'import sys',
                   'def func(): pass',
-                  'a = b', 
+                  'a = b',
+                  '_underscore',
+                  'class MyClass(object): pass',
                 ]
         for expr in exprs:
             testdata = self.src(expr)
@@ -159,7 +237,7 @@ policy:
                 msg = '\n    Note: expr was: {0}'.format(expr)
                 e.args = (e.args[0] + msg,) + e.args[1:]
                 raise
-                
+    
     def test_null_condition(self):
         _testdata = '''
 policy:
@@ -170,8 +248,25 @@ policy:
 '''
         # Should not cause an exception...
         p = policy.Policy(_testdata)
+    
+    def test_multi_condition(self):
+        _testdata = '''
+policy:
+    schedule:
+        1
+    condition:
+        True
+    condition:
+        True
+    condition:
+        True
+    apply:
+        1
+'''
+        # Should not cause an exception...
+        p = policy.Policy(_testdata)
 
-        
+    
 class ApplySection_TestCase(Section_TestCaseBase):
     _tmpl = '''\
 policy:
@@ -188,6 +283,7 @@ policy:
         exprs = [ 'True','False','None', 
                   'a = b', 'a and (b or c)',
                   'if True: pass',
+                  'if True:\n    pass\nelif True:\n    pass\nelse:\n    pass',
                   'x = [a for b in c]',
                   'x = [a for b in c if d]',
                   'x = (a for b in c if d)',
@@ -209,6 +305,8 @@ policy:
                   'def func(): pass',
                   'for x in y: pass',
                   'yield z',
+                  '_underscore',
+                  'class MyClass(object): pass',
                 ]
         for expr in exprs:
             testdata = self.src(expr)
