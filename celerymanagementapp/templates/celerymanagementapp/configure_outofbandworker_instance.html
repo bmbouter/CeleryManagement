@@ -1,0 +1,17 @@
+    <ul class="node">
+        <li class="left">{{ worker.worker.ip }}</li>
+        <li class="editWorkerNode right click" id="{{ worker.worker.pk }}_delete">Delete</li>
+        <li class="editWorkerNode right click" id="{{ worker.worker.pk }}_update">Edit</li>
+    </ul>
+    <form method="POST" enctype="multipart/form-data" class="outOfBandForm" id="{{ worker.worker.pk }}_Form">
+        {% csrf_token %}
+        {% for field in worker.workerForm %}
+        <div class="fieldWrapper">
+            <div class="field">
+                {{ field.label_tag }} {{ field }}
+                <span class="errorWrapper" id="{{ worker.worker.pk }}_{{ field.html_name }}_error"></span>
+            </div>
+        </div>
+        {% endfor %}
+        <button type='button' class="updateOutOfBandButton submitButton click positiveButton" id="{{ worker.worker.pk }}_editButton">Update</button>
+    </form>

@@ -27,7 +27,7 @@ CMA.Core.util = (function(){
             $('#statusText').show();
             $('#statusText').fadeOut(6000, function() {});
         },
-        formSubmit = function(element, submitFunction, form, urlID, successCallback){
+        formSubmit = function(element, submitFunction, form, kwargs){
             var formReturn = function(data){
                     var setText = function(){
                             var errLength = data.failure[i].error.length,
@@ -39,11 +39,11 @@ CMA.Core.util = (function(){
                         };
                     
                     if( !data.hasOwnProperty("failure") ){
-                        if( typeof successCallback === "undefined" ){
+                        if( typeof kwargs.successCallback === "undefined" ){
                             showStatus(data);
                             expand(element);
                         } else {
-                            successCallback(data);
+                            kwargs.successCallback(data);
                             expand(element);
                         }
                     } else {
@@ -67,8 +67,8 @@ CMA.Core.util = (function(){
                         }
                     }
                 };
-            if( urlID !== undefined ){
-                submitFunction(form, urlID, formReturn);
+            if( kwargs.urlID ){
+                submitFunction(form, kwargs.urlID, formReturn);
             } else {
                 submitFunction(form, formReturn);
             }
@@ -338,7 +338,8 @@ CMA.Core.policy = (function(){
                         var id = $(this).attr("id"),
                             split = id.split("_"),
                             form = document.getElementById(split[0] + "_Form");
-                        util.formSubmit($(this).parent(), ajax.postUpdatePolicy, $(form).serialize(), split[0]);
+                        util.formSubmit($(this).parent(), ajax.postUpdatePolicy, $(form).serialize(), 
+                            { "urlID": split[0] });
                     });
                     $('textarea').keydown(util.checkTab);
                 };
@@ -347,7 +348,8 @@ CMA.Core.policy = (function(){
             form.enabled = $('#id_enabled').attr("checked");
             form.source = $('#id_source').val();
          
-            util.formSubmit($(this).parent(), ajax.postCreatePolicy, form, success);
+            util.formSubmit($(this).parent(), ajax.postCreatePolicy, form, 
+                    { "successCallback": success });
         },
         deletePolicy = function(elem){
             util.createPopup("Are you sure you wish to delete policy " + $(elem).parent().children(':first').text()  + " ?",
@@ -386,7 +388,8 @@ CMA.Core.policy = (function(){
                 var id = $(this).attr("id"),
                     split = id.split("_"),
                     form = document.getElementById(split[0] + "_Form");
-                util.formSubmit($(this).parent(), ajax.postUpdatePolicy, $(form).serialize(), split[0]);
+                util.formSubmit($(this).parent(), ajax.postUpdatePolicy, $(form).serialize(), 
+                    { "urlID": split[0] });
             });
             $('textarea').keydown(util.checkTab);
         };
@@ -402,6 +405,49 @@ CMA.Core.configure = (function(){
 
         registerEvents = function() {
             if( CMA.Core.USE_MODE === "static" ){
+                var success = function(data){
+                    $('#configurationManagement').append(unescape(data.html));
+                    $('.outOfBandForm').hide();
+
+                    $('#' + data.pk + '_update').click(function(){
+                        var elem = document.getElementById($(this).attr("id").split("_")[0] + "_Form");
+                        util.expand(elem);
+                    });
+                    $('#' + data.pk + "_delete").click(function(){
+                        var id = $(this).attr("id"),
+                            split = id.split("_"),
+                            that = this;
+                        util.createPopup("Are you sure you wish to delete worker instance " + 
+                            $(that).parent().children(':first').text() + "?", 
+                            function(){
+                                ajax.postDeleteOutOfBandWorker(split[0], function(data){
+                                    if( !data.hasOwnProperty("failure") ){
+                                        $(that).parent().remove();
+                                        $('#' + split[0] + "_Form").remove();
+                                    } else {
+                                        util.showStatus(data.failure);
+                                    }
+                                });        
+                            });
+                    });
+                    $('#' + data.pk + "_editButton").click(function(){
+                        var id = $(this).attr("id"),
+                            split = id.split("_"),
+                            form = document.getElementById(split[0] + "_Form");
+                        util.formSubmit($(this).parent(), ajax.postUpdateOutOfBandWorker, $(form), 
+                                { "urlID": split[0] });
+                    });
+
+                    $('textarea').keydown(util.checkTab);
+                    $('textarea').attr("rows", "3");
+                    $('textarea').css("resize", "none");
+
+                    $('#blankOutOfBandForm')[0].reset();
+                },
+                updateSuccess = function(){
+                
+                };
+
                 $('textarea').attr("rows", "3");
                 $('textarea').css("resize", "none");
                 $('.outOfBandForm').hide();
@@ -432,9 +478,15 @@ CMA.Core.configure = (function(){
                     var id = $(this).attr("id"),
                         split = id.split("_"),
                         form = document.getElementById(split[0] + "_Form");
-                        util.formSubmit($(this).parent(), ajax.postUpdateOutOfBandWorker, $(form), split[0]);
+                        util.formSubmit($(this).parent(), ajax.postUpdateOutOfBandWorker, $(form), 
+                            { "urlID": split[0], 
+                            "successCallback": updateSuccess });
                 });
-                util.formSubmit($('#blankOutOfBandForm'), ajax.postCreateOutOfBandWorker, $('#blankOutOfBandForm'));
+                $('#submitOutOfBandButton').click(function(){
+                    util.formSubmit($('#blankOutOfBandForm'), ajax.postCreateOutOfBandWorker, $('#blankOutOfBandForm'), 
+                        { "successCallback": success});
+                });
+                $('#blankOutOfBandForm').submit(function(){ return false; });
 
             } else if( CMA.Core.USE_MODE === "dynamic" ){
                 var handleImages = function(data) {
