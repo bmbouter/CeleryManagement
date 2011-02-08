@@ -355,14 +355,12 @@ def create_or_update_outofbandworker(request, worker_pk=None):
             worker_node = OutOfBandWorkerNode.objects.get(pk=worker_pk)
             new_obj = OutOfBandWorkerNodeForm(request.POST, request.FILES, instance=worker_node)
         if new_obj.is_valid():
-            new_obj.save()
+            worker = new_obj.save()
             if worker_pk is not None:
                 json = simplejson.dumps("Worker successfully updated.")
             else:
-                worker = out_of_band_worker_node_form.save(commit=False)
-                worker.pk = 120
                 context = { 'worker': {'worker': worker,
-                            'workerForm': out_of_band_worker_node_form }}
+                            'workerForm': new_obj }}
                 html = render_to_response("celerymanagementapp/configure_outofbandworker_instance.html",
                         context,
                         context_instance=RequestContext(request))
