@@ -88,14 +88,14 @@ CMA.Core.ajax = (function() {
             $.post(urls.delete_instance_url.replace("<placeHolder>", instance), callbackFunction, "json");
         },
         postCreateOutOfBandWorker = function(form, callback){
-            form.ajaxForm({
+            form.ajaxSubmit({
                 dataType: 'json',
                 url: urls.out_of_band_worker_create_url,
                 success: callback
             });
         },
         postUpdateOutOfBandWorker = function(form, workerID, callback){
-            form.ajaxForm({
+            form.ajaxSubmit({
                 dataType: 'json',
                 url: urls.out_of_band_worker_update_url.replace("<placeHolder>", workerID),
                 success: callback
