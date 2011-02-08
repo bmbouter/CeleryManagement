@@ -58,9 +58,10 @@ def datetime_from_python(datetimeobj):
             was None.
     """
     if datetimeobj:
-        tt = datetimeobj.timetuple()
+        tt = datetimeobj.timetuple()  # removes fractional seconds
         unixtime = time.mktime(tt)
-        return int(unixtime*1000)
+        # use datetime.microsecond to reapply fractional seconds:
+        return int(unixtime*1000 + datetimeobj.microsecond/1000)
     return datetimeobj
 
 #==============================================================================#

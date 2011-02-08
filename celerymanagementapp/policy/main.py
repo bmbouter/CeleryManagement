@@ -148,11 +148,14 @@ class PolicyMain(object):
         
         
 #==============================================================================#
-def policy_main(app=None, loglevel=0, logfile=None):
+def policy_main(app=None, loglevel=0, logfile=None, **kwargs):
     """ Policy manager entry-point function. """
-    ##print 'cmrun: Loading policy manager...'
     import logging
     import sys
+    # Set process name that appears in logging messages.
+    import multiprocessing
+    multiprocessing.current_process().name = 'cm-policy-manager'
+    
     app = app_or_default(app)
     if not isinstance(loglevel, int):
         loglevel = LOG_LEVELS[loglevel.upper()]
@@ -160,27 +163,21 @@ def policy_main(app=None, loglevel=0, logfile=None):
                                   logfile=logfile,
                                   name="cm.policy")
     orig_ios = (sys.stdout, sys.stderr)
-    ##app.log.redirect_stdouts_to_logger(logger, loglevel=logging.INFO)
-    logger.info('-> cm.policy: Loading policy manager...')
+    logger.warning('-> cmpolicy: Loading policy manager...')
     conn = app.broker_connection()
     try:
         try:
             with PolicyMain(conn, logger, app=app) as pmain:
                 pmain.loop()
-        except KeyboardInterrupt:
-            raise SystemExit
-        except SystemExit:
-            raise
+        except (KeyboardInterrupt, SystemExit):
+            pass
         except Exception:
             import traceback
             tb = traceback.format_exc()
             logger.error('\n'+tb)
             raise
     finally:
-        #import traceback
-        #traceback.print_exc()
         conn.close()
-        logger.info('-> cm.policy: Policy manager shut down.')
+        logger.warning('-> cmpolicy: Policy manager shut down.\n')
         sys.stdout, sys.stderr = orig_ios
-        ##print 'cmrun: Policy manager shut down.'
         

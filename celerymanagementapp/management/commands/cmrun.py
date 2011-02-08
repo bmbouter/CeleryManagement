@@ -1,27 +1,113 @@
-import sys
-import os
 import signal
+import subprocess
+import time
+import sys
 
-from multiprocessing import Process, Queue, current_process
 from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
 
-from celery.bin import celeryev
 
-
-class CmEvCommand(celeryev.EvCommand):
-    def run_evcam(self, *args, **kwargs):
-        from celerymanagementapp.snapshot.snapshot import evcam
-        self.set_process_status("cam")
-        kwargs["app"] = self.app
-        return evcam(*args, **kwargs)
-        
-def run_policy_manager(**options):
-    from celerymanagementapp.policy import main
-    from djcelery.app import app
-    main.policy_main(app=app, **options)
+class Proc(object):
     
+    def __init__(self, basecmd, name, args):
+        args = ['python', basecmd, name] + args
+        self.name = name
+        self.error = False
+        self.proc = None
+        self._start(args)
+        
+    def _start(self, args):
+        if self.error:
+            raise RuntimeError('Attempted to start process after error.')
+        try:
+            self.proc = subprocess.Popen(args)
+        except Exception:
+            self.error = True
+            raise
+        
+    def stop(self):
+        proc = self.proc
+        if proc is not None and proc.poll() is None:
+            proc.send_signal(signal.SIGINT)  # ctrl-C
+            proc.wait()
+        
+    def is_stopped(self):
+        return self.proc is None  or  self.proc.poll() is not None
+
+    
+class Processes(object):
+    def __init__(self, basecmd=None):
+        self.basecmd = basecmd or 'django-admin.py'
+        self.procs = {}
+        self.error = False
+        
+    def _start(self, procname, args):
+        if procname in self.procs:
+            raise RuntimeError('Attempted to restart failed process.')
+        if self.error:
+            raise RuntimeError('Attempted to start process after error.')
+        
+        try:
+            print 'cmrun: starting {0}.'.format(procname)
+            proc = Proc(self.basecmd, procname, args)
+            self.procs[procname] = proc
+        except Exception:
+            print 'cmrun: Error! Exception while starting {0}.'.format(procname)
+            self.stop()
+            self.error = True
+            raise
+        
+    def start_cmevents(self, args):
+        self._start('cmevents', args)
+        
+    def start_cmpolicy(self, args):
+        self._start('cmpolicy', args)
+        
+    def stop(self):
+        for name, proc in self.procs.iteritems():
+            print 'cmrun: stopping {0}.'.format(name)
+            proc.stop()
+        
+    def is_stopped(self):
+        return all(proc.is_stopped() for proc in self.procs.itervalues())
+
+        
+base_optslist = [opt.dest for opt in BaseCommand.option_list]
+base_optslist += ['loglevel','logfile']
+
+ev_optslist = base_optslist + [
+    'frequency', 'maxrate',
+    ]
+
+po_optslist = base_optslist + []
+
+def make_args(args, options, optslist):
+    args = list(args)
+    endargs = []
+    for k,v in options.iteritems():
+        if k in optslist and v is not None:
+            if k in ['settings','pythonpath']:
+                endargs.extend(['--'+k, '{0}'.format(v)])
+            else:
+                args.extend(['--'+k, '{0}'.format(v)])
+    args += endargs
+    return args
+        
+def run(args, options):
+    evargs = make_args(args, options, ev_optslist)
+    poargs = make_args(args, options, po_optslist)
+    procs = Processes(sys.argv[0])
+    try:
+        procs.start_cmevents(evargs)
+        procs.start_cmpolicy(poargs)
+        while not procs.is_stopped():
+            time.sleep(2.0)
+    except KeyboardInterrupt, SystemExit:
+        pass
+    finally:
+        procs.stop()
+
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -41,53 +127,12 @@ class Command(BaseCommand):
         )
     
     args = ''
-    help = '''The CeleryManagement event handler that records Celery events in 
-the database.'''
+    help = '''The CeleryManagement main process.'''
     
     def handle(self, *args, **options):
-        options['camera'] = 'celerymanagementapp.snapshot.snapshot.Camera'
-        options['dump'] = False
-        options['prog_name'] = 'cmrun'
-            
-        main(*args, **options)
+        run(args, options)
         
-        
-        
-def get_policy_options(options):
-    newopts = {}
-    if 'loglevel' in options:
-        newopts['loglevel'] = options['loglevel']
-    if 'logfile' in options and options['logfile']:
-        newopts['logfile'] = options['logfile']+'.policy'
-    return newopts
-    
-def get_ev_options(options):
-    return options.copy()
-        
-        
-def main(*args, **options):
-    from djcelery.app import app
-    ev = CmEvCommand(app=app)
-    
-    policy_options = get_policy_options(options)
-    ev_options = get_ev_options(options)
-    
-    # The name is set in the following because it shows up in log messages.
-    p = Process(target=run_policy_manager, args=(), kwargs=policy_options, name='policy-manager')
-    p.start()
-    try:
-        ev.run(*args, **ev_options)
-    finally:
-        # try to join, if it doesn't, then force it to terminate
-        if p.is_alive():
-            pid = p.pid
-            os.kill(pid, signal.SIGINT)
-            p.join(5.0)
-            if p.is_alive():
-                print 'The policy_manager process did not stop on its own.  '\
-                      'Trying to terminate it...'
-                p.terminate()
-        p.join()
+
 
 
 
