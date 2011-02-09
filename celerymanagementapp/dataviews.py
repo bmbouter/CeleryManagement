@@ -20,6 +20,7 @@ from django.core.urlresolvers import reverse as urlreverse
 from django.utils import simplejson
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.utils.html import urlquote
 
 from celery import signals
 from celery.task.control import broadcast, inspect
@@ -354,16 +355,28 @@ def create_or_update_outofbandworker(request, worker_pk=None):
             worker_node = OutOfBandWorkerNode.objects.get(pk=worker_pk)
             new_obj = OutOfBandWorkerNodeForm(request.POST, request.FILES, instance=worker_node)
         if new_obj.is_valid():
-            new_obj.save()
-            return HttpResponse("success")
+            worker = new_obj.save()
+            if worker_pk is not None:
+                json = simplejson.dumps("Worker successfully updated.")
+            else:
+                context = { 'worker': {'worker': worker,
+                            'workerForm': new_obj }}
+                html = render_to_response("celerymanagementapp/configure_outofbandworker_instance.html",
+                        context,
+                        context_instance=RequestContext(request))
+                success = { 'success': 'Worker successfully created.',
+                            'html': urlquote(html.content),
+                            'pk': worker.pk }
+                json = simplejson.dumps(success)
         else:
             errors = []
             for field in new_obj:
                 errors.append({ 'field' : field.html_name,
                                 'error' : field.errors })
-            failed = { 'failure' : errors }
+            failed = { 'failure' : errors,
+                        'id': worker_pk }
             json = simplejson.dumps(failed)
-            return HttpResponse("<textarea>" + json + "</textarea>")
+        return HttpResponse("<textarea>" + json + "</textarea>")
 
 def worker_start(request):
     """Find an available node and start a worker process"""

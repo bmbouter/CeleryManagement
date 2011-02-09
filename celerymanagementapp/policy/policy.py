@@ -9,11 +9,11 @@ _policyparser = parser.PolicyParser()
 #==============================================================================#
 class Runner(object):
     """ Execute a code object in a given environment. """
-    def __init__(self, envtype):
+    def __init__(self, envtype, connection=None):
         """ envtype:  A callable that takes no arguments and returns an Env 
                       object. 
         """
-        self.env = envtype()
+        self.env = envtype(connection)
         self.globals = self.env.globals
         self.locals = self.env.locals
         
@@ -113,19 +113,22 @@ class Policy(object):
         
     def _compile_src(self, source=None, schedule_src=None, condition_srcs=None, apply_src=None):
         #if source is None:
-        self._source = source or parser.combine_section_sources(schedule_src, condition_srcs, apply_src)
+        if source is not None:
+            self._source = source
+        else:
+            self._source = parser.combine_section_sources(schedule_src, condition_srcs, apply_src)
         self.sourcelines = self._source.splitlines()
         ret = _policyparser(self._source)
         schedule_code, self.condition_code, self.apply_code = ret
         with Runner(env.ScheduleEnv) as runner:
             self.schedule = runner(schedule_code, self.sourcelines)
         
-    def run_condition(self):
-        with Runner(env.ScheduleEnv) as runner:
+    def run_condition(self, connection=None):
+        with Runner(env.ConditionEnv, connection) as runner:
             return runner(self.condition_code, self.sourcelines)
         
-    def run_apply(self):
-        with Runner(env.ScheduleEnv) as runner:
+    def run_apply(self, connection=None):
+        with Runner(env.ApplyEnv, connection) as runner:
             return runner(self.apply_code, self.sourcelines)
         
     def is_due(self, last_run_time):

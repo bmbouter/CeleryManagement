@@ -493,7 +493,7 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
     });
     
     //canvasElement.click(handlers.handleClick);
-    canvasElement.mousemove(handlers.handleHover);
+    //canvasElement.mousemove(handlers.handleHover);
     $(window).resize(handlers.resizer);
 
 };

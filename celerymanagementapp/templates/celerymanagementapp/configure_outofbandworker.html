@@ -6,7 +6,7 @@
         <li class="createNewOutOfBand right click">New Worker Node</li>
         <li class="createNewOutOfBand right click"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png"/></li>
     </ul>
-    <form method="POST" enctype="multipart/form-data" class="outOfBandForm" id="blankOutOfBandForm" action="/celerymanagementapp/outofbandworker/">
+    <form method="POST" enctype="multipart/form-data" class="hidden" id="blankOutOfBandForm" action="/celerymanagementapp/outofbandworker/">
         {% csrf_token %}
         {% for field in outofbandworkernode_form %}
         <div class="fieldWrapper">
@@ -20,21 +20,5 @@
         <button class="submitButton click positiveButton" id="submitOutOfBandButton" >Submit</button>
     </form>
     {% for worker in outofbandworkernodes %}
-    <ul class="node">
-        <li class="left">{{ worker.worker.ip }}</li>
-        <li class="editWorkerNode right click" id="{{ worker.worker.pk }}_delete">Delete</li>
-        <li class="editWorkerNode right click" id="{{ worker.worker.pk }}_update">Edit</li>
-    </ul>
-    <form method="POST" enctype="multipart/form-data" class="outOfBandForm" id="{{ worker.worker.pk }}_Form">
-        {% csrf_token %}
-        {% for field in worker.workerForm %}
-        <div class="fieldWrapper">
-            <div class="field">
-                {{ field.label_tag }} {{ field }}
-                <span class="errorWrapper" id="{{ worker.worker.pk }}_{{ field.html_name }}_error"></span>
-            </div>
-        </div>
-        {% endfor %}
-        <button class="updateOutOfBandButton submitButton click positiveButton" id="{{ worker.worker.pk }}_button">Update</button>
-    </form>
+        {% include "celerymanagementapp/configure_outofbandworker_instance.html" %}
     {% endfor %}

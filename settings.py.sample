@@ -12,6 +12,10 @@ CELERY_IMPORTS = ("celerymanagementapp.celery_imports",)
 CELERY_RESULT_BACKEND = "amqp"
 #CELERY_RESULT_DBURI = "celery.db"
 
+# Tell Celery to indicate when Tasks are sent.  Default is False.
+CELERY_SEND_TASK_SENT_EVENT = True
+
+# Broker settings for Celery.
 BROKER_HOST = "localhost"
 BROKER_PORT = 5672
 BROKER_USER = "guest"
@@ -29,9 +33,6 @@ BROKER_VHOST = "/"
 
 ## Time in seconds in which task results queues should expire.  Requires RabbitMQ 2.1+.
 CELERY_AMQP_TASK_RESULT_EXPIRES = 60*60  # one hour
-
-SECURE_UPLOADS = '/tmp/'
-FILE_UPLOAD_PERMISSIONS = 0600
                               
 import djcelery
 djcelery.setup_loader()
@@ -137,6 +138,9 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     #'south',
 )
+
+SECURE_UPLOADS = '/tmp/'
+FILE_UPLOAD_PERMISSIONS = 0600
 
 CELERYMANAGEMENTAPP_MEDIA_PREFIX = "/celerymanagementapp/site_media/"
 

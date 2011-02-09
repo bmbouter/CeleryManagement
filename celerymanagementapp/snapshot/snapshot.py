@@ -16,7 +16,7 @@ from celerymanagementapp.models import DispatchedTask, RegisteredTaskType
 
 
 REFRESH_REGISTERED_TASKS_EVERY = 60  #seconds
-CLEAR_REGISTERED_TASKS_AFTER = 24  #hours
+CLEAR_REGISTERED_TASKS_AFTER = 24*7  #hours
 
 
 class Camera(DjCeleryCamera):
@@ -101,15 +101,20 @@ class Camera(DjCeleryCamera):
 # evcam function taken from celery.events.snapshot
 def evcam(camera, freq=1.0, maxrate=None, loglevel=0,
         logfile=None, app=None, **kwargs):
+    
+    # Set process name that appears in logging messages.
+    import multiprocessing
+    multiprocessing.current_process().name = 'cm-event-handler'
+    
     app = app_or_default(app)
     if not isinstance(loglevel, int):
         loglevel = LOG_LEVELS[loglevel.upper()]
     logger = app.log.setup_logger(loglevel=loglevel,
                                   logfile=logfile,
-                                  name="cm.evcam")
+                                  name="cm.events")
     ##app.log.redirect_stdouts_to_logger(logger, loglevel=logging.INFO)
-    logger.info(
-        "-> cm.evcam: Taking snapshots with %s (every %s secs.)\n" % (
+    logger.warning(
+        "-> cmevents: Taking snapshots with %s (every %s secs.)" % (
             camera, freq))
     
     state = State()
@@ -121,11 +126,12 @@ def evcam(camera, freq=1.0, maxrate=None, loglevel=0,
     try:
         try:
             recv.capture(limit=None)
-        except KeyboardInterrupt:
-            raise SystemExit
+        except (KeyboardInterrupt, SystemExit):
+            pass
     finally:
         #import traceback
         #traceback.print_exc()
         cam.cancel()
         conn.close()
+        logger.warning("-> cmevents: Shut down.\n")
 

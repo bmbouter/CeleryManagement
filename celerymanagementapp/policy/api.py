@@ -114,8 +114,9 @@ TASKAPI_SETTINGS_CONFIG = [
 class ItemApi(object):
     assignable_names = set()
     
-    def __init__(self, names=None):
+    def __init__(self, _broadcast, names=None):
         self.names = names or []
+        self._broadcast = _broadcast
         self._locked = True
         
     def __setattr__(self, name, val):
@@ -138,19 +139,37 @@ class ItemsCollectionApi(object):
     """
     ItemApi = None
     
-    def __init__(self):
+    def __init__(self, connection=None):
         self._locked = True
+        self._connection = connection
         
     def __getitem__(self, names):
         if isinstance(names, basestring):
             names = (names,)
-        return self._get_item_api(names)
+        return self._get_item_api(self._broadcast, names)
         
     def all(self):
-        return self._get_item_api(None)
+        return self._get_item_api(self._broadcast, None)
         
-    def _get_item_api(self, names):
-        return self.ItemApi(names)
+    def _get_item_api(self, _broadcast, names):
+        return self.ItemApi(_broadcast, names)
+        
+    def _get_worker_count(self):
+        try:
+            n = self._worker_count
+        except AttributeError:
+            n = len(util.get_all_worker_names())
+            self._worker_count = n
+        return n
+        
+    def _broadcast(self, *args, **kwargs):
+        ##print 'self._connection = {0}'.format(self._connection)
+        kwargs['connection'] = self._connection
+        if 'destination' in kwargs and isinstance(kwargs['destination'], list):
+            kwargs['limit'] = len(kwargs['destination'])
+        else:
+            kwargs['limit'] = self._get_worker_count()
+        return broadcast(*args, **kwargs)
         
     def __getattr__(self, name):
         if not name.startswith('_') and name != 'all':
@@ -168,12 +187,12 @@ class TaskSetting(object):
         self.attrname = attrname
         self.validator = validator
     
-    def __get__(self, inst, owner):
-        assert inst is not None
-        if len(inst.names) != 1:
+    def __get__(self, taskapi, owner):
+        assert taskapi is not None
+        if len(taskapi.names) != 1:
             raise ApiError('Cannot retrieve this attribute for multiple tasks.')
-        arguments = {'taskname': inst.names[0], 'attrname': self.attrname}
-        r = broadcast('get_task_attribute', arguments=arguments, reply=True)
+        arguments = {'taskname': taskapi.names[0], 'attrname': self.attrname}
+        r = taskapi._broadcast('get_task_attribute', arguments=arguments, reply=True)
         r = util._merge_broadcast_result(r)
         if not r:
             tmpl = 'Unable to retrieve task attribute: {0}.'
@@ -188,11 +207,11 @@ class TaskSetting(object):
             raise ApiError(msg)
         return r
         
-    def __set__(self, inst, value):
+    def __set__(self, taskapi, value):
         value = self.validator(value)
-        arguments = {'tasknames': inst.names, 'attrname':self.attrname, 
+        arguments = {'tasknames': taskapi.names, 'attrname':self.attrname, 
                      'value': value}
-        r = broadcast('set_task_attribute', arguments=arguments, reply=True)
+        r = taskapi._broadcast('set_task_attribute', arguments=arguments, reply=True)
         r = util._merge_broadcast_result(r)
         if not r:
             msg = 'Unable to set task attribute: {0}.'.format(self.attrname)
@@ -204,7 +223,7 @@ class TaskSetting(object):
             tmpl = 'Error occurred while setting task attribute: {0}.'
             msg = tmpl.format(self.attrname)
             raise ApiError(msg)
-        inst._on_task_modified(self.attrname, value)
+        taskapi._on_task_modified(self.attrname, value)
         
         
 class TaskApiMeta(type):
@@ -221,14 +240,14 @@ class TaskApi(ItemApi):
     settings_config = TASKAPI_SETTINGS_CONFIG
     assignable_names = set(t[0] for t in settings_config)
     
-    def __init__(self, names=None, event_dispatcher=None):
+    def __init__(self, _broadcast, names=None, event_dispatcher=None):
         if not names:
             names = util.get_all_registered_tasks()
         self._event_dispatcher = event_dispatcher
-        super(TaskApi, self).__init__(names)
+        super(TaskApi, self).__init__(_broadcast, names)
         
     def _on_task_modified(self, attrname, value):
-        print 'TaskApi._on_task_modified(): {0}={1}'.format(attrname, value)
+        ##print 'TaskApi._on_task_modified(): {0}={1}'.format(attrname, value)
         self._event_dispatcher.send(signals.CM_TASK_MODIFIED_EVENT, 
                                     tasknames=self.names, attrname=attrname, 
                                     value=value)
@@ -236,21 +255,22 @@ class TaskApi(ItemApi):
 
 class TasksCollectionApi(ItemsCollectionApi):
     ItemApi = TaskApi
-    def __init__(self, event_dispatcher):
+    def __init__(self, event_dispatcher, connection=None):
         self._event_dispatcher = event_dispatcher
-        super(TasksCollectionApi, self).__init__()
+        super(TasksCollectionApi, self).__init__(connection=connection)
         
-    def _get_item_api(self, names):
-        return self.ItemApi(names, self._event_dispatcher)
+    def _get_item_api(self, *args):
+        return self.ItemApi(*args, event_dispatcher=self._event_dispatcher)
     
 #==============================================================================#
 class WorkerPrefetchProxy(object):
-    def __init__(self, names):
+    def __init__(self, broadcast, names):
         self.names = names
+        self._broadcast = broadcast
     def get(self):
         if len(self.names) != 1:
             raise ApiError('Cannot retrieve this attribute for multiple workers.')
-        r = broadcast('stats', destination=self.names, reply=True)
+        r = self._broadcast('stats', destination=self.names, reply=True)
         r = util._merge_broadcast_result(r)
         if not r:
             raise ApiError('Unable to retrieve worker attribute: prefetch.')
@@ -261,7 +281,7 @@ class WorkerPrefetchProxy(object):
         
     def increment(self, n=1):
         n = validate_int(n)
-        r = broadcast('prefetch_increment', arguments={'n':n}, reply=True)
+        r = self._broadcast('prefetch_increment', arguments={'n':n}, reply=True)
         r = util._merge_broadcast_result(r)
         if not r:
             raise ApiError('Unable to increment prefetch.')
@@ -272,7 +292,7 @@ class WorkerPrefetchProxy(object):
         
     def decrement(self, n=1):
         n = validate_int(n)
-        r = broadcast('prefetch_decrement', arguments={'n':n}, reply=True)
+        r = self._broadcast('prefetch_decrement', arguments={'n':n}, reply=True)
         r = util._merge_broadcast_result(r)
         if not r:
             raise ApiError('Unable to decrement prefetch.')
@@ -284,19 +304,19 @@ class WorkerPrefetchProxy(object):
 class WorkerSetting(object):
     def __init__(self, cls):
         self.cls = cls
-    def __get__(self, inst, owner):
-        assert inst is not None
-        return self.cls(inst.names)
-    def __set__(self, inst, value):
+    def __get__(self, workerapi, owner):
+        assert workerapi is not None
+        return self.cls(workerapi._broadcast, workerapi.names)
+    def __set__(self, workerapi, value):
         raise ApiError('Cannot set attribute')
 
 class WorkerApi(ItemApi):
     assignable_names = set()
     
-    def __init__(self, names=None):
+    def __init__(self, _broadcast, names=None):
         if not names:
             names = util.get_all_worker_names()
-        super(WorkerApi, self).__init__(names)
+        super(WorkerApi, self).__init__(_broadcast, names)
         
     prefetch = WorkerSetting(WorkerPrefetchProxy)
     
@@ -305,7 +325,7 @@ class WorkersCollectionApi(ItemsCollectionApi):
 
 #==============================================================================#
 class StatsApi(object):
-    def __init__(self):
+    def __init__(self, connection=None):
         pass
         
     ## [PENDING, RECEIVED, STARTED, SUCCESS]

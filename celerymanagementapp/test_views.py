@@ -5,6 +5,7 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse as urlreverse
 from django.contrib.auth.decorators import login_required
 from django.utils import simplejson
+from django.utils.html import urlquote
 
 import random
 
@@ -104,7 +105,20 @@ def create_or_update_outofbandworker(request, worker_pk=None):
             out_of_band_worker_node_form = OutOfBandWorkerNodeForm(request.POST, request.FILES, instance=worker)
 
         if out_of_band_worker_node_form.is_valid():
-            json = simplejson.dumps("success")
+            if worker_pk is not None:
+                json = simplejson.dumps("Worker successfully updated.")
+            else:
+                worker = out_of_band_worker_node_form.save(commit=False)
+                worker.pk = 120
+                context = { 'worker': {'worker': worker,
+                            'workerForm': out_of_band_worker_node_form }}
+                html = render_to_response("celerymanagementapp/configure_outofbandworker_instance.html",
+                        context,
+                        context_instance=RequestContext(request))
+                success = { 'success': 'Worker successfully created.',
+                            'html': urlquote(html.content),
+                            'pk': worker.pk }
+                json = simplejson.dumps(success)
         else:
             errors = []
             for field in out_of_band_worker_node_form:
@@ -114,7 +128,7 @@ def create_or_update_outofbandworker(request, worker_pk=None):
                         'id': worker_pk }
             json = simplejson.dumps(failed)
         
-        return HttpResponse(json)
+        return HttpResponse("<textarea>" + json + "</textarea>")
 
 def delete_outofbandworker(request, worker_pk=None):
     """Deletes a worker"""
@@ -226,7 +240,7 @@ def delete_worker(request, worker_pk):
     random.seed()
     choice = random.randint(0, 1000)
     if not (choice % 2):
-        json = simplejson.dumps("success")
+        json = simplejson.dumps("Worker successfully deleted.")
         return HttpResponse(json)
     else:
         failed = { 'failure' : 'Instance failed to delete'}

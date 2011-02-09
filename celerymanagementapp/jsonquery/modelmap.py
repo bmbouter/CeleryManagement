@@ -165,6 +165,7 @@ class TestModelModelMap(JsonModelMap):
     model = TestModel
     field_info = [
         ('date',    'date',     DateConv),
+        ('datetime','datetime', DateTimeConv),
         ('floatval','floatval', DefaultConv),
         ('intval',  'intval',   DefaultConv),
         ('charval', 'charval',  DefaultConv),

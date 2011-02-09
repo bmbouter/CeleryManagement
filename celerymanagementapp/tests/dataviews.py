@@ -175,7 +175,7 @@ class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
         
         self.assertTrue('failure' in output)
         self.assertEquals('source', output['failure'][2]['field'])
-        experror = '  File "<unknown>", line 1\n    This should not compile\n    ^\nPolicySyntaxError: expected "NAME", found "NAME"\n'
+        experror = '  File "<unknown>", line 1\n    This should not compile\n    ^\nPolicySyntaxError: expected "policy", found "This"\n'
         self.assertEquals(experror, output['failure'][2]['error'][0])
         # no model objects should have been created
         self.assertEquals(model_count, PolicyModel.objects.all().count())

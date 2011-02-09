@@ -36,6 +36,13 @@ def date_timestamp(y,m,d):
     ##print unixtime
     return unixtime*1000
     
+def datetime_timestamp(y,m,d,h=0,mi=0,s=0):
+    # takes a python datetime.date and converts into a timestamp in milliseconds
+    tt = datetime.datetime(y,m,d,h,mi,s).timetuple()
+    unixtime = time.mktime(tt)
+    ##print unixtime
+    return unixtime*1000
+    
 def timedelta_ms(days=0, seconds=0, milliseconds=0):
     seconds += days * 60*60*24
     milliseconds += seconds * 1000
@@ -240,6 +247,59 @@ class JsonQuery_DateSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
                 (D(2010,1,13), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
                 (D(2010,1,20), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
                 (D(2010,1,24), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                ]
+            }
+        
+        query = JsonXYQuery(TestModelModelMap(), input)
+        output = query.do_query()
+        output = sort_result(output)
+        self.assertEquals(expected_output, output)
+        
+
+class JsonQuery_DateTimeSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase):
+    fixtures = ['test_jsonquery']
+    
+    def test_date_all(self):
+        D = datetime_timestamp
+        input = {
+            'segmentize': {
+                'field': 'datetime',
+                'method': ['all'],
+                },
+            'aggregate': [
+                { 'field': 'count', }
+                ]
+            }
+        expected_output = {
+            'data': [
+                (D(2010,1,4,12), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 2}] }] ),
+                (D(2010,1,11,12),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,13,12),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,20,12),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                (D(2010,1,24,12),[{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
+                ]
+            }
+        query = JsonXYQuery(TestModelModelMap(), input)
+        output = query.do_query()
+        output = sort_result(output)
+        self.assertEquals(expected_output, output)
+        
+    def test_date_range(self):
+        D = datetime_timestamp
+        input = {
+            "segmentize": {
+                "field":"datetime",
+                "method": ["range", {"min": D(2010,1,10,12), "max": D(2010,1,22,12), "interval": timedelta_ms(days=6)}]
+                },
+            "aggregate": [
+                { "field":"count",
+                  "methods":["enumerate"] }
+                ]
+            }
+        expected_output = {
+            'data': [
+                (D(2010,1,13,12), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 2}] }] ),
+                (D(2010,1,19,12), [{ 'fieldname':'count', 'methods': [{'name':'count', 'value': 1}] }] ),
                 ]
             }
         
@@ -471,6 +531,15 @@ class JsonQuery_Filter_TestCase(base.CeleryManagement_DBTestCaseBase):
 class JsonQuery_UtilConv_TestCase(base.CeleryManagement_TestCaseBase):
     # TODO: move this to its own module.  The tested functions no longer reside 
     # in the jsonquery package.
+    
+    def tz_offset(self):
+        """ Offset from GMT in seconds.  Accounts for DST. """
+        if time.localtime().tm_isdst:
+            assert time.daylight
+            return time.altzone
+        else:
+            return time.timezone
+    
     def test_date_to_python(self):
         from celerymanagementapp.timeutil import date_to_python
         today = datetime.date.today()
@@ -482,9 +551,10 @@ class JsonQuery_UtilConv_TestCase(base.CeleryManagement_TestCaseBase):
     def test_datetime_to_python(self):
         from celerymanagementapp.timeutil import datetime_to_python
         now = datetime.datetime.now()
-        now = now.replace(microsecond=0)
-        ms = int(time.mktime(now.timetuple()) * 1000)
-        
+        # Resolution is in milliseconds.  Strip off smaller values.
+        microsecond = now.microsecond - now.microsecond%1000
+        now = now.replace(microsecond=microsecond)
+        ms = int(time.mktime(now.timetuple())*1000 + now.microsecond/1000.)
         self.assertEquals(now, datetime_to_python(ms))
         
         
@@ -499,10 +569,21 @@ class JsonQuery_UtilConv_TestCase(base.CeleryManagement_TestCaseBase):
     def test_datetime_from_python(self):
         from celerymanagementapp.timeutil import datetime_from_python
         now = datetime.datetime.now()
-        now = now.replace(microsecond=0)
-        ms = int(time.mktime(now.timetuple()) * 1000)
+        ms = int(time.mktime(now.timetuple())*1000 + now.microsecond/1000)
         
         self.assertEquals(ms, datetime_from_python(now))
         
+    def test_datetime_to_python2(self):
+        from celerymanagementapp.timeutil import datetime_to_python
+        tz = self.tz_offset()*1000
+        D = datetime.datetime
+        self.assertEquals(D(1970,1,1), datetime_to_python(0+tz))
+        self.assertEquals(D(2000,1,1), datetime_to_python(946684800000+tz))
+        
+    def test_datetime_from_python2(self):
+        from celerymanagementapp.timeutil import datetime_from_python
+        tz = self.tz_offset()*1000
+        D = datetime.datetime
+        self.assertEquals(946684800000+tz, datetime_from_python(D(2000,1,1)))
         
 

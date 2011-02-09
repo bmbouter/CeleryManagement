@@ -9,7 +9,7 @@ from celerymanagementapp.policy.signals import Receiver
 from celerymanagementapp.policy import util
 
 #==============================================================================#
-MIN_LOOP_SLEEP_TIME = 30  # seconds
+MIN_LOOP_SLEEP_TIME = 30    # seconds
 MAX_LOOP_SLEEP_TIME = 60*2  # seconds
 
 class PolicyMain(object):
@@ -20,6 +20,7 @@ class PolicyMain(object):
         ##print 'cmrun: Starting PolicyMain...'
         self.logger = logger
         self.logger.debug('Starting PolicyMain...')
+        self.connection = connection
         self.task_settings = TaskSettingsManager(logger)
         self.event_receiver = Receiver(connection, logger, app=app)
         self.registry = Registry(logger)
@@ -74,7 +75,7 @@ class PolicyMain(object):
         """ Look for Policies that may be due to be run, and try to run 
             them. 
         """
-        now = datetime.datetime.now()
+        start = datetime.datetime.now()
         modified_ids = []
         run_deltas = []
         
@@ -85,7 +86,7 @@ class PolicyMain(object):
                 for entry in self.registry:
                     was_run, next_run_delta = self.maybe_run_policy(entry)
                     if was_run:
-                        entry.set_last_run_time(now)
+                        entry.set_last_run_time(start)
                         modified_ids.append(entry.policy.id)
                     if next_run_delta:
                         run_deltas.append(next_run_delta)
@@ -98,6 +99,12 @@ class PolicyMain(object):
             msg = 'Not running policies -- no workers are available.'
             self.logger.warn(msg)
             run_deltas.append(MIN_LOOP_SLEEP_TIME)
+        
+        delta = datetime.datetime.now() - start
+        secs = delta.seconds + delta.microseconds/1000000.
+        self.logger.info(
+            'Ran {0} policies in {1} seconds'.format(len(modified_ids), secs))
+        
         return min(run_deltas+[MAX_LOOP_SLEEP_TIME])
         
     def maybe_run_policy(self, entry):
@@ -121,7 +128,7 @@ class PolicyMain(object):
             msg += '{0}\n'.format(entry.policy.name)
             msg += 'The following is the traceback:\n'
             msg += traceback.format_exc()
-            # Print excetion traceback to the log so at least the user knows it 
+            # Print exception traceback to the log so at least the user knows it 
             # occurred.
             self.logger.error(msg)
             next_run_delta = 0
@@ -135,17 +142,20 @@ class PolicyMain(object):
         """
         name = policyobj.name
         self.logger.debug('Checking policy {0} (condition)'.format(name))
-        if policyobj.run_condition():
+        if policyobj.run_condition(connection=self.connection):
             self.logger.info('Running policy {0} (apply)'.format(name))
-            policyobj.run_apply()
+            policyobj.run_apply(connection=self.connection)
         
         
 #==============================================================================#
-def policy_main(app=None, loglevel=0, logfile=None):
+def policy_main(app=None, loglevel=0, logfile=None, **kwargs):
     """ Policy manager entry-point function. """
-    ##print 'cmrun: Loading policy manager...'
     import logging
     import sys
+    # Set process name that appears in logging messages.
+    import multiprocessing
+    multiprocessing.current_process().name = 'cm-policy-manager'
+    
     app = app_or_default(app)
     if not isinstance(loglevel, int):
         loglevel = LOG_LEVELS[loglevel.upper()]
@@ -153,27 +163,21 @@ def policy_main(app=None, loglevel=0, logfile=None):
                                   logfile=logfile,
                                   name="cm.policy")
     orig_ios = (sys.stdout, sys.stderr)
-    ##app.log.redirect_stdouts_to_logger(logger, loglevel=logging.INFO)
-    logger.info('-> cm.policy: Loading policy manager...')
+    logger.warning('-> cmpolicy: Loading policy manager...')
     conn = app.broker_connection()
     try:
         try:
             with PolicyMain(conn, logger, app=app) as pmain:
                 pmain.loop()
-        except KeyboardInterrupt:
-            raise SystemExit
-        except SystemExit:
-            raise
+        except (KeyboardInterrupt, SystemExit):
+            pass
         except Exception:
             import traceback
             tb = traceback.format_exc()
             logger.error('\n'+tb)
             raise
     finally:
-        #import traceback
-        #traceback.print_exc()
         conn.close()
-        logger.info('-> cm.policy: Policy manager shut down.')
+        logger.warning('-> cmpolicy: Policy manager shut down.\n')
         sys.stdout, sys.stderr = orig_ios
-        ##print 'cmrun: Policy manager shut down.'
         

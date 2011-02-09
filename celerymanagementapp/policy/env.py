@@ -51,12 +51,9 @@ for state in states.ALL_STATES:
 
 SCHEDULE_GLOBALS = {}
 SCHEDULE_LOCALS = { 'crontab': crontab, }
-CONDITION_GLOBALS = { 'stats': api.StatsApi(), }
+CONDITION_GLOBALS = {}
 CONDITION_LOCALS = {}
-APPLY_GLOBALS = { #'tasks': api.TasksCollectionApi(), 
-                  'workers': api.WorkersCollectionApi(), 
-                  'stats': api.StatsApi(),
-                }
+APPLY_GLOBALS = {}
 APPLY_LOCALS = {}
 
 #==============================================================================#
@@ -73,9 +70,10 @@ class Env(object):
     """ The environment for an executing a code object.  This provides the 
         locals and globals dicts. 
     """
-    def __init__(self):
+    def __init__(self, connection=None):
         self._locals = {}
         self._globals = {}
+        self._connection = connection
         
     def __enter__(self):
         return self
@@ -93,24 +91,34 @@ class Env(object):
         
         
 class ScheduleEnv(Env):
-    def __init__(self):
-        super(ScheduleEnv, self).__init__()
+    def __init__(self, connection=None):
+        super(ScheduleEnv, self).__init__(connection=connection)
         self._locals.update(SCHEDULE_LOCALS)
         self._globals.update(SCHEDULE_GLOBALS)
         
 class ConditionEnv(Env):
-    def __init__(self):
-        super(ConditionEnv, self).__init__()
+    def __init__(self, connection=None):
+        super(ConditionEnv, self).__init__(connection=connection)
         self._locals.update(CONDITION_LOCALS)
         self._globals.update(CONDITION_GLOBALS)
+        xglobals = {
+            'stats':    api.StatsApi(connection=connection),
+            }
+        self._globals.update(xglobals)
         
 class ApplyEnv(Env):
-    def __init__(self):
-        super(ApplyEnv, self).__init__()
+    def __init__(self, connection=None):
+        super(ApplyEnv, self).__init__(connection=connection)
         self._dispatcher = signals.Dispatcher()
         self._locals.update(APPLY_LOCALS)
         self._globals.update(APPLY_GLOBALS)
-        self._globals.update({'tasks': api.TasksCollectionApi(self._dispatcher)})
+        xglobals = {
+            'tasks':    api.TasksCollectionApi(self._dispatcher, 
+                                               connection=connection),
+            'workers':  api.WorkersCollectionApi(connection=connection), 
+            'stats':    api.StatsApi(connection=connection),
+            }
+        self._globals.update(xglobals)
         
     def destroy(self):
         self._dispatcher.close()
