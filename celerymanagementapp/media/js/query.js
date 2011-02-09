@@ -76,7 +76,7 @@ function formatData(response) {
         var length = data.length;
         
         for(i = 0; i < length; i++) {
-            data[i] = toRelativeTime(data[i], $('#interval_select').val());
+            data[i] = toRelativeTimeMilliseconds(data[i], $('#interval_select').val());
         }
     } else {
         System.EventBus.fireEvent('formatData', response);
