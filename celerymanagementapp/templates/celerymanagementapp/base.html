@@ -18,16 +18,18 @@
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.flot.selection.min.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/jquery.flot.stack.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/anytime.min.js"></script>
-        <!--<script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/json.js" ></script>
+        {% if DEBUG_MODE %}
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/json.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/ajax.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/core.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/System.js"></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/Chart.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/DataParser.js" ></script>
         <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/EventBus.js"></script>
-        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/query.js"></script>-->
-        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/cma-min.3.js" ></script>
-
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/query.js"></script>
+        {% endif %}{% else %}
+        <script type="text/javascript" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}js/cma-min.js"></script>
+        {% endif %}
 
         <script>
             {% if load_test_data %}
