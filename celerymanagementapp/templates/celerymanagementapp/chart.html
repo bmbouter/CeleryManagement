@@ -97,11 +97,9 @@
                     </div>
                 </div>
             </fieldset>
-        
+            <br /><br />
             <fieldset id="segmentize_set">
                 <legend>Segmentize</legend>
-                <label for="segmentize" class="no_padding">Segmentize</label>
-                <input name="segmentize" id="segmentize" checked="checked" type="checkbox" />
                 <br />
                 <div id="segmentize_options">
                     <label for="segmentize_field">Field</label>
@@ -147,6 +145,14 @@
                         <label for="range_interval">Range Interval</label>
                         <div class="fields">
                             <input id="range_interval" name="interval" />
+                            <select id="interval_select" name="interval_select" value="interval_select">
+                                <option label="Seconds" value="seconds"></option>
+                                <option label="Minutes" value="minutes"></option>
+                                <option label="Hours" value="hours"></option>
+                                <option label="Days" value="days"></option>
+                                <option label="Months" value="months"></option>
+                                <option label="Years" value="years"></option>
+                            </select>
                         </div>
                     </div>
                     
@@ -163,8 +169,6 @@
             </fieldset>
             <fieldset id="aggregate_set">
                 <legend>Aggregate</legend>
-                <label for="aggregate" class="no_padding">Aggregate</label>
-                <input name="aggragate" id="aggregate" checked="checked" type="checkbox" />
                 <br />
                 <div id="aggregate_options">
                     <label for="aggregate_field">Field</label>
