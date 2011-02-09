@@ -78,9 +78,9 @@ function formatData(response) {
         for(i = 0; i < length; i++) {
             data[i] = toRelativeTimeMilliseconds(data[i], $('#interval_select').val());
         }
-    } else {
-        System.EventBus.fireEvent('formatData', response);
     }
+    
+    System.EventBus.fireEvent('formatData', response);
 }
 
 function create_query() {
@@ -249,8 +249,8 @@ $(function() {
             table.after(
                 '<tr><td>' + aggregate_field + '</td>' +
                 '<td>' + aggregate_methods + '</td>' +
-                '<td><a href="#" class="' + aggregate_field +
-                    '-delete"><strong>x</strong></span></td>' + 
+                '<td><span class="' + aggregate_field +
+                    '-delete red ' + 'click"><strong>x</strong></span></td>' + 
                 '</tr>'
             );
             

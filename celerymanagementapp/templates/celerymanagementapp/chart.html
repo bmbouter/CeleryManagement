@@ -19,7 +19,7 @@
                     <label for="filter_fieldname">Fieldname</label>
                     <div class="fields">
                         <select id="filter_fieldname" name="filter_fieldname" value="filter_fieldname">
-                            <option label="Name" value="taskname">Name</option>
+                            <option label="Task Name" value="taskname">Task Name</option>
                             <option label="State" value="state">State</option>
                             <option label="Task ID" value="task_id">Task ID</option>
                             <option label="Worker" value="worker">Worker</option>
@@ -63,7 +63,7 @@
                     <label for="exclude_fieldname">Fieldname</label>
                     <div class="fields">
                         <select id="exclude_fieldname" name="exclude_fieldname" value="exclude_fieldname">
-                            <option label="Name" value="taskname">Name</option>
+                            <option label="Task Name" value="taskname">Task Name</option>
                             <option label="State" value="state">State</option>
                             <option label="Task ID" value="task_id">Task ID</option>
                             <option label="Worker" value="worker">Worker</option>
@@ -96,11 +96,10 @@
                         <input id="exclude_arg2" name="exclude_arg2" />
                     </div>
                 </div>
+                <br />
             </fieldset>
-            <br /><br />
             <fieldset id="segmentize_set">
                 <legend>Segmentize</legend>
-                <br />
                 <div id="segmentize_options">
                     <label for="segmentize_field">Field</label>
                     <div class="fields">
@@ -162,14 +161,10 @@
                             <input id="values" name="values" />
                         </div>
                     </div>
-                    
-                    <!-- Add a list of name, retrieved using a json call -->
-                    
                 </div>
             </fieldset>
             <fieldset id="aggregate_set">
                 <legend>Aggregate</legend>
-                <br />
                 <div id="aggregate_options">
                     <label for="aggregate_field">Field</label>
                     <div class="aggregate_field">
