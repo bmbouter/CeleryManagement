@@ -13,7 +13,7 @@ CMA.Core.DataParser = (function() {
                         
         if(typeof(dataArray[0][0]) === 'string') {
             if(dataArray[0][1][0].fieldname === 'runtime') {
-                formattedData = runtimeData(dataArray);
+                formattedData = runtimeDataAlternate(dataArray);
             } else if(dataArray[0][1][0].fieldname === 'state') {
                 formattedData = stateData(dataArray);
             } else {
@@ -68,6 +68,30 @@ CMA.Core.DataParser = (function() {
         
         setTicks(axisLabels);
         
+        return data;
+    }
+    
+    var runtimeDataAlternate = function(dataArray) {
+        var data = [];
+        var workerLabels = [ ];
+        var count = 0;
+
+        var i, j;
+        var length = dataArray.length;
+        var methodsLength = dataArray[0][1][0].methods.length;
+        
+        for(i = 0; i < length; i++) {
+            var obj = { };
+            obj.data = [ ];
+            obj.label = dataArray[i][0] + ' - Runtime';
+            
+            for(j = 0; j < methodsLength; j++) {
+                obj.data.push([i, dataArray[i][1][0].methods[j].value]);
+            }
+            
+            data.push(obj);
+        }
+                
         return data;
     }
     
@@ -163,7 +187,7 @@ CMA.Core.DataParser = (function() {
             chartData.push([i, Math.sin(i)]);
         }
         
-        obj.label = "dummy";
+        obj.label = "Malformed data returned by server";
         obj.data = chartData;
         data.push(obj);
     
