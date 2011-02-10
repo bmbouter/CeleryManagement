@@ -527,6 +527,109 @@ class JsonQuery_Filter_TestCase(base.CeleryManagement_DBTestCaseBase):
         input = { 'filter': [['enumval','=','A'],], }
         self.assertRaises(JsonQueryError, JsonFilter, TestModelModelMap(), input)
     
+
+class JsonQuery_ModelMap_TestCase(base.CeleryManagement_TestCaseBase):
+    fixtures = ['test_jsonquery']
+    
+    
+        # 'date':         agg_methods_numeric,
+        # 'datetime':     agg_methods_numeric,
+        # 'floatval':     agg_methods_numeric,
+        # 'intval':       agg_methods_numeric,
+        
+        # 'charval':      ['count', 'enumerate',],
+        # 'enumval':      ['count', 'enumerate',],
+        
+    # segmentization_methods = {
+        # 'date':         ['each', 'range',],
+        # 'datetime':     ['each', 'range',],
+        # 'floatval':     ['each', 'range',],
+        # 'intval':       ['each', 'range',],
+        
+        # 'charval':      ['each', 'values', 'all',],
+        # 'enumval':      ['each', 'values', 'all',],
+    
+    def test_metadata_keys(self):
+        expected = {
+            'date': {},
+            'datetime': {},
+            'floatval': {},
+            'intval': {},
+            'charval': {},
+            'enumval': {},
+            }
+        meta = TestModelModelMap().get_metadata()
+        keys = meta.keys()
+        keys.sort()
+        self.assertEquals(['charval','count','date','datetime','enumval',
+                           'floatval','intval'], keys)
+    
+    def test_metadata(self):
+        meta = TestModelModelMap().get_metadata()
+        
+        # charval
+        self.assertEquals({
+            'type':         'string',
+            'allow_null':   False,
+            'segmentize':   {'methods': ['each', 'values', 'all',]},
+            'aggregate':    {'methods': ['count', 'enumerate',]},
+            },
+            meta['charval'])
+        
+        # count
+        self.assertEquals({
+            'type':         'int',
+            'allow_null':   False,
+            'segmentize':   {'methods': []},
+            'aggregate':    {'methods': ['count',]},
+            },
+            meta['count'])
+        
+        # date
+        self.assertEquals({
+            'type':         'datetime',
+            'allow_null':   True,
+            'segmentize':   {'methods': ['each', 'range',]},
+            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            },
+            meta['date'])
+        
+        # datetime
+        self.assertEquals({
+            'type':         'datetime',
+            'allow_null':   True,
+            'segmentize':   {'methods': ['each', 'range',]},
+            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            },
+            meta['datetime'])
+        
+        # enumval
+        self.assertEquals({
+            'type':         'string',
+            'allow_null':   False,
+            'segmentize':   {'methods': ['each', 'values', 'all',]},
+            'aggregate':    {'methods': ['count', 'enumerate',]},
+            },
+            meta['enumval'])
+        
+        # floatval
+        self.assertEquals({
+            'type':         'float',
+            'allow_null':   False,
+            'segmentize':   {'methods': ['each', 'range',]},
+            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            },
+            meta['floatval'])
+        
+        # intval
+        self.assertEquals({
+            'type':         'int',
+            'allow_null':   False,
+            'segmentize':   {'methods': ['each', 'range',]},
+            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            },
+            meta['intval'])
+    
     
 class JsonQuery_UtilConv_TestCase(base.CeleryManagement_TestCaseBase):
     # TODO: move this to its own module.  The tested functions no longer reside 
