@@ -34,6 +34,7 @@ urlpatterns = patterns('celerymanagementapp',
 # Data retrieval URLs
 urlpatterns += patterns('celerymanagementapp',    
     (r'^xy_query/dispatched_tasks/$', 'dataviews.task_xy_dataview'),
+    (r'^xy_query/dispatched_tasks/fieldinfo/$', 'dataviews.task_xy_metadata'),
     
     # For the following urls, the *name* may be a task or worker name (whichever 
     # is appropriate) or 'all' which returns information on all items.

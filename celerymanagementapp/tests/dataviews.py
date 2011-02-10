@@ -38,6 +38,97 @@ class XYDataView_TestCase(base.CeleryManagement_DBTestCaseBase):
         output = json.loads(response.content)
         
         self.assertEquals(expected_output, output)
+        
+class TaskXYMetadata_TestCase(base.CeleryManagement_DBTestCaseBase):
+    fixtures = ['test_runtimes']
+    
+    def test_basic(self):
+        url = urlreverse('celerymanagementapp.dataviews.task_xy_metadata')
+        response = self.client.get(url)
+        meta = json.loads(response.content)
+        
+        expected_keys = ['taskname','state','task_id','worker', 
+                         'runtime','waittime','totaltime',
+                         'tstamp','sent','received','started','succeeded','failed',
+                         'routing_key','expires','result','eta',
+                         'count',]
+        expected_keys.sort()
+        keys = meta.keys()
+        keys.sort()
+        self.assertEquals(expected_keys, keys)
+        
+        # taskname
+        self.assertEquals({
+            'type':         'string',
+            'allow_null':   False,
+            'segmentize':   {'methods': ['each', 'values', 'all',]},
+            'aggregate':    {'methods': ['count', 'enumerate',]},
+            },
+            meta['taskname'])
+            
+        # worker
+        self.assertEquals({
+            'type':         'string',
+            'allow_null':   False,
+            'segmentize':   {'methods': ['each', 'values', 'all',]},
+            'aggregate':    {'methods': ['count', 'enumerate',]},
+            },
+            meta['worker'])
+        
+        # runtime
+        self.assertEquals({
+            'type':         'elapsed_time',
+            'allow_null':   False,
+            'segmentize':   {'methods': ['each', 'range',]},
+            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            },
+            meta['runtime'])
+        
+        # waittime
+        self.assertEquals({
+            'type':         'elapsed_time',
+            'allow_null':   True,
+            'segmentize':   {'methods': ['each', 'range',]},
+            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            },
+            meta['waittime'])
+        
+        # tstamp
+        self.assertEquals({
+            'type':         'datetime',
+            'allow_null':   False,
+            'segmentize':   {'methods': ['each', 'range',]},
+            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            },
+            meta['tstamp'])
+        
+        # started
+        self.assertEquals({
+            'type':         'datetime',
+            'allow_null':   True,
+            'segmentize':   {'methods': ['each', 'range',]},
+            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            },
+            meta['started'])
+        
+        # result
+        self.assertEquals({
+            'type':         'string',
+            'allow_null':   True,
+            'segmentize':   {'methods': ['each', 'values', 'all',]},
+            'aggregate':    {'methods': ['count',]},
+            },
+            meta['result'])
+        
+        # count
+        self.assertEquals({
+            'type':         'int',
+            'allow_null':   False,
+            'segmentize':   {'methods': []},
+            'aggregate':    {'methods': ['count',]},
+            },
+            meta['count'])
+        
 
 class PendingTaskCount_TestCase(base.CeleryManagement_DBTestCaseBase):
     fixtures = ['test_pending_taskcount']

@@ -181,6 +181,11 @@ def task_xy_dataview(request):
     json_result = xyquery.do_query()
         
     return _json_response(json_result)
+    
+def task_xy_metadata(request):
+    """ Retrieve metadata about the task_xy_dataview fields. """
+    meta = JsonTaskModelMap().get_metadata()
+    return _json_response(meta)
 
 def worker_subprocesses_dataview(request, name=None):
     """ Return the number of sub processes for each worker as a json 

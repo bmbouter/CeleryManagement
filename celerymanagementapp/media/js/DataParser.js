@@ -10,22 +10,26 @@ CMA.Core.DataParser = (function() {
 
         console.log(data);
         console.log(dataArray);
-                        
-        if(typeof(dataArray[0][0]) === 'string') {
-            if(dataArray[0][1][0].fieldname === 'runtime') {
-                formattedData = runtimeDataAlternate(dataArray);
-            } else if(dataArray[0][1][0].fieldname === 'state') {
-                formattedData = stateData(dataArray);
-            } else {
-                formattedData = statusData(dataArray);
+        
+        //if(dataArray[0][1] !== NaN) {
+            if(typeof(dataArray[0][0]) === 'string') {
+                if(dataArray[0][1][0].fieldname === 'runtime') {
+                    formattedData = runtimeDataAlternate(dataArray);
+                } else if(dataArray[0][1][0].fieldname === 'state') {
+                    formattedData = stateData(dataArray);
+                } else {
+                    formattedData = statusData(dataArray);
+                }
+            } else if(typeof(dataArray[0][0]) === 'number') {
+                if(dataArray[0][1][0].fieldname === 'count') {
+                    formattedData = countData(dataArray);
+                } else {
+                    formattedData = dummyData();
+                }
             }
-        } else if(typeof(dataArray[0][0]) === 'number') {
-            if(dataArray[0][1][0].fieldname === 'count') {
-                formattedData = countData(dataArray);
-            } else {
-                formattedData = dummyData();
-            }
-        }
+        //} else {
+            //formattedData = dummyData();
+        //}
 
         System.EventBus.fireEvent('dataFormatted', formattedData);
         //System.EventBus.fireEvent('labelAxis', labels);
