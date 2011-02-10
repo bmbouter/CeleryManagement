@@ -10,22 +10,26 @@ CMA.Core.DataParser = (function() {
 
         console.log(data);
         console.log(dataArray);
-                        
-        if(typeof(dataArray[0][0]) === 'string') {
-            if(dataArray[0][1][0].fieldname === 'runtime') {
-                formattedData = runtimeData(dataArray);
-            } else if(dataArray[0][1][0].fieldname === 'state') {
-                formattedData = stateData(dataArray);
-            } else {
-                formattedData = statusData(dataArray);
+        
+        //if(dataArray[0][1] !== NaN) {
+            if(typeof(dataArray[0][0]) === 'string') {
+                if(dataArray[0][1][0].fieldname === 'runtime') {
+                    formattedData = runtimeDataAlternate(dataArray);
+                } else if(dataArray[0][1][0].fieldname === 'state') {
+                    formattedData = stateData(dataArray);
+                } else {
+                    formattedData = statusData(dataArray);
+                }
+            } else if(typeof(dataArray[0][0]) === 'number') {
+                if(dataArray[0][1][0].fieldname === 'count') {
+                    formattedData = countData(dataArray);
+                } else {
+                    formattedData = dummyData();
+                }
             }
-        } else if(typeof(dataArray[0][0]) === 'number') {
-            if(dataArray[0][1][0].fieldname === 'count') {
-                formattedData = countData(dataArray);
-            } else {
-                formattedData = dummyData();
-            }
-        }
+        //} else {
+            //formattedData = dummyData();
+        //}
 
         System.EventBus.fireEvent('dataFormatted', formattedData);
         //System.EventBus.fireEvent('labelAxis', labels);
@@ -68,6 +72,30 @@ CMA.Core.DataParser = (function() {
         
         setTicks(axisLabels);
         
+        return data;
+    }
+    
+    var runtimeDataAlternate = function(dataArray) {
+        var data = [];
+        var workerLabels = [ ];
+        var count = 0;
+
+        var i, j;
+        var length = dataArray.length;
+        var methodsLength = dataArray[0][1][0].methods.length;
+        
+        for(i = 0; i < length; i++) {
+            var obj = { };
+            obj.data = [ ];
+            obj.label = dataArray[i][0] + ' - Runtime';
+            
+            for(j = 0; j < methodsLength; j++) {
+                obj.data.push([i, dataArray[i][1][0].methods[j].value]);
+            }
+            
+            data.push(obj);
+        }
+                
         return data;
     }
     
@@ -163,7 +191,7 @@ CMA.Core.DataParser = (function() {
             chartData.push([i, Math.sin(i)]);
         }
         
-        obj.label = "dummy";
+        obj.label = "Malformed data returned by server";
         obj.data = chartData;
         data.push(obj);
     
