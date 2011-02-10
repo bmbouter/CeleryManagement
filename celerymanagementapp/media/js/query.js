@@ -52,10 +52,33 @@ function parseDate(field) {
 };
 
 function startChart(data) {
+    var displayBarChart = $('#displayBarChart'),
+        displayLineChart = $('#displayLineChart'),
+        enableTooltips = $('#enableTooltips'),
+        disableTooltips = $('#disableTooltips'),
+        enableLegend = $('#enableLegend'),
+        disableLegend = $('#disableLegend');
+    
     var options = CMA.Core.DataParser.getTicks();
     c1 = Chart("#chart", data, options);
-    c1.displayBarChart(true);
-    c1.enableTooltips();
+    
+    if(displayBarChart.attr('checked')) {
+        c1.displayBarChart(true);
+    } else {
+        c1.displayLineChart();
+    }
+    
+    if(enableTooltips.attr('checked')) {
+        c1.enableTooltips();
+    } else {
+        c1.disableTooltips();
+    }
+    
+    if(enableLegend.attr('checked')) {
+        c1.enableLegend();
+    } else {
+        c1.disableLegend();
+    }
 }
 
 function submitQuery(query) {
