@@ -16,19 +16,10 @@ def concatenate():
 
 def minify():
     current_dir = os.listdir(dirname)
-    try:
-        min_file = fnmatch.filter(current_dir, "cma-min.*.js")[0]
-    except IndexError:
-        min_file = "cma-min.0.js"
-    version = min_file.split(".")
-    version = int(version[1]) + 1
-    new_file = "cma-min." + str(version) + ".js"
+    new_file = "cma-min.js"
     subprocess.call(dirname + "/" + "uglifyjs/bin/uglifyjs -o " + dirname + "/" + new_file + " " + dirname + "/"  + "cma-master.js", shell=True)
-    try:
-        os.remove(dirname + "/" + min_file)
-    except OSError:
-        pass
     subprocess.call("git add " + dirname + "/"  + str(new_file), shell=True)
+    os.remove(dirname + "/" + "cma-master.js")
 
 if __name__ == "__main__":
     concatenate()

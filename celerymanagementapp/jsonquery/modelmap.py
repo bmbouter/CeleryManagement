@@ -26,20 +26,29 @@ class JsonModelMap(object):
     def __init__(self):
         self.fieldname_map = dict((r[1],r[0]) for r in self.field_info)
         self.fieldconv_map = dict((r[0],r[2]) for r in self.field_info)
-        ##self.conv_to_python = dict((r[0],r[2]) for r in self.field_info if r[2] is not None)
-        ##self.conv_from_python = dict((r[0],r[3]) for r in self.field_info if r[3] is not None)
         
-    # def get_conv_to_python(self, fieldname):
-        # conv = self.conv_to_python.get(fieldname, None)
-        # if not conv:
-            # conv = util.noop_conv
-        # return conv
+        def make_field_metadata(item):
+            fieldname = item[0]
+            queryname = item[1]
+            aggmethods = self.aggregation_methods[fieldname]
+            segmethods = self.segmentization_methods[fieldname]
+            data = { 'type':        item[3], 
+                     'allow_null':  item[4], 
+                     'segmentize':  {'methods': segmethods,},
+                     'aggregate':   {'methods': aggmethods,},
+                   }
+            return queryname, data
         
-    # def get_conv_from_python(self, fieldname):
-        # conv = self.conv_from_python.get(fieldname, None)
-        # if not conv:
-            # conv = util.noop_conv
-        # return conv
+        allfields = [r[1] for r in self.field_info]
+        self.metadata = dict(make_field_metadata(item) for item in self.field_info)
+        self.metadata['count'] = { 'type':        'int', 
+                                   'allow_null':  False, 
+                                   'segmentize':  {'methods': [],},
+                                   'aggregate':   {'methods': ['count'],},
+                                 }
+        
+    def get_metadata(self):
+        return self.metadata
         
     def get_fieldconv(self, fieldname):
         return self.fieldconv_map[fieldname]
@@ -133,44 +142,113 @@ class DateTimeConv(FieldConv):
 
 
 #==============================================================================#
+agg_method_count = ['count',]
+agg_method_common = agg_method_count + ['enumerate',]
+agg_methods_numeric = ['count', 'average', 'min', 'max', 'sum', 'variance',]
+
 class JsonTaskModelMap(JsonModelMap):
     model = DispatchedTask
-    # field_info:
-    #   (field in model, field in query, conv_to_python, conv_from_python)
     field_info = [
-        ('name',        'taskname',     DefaultConv),
-        ('state',       'state',        DefaultConv),
-        ('task_id',     'task_id',      DefaultConv),
-        ('worker',      'worker',       WorkerNameConv),
+    #   (field in model, field in query, FieldConv,     type,           allow_null)
+        ('name',        'taskname',     DefaultConv,    'string',       False),
+        ('state',       'state',        DefaultConv,    'string',       False),
+        ('task_id',     'task_id',      DefaultConv,    'string',       False),
+        ('worker',      'worker',       WorkerNameConv, 'string',       False),
         
-        ('runtime',     'runtime',      DefaultConv),
-        ('waittime',    'waittime',     DefaultConv),
-        ('totaltime',   'totaltime',    DefaultConv),
+        ('runtime',     'runtime',      DefaultConv,    'elapsed_time', False),
+        ('waittime',    'waittime',     DefaultConv,    'elapsed_time', True),
+        ('totaltime',   'totaltime',    DefaultConv,    'elapsed_time', True),
         
-        ('tstamp',      'tstamp',       DateTimeConv),
-        ('sent',        'sent',         DateTimeConv),
-        ('received',    'received',     DateTimeConv),
-        ('started',     'started',      DateTimeConv),
-        ('succeeded',   'succeeded',    DateTimeConv),
-        ('failed',      'failed',       DateTimeConv),
+        ('tstamp',      'tstamp',       DateTimeConv,   'datetime',     False),
+        ('sent',        'sent',         DateTimeConv,   'datetime',     True),
+        ('received',    'received',     DateTimeConv,   'datetime',     True),
+        ('started',     'started',      DateTimeConv,   'datetime',     True),
+        ('succeeded',   'succeeded',    DateTimeConv,   'datetime',     True),
+        ('failed',      'failed',       DateTimeConv,   'datetime',     True),
         
-        ('routing_key', 'routing_key',  DefaultConv),
-        ('expires',     'expires',      DateTimeConv),
-        ('result',      'result',       DefaultConv),
-        ('eta',         'eta',          DateTimeConv),
+        ('routing_key', 'routing_key',  DefaultConv,    'string',       True),
+        ('expires',     'expires',      DateTimeConv,   'datetime',     True),
+        ('result',      'result',       DefaultConv,    'string',       True),
+        ('eta',         'eta',          DateTimeConv,   'datetime',     True),
         ]
+    
+    aggregation_methods = {
+        'name':         ['count', 'enumerate',],
+        'state':        ['count', 'enumerate',],
+        'task_id':      ['count',],
+        'worker':       ['count', 'enumerate',],
+        
+        'runtime':      agg_methods_numeric,
+        'waittime':     agg_methods_numeric,
+        'totaltime':    agg_methods_numeric,
+        
+        'tstamp':       agg_methods_numeric,
+        'sent':         agg_methods_numeric,
+        'received':     agg_methods_numeric,
+        'started':      agg_methods_numeric,
+        'succeeded':    agg_methods_numeric,
+        'failed':       agg_methods_numeric,
+        
+        'routing_key':  ['count', 'enumerate',],
+        'expires':      agg_methods_numeric,
+        'result':       ['count',],
+        'eta':          agg_methods_numeric,
+        }
+        
+    segmentization_methods = {
+        'name':         ['each', 'values', 'all',],
+        'state':        ['each', 'values', 'all',],
+        'task_id':      ['each', 'values', 'all',],
+        'worker':       ['each', 'values', 'all',],
+        
+        'runtime':      ['each', 'range',],
+        'waittime':     ['each', 'range',],
+        'totaltime':    ['each', 'range',],
+        
+        'tstamp':       ['each', 'range',],
+        'sent':         ['each', 'range',],
+        'received':     ['each', 'range',],
+        'started':      ['each', 'range',],
+        'succeeded':    ['each', 'range',],
+        'failed':       ['each', 'range',],
+        
+        'routing_key':  ['each', 'values', 'all',],
+        'expires':      ['each', 'range',],
+        'result':       ['each', 'values', 'all',],
+        'eta':          ['each', 'range',],
+        }
         
 #==============================================================================#
 class TestModelModelMap(JsonModelMap):
     model = TestModel
     field_info = [
-        ('date',    'date',     DateConv),
-        ('datetime','datetime', DateTimeConv),
-        ('floatval','floatval', DefaultConv),
-        ('intval',  'intval',   DefaultConv),
-        ('charval', 'charval',  DefaultConv),
-        ('enumval', 'enumval',  DefaultConv),
+        ('date',    'date',     DateConv,       'datetime',     True),
+        ('datetime','datetime', DateTimeConv,   'datetime',     True),
+        ('floatval','floatval', DefaultConv,    'float',        False),
+        ('intval',  'intval',   DefaultConv,    'int',          False),
+        ('charval', 'charval',  DefaultConv,    'string',       False),
+        ('enumval', 'enumval',  DefaultConv,    'string',       False),
         ]
+    
+    aggregation_methods = {
+        'date':         agg_methods_numeric,
+        'datetime':     agg_methods_numeric,
+        'floatval':     agg_methods_numeric,
+        'intval':       agg_methods_numeric,
+        
+        'charval':      ['count', 'enumerate',],
+        'enumval':      ['count', 'enumerate',],
+        }
+        
+    segmentization_methods = {
+        'date':         ['each', 'range',],
+        'datetime':     ['each', 'range',],
+        'floatval':     ['each', 'range',],
+        'intval':       ['each', 'range',],
+        
+        'charval':      ['each', 'values', 'all',],
+        'enumval':      ['each', 'values', 'all',],
+        }
 
 #==============================================================================#
 
