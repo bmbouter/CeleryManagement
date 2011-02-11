@@ -79,7 +79,7 @@ CMA.Core.ajax = (function() {
             $.post(urls.shutdown_worker_url.replace("<placeHolder>", workerName), callbackFunction);
         },
         getDispatchedTasksData = function(query, callbackFunction) {
-            $.post(urls.query_dispatched_tasks_url, query, callbackFunction);
+            $.post(urls.query_dispatched_tasks_url, query, callbackFunction, 'json');
         },
         postGetImages = function(callbackFunction){
             $.post(urls.get_images_url, $('#blankProviderForm').serialize(), callbackFunction, "json");

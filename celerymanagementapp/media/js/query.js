@@ -81,29 +81,38 @@ function startChart(data) {
     }
 }
 
-function submitQuery(query) {
-    CMA.Core.ajax.getDispatchedTasksData(query, formatData);
-}
-
 function formatData(response) {
+    console.log("entering formatData");
+    console.log(response);
+    console.log("stringifying the response");
+    console.log(JSON.stringify(response));
+    console.log("parsing the stringification");
+    console.log($.parseJSON(JSON.stringify(response)));
+    console.log("done logging response");
+    
     var i,
         field = $('#segmentize_field');
     
     if(CMA.Core.testUrls) {
-        response = JSON.parse(response);
+        response = $.parseJSON(response);
     }
     
-    if(field.val() === 'sent' || field.val() === 'received' || field.val() === 'started' ||
+    //Logic needs to change
+    /*if(field.val() === 'sent' || field.val() === 'received' || field.val() === 'started' ||
                 field.val() === 'succeeded' || field.val() === 'failed') {
-        var data = response.data[0];
+        var data = response.data;
         var length = data.length;
         
         for(i = 0; i < length; i++) {
-            data[i] = toRelativeTimeMilliseconds(data[i], $('#interval_select').val());
+            data[i][0] = toRelativeTimeMilliseconds(data[i][0], $('#interval_select').val());
         }
-    }
+    }*/
     
     System.EventBus.fireEvent('formatData', response);
+}
+
+function submitQuery(query) {
+    CMA.Core.ajax.getDispatchedTasksData(query, formatData);
 }
 
 function create_query() {
