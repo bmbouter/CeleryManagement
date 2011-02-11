@@ -21,17 +21,34 @@ CMA.Core.QuerySystem = (function() {
             days: 86400,
             months: 2.62974383e6,
             years: 3.1556926e7
+        },
+        field_info = undefined,
+        labels = {
+            range: 'Range',
+            values: 'Values',
+            all: 'All',
+            each: 'Each'
         };
     
     $(document).ready(onReady);
     
     function onReady() {
         System.Handlers.loadHandlers();
+        CMA.Core.ajax.getFieldInfo(loadFieldInfo);
+        $.each($('option[value="choose"]'), function(index, element) {
+            $(element).attr('disabled', 'disabled');
+        });
+        $('#segmentize_range').hide();
         
         var q = {"segmentize":{"field":"worker","method":["all"]},"aggregate":[{"field":"waittime","methods":["average","max","min"]}]};
         
         submitQuery(JSON.stringify(q));
     };
+    
+    function loadFieldInfo(response) {
+        field_info = response;
+        console.log(field_info);
+    }
     
     function parseDate(field) {
         var jsonDate = new AnyTime.Converter(
@@ -90,17 +107,6 @@ CMA.Core.QuerySystem = (function() {
             response = $.parseJSON(response);
         }
         
-        //Logic needs to change
-        /*if(field.val() === 'sent' || field.val() === 'received' || field.val() === 'started' ||
-                    field.val() === 'succeeded' || field.val() === 'failed') {
-            var data = response.data;
-            var length = data.length;
-            
-            for(i = 0; i < length; i++) {
-                data[i][0] = toRelativeTimeMilliseconds(data[i][0], $('#interval_select').val());
-            }
-        }*/
-        
         System.EventBus.fireEvent('formatData', response);
     }
     
@@ -139,50 +145,48 @@ CMA.Core.QuerySystem = (function() {
             });
         }
         
-        //if($('#segmentize').attr('checked')) {
-            object.segmentize = { };
-            object.segmentize.field = $('#segmentize_field').val();
-            object.segmentize.method = [ $('#segmentize_method').val() ];
-            
-            var field = $('#segmentize_field');
-            
-            if($('#segmentize_method').val() == 'range') {
-                object.segmentize.method.push({});
-                
-                $.each($('#segmentize_range').children('div').children('input'), function(i, v) {
-                    if(field.val() === 'runtime' || field.val() === 'totaltime' || field.val() === 'waittime') {
-                        if($(v).attr('name') !== 'interval') {
-                            object.segmentize.method[1][$(v).attr('name')] = parseFloat($(v).val());
-                        } else {
-                            object.segmentize.method[1][$(v).attr('name')] = toSeconds($(v).val(), $('#interval_select').val());
-                        }
-                    } else {
-                        if($(v).attr('name') !== 'interval') {
-                            object.segmentize.method[1][$(v).attr('name')] = parseDate(v);
-                        } else {
-                            object.segmentize.method[1][$(v).attr('name')] = toMilliseconds($(v).val(), $('#interval_select').val());
-                        }
-                    }
-                });
-            } else if($('#segmentize_method').val() == 'values') {
-                object.segmentize.method.push($('#segmentize_values').children('div').children('input').val().split(/[\s,]+/));
-            }
-        //}
+        //Segmentize info
+        object.segmentize = { };
+        object.segmentize.field = $('#segmentize_field').val();
+        object.segmentize.method = [ $('#segmentize_method').val() ];
         
-        //if($('#aggregate').attr('checked')) {
-            object.aggregate = [ ];
+        var field = $('#segmentize_field');
+        
+        if($('#segmentize_method').val() == 'range') {
+            object.segmentize.method.push({});
             
-            var fields = $('#aggregate_table tr');
-            
-            fields.each(function(i, f) {
-                if(i != 0) {
-                    var children = $(f).children();
-                    object.aggregate.push({ });
-                    object.aggregate[i - 1].field = $.text([children[0]]);
-                    object.aggregate[i - 1].methods = $.text([children[1]]).split(/[\s,]+/);
+            $.each($('#segmentize_range').children('div').children('input'), function(i, v) {
+                if(field.val() === 'runtime' || field.val() === 'totaltime' || field.val() === 'waittime') {
+                    if($(v).attr('name') !== 'interval') {
+                        object.segmentize.method[1][$(v).attr('name')] = parseFloat($(v).val());
+                    } else {
+                        object.segmentize.method[1][$(v).attr('name')] = toSeconds($(v).val(), $('#interval_select').val());
+                    }
+                } else {
+                    if($(v).attr('name') !== 'interval') {
+                        object.segmentize.method[1][$(v).attr('name')] = parseDate(v);
+                    } else {
+                        object.segmentize.method[1][$(v).attr('name')] = toMilliseconds($(v).val(), $('#interval_select').val());
+                    }
                 }
             });
-        //}
+        } else if($('#segmentize_method').val() == 'values') {
+            object.segmentize.method.push($('#segmentize_values').children('div').children('input').val().split(/[\s,]+/));
+        }
+        
+        //Aggregate info
+        object.aggregate = [ ];
+        
+        var fields = $('#aggregate_table tr');
+        
+        fields.each(function(i, f) {
+            if(i != 0) {
+                var children = $(f).children();
+                object.aggregate.push({ });
+                object.aggregate[i - 1].field = $.text([children[0]]);
+                object.aggregate[i - 1].methods = $.text([children[1]]).split(/[\s,]+/);
+            }
+        });
         
         console.log(JSON.stringify(object));
         submitQuery(JSON.stringify(object));
@@ -290,11 +294,21 @@ CMA.Core.QuerySystem = (function() {
                 field = $('#segmentize_field');
             
             if(method.val() == 'range') {
-                $('#segmentize_range').show();
+                if(method.attr('disabled') === 'disabled') {
+                    $('#segmentize_range').hide()
+                } else {
+                    $('#segmentize_range').show();
+                }
+                
                 $('#segmentize_values').hide();
                 $('#segmentize_taskname').hide();
             } else if(method.val() == 'values') {
-                $('#segmentize_values').show()
+                if(method.attr('disabled') === 'disabled') {
+                    $('#segmentize_values').hide();
+                } else {
+                    $('#segmentize_values').show();
+                }
+                
                 $('#segmentize_range').hide();
                 $('#segmentize_taskname').hide();
             } else {
@@ -304,13 +318,26 @@ CMA.Core.QuerySystem = (function() {
         }
         
         function change_segmentize_field() {
+            var method = $('#segmentize_method'),
+                field = $('#segmentize_field');
+            
+            var i,
+                value = $(segmentize_field).val(),
+                object = field_info[value],
+                aggregate = object.aggregate,
+                segmentize = object.segmentize,
+                methods = segmentize.methods,
+                length = methods.length;
+
+            method.html("");
+            
+            for(i = 0; i < length; i++) {
+                html = '<option label="' + labels[methods[i]] + '" value="' + methods[i] + '"></option>';
+                method.append(html);
+            }
+            
             $('#range_min').AnyTime_noPicker();
             $('#range_max').AnyTime_noPicker();
-            
-            var _enum = $('#segmentize_field optgroup[id=enum]'),
-                time = $('#segmentize_field optgroup[id=time]'),
-                range = $('#segmentize_method option[value=range]'),
-                field = $('#segmentize_field');
             
             if(field.val() === 'sent' || field.val() === 'received' || field.val() === 'started' ||
                     field.val() === 'succeeded' || field.val() === 'failed') {
@@ -318,15 +345,7 @@ CMA.Core.QuerySystem = (function() {
                 $('#range_max').AnyTime_picker({format: "%Y-%m-%d %T"});
             }
             
-            if(_enum.children('[value=' + $(this).val() + ']').length !== 0) {
-                range.attr('disabled', 'disabled');
-                range.next().attr('selected', 'selected');
-                change_segmentize_method();
-            } else {
-                range.attr('disabled', false);
-                range.attr('selected', 'selected');
-                change_segmentize_method();
-            }
+            change_segmentize_method();
         }
         
         $('#segmentize_field').change(change_segmentize_field);
@@ -438,6 +457,7 @@ CMA.Core.QuerySystem = (function() {
     });
     
     return {
-        startChart: startChart
+        startChart: startChart,
+        field_info: field_info
     };
 }());
