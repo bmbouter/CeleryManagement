@@ -7,7 +7,7 @@ System.Handlers = (function() {
     
     var loadHandlers = function() {
         System.EventBus.addEventHandler('formatData', Core.DataParser.formatData);
-        System.EventBus.addEventHandler('dataFormatted', startChart);
+        System.EventBus.addEventHandler('dataFormatted', Core.QuerySystem.startChart);
     };
     
     return {

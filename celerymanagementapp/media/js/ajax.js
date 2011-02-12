@@ -27,7 +27,8 @@ CMA.Core.ajax = (function() {
                 delete_instance_url: root_url + "provider/delete_worker/",
                 policy_create_url: root_url + "policy/create/",
                 policy_update_url: root_url + "policy/modify/<placeHolder>/",
-                policy_delete_url: root_url + "policy/delete/<placeHolder>/"
+                policy_delete_url: root_url + "policy/delete/<placeHolder>/",
+                field_info_url: root_url + "xy_query/dispatched_tasks/fieldinfo/"
             };
         },
         loadTestUrls = function() {
@@ -75,11 +76,14 @@ CMA.Core.ajax = (function() {
         getWorkerProcesses = function(callbackFunction){
             $.getJSON(urls.worker_processes_url, callbackFunction);
         },
+        getFieldInfo = function(callbackFunction) {
+            $.getJSON(urls.field_info_url, callbackFunction);
+        },
         postShutdownWorker = function(workerName, callbackFunction){
             $.post(urls.shutdown_worker_url.replace("<placeHolder>", workerName), callbackFunction, "json");
         },
         getDispatchedTasksData = function(query, callbackFunction) {
-            $.post(urls.query_dispatched_tasks_url, query, callbackFunction);
+            $.post(urls.query_dispatched_tasks_url, query, callbackFunction, 'json');
         },
         postGetImages = function(callbackFunction){
             $.post(urls.get_images_url, $('#blankProviderForm').serialize(), callbackFunction, "json");
@@ -134,6 +138,7 @@ CMA.Core.ajax = (function() {
         getTasksPerWorker: getTasksPerWorker,
         getPendingTasks: getPendingTasks,
         getWorkerProcesses: getWorkerProcesses,
+        getFieldInfo: getFieldInfo,
         postShutdownWorker: postShutdownWorker,
         getDispatchedTasksData: getDispatchedTasksData,
         postGetImages: postGetImages,
