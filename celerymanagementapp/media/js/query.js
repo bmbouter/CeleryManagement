@@ -86,6 +86,7 @@ function submitQuery(query) {
 }
 
 function formatData(response) {
+    console.log(response);
     var i,
         field = $('#segmentize_field');
     

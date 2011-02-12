@@ -182,7 +182,6 @@ CMA.Core.util = (function(){
     };
 }());
 
-
 CMA.Core.init = function(){
     if( typeof CMA.Core.testUrls === "undefined" ){
         CMA.Core.ajax.loadUrls();
@@ -209,7 +208,6 @@ CMA.Core.init = function(){
 };
 
 CMA.Core.setupEvents = function(){
-    
     $('#taskNavigationMaster').click(function (){
         if( CMA.Core.expandedTasks ){
             $('#taskNavigationMaster').text("+ Tasks");
@@ -278,7 +276,6 @@ CMA.Core.setupEvents = function(){
 };
 
 CMA.Core.navigation = (function() {
-    
     var ajax = CMA.Core.ajax,
         addNavigationElements = function(names, list, linkUrl, activeItem){
             var color = "#7D7D7D",
@@ -469,6 +466,20 @@ CMA.Core.configure = (function(){
                                     }
                                 });        
                             });
+                    } else if( split[1] === "power" ) {
+                        if( $(that).parent().hasClass("active") ){
+                            ajax.postShutdownWorker(split[0], function(data){
+                                console.log(data);
+                                $(that).parent().removeClass("active");
+                                $(that).parent().addClass("inactive");
+                                $(that).children('span').text("Power On");
+                                });
+                        } else {
+                            //power on ajax call
+                            $(that).parent().removeClass("inactive");
+                            $(that).parent().addClass("active");
+                            $(that).children('span').text("Power Off");
+                        }
                     }
                 });
                 $('.createNewOutOfBand').click(function() {

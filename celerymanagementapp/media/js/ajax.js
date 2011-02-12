@@ -76,7 +76,7 @@ CMA.Core.ajax = (function() {
             $.getJSON(urls.worker_processes_url, callbackFunction);
         },
         postShutdownWorker = function(workerName, callbackFunction){
-            $.post(urls.shutdown_worker_url.replace("<placeHolder>", workerName), callbackFunction);
+            $.post(urls.shutdown_worker_url.replace("<placeHolder>", workerName), callbackFunction, "json");
         },
         getDispatchedTasksData = function(query, callbackFunction) {
             $.post(urls.query_dispatched_tasks_url, query, callbackFunction);

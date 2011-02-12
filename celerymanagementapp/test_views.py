@@ -50,11 +50,15 @@ def configure(request):
         for i in range(0,10):
             worker = OutOfBandWorkerNode(ip="4.5.6." + str(i), celeryd_username="Test Username")
             worker.pk = i
+            random.seed()
+            choice = random.randint(0, 1000)
+            worker.active = True if i < 5 else False
             workerForm = OutOfBandWorkerNodeForm(instance=worker)
             OutOfBandWorkers.append({ "worker" : worker, "workerForm" : workerForm })
 
         context["outofbandworkernode_form"] = out_of_band_worker_node_form
         context["outofbandworkernodes"] = OutOfBandWorkers
+
     elif settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "dynamic":
         provider = Provider(provider_user_id="test456YUser", celeryd_username="Test Username", 
                             provider_name=Provider.PROVIDER_CHOICES[3][1], image_id="6sd6aF8dadSSa3")
@@ -132,15 +136,21 @@ def create_or_update_outofbandworker(request, worker_pk=None):
 
 def delete_outofbandworker(request, worker_pk=None):
     """Deletes a worker"""
-    random.seed()
-    choice = random.randint(0, 1000)
-    if not (choice % 2):
-        json = simplejson.dumps("success")
-    else:
-        failed = { 'failure' : 'Worker Node failed to delete'}
-        json = simplejson.dumps(failed)
-    return HttpResponse(json)
+    if request.method == "POST":
+        random.seed()
+        choice = random.randint(0, 1000)
+        if not (choice % 2):
+            json = simplejson.dumps("success")
+        else:
+            failed = { 'failure' : 'Worker Node failed to delete'}
+            json = simplejson.dumps(failed)
+        return HttpResponse(json)
 
+def kill_worker(request, name=None):
+    if request.method == "POST":
+        json = simplejson.dumps("success")
+        return HttpResponse(json)
+        
 
 def create_provider(request):
     if request.method == "POST":
