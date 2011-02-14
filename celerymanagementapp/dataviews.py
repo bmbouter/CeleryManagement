@@ -179,7 +179,12 @@ def task_xy_dataview(request):
     
     xyquery = JsonXYQuery(JsonTaskModelMap(), json_request)
     json_result = xyquery.do_query()
-        
+    
+    ##import pprint
+    ##pprint.pprint(json_result)
+    
+    ##print jsonutil.dumps(json_result)
+    
     return _json_response(json_result)
     
 def task_xy_metadata(request):

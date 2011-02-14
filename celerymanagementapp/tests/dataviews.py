@@ -39,6 +39,31 @@ class XYDataView_TestCase(base.CeleryManagement_DBTestCaseBase):
         
         self.assertEquals(expected_output, output)
         
+    def test_regression1(self):
+        url = urlreverse('celerymanagementapp.dataviews.task_xy_dataview')
+        json_request = {
+            "segmentize": {
+                "field": "sent",
+                "method": [ "range", {'min': 1299691750000, 'max': 1299702556000, 'interval': 3600000} ],
+            },
+            "aggregate": [
+                {
+                    "field": "count",
+                    "methods": ["average"]
+                }
+            ]
+        }
+        json_request = {"segmentize":{"field":"sent","method":["range",{"min":1299792588000,"max":1299792598000,"interval":3600000}]},"aggregate":[{"field":"count","methods":["average"]}]}
+        rawjson = json.dumps(json_request)
+        response = self.client.post(url, rawjson, content_type='application/json')
+        output = json.loads(response.content)
+        
+        data = output['data']
+        self.assertTrue(data[0][1] != float('nan'))
+        ##import pprint
+        ##pprint.pprint(data)
+        
+        
 class TaskXYMetadata_TestCase(base.CeleryManagement_DBTestCaseBase):
     fixtures = ['test_runtimes']
     

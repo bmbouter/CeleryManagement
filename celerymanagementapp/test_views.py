@@ -256,9 +256,9 @@ def get_dispatched_tasks_data(request, name=None):
 
 @login_required
 def task_demo_test_dataview(request):
-    """ Very simple view for testing the task_demo_dataview function.  This is 
-        only for testing, not for production code. 
-    """
+    """ Very simple view for testing the task_demo_dataview function. This is
+only for testing, not for production code.
+"""
     from django.template import Template
     from django.template import RequestContext
     
@@ -273,40 +273,49 @@ def task_demo_test_dataview(request):
     <head>
     <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/jquery.js" ></script>
     <script>
-    
     function json() {{
-    var query = '{{"name": "[NAME]", "rate":{rate}, "runfor":{runfor} }}';
-    query = query.replace("[NAME]", document.testform.taskname.value)
-    
-    $.post(
-        '{send}',
-        query,
-        function(data) {{
-            //alert("Data loaded: " + data);
-            //alert(data.data);
-            //alert(data.data[0]);
-        }},
-        'json'
-    );
+        var query = '{{"name": "[NAME]", "rate":[RATE], "runfor":[RUNFOR] }}';
+        query = query.replace("[NAME]", document.testform.taskname.value)
+        query = query.replace("[RATE]", document.testform.rate.value)
+        query = query.replace("[RUNFOR]", document.testform.runfor.value)
+        
+        $.post(
+            '{send}',
+            query,
+            function(data) {{
+                //alert("Data loaded: " + data);
+                //alert(data.data);
+                //alert(data.data[0]);
+            }},
+            'json'
+        );
     }}
-    
     </script>
     </head>
     <body>
     <form name="testform" action="{send}" method="POST">
-      <table>
-        {{% csrf_token %}}
-        <tr><td>
-        <input type="text" name="taskname" value="{name}" size="90" />
-        </td></tr>
-        <tr><td>
-        <input type="button" value="Send" onclick="json();"/>
-        </td></tr>
-      </table>
+        <table>
+            {{% csrf_token %}}
+            <tr>
+                <td>Task name:</td>
+                <td><input type="text" name="taskname" value="{name}" size="90" /></td>
+            </tr>
+            <tr>
+                <td>Rate (tasks/sec):</td>
+                <td><input type="text" name="rate" value="{rate}" size="30" /></td>
+            </tr>
+            <tr>
+                <td>Run for (sec):</td>
+                <td><input type="text" name="runfor" value="{runfor}" size="30" /></td>
+            </tr>
+            <tr><td>
+            <input type="button" value="Send" onclick="json();"/>
+            </td></tr>
+        </table>
     </form>
     </body>
     </html>
-    """
+"""
     html = html.format(send=send, name=name, rate=rate, runfor=runfor)
     t = Template(html)
     c = RequestContext(request)
@@ -401,5 +410,109 @@ def policy_form_test(request):
     t = Template(html)
     c = RequestContext(request, {'form': form})
     return HttpResponse(t.render(c))
+    
+def task_xy_dataview_test(request):
+    from celerymanagementapp import jsonutil
+    from django.template import Template
+    
+    
+    
+    html = """
+    <html>
+    <head>
+        <title>XY Dataview -- Test</title>
 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/less.js" ></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/jquery.js" ></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/jquery.form.js" ></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/jquery.flot.min.js" ></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/jquery.flot.selection.min.js" ></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/jquery.flot.stack.js" ></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/anytime.min.js"></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/json.js" ></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/ajax.js" ></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/core.js" ></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/System.js"></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/Chart.js" ></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/DataParser.js" ></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/EventBus.js"></script> 
+        <script type="text/javascript" src="/celerymanagementapp/site_media/js/query.js"></script>
+        
+        <script>
+        CMA.Core.USE_MODE = "dynamic";
+        </script>
+        
+        <!--
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/jquery.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/ajax.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/json.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/DataParser.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/EventBus.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/less.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/System.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/Chart.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/jquery.flot.min.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/jquery.flot.selection.min.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/jquery.flot.stack.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/query.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/less.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/anytime.min.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/jquery.form.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/jquery-ui.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/system_canvas.js" ></script>
+        <script type="text/javascript" src="{{{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}}}js/core.js" ></script>
+        -->
+        
+        <script>
+        function json() {{
+            var query = '{query}';
+            
+            $.post(
+                '{url}',
+                query,
+                function(data) {{
+                    console.log(data);
+                    console.log(data["data"]);
+                    //alert("Data loaded: " + data);
+                    //alert(data.data);
+                    //alert(data.data[0]);
+                }},
+                'json'
+            );
+        }}
+        </script>
+    </head>
+    <body>
+    <form name="testform" action="{url}" method="POST">
+        <table>
+            {{% csrf_token %}}
+            <tr><td>
+            <input type="button" value="Send" onclick="json();"/>
+            </td></tr>
+        </table>
+    </form>
+    </body>
+    </html>
+    """
+    min = 1297371600
+    max = 1297382400
+    
+    min = 1297368000
+    max = 1297396800
+    interval = 3600
+    
+    min *= 1000
+    max *= 1000
+    interval *= 1000
+    
+    url = urlreverse('celerymanagementapp.dataviews.task_xy_dataview')
+    data = {"segmentize":{"field":"sent","method":["range",{"min":min,"max":max,"interval":interval}]},"aggregate":[{"field":"count","methods":["average"]}]}
+    ##{"segmentize":{"field":"sent","method":["range",{"min":1297368000000,"max":1297396800000,"interval":3600000}]},"aggregate":[{"field":"count","methods":["average"]}]}
+    json = jsonutil.dumps(data)
+    
+    html = html.format(url=url, query=json)
+    t = Template(html)
+    c = RequestContext(request)
+    return HttpResponse(t.render(c))
+    
 
