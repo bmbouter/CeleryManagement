@@ -312,6 +312,30 @@ class JsonQuery_DateTimeSegmentize_TestCase(base.CeleryManagement_DBTestCaseBase
 class JsonQuery_SimpleAggregate_TestCase(base.CeleryManagement_DBTestCaseBase):
     fixtures = ['test_jsonquery']
     
+    def is_sqlite3(self):
+        # Simple technique for finding database engine.  Will not work in all cases.
+        from django.conf import settings
+        dbs = settings.DATABASES
+        defaultdb = dbs.get('default', None)
+        if defaultdb:
+            return defaultdb.get('ENGINE') == 'django.db.backends.sqlite3'
+        return False  # 
+        
+    def has_variance(self):
+        # Determines if Variance is supported by the underlying database 
+        # engine.  It is not supported by SQLite out-of-the-box.
+        from django.db import DatabaseError
+        from django.db.models import Variance
+        qs = TestModel.objects.all()
+        try:
+            qs.aggregate(Variance('floatval'))['floatval__variance']
+        except DatabaseError as e:
+            if str(e) == 'no such function: VAR_POP':
+                return False
+            else:
+                return True
+        return True
+    
     def test_simple_min(self):
         input = {
             'segmentize': {
@@ -357,6 +381,34 @@ class JsonQuery_SimpleAggregate_TestCase(base.CeleryManagement_DBTestCaseBase):
         output = query.do_query()
         output = sort_result(output)
         self.assertEquals(expected_output, output)
+    
+    def test_simple_variance(self):
+        if not self.has_variance():
+            print '\nThis database does not support computing Variance.  Skipping test.'
+            return
+        input = {
+            'segmentize': {
+                'field': 'enumval',
+                'method': ['all'],
+                },
+            'aggregate': [
+                { 'field': 'floatval', 
+                  'methods': ['variance'] }
+                ]
+            }
+        expected_output = {
+            'data': [
+                (u'A',[{ 'fieldname':'floatval', 'methods': [{'name':'variance', 'value': 5.0}] }] ),
+                (u'B',[{ 'fieldname':'floatval', 'methods': [{'name':'variance', 'value': 4.0}] }] ),
+                (u'C',[{ 'fieldname':'floatval', 'methods': [{'name':'variance', 'value': 88.0}] }] ),
+                ]
+            }
+        query = JsonXYQuery(TestModelModelMap(), input)
+        output = query.do_query()
+        output = sort_result(output)
+        self.assertEquals('variance', output['data'][0][1]['methods'][0]['name'])
+        self.assertEquals('variance', output['data'][1][1]['methods'][0]['name'])
+        self.assertEquals('variance', output['data'][2][1]['methods'][0]['name'])
     
     def test_simple_average(self):
         input = {

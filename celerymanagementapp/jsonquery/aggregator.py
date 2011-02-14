@@ -1,4 +1,29 @@
 from django.db.models import Avg, Max, Min, Sum, Variance
+from celerymanagementapp.jsonquery.exception import JsonQueryError
+
+#==============================================================================#
+_has_variance_cached = None
+
+def _has_variance():
+    global _has_variance_cached
+    
+    if _has_variance_cached is None:
+    
+        def inner():
+            from django.db import DatabaseError
+            qs = TestModel.objects.all()
+            try:
+                qs.aggregate(Variance('floatval'))['floatval__variance']
+            except DatabaseError as e:
+                if str(e) == 'no such function: VAR_POP':
+                    return False
+                else:
+                    return True
+            return True
+            
+        _has_variance_cached = inner()
+        
+    return _has_variance_cached
 
 #==============================================================================#
 # Aggregator stuff:
@@ -69,11 +94,19 @@ def average(fieldname, fieldconv):
 def variance(fieldname, fieldconv):
     """ Return a variance value aggregator function.  The returned function can 
         be used to aggregate a queryset on the variance of the values found in 
-        the field *fieldname*. 
+        the field *fieldname*.
     """
+    if not _has_variance():
+        msg =  'Unable to compute Variance!  This database does not support it.\n'
+        msg += 'SQLite is one database that does not support variance out of the\n'
+        msg += 'box.  Please check the SQLite docs for information about\n'
+        msg += 'extension modules which do provide it.\n'
+        print msg
+        raise JsonQueryError('Unable to compute Variance!')
+    
     key = '{0}__variance'.format(fieldname)
     def _aggregator(queryset):
-        return queryset.aggregate(Var(fieldname))[key]
+        return queryset.aggregate(Variance(fieldname))[key]
     return _aggregator
 
 def sum(fieldname, fieldconv):
