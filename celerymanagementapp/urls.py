@@ -126,6 +126,7 @@ if settings.DEBUG:
         url(r'^test/post/xy_query/dispatched_tasks/$', 'get_dispatched_tasks_data', name='test_get_dispatched_tasks_url'),
     )
     urlpatterns += patterns('celerymanagementapp.test_views',
+        url(r'^test/post/worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'kill_worker', name='test_kill_worker_url'),
         url(r'^test/post/outofbandworker/$', 'create_or_update_outofbandworker', name="test_create_outofbandworker_url"),
         url(r'^test/post/outofbandworker/(?P<worker_pk>[\d]+)/update/$', 'create_or_update_outofbandworker', name="test_update_outofbandworker_url"),
         url(r'^test/post/outofbandworker/(?P<worker_pk>[\d]+)/delete/$', 'delete_outofbandworker', name="test_delete_outofbandworker_url"),

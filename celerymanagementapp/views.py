@@ -381,11 +381,13 @@ def configure(request):
 
         outofbandworkernodes = OutOfBandWorkerNode.objects.all()
         for worker in outofbandworkernodes:
+            worker.active = worker.is_celeryd_running()
             workerForm = OutOfBandWorkerNodeForm(instance=worker)
             OutOfBandWorkers.append({ "worker" : worker, "workerForm" : workerForm })
 
         context["outofbandworkernode_form"] = out_of_band_worker_node_form
         context["outofbandworkernodes"] = OutOfBandWorkers
+
     elif settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "dynamic":
         provider = Provider.objects.all()
         providers = {}

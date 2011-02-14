@@ -8,8 +8,8 @@ CMA.Core.DataParser = (function() {
     var formatData = function(data) {        
         var dataArray = data.data;
 
-        console.log(data);
-        console.log(dataArray);
+        //console.log(data);
+        //console.log(dataArray);
         
         //if(dataArray[0][1] !== NaN) {
             if(typeof(dataArray[0][0]) === 'string') {
@@ -67,13 +67,13 @@ CMA.Core.DataParser = (function() {
             }
     
             data.push(obj);
-            console.log(data);
+            //console.log(data);
         }
         
         setTicks(axisLabels);
         
         return data;
-    }
+    };
     
     var runtimeDataAlternate = function(dataArray) {
         var data = [];
@@ -97,7 +97,7 @@ CMA.Core.DataParser = (function() {
         }
                 
         return data;
-    }
+    };
     
     var stateData = function(dataArray) {
         var data = [ ];
@@ -126,7 +126,7 @@ CMA.Core.DataParser = (function() {
             }
             
             data.push(obj);
-            console.log(data);
+            //console.log(data);
         }
         
         setTicks(axisLabels);

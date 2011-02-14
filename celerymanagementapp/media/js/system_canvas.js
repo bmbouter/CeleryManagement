@@ -328,16 +328,12 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
             if( !expandedTask ){
                 showTaskConnectors(task);
                 expandTask(task, true);
-                canvasElement.css("cursor", "pointer");
-                canvasElement.css("cursor", "hand");
             }
         },
         handleWorkerHover: function(worker){
             if( !expandedWorker ){
                 showWorkerConnectors(worker);
                 expandWorker(worker, true);
-                canvasElement.css("cursor", "pointer");
-                canvasElement.css("cursor", "hand");
             }
         },
         unexpandEntity: function(){
@@ -493,7 +489,7 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
     });
     
     //canvasElement.click(handlers.handleClick);
-    //canvasElement.mousemove(handlers.handleHover);
+    canvasElement.mousemove(handlers.handleHover);
     $(window).resize(handlers.resizer);
 
 };
