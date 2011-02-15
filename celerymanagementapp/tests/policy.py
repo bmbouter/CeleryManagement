@@ -359,6 +359,24 @@ policy:
             r = runner(p.apply_code, p.sourcelines) # Policy.run_apply()
         self.assertEquals(float, type(runner.locals['t']))
         
+    def test_send_mail(self):
+        from django.core import mail as django_mail
+        
+        subj = 'Test Email'
+        msg = 'This is a test email.'
+        frm = 'from@example.org'
+        to = '["to@example.org"]'
+        testdata = self.src('send_email("{subj}","{msg}","{frm}",{to})'.format(
+                                subj=subj, msg=msg, frm=frm, to=to)
+                            )
+        p = policy.Policy(testdata)
+        with Runner(env.ApplyEnv) as runner:
+            r = runner(p.apply_code, p.sourcelines) # Policy.run_apply()
+        self.assertEquals(1, len(django_mail.outbox))
+        self.assertEquals('Test Email', django_mail.outbox[0].subject)
+        self.assertEquals('from@example.org', django_mail.outbox[0].from_email)
+        self.assertEquals(['to@example.org'], django_mail.outbox[0].recipients())
+        
 #==============================================================================#
 class StatsApi_TestCase(base.CeleryManagement_DBTestCaseBase):
     fixtures = ['test_policy_statsapi']

@@ -3,6 +3,7 @@ import itertools
 import collections
 
 from django.db.models import Avg, Min, Max, Variance
+from django.core.mail import send_mail as django_send_mail
 
 from celery.task.control import broadcast, inspect
 from celery.states import RECEIVED, FAILURE, SUCCESS, PENDING, STARTED, REVOKED
@@ -408,7 +409,22 @@ class StatsApi(object):
 
 
 #==============================================================================#
-
+def send_email(subject, message, from_email, recipient_list, auth_user=None, 
+               auth_password=None):
+    """ Send an email using Django's email interface. 
+        
+        recipient_list:
+            A list of emails--each email is a string.
+            
+        auth_user, auth_password:
+            Username and password for the SMTP server.  If they are not 
+            provided, Django will use the EMAIL_HOST_USER and 
+            EMAIL_HOST_PASSWORD settings, respectively.
+    """
+    django_send_mail(subject, message, from_email, recipient_list, 
+                     auth_user=auth_user, auth_password=auth_password)
+                     
+#==============================================================================#
 
 
 

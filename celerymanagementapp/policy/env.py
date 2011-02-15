@@ -117,6 +117,7 @@ class ApplyEnv(Env):
                                                connection=connection),
             'workers':  api.WorkersCollectionApi(connection=connection), 
             'stats':    api.StatsApi(connection=connection),
+            'send_email': api.send_email,
             }
         self._globals.update(xglobals)
         
