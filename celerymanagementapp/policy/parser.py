@@ -207,14 +207,18 @@ class SectionParser(object):
     def __call__(self, tokens):
         """ tokens is either a list of tokens or a list of lists of tokens. """
         #import debug_help
-        if tokens and not isinstance(tokens[0], list):
-            ##print 'list of lists!!!'
-            tokens = [tokens]
-        trees = [self.process_one_subsection(toks) for toks in tokens]
-        tree = self.merge_asts(trees)
-        #print debug_help.write_ast(tree)
-        #print ''
-        co = self.compile_ast(tree)
+        try:
+            if tokens and not isinstance(tokens[0], list):
+                ##print 'list of lists!!!'
+                tokens = [tokens]
+            trees = [self.process_one_subsection(toks) for toks in tokens]
+            tree = self.merge_asts(trees)
+            #print debug_help.write_ast(tree)
+            #print ''
+            co = self.compile_ast(tree)
+        except SyntaxError as e:
+            msg, (file, row, col, text) = e.args
+            raise exceptions.SyntaxError(msg, row, col, text)
         return co
         
     def process_one_subsection(self, tokens):

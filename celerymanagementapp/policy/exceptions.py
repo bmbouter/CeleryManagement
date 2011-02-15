@@ -71,15 +71,20 @@ class StaticError(Error):
         super(StaticError, self).__init__(msg)
         super(StaticError, self).set_policy_context(lineno=lineno, column=column, 
                                                     line=line, file=file)
-        
-        
+
+class _ExceptionWrapper(Error):
+    clsname = 'ExceptionWrapper'
+    def __init__(self, exctype, *args, **kwargs):
+        self.clsname = exctype.__name__
+        super(_ExceptionWrapper, self).__init__(*args, **kwargs)
+    
+
 def ExceptionWrapper(exctype, *args, **kwargs):
-    class _ExceptionWrapper(Error):
-        clsname = exctype.__name__
+    class _ExceptionWrapperImpl(_ExceptionWrapper):
         def __init__(self, *args, **kwargs):
-            super(_ExceptionWrapper, self).__init__(*args, **kwargs)
-    _ExceptionWrapper.__name__ = exctype.__name__
-    return _ExceptionWrapper(*args, **kwargs)
+            super(_ExceptionWrapperImpl, self).__init__(*args, **kwargs)
+    _ExceptionWrapperImpl.__name__ = exctype.__name__
+    return _ExceptionWrapperImpl(exctype, *args, **kwargs)
         
 
 class SyntaxError(StaticError):

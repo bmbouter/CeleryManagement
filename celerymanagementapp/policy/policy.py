@@ -47,7 +47,8 @@ class Runner(object):
             line, lineno, filename = exceptions.policy_traceback_info(text, tb)
             if line:
                 EW = exceptions.ExceptionWrapper
-                raise EW(exctype, msg=e.message, lineno=lineno, 
+                msg = str(e.args[0])
+                raise EW(exctype, msg=msg, lineno=lineno, 
                          line=text[lineno-1], file=filename)
             # ...otherwise re-raise the exception.
             else:

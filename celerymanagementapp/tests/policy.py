@@ -316,6 +316,20 @@ policy:
                 msg = '\n    Note: expr was: {0}'.format(expr)
                 e.args = (e.args[0] + msg,) + e.args[1:]
                 raise
+                
+    def test_syntax_error(self):
+        # genuine Python syntax errors.
+        exprs = [ 'if False then\nx=1',
+                ]
+        for expr in exprs:
+            testdata = self.src(expr)
+            try:
+                self.assertRaises(exceptions.SyntaxError, policy.Policy, testdata)
+            except Exception as e:
+                msg = '\n    Note: expr was: {0}'.format(expr)
+                e.args = (e.args[0] + msg,) + e.args[1:]
+                raise
+        
         
     def test_unassignable_error(self):
         exprs = [ 'workers = 5',
@@ -376,6 +390,27 @@ policy:
         self.assertEquals('Test Email', django_mail.outbox[0].subject)
         self.assertEquals('from@example.org', django_mail.outbox[0].from_email)
         self.assertEquals(['to@example.org'], django_mail.outbox[0].recipients())
+        
+    def test_name_error(self):
+        testdata = self.src('a = unknown_function()')
+        p = policy.Policy(testdata)
+        try:
+            with Runner(env.ApplyEnv) as runner:
+                r = runner(p.apply_code, p.sourcelines)
+            self.fail('Expected a NameError exception.')
+        except exceptions._ExceptionWrapper as e:
+            self.assertEquals('NameError', e.clsname)
+            self.assertEquals("name 'unknown_function' is not defined", e._msg)
+            s =  '  File "<policy:apply>", line 7\n'
+            s += '    a = unknown_function()\n'
+            s += "NameError: name 'unknown_function' is not defined\n"
+            self.assertEquals(s, e.formatted_message)
+        except Exception as e:
+            msg = 'Expected an _ExceptionWrapper wrapping a NameError exception.'
+            msg += '  Instead, found: {0}.'.format(type(e))
+            self.fail(msg)
+        
+        
         
 #==============================================================================#
 class StatsApi_TestCase(base.CeleryManagement_DBTestCaseBase):
