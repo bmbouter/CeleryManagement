@@ -87,7 +87,6 @@ class AbstractWorkerNode(models.Model):
 class OutOfBandWorkerNode(AbstractWorkerNode):
     """An out-of-band Worker Node"""
     ip = models.IPAddressField(_(u"IP address"), unique=True)
-    active = models.BooleanField(_(u"currently active"), default=True)
 
     def __unicode__(self):
         return self.ip
