@@ -421,7 +421,7 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
 
         $('#deactivateWorker').click(function (){
             if(  clickedEntity !== undefined  && clickedEntity.objectType === "Worker" ){
-                CMA.Core.ajax.postShutdownWorker(clickedEntity.fullName, viewer.shutdownWorker);
+                ajax.postWorkerPower(clickedEntity.fullName, {"power_state": "off"}, viewer.shutdownWorker);
                 console.log("deactivate clicked");
                 clickedEntity = false;
             }
