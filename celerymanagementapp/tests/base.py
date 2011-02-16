@@ -68,6 +68,10 @@ class CeleryManagement_DBTestCaseBase(CeleryManagement_TestCaseBase):
         self.today = datetime.date.today()
         #self.client = Client()
         self.users = []
+        self.basic_user = User.objects.create_user(username="test_user", 
+                                                   email="test_user@example.com", 
+                                                   password="password")
+        
         
     def create_users(self, n):
         """Create n users for a test case.  The users will be named userN where 
@@ -93,6 +97,8 @@ class CeleryManagement_DBTestCaseBase(CeleryManagement_TestCaseBase):
         WorkerState.objects.all().delete()
         DispatchedTask.objects.all().delete()
         PolicyModel.objects.all().delete()
+        
+        self.basic_user.delete()
         
         # delete all test users
         for user in self.users:

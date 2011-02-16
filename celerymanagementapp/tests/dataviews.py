@@ -34,7 +34,8 @@ class XYDataView_TestCase(base.CeleryManagement_DBTestCaseBase):
                 ]
             }
         rawjson = json.dumps(json_request)
-        response = self.client.post(url, rawjson, content_type='application/json')
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, rawjson, content_type='application/json')
         output = json.loads(response.content)
         
         self.assertEquals(expected_output, output)
@@ -55,7 +56,8 @@ class XYDataView_TestCase(base.CeleryManagement_DBTestCaseBase):
         }
         json_request = {"segmentize":{"field":"sent","method":["range",{"min":1299792588000,"max":1299792598000,"interval":3600000}]},"aggregate":[{"field":"count","methods":["average"]}]}
         rawjson = json.dumps(json_request)
-        response = self.client.post(url, rawjson, content_type='application/json')
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, rawjson, content_type='application/json')
         output = json.loads(response.content)
         
         data = output['data']
@@ -69,7 +71,8 @@ class TaskXYMetadata_TestCase(base.CeleryManagement_DBTestCaseBase):
     
     def test_basic(self):
         url = urlreverse('celerymanagementapp.dataviews.task_xy_metadata')
-        response = self.client.get(url)
+        with self.scoped_login('test_user','password'):
+            response = self.client.get(url)
         meta = json.loads(response.content)
         
         expected_keys = ['taskname','state','task_id','worker', 
@@ -164,7 +167,9 @@ class PendingTaskCount_TestCase(base.CeleryManagement_DBTestCaseBase):
             'task1': 2,
             'task2': 1,
             }
-        response = self.client.post(url, '', content_type='application/json')
+        
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, '', content_type='application/json')
         output = json.loads(response.content)
         
         self.assertEquals(expected_output, output)
@@ -178,29 +183,33 @@ class TasksPerWorker_TestCase(base.CeleryManagement_DBTestCaseBase):
             'task1': {'worker1': 3, 'worker2': 2}, 
             'task2': {'worker1': 2, 'worker2': 2},
             }
-        response = self.client.post(url, '', content_type='application/json')
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, '', content_type='application/json')
         output = json.loads(response.content)
         
         self.assertEquals(expected_output, output)
         
 
 
-class Configuration_TestCase(base.CeleryManagement_TestCaseBase):
+class Configuration_TestCase(base.CeleryManagement_DBTestCaseBase):
     def setUp(self):
+        super(Configuration_TestCase, self).setUp()
         self.outofbandworker_url = '/celerymanagementapp/outofbandworker/'
         self.provider_url = '/celerymanagementapp/provider/'
 
     def test_create_outofbandworker(self):
         f = open(testcase_settings.OUTOFBANDWORKER_SSH_KEY_FILE) #path to ssh_key file for testing
-        response = self.client.post(self.outofbandworker_url, {
-                        'ip' : testcase_settings.OUTOFBANDWORKER_IP,
-                        'celeryd_username' : testcase_settings.OUTOFBANDWORKER_USERNAME,
-                        'ssh_key' : f,
-                        'celeryd_start_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_START ,
-                        'celeryd_stop_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_STOP,
-                        'celeryd_status_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_STATUS,
-                        'active' : 'on',
-                            })
+        
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(self.outofbandworker_url, {
+                            'ip' : testcase_settings.OUTOFBANDWORKER_IP,
+                            'celeryd_username' : testcase_settings.OUTOFBANDWORKER_USERNAME,
+                            'ssh_key' : f,
+                            'celeryd_start_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_START ,
+                            'celeryd_stop_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_STOP,
+                            'celeryd_status_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_STATUS,
+                            'active' : 'on',
+                                })
         f.close()
         self.assertEquals(response.status_code, 200)
         outofbandworkers = OutOfBandWorkerNode.objects.all()
@@ -208,18 +217,20 @@ class Configuration_TestCase(base.CeleryManagement_TestCaseBase):
 
     def test_create_provider(self):
         f = open(testcase_settings.PROVIDER_SSH_KEY_FILE) #path to ssh_key file for testing
-        response = self.client.post(self.provider_url, {
-                        'provider_user_id' : testcase_settings.PROVIDER_USER_ID,
-                        'provider_key' : testcase_settings.PROVIDER_KEY,
-                        'provider_name' : testcase_settings.PROVIDER_NAME,
-                        'image_id' : testcase_settings.PROVIDER_IMAGE_ID,
-                        'celeryd_username' : testcase_settings.OUTOFBANDWORKER_USERNAME,
-                        'ssh_key' : f,
-                        'celeryd_start_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_START ,
-                        'celeryd_stop_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_STOP,
-                        'celeryd_status_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_STATUS,
-                        'active' : 'on',
-                            })
+        
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(self.provider_url, {
+                            'provider_user_id' : testcase_settings.PROVIDER_USER_ID,
+                            'provider_key' : testcase_settings.PROVIDER_KEY,
+                            'provider_name' : testcase_settings.PROVIDER_NAME,
+                            'image_id' : testcase_settings.PROVIDER_IMAGE_ID,
+                            'celeryd_username' : testcase_settings.OUTOFBANDWORKER_USERNAME,
+                            'ssh_key' : f,
+                            'celeryd_start_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_START ,
+                            'celeryd_stop_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_STOP,
+                            'celeryd_status_cmd' : testcase_settings.OUTOFBANDWORKER_CELERYD_STATUS,
+                            'active' : 'on',
+                                })
         f.close()
         self.assertEquals(response.status_code, 200)
         providers = Provider.objects.all()
@@ -239,7 +250,8 @@ class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
             'enabled': True,
         }
         
-        response = self.client.post(url, post_data)
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, post_data)
         output = json.loads(response.content)
         
         self.assertContains(response, 'Policy successfully created.')
@@ -263,7 +275,8 @@ class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
             'enabled': False,
         }
         
-        response = self.client.post(url, post_data)
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, post_data)
         output = json.loads(response.content)
         
         self.assertContains(response, 'Policy successfully created.')
@@ -286,7 +299,9 @@ class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
             'source': 'This should not compile',  # not legal policy source
             'enabled': True,
         }
-        response = self.client.post(url, post_data)
+        
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, post_data)
         output = json.loads(response.content)
         
         self.assertTrue('failure' in output)
@@ -306,7 +321,8 @@ class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
             'source': 'policy:\n schedule:\n  True\n apply:\n  True',
             'enabled': True,
         }
-        response = self.client.post(url, post_data)
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, post_data)
         output = json.loads(response.content)
         
         self.assertTrue('failure' in output)
@@ -323,7 +339,8 @@ class PolicyCreate_TestCase(base.CeleryManagement_DBTestCaseBase):
             'source': 'policy:\n schedule:\n  True\n apply:\n  True',
             'enabled': True,
         }
-        response = self.client.post(url, post_data)
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, post_data)
         output = json.loads(response.content)
         
         self.assertTrue('failure' in output)
@@ -351,7 +368,8 @@ class PolicyModify_TestCase(base.CeleryManagement_DBTestCaseBase):
             
         self.assertNotEqual('another_policy', PolicyModel.objects.get(id=1).name)
         
-        response = self.client.post(url, post_data)
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, post_data)
         output = json.loads(response.content)
         
         self.assertEquals('Policy successfully updated.', output)
@@ -374,7 +392,8 @@ class PolicyModify_TestCase(base.CeleryManagement_DBTestCaseBase):
             'enabled': True,
         }
         
-        response = self.client.post(url, json_request)
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, json_request)
         output = json.loads(response.content)
         
         self.assertTrue('failure' in output)
@@ -395,7 +414,8 @@ class PolicyModify_TestCase(base.CeleryManagement_DBTestCaseBase):
             'source': 'policy:\n schedule:\n  True\n apply:\n  True',
             'enabled': True,
         }
-        response = self.client.post(url, post_data)
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, post_data)
         output = json.loads(response.content)
         
         self.assertTrue('failure' in output)
@@ -413,7 +433,8 @@ class PolicyDelete_TestCase(base.CeleryManagement_DBTestCaseBase):
         url = urlreverse('celerymanagementapp.dataviews.policy_delete', 
                          kwargs={'policy_id': 1} )
         
-        response = self.client.post(url, {})
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, {})
         output = json.loads(response.content)
         
         self.assertEquals('Policy successfully deleted.', output)
@@ -424,8 +445,9 @@ class PolicyDelete_TestCase(base.CeleryManagement_DBTestCaseBase):
         model_count = PolicyModel.objects.all().count()
         url = urlreverse('celerymanagementapp.dataviews.policy_delete', 
                          kwargs={'policy_id': model_count+1} )
-            
-        response = self.client.post(url, {})
+        
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, {})
         output = json.loads(response.content)
         
         self.assertTrue('failure' in output)
@@ -460,8 +482,8 @@ class PolicyGet_TestCase(base.CeleryManagement_DBTestCaseBase):
                 'traceback': '',
                 },
             }
-            
-        response = self.client.post(url, '', content_type='application/json')
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, '', content_type='application/json')
         output = json.loads(response.content)
         
         self.assertEquals(expected_output, output)
@@ -471,8 +493,9 @@ class PolicyGet_TestCase(base.CeleryManagement_DBTestCaseBase):
         model_count = PolicyModel.objects.all().count()
         url = urlreverse('celerymanagementapp.dataviews.policy_get', 
                          kwargs={'id': model_count+1} )
-            
-        response = self.client.post(url, '', content_type='application/json')
+        
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, '', content_type='application/json')
         output = json.loads(response.content)
         
         self.assertEquals(False, output['success'])
@@ -498,7 +521,8 @@ class PolicyList_TestCase(base.CeleryManagement_DBTestCaseBase):
             {'id': 2, 'name': 'second_policy', 'enabled': True, 'modified': modified, 'last_run_time': last_run_time,},
         ]
             
-        response = self.client.post(url, '', content_type='application/json')
+        with self.scoped_login('test_user','password'):
+            response = self.client.post(url, '', content_type='application/json')
         output = json.loads(response.content)
         
         self.assertEquals(expected_output, output)
