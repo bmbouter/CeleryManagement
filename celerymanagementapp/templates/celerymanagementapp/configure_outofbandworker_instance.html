@@ -1,4 +1,4 @@
-<ul class="node {% if worker.worker.active %} active {% else %} inactive {% endif %} ">
+<ul class="node {% if worker.worker.active %}active{% else %}inactive{% endif %}">
     <li class="left">{{ worker.worker.ip }}</li>
     <li class="editWorkerNode right click" id="{{ worker.worker.pk }}_delete"><img width="12" height ="12" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/delete.png"/><span class="right">Delete</span></li>
     <li class="editWorkerNode right click" id="{{ worker.worker.pk }}_update"><span>Modify</span></li>
