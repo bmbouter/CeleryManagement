@@ -469,11 +469,11 @@ CMA.Core.configure = (function(){
                             });
                     } else if( split[1] === "power" ) {
                         if( $(that).parent().hasClass("active") ){
-                            ajax.postShutdownWorker(split[0], function(data){
-                                console.log(data);
+                            ajax.postWorkerPower(split[0], {"power_state": "off"}, function(data){
                                 $(that).parent().removeClass("active");
                                 $(that).parent().addClass("inactive");
                                 $(that).children('span').text("Power On");
+                                $(that).children('img').attr("src", "../../../site_media/images/power-on.png");
                             });
                         } else {
                             ajax.postWorkerPower(split[0], {"power_state": "on"}, function(data){
