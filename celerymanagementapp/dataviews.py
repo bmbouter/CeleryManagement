@@ -388,15 +388,16 @@ def create_or_update_outofbandworker(request, worker_pk=None):
             json = simplejson.dumps(failed)
         return HttpResponse("<textarea>" + json + "</textarea>")
 
-def worker_start(request):
-    """Find an available node and start a worker process"""
-    active_nodes = OutOfBandWorkerNode.objects.filter(active=True)
-    for node in active_nodes:
-        if not node.is_celeryd_running():
-            node.celeryd_start()
-            return _json_response({'status': 'success'})
-    return _json_response({'status': 'failure', 'message': 'No Available Worker Nodes'})
-    
+def worker_power_dataview(request, name):
+    """Change the power status of a worker"""
+    out_of_band_worker_node = OutOfBandWorkerNode.objects.get(pk=name)
+    if request.method == 'POST':
+        if request.POST['power_state'] == 'on':
+            out_of_band_worker_node.celeryd_start()
+        elif request.POST['power_state'] == 'off':
+            out_of_band_worker_node.celeryd_stop()
+    return _json_response({'status': 'success'})
+
 #==============================================================================#
 # Policy dataviews
 class PolicyDataviewError(Exception):
