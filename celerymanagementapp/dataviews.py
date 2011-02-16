@@ -351,10 +351,11 @@ def delete_outofbandworker(request, worker_pk):
     try:
         worker = OutOfBandWorkerNode.objects.get(pk=worker_pk)
         worker.delete()
+        json = simplejson.dumps("success")
     except Exception as e:
         failed = { 'failure' : e.args[0]}
         json = simplejson.dumps(failed)
-        return HttpResponse(json)
+    return HttpResponse(json)
 
 def create_or_update_outofbandworker(request, worker_pk=None):
     """Create an OutOfBandWorker"""
