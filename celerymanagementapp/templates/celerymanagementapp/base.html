@@ -36,12 +36,6 @@
                CMA.Core.testUrls = true;
             {% endif %}
 
-            {% if taskname %}
-                CMA.Core.taskname = "{{ taskname }}";
-            {% endif %}
-            {% if workername %}
-                CMA.Core.workername = "{{ workername }}";
-            {% endif %}
             {% if CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE %}
                 CMA.Core.USE_MODE = "{{ CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE }}";
             {% endif %}
@@ -76,7 +70,7 @@
                     <div id="navigation">
                         <ul>
                             {% if load_test_data %}
-                            <li><a href="/celerymanagementapp/test/view/dashboard/">Dashboard</a></li>
+                            <!--<li><a href="/celerymanagementapp/test/view/dashboard/">Dashboard</a></li>-->
                             <li><a href="/celerymanagementapp/test/view/system/">Realtime View</a></li>
                             <li><a href="/celerymanagementapp/test/view/configure/">Configuration</a></li>
                             <li><a href="/celerymanagementapp/test/view/chart/">Charts</a></li>
@@ -84,7 +78,7 @@
                             <li><a href="/celerymanagementapp/test/view/policy/">Policies</a></li>
                             {% endif %}
                             {% else %}
-                            <li><a href="/celerymanagementapp/view/dashboard/">Dashboard</a></li>
+                            <!--<li><a href="/celerymanagementapp/view/dashboard/">Dashboard</a></li>-->
                             <li><a href="/celerymanagementapp/view/system/">Realtime View</a></li>
                             <li><a href="/celerymanagementapp/view/chart/">Charts</a></li>
                             <li><a href="/celerymanagementapp/view/configure/">Configuration</a></li>
