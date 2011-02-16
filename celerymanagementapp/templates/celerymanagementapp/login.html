@@ -1,0 +1,32 @@
+{% extends "celerymanagementapp/base.html" %}
+
+{% block container %}
+<form method="POST" action="{% url django.contrib.auth.views.login %}">
+    {% csrf_token %}
+    <div id="login">
+        <div id="loginHeader">
+            <h1>CeleryManagement Console Login</h1>
+        </div>
+        <div class="fieldWrapper">
+            <div class="field">
+                <label for="id_username">Username:</label>
+                <div class="left">{{ form.username }}</div>
+            </div>
+        </div>
+        <div class="fieldWrapper">
+            <div class="field">       
+                <label for="id_password">Password:</label>
+                <div class="left">{{ form.password }}
+            </div>
+        </div>
+    </div>
+    {% if next %}
+        <input type="hidden" name="next" value="{{ next }}" />
+    {% else %}
+        <input type="hidden" name="next" value="{% url system_overview_url %}" />
+    {% endif %}
+
+    <button class="submitButton click positiveButton" id="loginButton" >Submit</button>
+
+</form>
+{% endblock container %}

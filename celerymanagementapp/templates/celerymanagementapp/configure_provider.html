@@ -74,6 +74,6 @@
     {% for instance in instances %}
     <ul class="node active">
         <li class="left">{{ instance.instance_id }}</li>
-        <li class="deleteInstance right click" id="{{ instance.pk }}">Delete</li>
+        <li class="deleteInstance right click" id="{{ instance.pk }}"><img width="12" height ="12" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/delete.png"/><span class="right">Delete</span></li>
     </ul>
     {% endfor %}

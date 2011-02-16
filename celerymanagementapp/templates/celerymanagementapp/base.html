@@ -54,6 +54,7 @@
     {% block body %}
     <body>
         <div id="container">
+            {% block container %}
             <div id="header">
             {% block header %}
                 <div id="headerBarContainer">
@@ -99,6 +100,7 @@
                     {% endblock %}
                 </div>
             </div>
+            {% endblock container %}
         </div>
     </body>
     {% endblock body %}

@@ -72,6 +72,16 @@ body {
     .background_gradient(#31C43B, #31C43B, #2AA833);
     border: 2px solid #2AA833;
 }
+button {
+    color: #FFFFFF;
+    .rounded_borders(5px);
+    height: 30px;
+    padding: 0 1.3em;
+    font-size: 1.3em;
+    font-weight: bold;
+    -webkit-box-shadow: 2px 2px 8px #4D4D4D;
+}
+
 
 #container {
     background: @page_background;
@@ -406,6 +416,44 @@ body {
                     }
                 }
             }
+        }
+    }
+
+    #login {
+        margin: 25% auto;
+        width: 450px;
+
+        #loginHeader {
+            border-bottom: 2px solid #CCC;
+            margin-bottom: 1em;
+            
+            h1 {
+                margin-left: 2em;
+                margin-bottom: 0.2em;
+                font-size: 1.4em;
+                font-weight: bold;
+            }
+        }
+        .fieldWrapper {
+            float: left;
+            width: 90%;
+            margin: 15px 0 0 30px;
+        }
+        .field {
+            float: left;
+        }
+        input {
+            margin: 5px 0 0 0;
+        }
+        label {
+            text-align: right;
+            width: 120px;
+            float: left;
+            margin: 5px 5px 0 0;
+            color: black;
+        }
+        button {
+            margin: 0.6em 0 0 7.5em;
         }
     }
 }

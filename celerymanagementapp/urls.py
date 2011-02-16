@@ -100,6 +100,10 @@ urlpatterns += patterns('celerymanagementapp',
     (r'^get/dispatched_tasks/(?P<taskname>[-\w\d_.]+)/$', 'views.get_dispatched_tasks'),   
 )
 
+urlpatterns += patterns('',
+    (r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'celerymanagementapp/login.html'}),
+)
+
 urlpatterns += patterns('celerymanagementapp.views',
     url(r'^view/system/$', 'system_overview', name="system_overview_url"),
     url(r'^view/task/(?P<taskname>[-\w\d_.]+)/$', 'task_view', name="task_view_url"),
