@@ -21,7 +21,7 @@ CMA.Core.ajax = (function() {
                 out_of_band_worker_create_url: root_url + "outofbandworker/",
                 out_of_band_worker_update_url: root_url + "outofbandworker/<placeHolder>/update/",
                 out_of_band_worker_delete_url: root_url + "outofbandworker/<placeHolder>/delete/",
-                out_of_band_worker_power_url: root_url + "/worker/<placeHolder>/power_state/",
+                out_of_band_worker_power_url: root_url + "worker/<placeHolder>/power_state/",
                 provider_create_url: root_url + "provider/",
                 provider_delete_url: root_url + "provider/<placeHolder>/delete/",
                 get_images_url: root_url + "provider/images/",
