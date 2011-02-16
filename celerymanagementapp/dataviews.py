@@ -370,6 +370,7 @@ def create_or_update_outofbandworker(request, worker_pk=None):
             if worker_pk is not None:
                 json = simplejson.dumps("Worker successfully updated.")
             else:
+                worker.active = worker.is_celeryd_running()
                 context = { 'worker': {'worker': worker,
                             'workerForm': new_obj }}
                 html = render_to_response("celerymanagementapp/configure_outofbandworker_instance.html",

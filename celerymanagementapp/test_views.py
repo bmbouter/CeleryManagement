@@ -114,6 +114,7 @@ def create_or_update_outofbandworker(request, worker_pk=None):
             else:
                 worker = out_of_band_worker_node_form.save(commit=False)
                 worker.pk = 120
+                worker.active = True
                 context = { 'worker': {'worker': worker,
                             'workerForm': out_of_band_worker_node_form }}
                 html = render_to_response("celerymanagementapp/configure_outofbandworker_instance.html",
