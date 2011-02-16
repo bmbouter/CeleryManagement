@@ -12,16 +12,19 @@ import random
 from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm, PolicyModelForm
 from celerymanagementapp.models import OutOfBandWorkerNode, Provider, InBandWorkerNode, PolicyModel
 
+@login_required()
 def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
             { "load_test_data" : "true" },
             context_instance=RequestContext(request))
 
+@login_required()
 def dashboard(request):
     return render_to_response('celerymanagementapp/dashboard.html',
             { "load_test_data" : "true" },
             context_instance=RequestContext(request))
 
+@login_required()
 def policy(request):
     policies = []
     for i in range(0,10):
@@ -36,11 +39,13 @@ def policy(request):
             "blank_policy_form": blank_policy_form},
             context_instance=RequestContext(request))
 
+@login_required()
 def chart(request):
     return render_to_response('celerymanagementapp/chart.html',
             { "load_test_data" : "true" },
             context_instance=RequestContext(request))
 
+@login_required()
 def configure(request):
     context = { "load_test_data": "true" }
     if settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static":
@@ -100,6 +105,7 @@ def worker_view(request, workername=None):
 
 
 #######  Ajax views.  #####################
+@login_required()
 def create_or_update_outofbandworker(request, worker_pk=None):
     if request.method == "POST":
         if worker_pk is None:
@@ -135,6 +141,7 @@ def create_or_update_outofbandworker(request, worker_pk=None):
         
         return HttpResponse("<textarea>" + json + "</textarea>")
 
+@login_required()
 def delete_outofbandworker(request, worker_pk=None):
     """Deletes a worker"""
     if request.method == "POST":
@@ -147,16 +154,19 @@ def delete_outofbandworker(request, worker_pk=None):
             json = simplejson.dumps(failed)
         return HttpResponse(json)
 
+@login_required()
 def kill_worker(request, name=None):
     if request.method == "POST":
         json = simplejson.dumps("success")
         return HttpResponse(json)
         
+@login_required()
 def worker_power(request, name=None):
     if request.method == 'POST':
         json = simplejson.dumps("success")
         return HttpResponse(json)
 
+@login_required()
 def create_provider(request):
     if request.method == "POST":
         provider_form = ProviderForm(request.POST, request.FILES)
@@ -171,6 +181,7 @@ def create_provider(request):
             json = simplejson.dumps(failed)
         return HttpResponse(json)
 
+@login_required()
 def delete_provider(request, provider_pk=None):
     """Deletes a Provider"""
     random.seed()
@@ -190,6 +201,7 @@ def delete_provider(request, provider_pk=None):
         json = simplejson.dumps(failed)
     return HttpResponse(json)
 
+@login_required()
 def get_images(request):
     images = [{ 'name': "Ubuntu34-postgresql", "id": "9ad9adf88dsa"}, 
                 {'name': "Fedora-14-postgresql-Django", "id": "36d6a6gGHT"}, 
@@ -198,6 +210,7 @@ def get_images(request):
     return HttpResponse(json, mimetype="application/json")
 
 
+@login_required()
 def policy_create(request):
     if request.method == "POST":
         policy_form = PolicyModelForm(request.POST)
@@ -222,6 +235,7 @@ def policy_create(request):
             json = simplejson.dumps(failed)
         return HttpResponse(json)
 
+@login_required()
 def policy_modify(request, policy_id=None):
     if request.method == "POST":
         policy = PolicyModel()
@@ -238,6 +252,7 @@ def policy_modify(request, policy_id=None):
             json = simplejson.dumps(failed)
         return HttpResponse(json)
 
+@login_required()
 def policy_delete(request, policy_id=None):
     """Deletes a policy"""
     random.seed()
@@ -250,6 +265,7 @@ def policy_delete(request, policy_id=None):
     return HttpResponse(json)
 
 
+@login_required()
 def delete_worker(request, worker_pk):
     """Deletes a worker"""
     random.seed()
@@ -263,6 +279,7 @@ def delete_worker(request, worker_pk):
         return HttpResponse(json)
 
 
+@login_required()
 def get_dispatched_tasks_data(request, name=None):
     if request.method == 'POST':
         f = open(settings.BASE_DIR + '/celerymanagementapp/media/test_data/chart_data.json', "r")
@@ -426,6 +443,7 @@ def policy_form_test(request):
     c = RequestContext(request, {'form': form})
     return HttpResponse(t.render(c))
     
+@login_required()
 def task_xy_dataview_test(request):
     from celerymanagementapp import jsonutil
     from django.template import Template

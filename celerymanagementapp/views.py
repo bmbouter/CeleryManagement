@@ -148,6 +148,7 @@ def test_view(request, taskname=None):
     return HttpResponse(states_in_range)
     
 #==============================================================================#
+@login_required()
 def view_throughputs(request, taskname=None):
     # Simple view, mostly for testing purposes at this point.
     now = datetime.datetime.now()
@@ -157,6 +158,7 @@ def view_throughputs(request, taskname=None):
     return HttpResponse(str(throughputs))
 
 #==============================================================================#
+@login_required()
 def get_throughput_data(request, taskname=None):
     all_data = [] 
     description = {}
@@ -185,6 +187,7 @@ def get_throughput_data(request, taskname=None):
     return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","tasks")))
 
 
+@login_required()
 def get_runtime_data(request, taskname=None):
     search_range =          searchrange_from_post(request.GET)
     runtime_range_min =     get_postval(request.GET, 'runtime_min', float, 0.)
@@ -248,11 +251,13 @@ def visualize_runtimes(request, taskname=None, runtime_min=0., bin_count=None,
     return render_to_response('celerymanagementapp/barchart.html', params,
             context_instance=RequestContext(request))
 
+@login_required()
 def visualize_throughput(request, taskname=None):
     return render_to_response('celerymanagementapp/timeseries.html',
             {'task': taskname, 'taskname': taskname },
             context_instance=RequestContext(request))
 
+@login_required()
 def view_defined_tasks(request):
     i = inspect()
     workers = i.registered_tasks()
@@ -275,6 +280,7 @@ def view_defined_tasks(request):
 
     # return HttpResponse(json.dumps(defined))
 
+@login_required()
 def get_dispatched_tasks(request, taskname=None):
     """View DispatchedTasks, possibly limited to those for a particular 
        DefinedTask.
@@ -297,6 +303,7 @@ def get_dispatched_tasks(request, taskname=None):
     return HttpResponse(tasks)
 
 
+@login_required()
 def view_dispatched_tasks(request, taskname=None):
     """View DispatchedTasks, possibly limited to those for a particular 
        DefinedTask.
@@ -352,6 +359,7 @@ def get_runtimes_new(request, taskname=None, interval=0):
         return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","runtime"),req_id=reqId))
     return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","runtime")))
 
+@login_required()
 def visualize_runtimes_new(request, taskname=None, interval=0):
     return render_to_response('celerymanagementapp/runtime_timeseries.html',
             {'task': taskname, 'taskname': taskname },
@@ -365,14 +373,17 @@ def visualize_runtimes_new(request, taskname=None, interval=0):
         # worker_dict[w.__str__()] = w.is_alive()
     # return HttpResponse(json.dumps(worker_dict))
 
+@login_required()
 def system_overview(request):
     return render_to_response('celerymanagementapp/system.html',
             context_instance=RequestContext(request))
             
+@login_required()
 def chart(request):
     return render_to_response('celerymanagementapp/chart.html',
             context_instance=RequestContext(request))
 
+@login_required()
 def configure(request):
     context = {}
     if settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static":
@@ -406,20 +417,24 @@ def configure(request):
             context,
             context_instance=RequestContext(request))
 
+@login_required()
 def task_view(request, taskname=None):
     return render_to_response('celerymanagementapp/task.html',
             { "taskname" : taskname, },
             context_instance=RequestContext(request))
 
+@login_required()
 def worker_view(request, workername=None):
     return render_to_response('celerymanagementapp/worker.html',
             { "workername" : workername, },
             context_instance=RequestContext(request))
 
+@login_required()
 def dashboard(request):
     return render_to_response('celerymanagementapp/dashboard.html',
             context_instance=RequestContext(request))
     
+@login_required()
 def policy(request):
     pols = PolicyModel.objects.all()
     policies = []
@@ -439,6 +454,7 @@ def _resolve_name_param(name):
         name = None
     return name
 
+@login_required()
 def kill_worker(request, name=None):
     """ Kills a running worker (celeryd).  However, no action will be taken 
         unless the request method is 'POST'.
@@ -457,6 +473,7 @@ def kill_worker(request, name=None):
         broadcast('shutdown', destination=dest)
         return HttpResponse('success')
 
+@login_required()
 def grow_worker_pool(request, name=None, num=1):
     """ Kills a running worker (celeryd).  However, no action will be taken 
         unless the request method is 'POST'.
@@ -473,6 +490,7 @@ def grow_worker_pool(request, name=None, num=1):
         broadcast('pool_grow', destination=dest, arguments={'n':num})
         return HttpResponse('')
 
+@login_required()
 def shrink_worker_pool(request, name=None, num=1):
     """ Kills a running worker (celeryd).  However, no action will be taken 
         unless the request method is 'POST'.
