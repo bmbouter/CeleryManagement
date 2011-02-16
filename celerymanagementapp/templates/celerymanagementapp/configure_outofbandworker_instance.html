@@ -2,7 +2,7 @@
     <li class="left">{{ worker.worker.ip }}</li>
     <li class="editWorkerNode right click" id="{{ worker.worker.pk }}_delete"><img width="12" height ="12" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/delete.png"/><span class="right">Delete</span></li>
     <li class="editWorkerNode right click" id="{{ worker.worker.pk }}_update"><span>Modify</span></li>
-    <li class="editWorkerNode right click" id="{{ worker.worker.pk }}_power"><img width="14" height ="12" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/{% if worker.worker.active %}power-off.png{% else %}power-on.png{% endif %}"/><span>{% if worker.worker.active %} Power Off {% else %} Power On {% endif %}</span></li>
+    <li class="editWorkerNode right click" id="{{ worker.worker.pk }}_power"><img width="14" height ="12" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/{% if worker.worker.active %}power-off.png{% else %}power-on.png{% endif %}"/><span>{% if worker.worker.active %}Power Off{% else %}Power On{% endif %}</span></li>
 </ul>
 <form method="POST" enctype="multipart/form-data" class="outOfBandForm" id="{{ worker.worker.pk }}_Form">
     {% csrf_token %}

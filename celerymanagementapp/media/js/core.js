@@ -474,12 +474,14 @@ CMA.Core.configure = (function(){
                                 $(that).parent().removeClass("active");
                                 $(that).parent().addClass("inactive");
                                 $(that).children('span').text("Power On");
-                                });
+                            });
                         } else {
-                            //power on ajax call
-                            $(that).parent().removeClass("inactive");
-                            $(that).parent().addClass("active");
-                            $(that).children('span').text("Power Off");
+                            ajax.postWorkerPower(split[0], {"power_state": "on"}, function(data){
+                                $(that).parent().removeClass("inactive");
+                                $(that).parent().addClass("active");
+                                $(that).children('span').text("Power Off");
+                                $(that).children('img').attr("src", "../../../site_media/images/power-off.png");
+                            });
                         }
                     }
                 });

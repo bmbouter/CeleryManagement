@@ -127,6 +127,7 @@ if settings.DEBUG:
     )
     urlpatterns += patterns('celerymanagementapp.test_views',
         url(r'^test/post/worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'kill_worker', name='test_kill_worker_url'),
+        url(r'^test/post/worker/(?P<name>[-\w\d_.]+)/power_state/$', 'worker_power', name='test_worker_power_url'),
         url(r'^test/post/outofbandworker/$', 'create_or_update_outofbandworker', name="test_create_outofbandworker_url"),
         url(r'^test/post/outofbandworker/(?P<worker_pk>[\d]+)/update/$', 'create_or_update_outofbandworker', name="test_update_outofbandworker_url"),
         url(r'^test/post/outofbandworker/(?P<worker_pk>[\d]+)/delete/$', 'delete_outofbandworker', name="test_delete_outofbandworker_url"),

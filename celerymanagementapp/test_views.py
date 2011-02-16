@@ -151,7 +151,10 @@ def kill_worker(request, name=None):
         json = simplejson.dumps("success")
         return HttpResponse(json)
         
-
+def worker_power(request, name=None):
+    if request.method == 'POST':
+        json = simplejson.dumps("success")
+        return HttpResponse(json)
 
 def create_provider(request):
     if request.method == "POST":
