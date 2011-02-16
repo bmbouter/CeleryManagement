@@ -7,6 +7,9 @@
         <div id="loginHeader">
             <h1>CeleryManagement Console Login</h1>
         </div>
+        {% if form.errors %}
+        <p style="color: red;">Your username and password didn't match.  Please try again.</p>
+        {% endif %}
         <div class="fieldWrapper">
             <div class="field">
                 <label for="id_username">Username:</label>

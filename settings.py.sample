@@ -142,6 +142,8 @@ INSTALLED_APPS = (
 SECURE_UPLOADS = '/tmp/'
 FILE_UPLOAD_PERMISSIONS = 0600
 
+LOGIN_URL = "/celerymanagementapp/login/"
+
 CELERYMANAGEMENTAPP_MEDIA_PREFIX = "/celerymanagementapp/site_media/"
 
 # This represents how often the System View refreshes its data.  Given in
