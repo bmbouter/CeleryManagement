@@ -491,20 +491,26 @@ CMA.Core.configure = (function(){
                                 });        
                             });
                     } else if( split[1] === "power" ) {
-                        if( $(that).parent().hasClass("active") ){
-                            ajax.postWorkerPower(split[0], {"power_state": "off"}, function(data){
-                                $(that).parent().removeClass("active");
-                                $(that).parent().addClass("inactive");
-                                $(that).children('span').text("Power On");
-                                $(that).children('img').attr("src", "../../../site_media/images/power-on.png");
-                            });
-                        } else {
-                            ajax.postWorkerPower(split[0], {"power_state": "on"}, function(data){
-                                $(that).parent().removeClass("inactive");
-                                $(that).parent().addClass("active");
-                                $(that).children('span').text("Power Off");
-                                $(that).children('img').attr("src", "../../../site_media/images/power-off.png");
-                            });
+                        if( !$(that).attr('disabled') ){
+                            if( $(that).parent().hasClass("active") ){
+                                $(that).attr('disabled', 'disabled');
+                                ajax.postWorkerPower(split[0], {"power_state": "off"}, function(data){
+                                    $(that).parent().removeClass("active");
+                                    $(that).parent().addClass("inactive");
+                                    $(that).children('span').text("Power On");
+                                    $(that).children('img').attr("src", "../../../site_media/images/power-on.png");
+                                    $(that).removeAttr('disabled');
+                                });
+                            } else {
+                                $(that).attr('disabled', 'disabled');
+                                ajax.postWorkerPower(split[0], {"power_state": "on"}, function(data){
+                                    $(that).parent().removeClass("inactive");
+                                    $(that).parent().addClass("active");
+                                    $(that).children('span').text("Power Off");
+                                    $(that).children('img').attr("src", "../../../site_media/images/power-off.png");
+                                    $(that).removeAttr('disabled');
+                                });
+                            }
                         }
                     }
                 });
