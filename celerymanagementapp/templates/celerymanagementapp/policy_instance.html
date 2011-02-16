@@ -1,7 +1,7 @@
-    <ul class="node">
+    <ul class="node active">
         <li class="left">{{ policy.policy.name }}</li>
-        <li class="deletePolicy right click" id="{{ policy.policy.pk }}_delete">Delete</li>
-        <li class="editPolicy right click" id="{{ policy.policy.pk }}_update">Modify</li>
+        <li class="deletePolicy right click" id="{{ policy.policy.pk }}_delete"><span>Delete</span></li>
+        <li class="editPolicy right click" id="{{ policy.policy.pk }}_update"><span>Modify</span></li>
     </ul>
     <form method="POST" enctype="multipart/form-data" class="policyForm" id="{{ policy.policy.pk }}_Form">
         {% csrf_token %}

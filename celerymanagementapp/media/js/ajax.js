@@ -49,6 +49,7 @@ CMA.Core.ajax = (function() {
                 out_of_band_worker_create_url: post_root_url + "outofbandworker/",
                 out_of_band_worker_update_url: post_root_url + "outofbandworker/<placeHolder>/update/",
                 out_of_band_worker_delete_url: post_root_url + "outofbandworker/<placeHolder>/delete/",
+                out_of_band_worker_power_url: post_root_url + "/outofbandworker/<placeHolder>/power_state/",
                 provider_create_url: post_root_url + "provider/",
                 provider_delete_url: post_root_url + "provider/<placeHolder>/delete/",
                 get_images_url: post_root_url + "provider/images/",
@@ -79,9 +80,6 @@ CMA.Core.ajax = (function() {
         getFieldInfo = function(callbackFunction) {
             $.getJSON(urls.field_info_url, callbackFunction);
         },
-        postShutdownWorker = function(workerName, callbackFunction){
-            $.post(urls.shutdown_worker_url.replace("<placeHolder>", workerName), callbackFunction, "json");
-        },
         getDispatchedTasksData = function(query, callbackFunction) {
             $.post(urls.query_dispatched_tasks_url, query, callbackFunction, 'json');
         },
@@ -107,6 +105,12 @@ CMA.Core.ajax = (function() {
         },
         postDeleteOutOfBandWorker = function(workerID, callback){
             $.post(urls.out_of_band_worker_delete_url.replace("<placeHolder>", workerID), {}, callback, "json");
+        },
+        postShutdownWorker = function(workerName, callbackFunction){
+            $.post(urls.shutdown_worker_url.replace("<placeHolder>", workerName), callbackFunction, "json");
+        },
+        postWorkerPower = function(workerName, data, callbackFunction){
+            $.post(urls.out_of_band_worker_power_url.replace("<placeHolder>", workerName), data, callbackFunction, "json");
         },
         postCreateProvider = function(form, callback){
             console.log("test");
@@ -146,6 +150,7 @@ CMA.Core.ajax = (function() {
         postCreateOutOfBandWorker: postCreateOutOfBandWorker,
         postUpdateOutOfBandWorker: postUpdateOutOfBandWorker,
         postDeleteOutOfBandWorker: postDeleteOutOfBandWorker,
+        postWorkerPost: postWorkerPower,
         postCreateProvider: postCreateProvider,
         postDeleteProvider: postDeleteProvider,
         postCreatePolicy: postCreatePolicy,

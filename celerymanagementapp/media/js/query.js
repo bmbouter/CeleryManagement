@@ -456,21 +456,8 @@ CMA.Core.QuerySystem = (function() {
         });
     });
     
-<<<<<<< HEAD:celerymanagementapp/media/js/query.js
-    disableLegend.click(function() {
-        if($(this).attr('checked')) {
-            enableLegend.attr('checked', false);
-            c1.disableLegend();
-        } else {
-            enableLegend.attr('checked', true);
-            c1.enableLegend();
-        }
-    });
-});
-=======
     return {
         startChart: startChart,
         field_info: field_info
     };
 }());
->>>>>>> 7c3ce4eaa919742575ce7ad8954367820cd5bcec:celerymanagementapp/media/js/query.js

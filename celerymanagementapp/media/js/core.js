@@ -14,7 +14,7 @@ function createTable(data) {
     });
 }
 
-CMA.Core.util = (function(){
+CMA.Core.util = (function($){
     var expand = function(elem) {
             $(elem).animate(
                 { height: "toggle" },
@@ -180,7 +180,7 @@ CMA.Core.util = (function(){
         checkTab: checkTab,
         showStatus: showStatus
     };
-}());
+}(jQuery));
 
 CMA.Core.init = function(){
     if( typeof CMA.Core.testUrls === "undefined" ){
@@ -198,13 +198,6 @@ CMA.Core.init = function(){
     } else {
         $('#navigation').css("height", $('#container').css("min-height"));
     }
-
-    $('li').hover(function(){
-        $(this).css({ "color": "orange" });
-        },
-        function(){
-        $(this).css({ "color": "#000000" });
-    });
 };
 
 CMA.Core.setupEvents = function(){
@@ -316,6 +309,13 @@ CMA.Core.navigation = (function() {
 CMA.Core.policy = (function(){
     var ajax = CMA.Core.ajax,
         util = CMA.Core.util,
+        defaultSourceText = 'policy:\n' + 
+                            '    schedule:\n' +  
+                            '\tcrontab(minute="*/1")\n' + 
+                            '    condition:\n' + 
+                            '\tTrue\n' + 
+                            '    apply:\n' + 
+                            '\tprint "in policy apply..."',
 
         submitPolicy = function(){
             var form = {},
@@ -389,6 +389,7 @@ CMA.Core.policy = (function(){
                     { "urlID": split[0] });
             });
             $('textarea').keydown(util.checkTab);
+            $('#blankPolicyForm').children().find('#id_source').val(defaultSourceText);
         };
 
     return {

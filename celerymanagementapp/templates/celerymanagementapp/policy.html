@@ -7,8 +7,7 @@
     </h1>
     <ul>
         <li>Policy Name</li>
-        <li class="createPolicy right click">Policy</li>
-        <li class="createPolicy right click"><img src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png"/></li>
+        <li class="createPolicy right click"><img width="13" height="13" src="{{ CELERYMANAGEMENTAPP_MEDIA_PREFIX }}images/edit-add.png"/><span class="right">New Policy</span></li>
     </ul>
     <form method="POST" enctype="multipart/form-data" class="policyForm" id="blankPolicyForm" action="/celerymanagementapp/policy/">
         {% csrf_token %}
