@@ -204,7 +204,7 @@ class WorkerList_TestCase(base.CeleryManagement_DBTestCaseBase):
 
         try:
             url = urlreverse('celerymanagementapp.dataviews.worker_list_dataview')
-            expected_output = ['worker1',]
+            expected_output = [{'name':'worker1','id':'worker1'}]
             response = self.client.post(url, '', content_type='application/json')
             output = json.loads(response.content)
             self.assertEquals(expected_output, output)
