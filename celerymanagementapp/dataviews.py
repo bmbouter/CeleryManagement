@@ -299,9 +299,13 @@ def worker_list_dataview(request):
         workers = OutOfBandWorkerNode.objects.all()
         for worker in workers:
             if worker.is_celeryd_running():
-                workers.append(worker)
+                workers.append({ 'name': worker.name,
+                                'id': worker.pk})
     else:
-        workernames = get_workers_live()
+        workers = get_workers_live()
+        for worker in workers:
+            workernames.append({ "name": worker,
+                                "id": worker })
     return _json_response(workernames)
 
 #==============================================================================#
