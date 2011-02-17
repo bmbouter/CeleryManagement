@@ -188,8 +188,49 @@ class TasksPerWorker_TestCase(base.CeleryManagement_DBTestCaseBase):
         output = json.loads(response.content)
         
         self.assertEquals(expected_output, output)
-        
 
+
+
+class WorkerList_TestCase(base.CeleryManagement_DBTestCaseBase):
+    
+    def test_basic(self):
+        from django.conf import settings
+        from celerymanagementapp import dataviews
+        # Note: modifying Django settings at runtime is in general a bad idea.
+        old_use_mode = settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE
+        settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE = 'dynamic'
+        old_test_flag = dataviews.GET_WORKERS_LIVE_ENABLE_TEST
+        dataviews.GET_WORKERS_LIVE_ENABLE_TEST = ['worker1']
+
+        try:
+            url = urlreverse('celerymanagementapp.dataviews.worker_list_dataview')
+            expected_output = ['worker1',]
+            response = self.client.post(url, '', content_type='application/json')
+            output = json.loads(response.content)
+            self.assertEquals(expected_output, output)
+
+        finally:
+            dataviews.GET_WORKERS_LIVE_ENABLE_TEST = old_test_flag
+            settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE = old_use_mode
+            
+    def test_static1(self):
+        from django.conf import settings
+        # Note: modifying Django settings at runtime is in general a bad idea.
+        old_use_mode = settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE
+        settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE = 'static'
+
+        try:
+            OutOfBandWorkerNode.objects.all().delete()  # try with no objects
+            url = urlreverse('celerymanagementapp.dataviews.worker_list_dataview')
+            expected_output = []
+            response = self.client.post(url, '', content_type='application/json')
+            output = json.loads(response.content)
+            self.assertEquals(expected_output, output)
+
+        finally:
+            settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE = old_use_mode
+            
+        
 
 class Configuration_TestCase(base.CeleryManagement_DBTestCaseBase):
     def setUp(self):
