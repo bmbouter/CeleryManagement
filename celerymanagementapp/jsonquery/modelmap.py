@@ -142,9 +142,8 @@ class DateTimeConv(FieldConv):
 
 
 #==============================================================================#
-agg_method_count = ['count',]
-agg_method_common = agg_method_count + ['enumerate',]
-agg_methods_numeric = ['count', 'average', 'min', 'max', 'sum', 'variance',]
+agg_method_common = ['enumerate',]
+agg_methods_numeric = ['average', 'min', 'max', 'sum', 'variance',]
 
 class JsonTaskModelMap(JsonModelMap):
     model = DispatchedTask
@@ -173,10 +172,10 @@ class JsonTaskModelMap(JsonModelMap):
         ]
     
     aggregation_methods = {
-        'name':         ['count', 'enumerate',],
-        'state':        ['count', 'enumerate',],
-        'task_id':      ['count',],
-        'worker':       ['count', 'enumerate',],
+        'name':         ['enumerate',],
+        'state':        ['enumerate',],
+        'task_id':      [],
+        'worker':       ['enumerate',],
         
         'runtime':      agg_methods_numeric,
         'waittime':     agg_methods_numeric,
@@ -189,9 +188,9 @@ class JsonTaskModelMap(JsonModelMap):
         'succeeded':    agg_methods_numeric,
         'failed':       agg_methods_numeric,
         
-        'routing_key':  ['count', 'enumerate',],
+        'routing_key':  ['enumerate',],
         'expires':      agg_methods_numeric,
-        'result':       ['count',],
+        'result':       ['enumerate',],
         'eta':          agg_methods_numeric,
         }
         
