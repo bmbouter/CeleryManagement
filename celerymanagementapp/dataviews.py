@@ -167,7 +167,6 @@ def get_worker_subprocesses(dest=None):
 
 #==============================================================================#
 # task/worker dataviews
-@login_required()
 def task_xy_dataview(request):
     """ Performs a database query and returns the results of that query.  The 
         result is formatted as json.  The query must be contained in the 
@@ -188,13 +187,11 @@ def task_xy_dataview(request):
     
     return _json_response(json_result)
     
-@login_required()
 def task_xy_metadata(request):
     """ Retrieve metadata about the task_xy_dataview fields. """
     meta = JsonTaskModelMap().get_metadata()
     return _json_response(meta)
 
-@login_required()
 def worker_subprocesses_dataview(request, name=None):
     """ Return the number of sub processes for each worker as a json 
         dictionary.
@@ -205,7 +202,6 @@ def worker_subprocesses_dataview(request, name=None):
         
     return _json_response(workercounts)
 
-@login_required()
 def pending_task_count_dataview(request, name=None):
     """ Return the number of pending DispatchedTasks for each defined task.  An 
         optional filter and/or exclude may be provided in the POST data as a 
@@ -236,7 +232,6 @@ def pending_task_count_dataview(request, name=None):
     
     return _json_response(r)
     
-@login_required()
 def tasks_per_worker_dataview(request, name=None):
     """ Return the number of tasks of each DefinedTask dispatched to each 
         worker.  The return value is a two-level json dictionary where the 
@@ -286,13 +281,11 @@ def tasks_per_worker_dataview(request, name=None):
             r[taskname][wname] = n
     return _json_response(r)
     
-@login_required()
 def definedtask_list_dataview(request):
     """ Returns a list of DefinedTasks names, formatted as json. """
     tasknames = get_defined_tasks()
     return _json_response(tasknames)
     
-@login_required()
 def worker_list_dataview(request):
     """ Returns a list of worker names, formatted as json. """
     workernames = get_workers_live()
@@ -300,7 +293,6 @@ def worker_list_dataview(request):
 
 #==============================================================================#
 # Provider dataviews.
-@login_required()
 def create_provider(request):
     """Create a Provider"""
     if request.method == 'POST':
@@ -321,7 +313,6 @@ def create_provider(request):
                 "load_test_data" : "true" },
                 context_instance=RequestContext(request))
 
-@login_required()
 def provider_images(request):
     """Returns a list of images for a Provider"""
     p = Provider(provider_user_id=request.POST['provider_user_id'],
@@ -339,7 +330,6 @@ def provider_images(request):
 
 #==============================================================================#
 # out-of-band/in-band worker dataviews.
-@login_required()
 def delete_inbandworker(request, worker_pk):
     """Deletes an InBandWorkerNode object"""
     try:
@@ -350,14 +340,12 @@ def delete_inbandworker(request, worker_pk):
         json = simplejson.dumps(failed)
         return HttpResponse(json)
 
-@login_required()
 def delete_provider(request, provider_pk):
     """Deletes a provider object and all corresponding InBandWorkerNode objects"""
     for inbandworker in InBandWorkerNode.objects.filter(provider=provider_pk):
         inbandworker.delete()
     Provider.objects.get(pk=provider_pk).delete()
 
-@login_required()
 def delete_outofbandworker(request, worker_pk):
     """Deletes an OutOfBandWorkerNode"""
     try:
@@ -369,7 +357,6 @@ def delete_outofbandworker(request, worker_pk):
         json = simplejson.dumps(failed)
     return HttpResponse(json)
 
-@login_required()
 def create_or_update_outofbandworker(request, worker_pk=None):
     """Create an OutOfBandWorker"""
     if request.method == 'POST':
@@ -403,16 +390,16 @@ def create_or_update_outofbandworker(request, worker_pk=None):
             json = simplejson.dumps(failed)
         return HttpResponse("<textarea>" + json + "</textarea>")
 
-@login_required()
-def worker_power_dataview(request, name):
+def worker_power_dataview(request, worker_pk=None):
     """Change the power status of a worker"""
-    out_of_band_worker_node = OutOfBandWorkerNode.objects.get(pk=name)
+    out_of_band_worker_node = OutOfBandWorkerNode.objects.get(pk=worker_pk)
     if request.method == 'POST':
         if request.POST['power_state'] == 'on':
             out_of_band_worker_node.celeryd_start()
         elif request.POST['power_state'] == 'off':
             out_of_band_worker_node.celeryd_stop()
-    return _json_response({'status': 'success'})
+    return _json_response({ "name": out_of_band_worker_node.name,
+                            "id": worker_pk })
 
 #==============================================================================#
 # Policy dataviews
@@ -587,7 +574,6 @@ class PolicyGet(PolicyDataviewBase):
         self.get_policy(model)
         
 
-@login_required()
 def policy_create(request):
     if request.method == "POST":
         policy_form = PolicyModelForm(request.POST)
@@ -611,7 +597,6 @@ def policy_create(request):
             json = simplejson.dumps(failed)
         return HttpResponse(json)
     
-@login_required()
 def policy_modify(request, policy_id=None):
     if request.method == "POST":
         try:
@@ -636,7 +621,6 @@ def policy_modify(request, policy_id=None):
                 json = simplejson.dumps(failed)
         return HttpResponse(json)
     
-@login_required()
 def policy_delete(request, policy_id=None):
     """Deletes a Policy"""
     try:
@@ -648,7 +632,6 @@ def policy_delete(request, policy_id=None):
         json = simplejson.dumps(failed)
     return HttpResponse(json)
     
-@login_required()
 def policy_get(request, id):
     getter = PolicyGet()
     success, record, error_info = getter(id)
@@ -659,7 +642,6 @@ def policy_get(request, id):
     
     return _json_response(json_result)
     
-@login_required()
 def policy_list(request):
     def make_row(obj):
         return {
@@ -711,7 +693,6 @@ def validate_task_demo_request(json_request):
     return True, ""
     
 
-@login_required()
 def task_demo_dataview(request):
     """ View that launches a single task several times.  This can be used to 
         stress test a particular Celery configuration. 
@@ -748,7 +729,6 @@ def task_demo_dataview(request):
         
         return _json_response(response)
     
-@login_required()
 def task_demo_status_dataview(request, uuid=None):
     """ Retrieve the status of the task demo with the given uuid.  The status 
         is returned as Json data. 

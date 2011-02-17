@@ -42,7 +42,6 @@ urlpatterns += patterns('celerymanagementapp',
     # General url pattern: worker/NAME/...
     (r'^worker/all/list/$', 'dataviews.worker_list_dataview'),
     (r'^worker/(?P<name>[-\w\d_.]+)/subprocess/count/$', 'dataviews.worker_subprocesses_dataview'),
-    (r'^worker/(?P<name>[-\w\d_.]+)/power_state/$', 'dataviews.worker_power_dataview'),
     
     # General url pattern: task/NAME/...
     (r'^task/all/list/$', 'dataviews.definedtask_list_dataview'),
@@ -68,6 +67,7 @@ urlpatterns += patterns('celerymanagementapp',
     (r'^outofbandworker/$', 'dataviews.create_or_update_outofbandworker'),
     (r'^outofbandworker/(?P<worker_pk>[\d]+)/delete/$', 'dataviews.delete_outofbandworker'),
     (r'^outofbandworker/(?P<worker_pk>[\d]+)/update/$', 'dataviews.create_or_update_outofbandworker'),
+    (r'^outofbandworker/(?P<worker_pk>[\d]+)/power_state/$', 'dataviews.worker_power_dataview'),
 
     # manipulating provider ...
     (r'^provider/$', 'dataviews.create_provider'),
@@ -132,7 +132,7 @@ if settings.DEBUG:
     )
     urlpatterns += patterns('celerymanagementapp.test_views',
         url(r'^test/post/worker/(?P<name>[-\w\d_.]+)/shutdown/$', 'kill_worker', name='test_kill_worker_url'),
-        url(r'^test/post/worker/(?P<name>[-\w\d_.]+)/power_state/$', 'worker_power', name='test_worker_power_url'),
+        url(r'^test/post/outofbandworker/(?P<worker_pk>[\d]+)/power_state/$', 'worker_power', name='test_worker_power_url'),
         url(r'^test/post/outofbandworker/$', 'create_or_update_outofbandworker', name="test_create_outofbandworker_url"),
         url(r'^test/post/outofbandworker/(?P<worker_pk>[\d]+)/update/$', 'create_or_update_outofbandworker', name="test_update_outofbandworker_url"),
         url(r'^test/post/outofbandworker/(?P<worker_pk>[\d]+)/delete/$', 'delete_outofbandworker', name="test_delete_outofbandworker_url"),

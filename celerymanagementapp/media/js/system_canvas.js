@@ -52,7 +52,7 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
             workers = {};
             
             for (i=0; i < length; i += 1){
-                workers[data[i]] = CMA.SystemDisplay.Worker(y, canvas.width, data[i], true);
+                workers[data[i].name] = CMA.SystemDisplay.Worker(y, canvas.width, data[i].id, data[i].name, true);
                 y += 60;
             }
 
@@ -92,6 +92,8 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
 
         createConnectors = function(data){
             var num, task, worker;
+            
+            console.log(data);
 
             connectors = [];
             connectorWeight = 0;
@@ -109,6 +111,7 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
                     }
                 }
             }
+            console.log("test");
             CMA.SystemDisplay.fire("Redraw");
         },
 
@@ -175,6 +178,7 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
         canvasHeight = 0,
         systemRender,
         dummyWidth = $('#dummy').css("width").split("px")[0],
+        ajax = CMA.Core.ajax,
 
         connectorWeightingFunction = function(size){
             return (size / modelFactory.getConnectorsWeight() + 0.35) * 4;
@@ -275,7 +279,7 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
             var newWorker;
             if( expand ){
                 if( worker.fullName !== worker.displayName ){
-                    newWorker = CMA.SystemDisplay.Worker(worker.y, canvas.width, worker.fullName, worker.active);
+                    newWorker = CMA.SystemDisplay.Worker(worker.y, canvas.width, worker.id, worker.fullName, worker.active);
                     newWorker.width = worker.fullName.length * 7;
                     newWorker.x = worker.x - ((newWorker.width - worker.width) / 2);
                     newWorker.displayName = worker.fullName;
@@ -286,7 +290,7 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
                     expandedWorker = worker;
                 }
             } else {
-                newWorker = CMA.SystemDisplay.Worker(worker.y, canvas.width, worker.displayName, worker.active);
+                newWorker = CMA.SystemDisplay.Worker(worker.y, canvas.width, worker.id, worker.displayName, worker.active);
                 systemRenderer.clearCanvas();
                 draw();
                 expandedWorker = false;
@@ -294,8 +298,29 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
         },
 
         refresh = function(){
-            CMA.Core.ajax.getTasks(modelFactory.createTasks);
-            CMA.Core.ajax.getWorkers(modelFactory.createWorkers);
+            ajax.getTasks(modelFactory.createTasks);
+            ajax.getWorkers(modelFactory.createWorkers);
+        },
+        powerOnWorker = function(data){
+            var connectors = modelFactory.getConnectors(),
+                weight = modelFactory.getConnectorsWeight(),
+                connector, workers;
+                
+                workers = modelFactory.getWorkers();
+                workers[data.name].active = true;
+
+            if( data !== "failed" || data !== undefined ){
+                for( connector in connectors ){
+                    if( connectors.hasOwnProperty(connector) ){
+                        if( connectors[connector].worker.fullName === data.name ){
+                            weight += connectors[connector].numTasks;
+                            modelFactory.setConnectorsWeight(weight);
+                            connectors[connector].active = true;
+                        }
+                    }
+                }
+                draw();
+            }
         };
 
     CMA.SystemDisplay.on("Redraw", redraw);
@@ -310,18 +335,19 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
             if( data !== "failed" || data !== undefined ){
                 for( connector in connectors ){
                     if( connectors.hasOwnProperty(connector) ){
-                        if( connectors[connector].worker.fullName === data ){
+                        if( connectors[connector].worker.fullName === data.name ){
                             weight -= connectors[connector].numTasks;
                             modelFactory.setConnectorsWeight(weight);
-                            delete connectors[connector];
+                            connectors[connector].active = false;
                         }
                     }
                 }
                 workers = modelFactory.getWorkers();
-                delete workers[data];
+                workers[data.name].active = false;
                 draw();
             }
         },
+        powerOnWorker: powerOnWorker,
         redraw: redraw,
         draw: draw,
         handleTaskHover: function(task){
@@ -411,6 +437,7 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
 
             if( entity !== undefined  && entity.objectType === "Worker" ){
                 $('#taskMenu').hide();
+                $('#powerWorker').text(entity.active ? "Power Off" : "Power On");
                 $('#workerMenu').css({
                     top: (e.pageY - yOffset) + 'px',
                     left: (e.pageX - xOffset - $('#workerMenu').width()) + 'px'
@@ -419,10 +446,13 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
             return false;
         });
 
-        $('#deactivateWorker').click(function (){
+        $('#powerWorker').click(function (){
             if(  clickedEntity !== undefined  && clickedEntity.objectType === "Worker" ){
-                ajax.postWorkerPower(clickedEntity.fullName, {"power_state": "off"}, viewer.shutdownWorker);
-                console.log("deactivate clicked");
+                if( $(this).text() === "Power Off" ){
+                    ajax.postWorkerPower(clickedEntity.id, {"power_state": "off"}, viewer.shutdownWorker);
+                } else {
+                    ajax.postWorkerPower(clickedEntity.id, {"power_state": "on"}, viewer.powerOnWorker);
+                }
                 clickedEntity = false;
             }
         });
@@ -515,7 +545,8 @@ CMA.SystemDisplay.Renderer = function(canvas, modelFactory){
             context.fillText("Pending: " + task.pending, task.x + 5, task.y + 12 + 15);
         },
         drawWorker: function(worker){
-            drawShapes.roundedRect(worker.x, worker.y, worker.width, worker.height, worker.getFill());
+            var fill = worker.active ? '#FFC028' : '#CCC';
+            drawShapes.roundedRect(worker.x, worker.y, worker.width, worker.height, fill);
             context.textBaseline = "middle";
             context.textAlign = "start";
             context.font = "12px sans-serif";
@@ -526,29 +557,33 @@ CMA.SystemDisplay.Renderer = function(canvas, modelFactory){
             context.fillText("Worker Processes: " + worker.processes, worker.x + 5, worker.y + 12 + 15);
         },
         drawConnector: function(connector, weight){
-            connector.x2 = connector.worker.xCenter - (connector.worker.width / 2);
-            context.lineWidth = weight;
-            context.beginPath();
-            context.moveTo(connector.x1, connector.y1);
-            context.lineTo(connector.x2, connector.y2);
-            context.closePath();
-            context.strokeStyle = connector.getFill();
-            context.stroke();
+            if( connector.active ){
+                connector.x2 = connector.worker.xCenter - (connector.worker.width / 2);
+                context.lineWidth = weight;
+                context.beginPath();
+                context.moveTo(connector.x1, connector.y1);
+                context.lineTo(connector.x2, connector.y2);
+                context.closePath();
+                context.strokeStyle = connector.getFill();
+                context.stroke();
+            }
         },
         highlightConnector: function(connector, weight){
-            context.lineCap = "butt";
-            context.lineWidth = weight;
-            context.beginPath();
-            context.moveTo(connector.x1, connector.y1);
-            context.lineTo(connector.x2, connector.y2);
-            context.closePath();
-            context.strokeStyle = "red";
-            context.stroke();
-            context.textBaseline = "middle";
-            context.textAlign = "left";
-            context.font = "15px sans-serif";
-            context.fillStyle = "black";
-            context.fillText(connector.numTasks, connector.getXCenter()+10, connector.getYCenter()+5);
+            if( connector.active ){
+                context.lineCap = "butt";
+                context.lineWidth = weight;
+                context.beginPath();
+                context.moveTo(connector.x1, connector.y1);
+                context.lineTo(connector.x2, connector.y2);
+                context.closePath();
+                context.strokeStyle = "red";
+                context.stroke();
+                context.textBaseline = "middle";
+                context.textAlign = "left";
+                context.font = "15px sans-serif";
+                context.fillStyle = "black";
+                context.fillText(connector.numTasks, connector.getXCenter()+10, connector.getYCenter()+5);
+            }
         },
         dimConnector: function(connector){
             context.lineCap = "butt";
@@ -640,7 +675,7 @@ CMA.SystemDisplay.Task = function(y, name){
     };
 };
 
-CMA.SystemDisplay.Worker = function(y, canvasWidth, name, active){
+CMA.SystemDisplay.Worker = function(y, canvasWidth, id, name, active){
 
     var width = 200,
         height = 40,
@@ -658,6 +693,7 @@ CMA.SystemDisplay.Worker = function(y, canvasWidth, name, active){
         };
     
     return {
+        id: id,
         x: x,
         y: y,
         width: width,
@@ -679,6 +715,7 @@ CMA.SystemDisplay.Connector = function(task, worker, numTasks){
         y1 = task.yCenter,
         x2 = worker.xCenter - (worker.width / 2),
         y2 = worker.yCenter,
+        active = true,
 
         getXCenter = function(){ 
             return ((worker.xCenter - (worker.width / 2)) - ((((worker.xCenter - (worker.width / 2)) - (task.xCenter + (task.width / 2))) / 2)));
@@ -698,6 +735,7 @@ CMA.SystemDisplay.Connector = function(task, worker, numTasks){
         y1: y1,
         x2: x2,
         y2: y2,
+        active: active,
         numTasks: numTasks,
         getXCenter: getXCenter,
         getYCenter: getYCenter,

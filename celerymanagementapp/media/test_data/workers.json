@@ -1,5 +1,8 @@
 [
-    "opus-dev.cnl.ncsu.edu",
-    "opus-dev.cnl.ncsu.edu-FakeTest1",
-    "opus-dev.cnl.ncsu.edu-FakeTest2"
+    { "name": "opus-dev.cnl.ncsu.edu", 
+      "id": 1 },
+    { "name": "opus-dev.cnl.ncsu.edu-FakeTest1", 
+      "id": 2 },
+    { "name": "opus-dev.cnl.ncsu.edu-FakeTest2", 
+      "id": 3 }
 ]
