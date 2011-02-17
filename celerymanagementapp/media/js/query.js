@@ -27,7 +27,14 @@ CMA.Core.QuerySystem = (function() {
             range: 'Range',
             values: 'Values',
             all: 'All',
-            each: 'Each'
+            each: 'Each',
+            count: 'Count',
+            average: 'Average',
+            min: 'Min',
+            max: 'Max',
+            sum: 'Sum',
+            variance: 'Variance',
+            enumerate: 'Enumerate'
         };
     
     $(document).ready(onReady);
@@ -114,7 +121,7 @@ CMA.Core.QuerySystem = (function() {
         CMA.Core.ajax.getDispatchedTasksData(query, formatData);
     }
     
-    function create_query() {
+    function createQuery() {
         var object = { };
         
         if($('#filter').attr('checked')) {
@@ -322,9 +329,8 @@ CMA.Core.QuerySystem = (function() {
                 field = $('#segmentize_field');
             
             var i,
-                value = $(segmentize_field).val(),
+                value = $(field).val(),
                 object = field_info[value],
-                aggregate = object.aggregate,
                 segmentize = object.segmentize,
                 methods = segmentize.methods,
                 length = methods.length;
@@ -332,15 +338,15 @@ CMA.Core.QuerySystem = (function() {
             method.html("");
             
             for(i = 0; i < length; i++) {
-                html = '<option label="' + labels[methods[i]] + '" value="' + methods[i] + '"></option>';
+                var html = '<option label="' + labels[methods[i]] + '" value="' + methods[i] + '"></option>';
                 method.append(html);
             }
             
             $('#range_min').AnyTime_noPicker();
             $('#range_max').AnyTime_noPicker();
             
-            if(field.val() === 'sent' || field.val() === 'received' || field.val() === 'started' ||
-                    field.val() === 'succeeded' || field.val() === 'failed') {
+            if(value === 'sent' || value === 'received' || value === 'started' ||
+                    value === 'succeeded' || value === 'failed') {
                 $('#range_min').AnyTime_picker({format: "%Y-%m-%d %T"});
                 $('#range_max').AnyTime_picker({format: "%Y-%m-%d %T"});
             }
@@ -348,9 +354,34 @@ CMA.Core.QuerySystem = (function() {
             change_segmentize_method();
         }
         
+        function change_aggregate_field() {
+            var method = $('#aggregate_methods'),
+                field = $('#aggregate_field');
+                
+            var i,
+                value = $(field).val(),
+                object = field_info[value],
+                aggregate = object.aggregate,
+                methods = aggregate.methods,
+                length = methods.length;
+
+            method.html("");
+            
+            if(value === 'count') {
+                method.append('<option label="Count" value="count"></option>');
+            } else {
+                for(i = 0; i < length; i++) {
+                    var html = '<option label="' + labels[methods[i]] + '" value="' + methods[i] + '"></option>';
+                    method.append(html);
+                }
+            }
+        }
+        
         $('#segmentize_field').change(change_segmentize_field);
         
         $('#segmentize_method').change(change_segmentize_method);
+        
+        $('#aggregate_field').change(change_aggregate_field);
         
         $('#add_aggregation').click(add_aggregation);
         
@@ -457,7 +488,7 @@ CMA.Core.QuerySystem = (function() {
     });
     
     return {
-        startChart: startChart,
-        field_info: field_info
+        createQuery: createQuery,
+        startChart: startChart
     };
 }());
