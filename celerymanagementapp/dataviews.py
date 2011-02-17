@@ -288,7 +288,14 @@ def definedtask_list_dataview(request):
     
 def worker_list_dataview(request):
     """ Returns a list of worker names, formatted as json. """
-    workernames = get_workers_live()
+    workernames = []
+    if settings.CELERYMANAGEMENTAPP_INFRASTRUCTURE_USE_MODE == "static":
+        workers = OutOfBandWorkerNode.objects.all()
+        for worker in workers:
+            if worker.is_celeryd_running():
+                workers.append(worker)
+    else:
+        workernames = get_workers_live()
     return _json_response(workernames)
 
 #==============================================================================#

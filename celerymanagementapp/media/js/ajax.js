@@ -14,7 +14,6 @@ CMA.Core.ajax = (function($) {
                 //task_url: root_url + "view/dispatched_tasks/",
                 pending_tasks_url: root_url + "task/all/dispatched/pending/count/",
                 worker_processes_url: root_url + "worker/all/subprocess/count/",
-                worker_power_url: root_url + "worker/<placeHolder>/power_state/",
                 query_dispatched_tasks_url: root_url + "xy_query/dispatched_tasks/",
                 task_url: "/celerymanagementapp/view/task/",
                 worker_url: "/celerymanagementapp/view/worker/",
@@ -106,9 +105,6 @@ CMA.Core.ajax = (function($) {
         postDeleteOutOfBandWorker = function(workerID, callback){
             $.post(urls.out_of_band_worker_delete_url.replace("<placeHolder>", workerID), {}, callback, "json");
         },
-        postShutdownWorker = function(workerName, callbackFunction){
-            $.post(urls.shutdown_worker_url.replace("<placeHolder>", workerName), callbackFunction, "json");
-        },
         postWorkerPower = function(workerName, data, callbackFunction){
             $.post(urls.out_of_band_worker_power_url.replace("<placeHolder>", workerName), data, callbackFunction, "json");
         },
@@ -143,7 +139,6 @@ CMA.Core.ajax = (function($) {
         getPendingTasks: getPendingTasks,
         getWorkerProcesses: getWorkerProcesses,
         getFieldInfo: getFieldInfo,
-        postShutdownWorker: postShutdownWorker,
         getDispatchedTasksData: getDispatchedTasksData,
         postGetImages: postGetImages,
         postDeleteInstance: postDeleteInstance,
