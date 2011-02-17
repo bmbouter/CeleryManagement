@@ -158,7 +158,8 @@ def worker_power(request, worker_pk=None):
         file_json = simplejson.load(file_ptr)
 
         for item in file_json:
-            if int(item["id"]) == int(worker_pk):
+            id = item["id"]
+            if id == int(worker_pk):
                 json = simplejson.dumps({ "name": item["name"],
                                         "id": worker_pk })
                 return HttpResponse(json)

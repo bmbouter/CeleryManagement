@@ -8,6 +8,7 @@ CMA.Core.ajax = (function($) {
             root_url = "/celerymanagementapp/";
             
             urls = {
+                media_url: "/celerymanagementapp/site_media/",
                 get_tasks_url: root_url + "task/all/list/",
                 get_workers_url: root_url + "worker/all/list/",
                 tasks_per_worker_url: root_url + "task/all/dispatched/byworker/count/",
@@ -36,6 +37,7 @@ CMA.Core.ajax = (function($) {
             var post_root_url = "/celerymanagementapp/test/post/";
             
             urls = {
+                media_url: "/celerymanagementapp/site_media/",
                 get_tasks_url: root_url + "tasks.json",
                 get_workers_url: root_url + "workers.json",
                 tasks_per_worker_url: root_url + "tasks_per_worker.json",

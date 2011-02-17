@@ -380,7 +380,8 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
         clickedEntity = null,
         yOffset = $('#header').css("height").split("px")[0],
         xOffset = $('#dummy').css("width").split("px")[0],
-        ajax = CMA.Core.ajax;
+        ajax = CMA.Core.ajax,
+        powerImg = new Image();
 
     var getEntity = function(xPos, yPos){
         var xMousePos = xPos - xOffset,
@@ -450,8 +451,10 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
             if(  clickedEntity !== undefined  && clickedEntity.objectType === "Worker" ){
                 if( $(this).text() === "Power Off" ){
                     ajax.postWorkerPower(clickedEntity.id, {"power_state": "off"}, viewer.shutdownWorker);
+                    $('#powerWorkerImg').children('img').attr("src", ajax.getUrls().media_url + 'images/power-on.png');
                 } else {
                     ajax.postWorkerPower(clickedEntity.id, {"power_state": "on"}, viewer.powerOnWorker);
+                    $('#powerWorkerImg').children('img').attr("src", ajax.getUrls().media_url + 'images/power-off.png');
                 }
                 clickedEntity = false;
             }

@@ -498,7 +498,7 @@ CMA.Core.configure = (function(){
                                     $(that).parent().removeClass("active");
                                     $(that).parent().addClass("inactive");
                                     $(that).children('span').text("Power On");
-                                    $(that).children('img').attr("src", "../../../site_media/images/power-on.png");
+                                    $(that).children('img').attr("src", ajax.getUrls().media_url + "images/power-on.png");
                                     $(that).removeAttr('disabled');
                                 });
                             } else {
@@ -507,7 +507,7 @@ CMA.Core.configure = (function(){
                                     $(that).parent().removeClass("inactive");
                                     $(that).parent().addClass("active");
                                     $(that).children('span').text("Power Off");
-                                    $(that).children('img').attr("src", "../../../site_media/images/power-off.png");
+                                    $(that).children('img').attr("src", ajax.getUrls().media_url + "images/power-off.png");
                                     $(that).removeAttr('disabled');
                                 });
                             }
