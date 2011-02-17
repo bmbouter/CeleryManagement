@@ -171,7 +171,7 @@
                     <label for="aggregate_field">Field</label>
                     <div class="aggregate_field">
                         <select id="aggregate_field" name="aggregate_field" value="aggregate_field">
-                            <option label="Choose one:" id="aggregate_choose"></option>
+                            <option label="Choose one:" value="choose" selected="selected">Choose one:</option>
                             <option label="Count" value="count">Count</option>
                             <option label="Task Name" value="taskname">Task Name</option>
                             <option label="State" value="state">State</option>
@@ -186,12 +186,13 @@
                     <label for="aggregate_methods">Methods</label>
                     <div class="fields">
                         <select id="aggregate_methods" name="aggregate_methods" value="aggregate_methods" size=4 multiple>
-                            <option label="Average" value="average">Average</option>
+                            <option label="Choose a field" value="choose">Choose a field</option>
+                            <!--<option label="Average" value="average">Average</option>
                             <option label="Max" value="max">Max</option>
                             <option label="Min" value="min">Min</option>
                             <option label="Variance" value="variance">Variance</option>
                             <option label="Sum" value="sum">Sum</option>
-                            <option label="Enumerate" value="enumerate">Enumerate</option>
+                            <option label="Enumerate" value="enumerate">Enumerate</option>-->
                         </select>
                     </div>
                     <input id="add_aggregation" value="Add Aggregation" type="button" style="width: 120px" />
@@ -209,7 +210,7 @@
             </tbody>
         </table>
         
-        <input id="submit_query" value="Submit Form" onclick="create_query();" type="button" style="width: 100px; margin-top: 100px" />
+        <input id="submit_query" value="Submit Form" onclick="CMA.Core.QuerySystem.createQuery();" type="button" style="width: 100px; margin-top: 100px" />
     </div>
     
     <div id="chartOptions">
