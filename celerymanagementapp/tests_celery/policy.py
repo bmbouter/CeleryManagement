@@ -9,12 +9,13 @@ from celerymanagementapp.testutil import process
 from celerymanagementapp.tests_celery import base
 
 
-class PolicyTaskApi_TestCase(base.CeleryManagement_DBTestCaseBase):
+class PolicyApi_TestCaseBase(base.CeleryManagement_DBTestCaseBase):
+    hostname = None
     def setUp(self):
-        super(PolicyTaskApi_TestCase, self).setUp()
+        super(PolicyApi_TestCaseBase, self).setUp()
         try:
             print 'Launching celeryd...'
-            self.celeryd = process.DjCeleryd(log='celeryd.log.txt')
+            self.celeryd = process.DjCeleryd(log='celeryd.log.txt', hostname=self.hostname)
             print 'Launching cmrun...'
             self.cmrun = process.CMRun(freq=0.1, log='celeryev.log.txt')
             time.sleep(2.0)
@@ -29,7 +30,7 @@ class PolicyTaskApi_TestCase(base.CeleryManagement_DBTestCaseBase):
             raise
         
     def tearDown(self):
-        super(PolicyTaskApi_TestCase, self).tearDown()
+        super(PolicyApi_TestCaseBase, self).tearDown()
         print ''
         print 'Terminating cmrun...'
         self.cmrun.close()
@@ -48,6 +49,9 @@ class PolicyTaskApi_TestCase(base.CeleryManagement_DBTestCaseBase):
             if isinstance(v, dict) and 'error' in v:
                 raise RuntimeError('Found error in broadcast()')
         return result
+
+
+class PolicyTaskApi_TestCase(PolicyApi_TestCaseBase):
     
     def test_routing_key(self):
         taskname = 'celerymanagementapp.testutil.tasks.simple_test'
@@ -63,6 +67,33 @@ class PolicyTaskApi_TestCase(base.CeleryManagement_DBTestCaseBase):
         finally:
             dispatcher.close()
         
+
+class PolicyWorkerApi_TestCase(PolicyApi_TestCaseBase):
+    hostname = 'worker1'
+    
+    def test_prefetch(self):
+        workername = self.hostname
+        workers = api.WorkersCollectionApi()
+        prefetch = workers[workername].prefetch.get()
+        workers[workername].prefetch.increment()
+        self.assertEquals(prefetch+1, workers[workername].prefetch.get())
+        workers[workername].prefetch.decrement()
+        self.assertEquals(prefetch, workers[workername].prefetch.get())
+    
+    def test_subprocesses(self):
+        workername = self.hostname
+        workers = api.WorkersCollectionApi()
+        subprocesses = workers[workername].subprocesses.get()
+        workers[workername].subprocesses.increment()
+        self.assertEquals(subprocesses+1, workers[workername].subprocesses.get())
+        workers[workername].subprocesses.decrement()
+        self.assertEquals(subprocesses, workers[workername].subprocesses.get())
+
+
+
+
+
+
 
 class PolicyRestoreTaskSettings_TestCase(base.CeleryManagement_DBTestCaseBase):
         
@@ -100,23 +131,25 @@ class PolicyRestoreTaskSettings_TestCase(base.CeleryManagement_DBTestCaseBase):
                 time.sleep(2.0)
                 tasks = api.TasksCollectionApi(dispatcher)
                 self.assertTrue(self.task_setting_is_undefined(taskname, 'routing_key'))
-                print 'A: {0}'.format(time.ctime())
                 tasks[taskname].routing_key = 'mykey'
                 self.assertEquals('mykey', self.get_task_setting(taskname, 'routing_key'))
                 
-                print 'B: {0}'.format(time.ctime())
                 time.sleep(2.0)
                 procs.close('cmrun')
-                print 'C: {0}'.format(time.ctime())
                 time.sleep(1.0)
                 # after closing cmrun, any changes should be undone
-                print 'D: {0}'.format(time.ctime())
                 self.assertTrue(self.task_setting_is_undefined(taskname, 'routing_key'), 
                                 'setting = "{0}"'.format(self.get_task_setting(taskname, 'routing_key'))
                                 )
-                print time.ctime()
+                ##print time.ctime()
             finally:
                 dispatcher.close()
             
+
+
+
+
+
+
 
 

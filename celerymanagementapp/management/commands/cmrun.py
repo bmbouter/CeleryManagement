@@ -7,6 +7,8 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
 
+WAIT_SLEEP_INTERVAL = 0.05
+
 
 class Proc(object):
     
@@ -26,11 +28,24 @@ class Proc(object):
             self.error = True
             raise
         
-    def stop(self):
+    def stop(self, waittime=None):
         proc = self.proc
         if proc is not None and proc.poll() is None:
             proc.send_signal(signal.SIGINT)  # ctrl-C
-            proc.wait()
+            if self._wait(waittime) is None: # if wait() times out...
+                print "Timeout while trying to stop: {0}.".format(self.name)
+                proc.terminate()
+                proc.wait()
+                
+    def _wait(self, timeout=0):
+        if timeout and timeout > 0:
+            assert WAIT_SLEEP_INTERVAL > 0.
+            timeout += time.time()
+            while time.time() < timeout and not self.is_stopped():
+                time.sleep(WAIT_SLEEP_INTERVAL)
+            return self.proc.returncode
+        else:
+            return self.proc.wait()
         
     def is_stopped(self):
         return self.proc is None  or  self.proc.poll() is not None
@@ -67,7 +82,7 @@ class Processes(object):
     def stop(self):
         for name, proc in self.procs.iteritems():
             print 'cmrun: stopping {0}.'.format(name)
-            proc.stop()
+            proc.stop(8.0)
         
     def is_stopped(self):
         return all(proc.is_stopped() for proc in self.procs.itervalues())
