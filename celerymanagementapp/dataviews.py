@@ -136,8 +136,14 @@ def get_workers_from_database():
     """Get a list of all workers that exist (running or not) in the database."""
     return [unicode(w) for w in _worker_state_cache.data]
     
+# Ugly hack to facilitate testing
+GET_WORKERS_LIVE_ENABLE_TEST = None
+    
 def get_workers_live():
     """ Get the list of workers as reported by Celery right now. """
+    if GET_WORKERS_LIVE_ENABLE_TEST is not None:
+        assert isinstance(GET_WORKERS_LIVE_ENABLE_TEST, list)
+        return GET_WORKERS_LIVE_ENABLE_TEST
     i = inspect()
     workersdict = i.ping()
     workers = []

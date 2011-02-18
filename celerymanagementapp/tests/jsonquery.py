@@ -624,7 +624,7 @@ class JsonQuery_ModelMap_TestCase(base.CeleryManagement_TestCaseBase):
             'type':         'string',
             'allow_null':   False,
             'segmentize':   {'methods': ['each', 'values', 'all',]},
-            'aggregate':    {'methods': ['count', 'enumerate',]},
+            'aggregate':    {'methods': ['enumerate',]},
             },
             meta['charval'])
         
@@ -642,7 +642,7 @@ class JsonQuery_ModelMap_TestCase(base.CeleryManagement_TestCaseBase):
             'type':         'datetime',
             'allow_null':   True,
             'segmentize':   {'methods': ['each', 'range',]},
-            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            'aggregate':    {'methods': ['average', 'min', 'max', 'sum', 'variance',]},
             },
             meta['date'])
         
@@ -651,7 +651,7 @@ class JsonQuery_ModelMap_TestCase(base.CeleryManagement_TestCaseBase):
             'type':         'datetime',
             'allow_null':   True,
             'segmentize':   {'methods': ['each', 'range',]},
-            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            'aggregate':    {'methods': ['average', 'min', 'max', 'sum', 'variance',]},
             },
             meta['datetime'])
         
@@ -660,7 +660,7 @@ class JsonQuery_ModelMap_TestCase(base.CeleryManagement_TestCaseBase):
             'type':         'string',
             'allow_null':   False,
             'segmentize':   {'methods': ['each', 'values', 'all',]},
-            'aggregate':    {'methods': ['count', 'enumerate',]},
+            'aggregate':    {'methods': ['enumerate',]},
             },
             meta['enumval'])
         
@@ -669,7 +669,7 @@ class JsonQuery_ModelMap_TestCase(base.CeleryManagement_TestCaseBase):
             'type':         'float',
             'allow_null':   False,
             'segmentize':   {'methods': ['each', 'range',]},
-            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            'aggregate':    {'methods': ['average', 'min', 'max', 'sum', 'variance',]},
             },
             meta['floatval'])
         
@@ -678,7 +678,7 @@ class JsonQuery_ModelMap_TestCase(base.CeleryManagement_TestCaseBase):
             'type':         'int',
             'allow_null':   False,
             'segmentize':   {'methods': ['each', 'range',]},
-            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            'aggregate':    {'methods': ['average', 'min', 'max', 'sum', 'variance',]},
             },
             meta['intval'])
     

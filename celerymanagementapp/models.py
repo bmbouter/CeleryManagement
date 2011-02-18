@@ -182,7 +182,7 @@ class Provider(AbstractWorkerNode):
         """Returns an object of type libcloud.base.NodeImage looked up by id or name"""
         images = self.conn.list_images()
         for image in images:
-            if self.image_id == image.id:
+            if self.image_id == unicode(image.id):
                 return image
 
     @property

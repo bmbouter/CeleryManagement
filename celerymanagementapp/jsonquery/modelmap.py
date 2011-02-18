@@ -235,8 +235,8 @@ class TestModelModelMap(JsonModelMap):
         'floatval':     agg_methods_numeric,
         'intval':       agg_methods_numeric,
         
-        'charval':      ['count', 'enumerate',],
-        'enumval':      ['count', 'enumerate',],
+        'charval':      ['enumerate',],
+        'enumval':      ['enumerate',],
         }
         
     segmentization_methods = {
