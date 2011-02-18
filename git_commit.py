@@ -11,11 +11,11 @@ def start():
         success = run_tests()
     if success:
         commit()
-        if "--pull" in sys.argv:
+        if "--no-pull" in sys.argv:
             pull()
             if "--no-tests" not in sys.argv:
                 success = run_tests()
-        if "--push" in sys.argv and success:
+        if "--no-push" in sys.argv and success:
             push()
 
 def minify_js():
@@ -40,7 +40,11 @@ def push():
     subprocess.call("git push", shell=True)
 
 def commit():
-    subprocess.call("git commit -a", shell=True)
+    if '-m' in sys.argv:
+        index = sys.argv.index('-m')
+        subprocess.call("git commit -m " + sys.argv[index+1] + ' -a', shell=True)
+    else:
+        subprocess.call("git commit -a", shell=True)
 
 if __name__ == "__main__":
     start()

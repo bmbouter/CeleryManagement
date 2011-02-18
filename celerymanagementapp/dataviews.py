@@ -403,12 +403,10 @@ def worker_power_dataview(request, worker_pk=None):
     if request.method == 'POST':
         if request.POST['power_state'] == 'on':
             out_of_band_worker_node.celeryd_start()
-            if out_of_band_worker_node.is_celeryd_running():
-                json = "Worker successfully powered off."
+            json = "Worker successfully powered off."
         elif request.POST['power_state'] == 'off':
             out_of_band_worker_node.celeryd_stop()
-            if not out_of_band_worker_node.is_celeryd_running():
-                json = "Worker successfully powered on."
+            json = "Worker successfully powered on."
     return _json_response(json)
 
 #==============================================================================#
