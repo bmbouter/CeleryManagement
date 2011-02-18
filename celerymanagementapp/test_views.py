@@ -154,15 +154,8 @@ def kill_worker(request, name=None):
         
 def worker_power(request, worker_pk=None):
     if request.method == 'POST':
-        file_ptr = open("celerymanagementapp/media/test_data/workers.json")
-        file_json = simplejson.load(file_ptr)
-
-        for item in file_json:
-            id = item["id"]
-            if id == int(worker_pk):
-                json = simplejson.dumps({ "name": item["name"],
-                                        "id": worker_pk })
-                return HttpResponse(json)
+        json = simplejson.dumps(worker_pk)
+        return HttpResponse(json)
 
 def create_provider(request):
     if request.method == "POST":
