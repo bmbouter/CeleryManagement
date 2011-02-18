@@ -154,7 +154,13 @@ def kill_worker(request, name=None):
         
 def worker_power(request, worker_pk=None):
     if request.method == 'POST':
-        json = simplejson.dumps(worker_pk)
+        random.seed()
+        choice = random.randint(0, 1000)
+        if not (choice % 2):
+            json = simplejson.dumps("Worker successfully powered on.")
+        else:
+            json = { "failure": "There was an error changing the power state." }
+            json = simplejson.dumps(json)
         return HttpResponse(json)
 
 def create_provider(request):
