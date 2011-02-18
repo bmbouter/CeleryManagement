@@ -302,6 +302,44 @@ class WorkerPrefetchProxy(object):
             if isinstance(worker_ret, dict) and 'error' in worker_ret:
                 raise ApiError('Error occurred while decrementing prefetch.')
                 
+class WorkerSubprocessesProxy(object):
+    def __init__(self, broadcast, names):
+        self.names = names
+        self._broadcast = broadcast
+    def get(self):
+        if len(self.names) != 1:
+            raise ApiError('Cannot retrieve this attribute for multiple workers.')
+        r = self._broadcast('stats', destination=self.names, reply=True)
+        r = util._merge_broadcast_result(r)
+        if not r:
+            raise ApiError('Unable to retrieve worker attribute: subprocess pool.')
+        r = util._condense_broadcast_result(r)
+        if isinstance(r, dict) and 'error' in r:
+            raise ApiError('Error occurred while retrieving worker subprocess pool.')
+        return len(r['pool']['processes'])
+        
+    def increment(self, n=1):
+        n = validate_int(n)
+        r = self._broadcast('pool_grow', arguments={'n':n}, reply=True)
+        r = util._merge_broadcast_result(r)
+        if not r:
+            raise ApiError('Unable to increment worker subprocess pool.')
+        # check that the value doesn't indicate an error
+        for worker_ret in r:
+            if isinstance(worker_ret, dict) and 'error' in worker_ret:
+                raise ApiError('Error occurred while incrementing worker subprocess pool.')
+        
+    def decrement(self, n=1):
+        n = validate_int(n)
+        r = self._broadcast('pool_shrink', arguments={'n':n}, reply=True)
+        r = util._merge_broadcast_result(r)
+        if not r:
+            raise ApiError('Unable to decrement worker subprocess pool.')
+        # check that the value doesn't indicate an error
+        for worker_ret in r:
+            if isinstance(worker_ret, dict) and 'error' in worker_ret:
+                raise ApiError('Error occurred while decrementing worker subprocess pool.')
+                
 class WorkerSetting(object):
     def __init__(self, cls):
         self.cls = cls
@@ -320,6 +358,7 @@ class WorkerApi(ItemApi):
         super(WorkerApi, self).__init__(_broadcast, names)
         
     prefetch = WorkerSetting(WorkerPrefetchProxy)
+    subprocesses = WorkerSetting(WorkerSubprocessesProxy)
     
 class WorkersCollectionApi(ItemsCollectionApi):
     ItemApi = WorkerApi

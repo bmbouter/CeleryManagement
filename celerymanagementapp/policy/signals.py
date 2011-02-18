@@ -19,8 +19,8 @@ class Signal(object):
         self.handlers.discard(handler)
         
     def __call__(self, *args, **kwargs):
-        if self.name:
-            print 'Activated signal: {0} ({1})'.format(self.name, len(self.handlers))
+        ##if self.name:
+            ##print 'Activated signal: {0} ({1})'.format(self.name, len(self.handlers))
         for handler in self.handlers:
             handler(*args, **kwargs)
 
