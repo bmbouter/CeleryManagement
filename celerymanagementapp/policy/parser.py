@@ -138,7 +138,7 @@ class NodeVisitor(ast.NodeVisitor):
         self.syntax_error(node, 'Return statements are not allowed.')
     def visit_For(self, node):
         self.syntax_error(node, 'For statements are not allowed.')
-    def visit_White(self, node):
+    def visit_While(self, node):
         self.syntax_error(node, 'While statements are not allowed.')
     def visit_Raise(self, node):
         self.syntax_error(node, 'Raise statements are not allowed.')
