@@ -399,7 +399,7 @@ def create_or_update_outofbandworker(request, worker_pk=None):
 def worker_power_dataview(request, worker_pk=None):
     """Change the power status of a worker"""
     out_of_band_worker_node = OutOfBandWorkerNode.objects.get(pk=worker_pk)
-    json = "There was an error changing the power state."
+    json = { "failure": "There was an error changing the power state." }
     if request.method == 'POST':
         if request.POST['power_state'] == 'on':
             out_of_band_worker_node.celeryd_start()
