@@ -13,7 +13,7 @@ Contents:
    
    getting-started/index
    operation
-   policy
+   policy/index
    cloud
 
 Indices and tables
