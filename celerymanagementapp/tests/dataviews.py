@@ -90,7 +90,7 @@ class TaskXYMetadata_TestCase(base.CeleryManagement_DBTestCaseBase):
             'type':         'string',
             'allow_null':   False,
             'segmentize':   {'methods': ['each', 'values', 'all',]},
-            'aggregate':    {'methods': ['count', 'enumerate',]},
+            'aggregate':    {'methods': ['enumerate',]},
             },
             meta['taskname'])
             
@@ -99,7 +99,7 @@ class TaskXYMetadata_TestCase(base.CeleryManagement_DBTestCaseBase):
             'type':         'string',
             'allow_null':   False,
             'segmentize':   {'methods': ['each', 'values', 'all',]},
-            'aggregate':    {'methods': ['count', 'enumerate',]},
+            'aggregate':    {'methods': ['enumerate',]},
             },
             meta['worker'])
         
@@ -108,7 +108,7 @@ class TaskXYMetadata_TestCase(base.CeleryManagement_DBTestCaseBase):
             'type':         'elapsed_time',
             'allow_null':   False,
             'segmentize':   {'methods': ['each', 'range',]},
-            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            'aggregate':    {'methods': ['average', 'min', 'max', 'sum', 'variance',]},
             },
             meta['runtime'])
         
@@ -117,7 +117,7 @@ class TaskXYMetadata_TestCase(base.CeleryManagement_DBTestCaseBase):
             'type':         'elapsed_time',
             'allow_null':   True,
             'segmentize':   {'methods': ['each', 'range',]},
-            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            'aggregate':    {'methods': ['average', 'min', 'max', 'sum', 'variance',]},
             },
             meta['waittime'])
         
@@ -126,7 +126,7 @@ class TaskXYMetadata_TestCase(base.CeleryManagement_DBTestCaseBase):
             'type':         'datetime',
             'allow_null':   False,
             'segmentize':   {'methods': ['each', 'range',]},
-            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            'aggregate':    {'methods': ['average', 'min', 'max', 'sum', 'variance',]},
             },
             meta['tstamp'])
         
@@ -135,7 +135,7 @@ class TaskXYMetadata_TestCase(base.CeleryManagement_DBTestCaseBase):
             'type':         'datetime',
             'allow_null':   True,
             'segmentize':   {'methods': ['each', 'range',]},
-            'aggregate':    {'methods': ['count', 'average', 'min', 'max', 'sum', 'variance',]},
+            'aggregate':    {'methods': ['average', 'min', 'max', 'sum', 'variance',]},
             },
             meta['started'])
         
@@ -144,7 +144,7 @@ class TaskXYMetadata_TestCase(base.CeleryManagement_DBTestCaseBase):
             'type':         'string',
             'allow_null':   True,
             'segmentize':   {'methods': ['each', 'values', 'all',]},
-            'aggregate':    {'methods': ['count',]},
+            'aggregate':    {'methods': ['enumerate',]},
             },
             meta['result'])
         
