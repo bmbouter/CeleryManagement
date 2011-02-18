@@ -11,11 +11,11 @@ def start():
         success = run_tests()
     if success:
         commit()
-        if "--no-pull" in sys.argv:
+        if "--no-pull" not in sys.argv:
             pull()
             if "--no-tests" not in sys.argv:
                 success = run_tests()
-        if "--no-push" in sys.argv and success:
+        if "--no-push" not in sys.argv and success:
             push()
 
 def minify_js():
