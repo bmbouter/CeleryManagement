@@ -42,7 +42,7 @@ def push():
 def commit():
     if '-m' in sys.argv:
         index = sys.argv.index('-m')
-        subprocess.call("git commit -m " + sys.argv[index+1] + ' -a', shell=True)
+        subprocess.call("git commit -m \'" + sys.argv[index+1] + '\' -a', shell=True)
     else:
         subprocess.call("git commit -a", shell=True)
 
