@@ -52,7 +52,7 @@ CMA.SystemDisplay.ModelFactory = function(canvas){
             workers = {};
             
             for (i=0; i < length; i += 1){
-                workers[data[i].name] = CMA.SystemDisplay.Worker(y, canvas.width, data[i].id, data[i].name, true);
+                workers[data[i]] = CMA.SystemDisplay.Worker(y, canvas.width, data[i], data[i], true);
                 y += 60;
             }
 
@@ -430,70 +430,84 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
         }
     };
     
-    if( CMA.Core.USE_MODE === "static" ){
-        
-        canvasElement.bind("contextmenu", function(e){
-            var entity = getEntity(e.pageX, e.pageY);
-            clickedEntity = entity;
-
-            if( entity !== undefined  && entity.objectType === "Worker" ){
-                $('#taskMenu').hide();
-                $('#powerWorker').text(entity.active ? "Power Off" : "Power On");
-                $('#workerMenu').css({
-                    top: (e.pageY - yOffset) + 'px',
-                    left: (e.pageX - xOffset - $('#workerMenu').width()) + 'px'
-                }).show();
-            }
-            return false;
-        });
-
-        $('#powerWorker').click(function (){
-            if(  clickedEntity !== undefined  && clickedEntity.objectType === "Worker" ){
-                if( $(this).text() === "Power Off" ){
-                    ajax.postWorkerPower(clickedEntity.id, {"power_state": "off"}, viewer.shutdownWorker);
-                    $('#powerWorkerImg').children('img').attr("src", ajax.getUrls().media_url + 'images/power-on.png');
-                } else {
-                    ajax.postWorkerPower(clickedEntity.id, {"power_state": "on"}, viewer.powerOnWorker);
-                    $('#powerWorkerImg').children('img').attr("src", ajax.getUrls().media_url + 'images/power-off.png');
-                }
-                clickedEntity = false;
-            }
-        });
-    } else {
-        canvasElement.bind("contextmenu", function(e){
-            return false;
-        });
-    }
-    
-    if( CMA.Core.USE_MODE === "static" ){
-        
-        canvasElement.bind("contextmenu", function(e){
-            var entity = getEntity(e.pageX, e.pageY);
-            clickedEntity = entity;
+    var menuSetup = function(){
+        if( CMA.Core.USE_MODE === "static" ){
             
-            if( entity !== undefined  && entity.objectType === "Task" ){
-                $('#workerMenu').hide();
-                $('#taskMenu').css({
-                    top: (e.pageY - yOffset) + 'px',
-                    left: (e.pageX - xOffset) + 'px'
-                }).show();
-            }
-            return false;
-        });
+            canvasElement.bind("contextmenu", function(e){
+                var entity = getEntity(e.pageX, e.pageY);
+                clickedEntity = entity;
 
-        $('#dispatchTask').click(function (){
-            if(  clickedEntity !== undefined  && clickedEntity.objectType === "Task" ){
-                //CMA.Core.postShutdownWorker(clickedEntity.fullName, viewer.shutdownWorker);
-                console.log("task dispatch");
-                clickedEntity = false;
-            }
+                if( entity !== undefined  && entity.objectType === "Worker" ){
+                    $('#taskMenu').hide();
+                    $('#powerWorker').text(entity.active ? "Power Off" : "Power On");
+                    $('#workerMenu').css({
+                        top: (e.pageY - yOffset) + 'px',
+                        left: (e.pageX - xOffset - $('#workerMenu').width()) + 'px'
+                    }).show();
+                }
+                return false;
+            });
+
+            $('#powerWorker').click(function (){
+                if(  clickedEntity !== undefined  && clickedEntity.objectType === "Worker" ){
+                    if( $(this).text() === "Power Off" ){
+                        ajax.postWorkerPower(clickedEntity.id, {"power_state": "off"}, viewer.shutdownWorker);
+                        $('#powerWorkerImg').children('img').attr("src", ajax.getUrls().media_url + 'images/power-on.png');
+                    } else {
+                        ajax.postWorkerPower(clickedEntity.id, {"power_state": "on"}, viewer.powerOnWorker);
+                        $('#powerWorkerImg').children('img').attr("src", ajax.getUrls().media_url + 'images/power-off.png');
+                    }
+                    clickedEntity = false;
+                }
+            });
+        } else {
+            canvasElement.bind("contextmenu", function(e){
+                return false;
+            });
+        }
+        
+        if( CMA.Core.USE_MODE === "static" ){
+            
+            canvasElement.bind("contextmenu", function(e){
+                var entity = getEntity(e.pageX, e.pageY);
+                clickedEntity = entity;
+                
+                if( entity !== undefined  && entity.objectType === "Task" ){
+                    $('#workerMenu').hide();
+                    $('#taskMenu').css({
+                        top: (e.pageY - yOffset) + 'px',
+                        left: (e.pageX - xOffset) + 'px'
+                    }).show();
+                }
+                return false;
+            });
+
+            $('#dispatchTask').click(function (){
+                if(  clickedEntity !== undefined  && clickedEntity.objectType === "Task" ){
+                    //CMA.Core.postShutdownWorker(clickedEntity.fullName, viewer.shutdownWorker);
+                    console.log("task dispatch");
+                    clickedEntity = false;
+                }
+            });
+        } else {
+            canvasElement.bind("contextmenu", function(e){
+                return false;
+            });
+        }
+        
+        $(document).ready(function() {
+            $('#workerMenu').click(function() {
+                $('#workerMenu').hide();
+            });
+            $('#taskMenu').click(function() {
+                $('#taskMenu').hide();
+            });
+            $(document).click(function() {
+                $('#workerMenu').hide();
+                $('#taskMenu').hide();
+            });
         });
-    } else {
-        canvasElement.bind("contextmenu", function(e){
-            return false;
-        });
-    }
-    
+    };
 
     handlers.resizer = (function() {
         var canvasElement = $('#systemCanvas')[0],
@@ -508,19 +522,6 @@ CMA.SystemDisplay.EventHandler = function(canvasElement, viewer, modelFactory){
         return resize;
     }());
 
-    $(document).ready(function() {
-        $('#workerMenu').click(function() {
-            $('#workerMenu').hide();
-        });
-        $('#taskMenu').click(function() {
-            $('#taskMenu').hide();
-        });
-        $(document).click(function() {
-            $('#workerMenu').hide();
-            $('#taskMenu').hide();
-        });
-    });
-    
     //canvasElement.click(handlers.handleClick);
     canvasElement.mousemove(handlers.handleHover);
     $(window).resize(handlers.resizer);
