@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Getting Started &mdash; CeleryManagement v0.0 documentation</title>
+    <title>Policies &mdash; CeleryManagement v0.0 documentation</title>
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="CeleryManagement v0.0 documentation" href="../index.html" />
-    <link rel="next" title="Introduction" href="introduction.html" />
-    <link rel="prev" title="Welcome to CeleryManagement’s documentation!" href="../index.html" /> 
+    <link rel="next" title="Policies Overview" href="overview.html" />
+    <link rel="prev" title="Operation" href="../operation.html" /> 
   </head>
   <body>
     <div class="related">
@@ -34,10 +34,10 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="introduction.html" title="Introduction"
+          <a href="overview.html" title="Policies Overview"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../index.html" title="Welcome to CeleryManagement’s documentation!"
+          <a href="../operation.html" title="Operation"
              accesskey="P">previous</a> |</li>
         <li><a href="../index.html">CeleryManagement v0.0 documentation</a> &raquo;</li> 
       </ul>
@@ -48,36 +48,33 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="getting-started">
-<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Release:</th><td class="field-body">0.0</td>
-</tr>
-<tr class="field"><th class="field-name">Date:</th><td class="field-body">February 18, 2011</td>
-</tr>
-</tbody>
-</table>
+  <div class="section" id="policies">
+<h1>Policies<a class="headerlink" href="#policies" title="Permalink to this headline">¶</a></h1>
+<p>Policies facilitate some automatic control over Celery behavior.  They are
+simple Python-like scripts that may modify Celery Task and/or Worker settings.
+They run periodically at which time a condition is evaluated.  If the condition
+is true, then the main body of the Policy is executed.  It is in this main body
+that changes can be made to Tasks and/or Workers.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#overview">Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#example">Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#features">Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#documentation">Documentation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Policies Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#example">Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#features-limitations">Features &amp; Limitations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#sections">Sections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#policy-manager">Policy Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#common-issues">Common Issues</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="quick-start.html">Quick Start Instructions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="quick-start.html#overview-of-steps">Overview of Steps</a></li>
-<li class="toctree-l2"><a class="reference internal" href="quick-start.html#create-your-virtual-environment-containing-the-correct-requirements">Create your virtual environment containing the correct requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="quick-start.html#configure-your-settings">Configure your settings</a></li>
-<li class="toctree-l2"><a class="reference internal" href="quick-start.html#start-the-required-processes">Start the required processes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="quick-start.html#starting-a-worker-daemon-optional">Starting a worker daemon: (Optional)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Policies API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#common-api">Common API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#collections">Collections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#status-history">Status &amp; History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#schedules">Schedules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#api-by-section">API by Section</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="recipes.html">Policy Recipes</a></li>
 </ul>
 </div>
 </div>
@@ -89,14 +86,14 @@
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../index.html"
-                        title="previous chapter">Welcome to CeleryManagement&#8217;s documentation!</a></p>
+  <p class="topless"><a href="../operation.html"
+                        title="previous chapter">Operation</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="introduction.html"
-                        title="next chapter">Introduction</a></p>
+  <p class="topless"><a href="overview.html"
+                        title="next chapter">Policies Overview</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="../_sources/getting-started/index.txt"
+    <li><a href="../_sources/policy/index.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -123,10 +120,10 @@
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="introduction.html" title="Introduction"
+          <a href="overview.html" title="Policies Overview"
              >next</a> |</li>
         <li class="right" >
-          <a href="../index.html" title="Welcome to CeleryManagement’s documentation!"
+          <a href="../operation.html" title="Operation"
              >previous</a> |</li>
         <li><a href="../index.html">CeleryManagement v0.0 documentation</a> &raquo;</li> 
       </ul>
