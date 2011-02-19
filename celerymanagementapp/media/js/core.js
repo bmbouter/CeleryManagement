@@ -495,20 +495,32 @@ CMA.Core.configure = (function(){
                             if( $(that).parent().hasClass("active") ){
                                 $(that).attr('disabled', 'disabled');
                                 ajax.postWorkerPower(split[0], {"power_state": "off"}, function(data){
-                                    $(that).parent().removeClass("active");
-                                    $(that).parent().addClass("inactive");
-                                    $(that).children('span').text("Power On");
-                                    $(that).children('img').attr("src", ajax.getUrls().media_url + "images/power-on.png");
-                                    $(that).removeAttr('disabled');
+                                    if( !data.hasOwnProperty("failure") ){
+                                        $(that).parent().removeClass("active");
+                                        $(that).parent().addClass("inactive");
+                                        $(that).children('span').text("Power On");
+                                        $(that).children('img').attr("src", ajax.getUrls().media_url + "images/power-on.png");
+                                        $(that).removeAttr('disabled');
+                                        util.showStatus(data);
+                                    } else {
+                                        $(that).removeAttr('disabled');
+                                        util.showStatus(data.failure);
+                                    }
                                 });
                             } else {
                                 $(that).attr('disabled', 'disabled');
                                 ajax.postWorkerPower(split[0], {"power_state": "on"}, function(data){
-                                    $(that).parent().removeClass("inactive");
-                                    $(that).parent().addClass("active");
-                                    $(that).children('span').text("Power Off");
-                                    $(that).children('img').attr("src", ajax.getUrls().media_url + "images/power-off.png");
-                                    $(that).removeAttr('disabled');
+                                    if( !data.hasOwnProperty("failure") ){
+                                        $(that).parent().removeClass("inactive");
+                                        $(that).parent().addClass("active");
+                                        $(that).children('span').text("Power Off");
+                                        $(that).children('img').attr("src", ajax.getUrls().media_url + "images/power-off.png");
+                                        $(that).removeAttr('disabled');
+                                        util.showStatus(data);
+                                    } else {
+                                        $(that).removeAttr('disabled');
+                                        util.showStatus(data.failure);
+                                    }
                                 });
                             }
                         }
