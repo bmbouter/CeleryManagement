@@ -176,7 +176,7 @@ CMA.SystemDisplay.Viewer = function(modelFactory, canvas, canvasElement){
     var expandedTask = false,
         expandedWorker = false,
         canvasHeight = 0,
-        systemRender,
+        systemRenderer = CMA.SystemDisplay.Renderer(canvas, modelFactory),
         dummyWidth = $('#dummy').css("width").split("px")[0],
         ajax = CMA.Core.ajax,
 
