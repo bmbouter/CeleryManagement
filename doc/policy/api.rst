@@ -1,4 +1,6 @@
 
+.. _policies-api:
+
 Policies API
 ############
 
