@@ -1,5 +1,5 @@
 Quick Start Instructions
-############
+########################
 
 Overview of Steps
 =================

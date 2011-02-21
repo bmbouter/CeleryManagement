@@ -49,7 +49,7 @@ TODO....
 
 Not permitted in any section:
 
-- imports
+- imports (selected modules are available to policies)
 - defining functions (with ``def`` or with ``lambda``)
 - defining classes
 - ``exec`` statement or ``eval()`` function
@@ -108,6 +108,73 @@ Celery can be modified.  The apply section is required.
 
 TODO....
 
+Limited Environment
+===================
+
+Policies are run in a limited execution environment.  These limitations 
+manifest themselves when the source code is parsed and when the compiled 
+bytecode is executed.
+
+At parse time, the policy source is checked for certain language constructs 
+which are available in the full Python language, but are not desired in 
+policies.
+
+
+
+Imports
+~~~~~~~
+
+No imports are allowed in policies.  This includes the import statements 
+``import ...`` and ``from ... import ...`` as well as the builtin 
+``__import__`` function.  
+
+Selected builtin modules are made available, including ``datetime``, 
+``time``, ``calendar``, and ``math``.  (Actually, they are wrappers around 
+those modules to prevent any details of those modules leaking into the 
+execution environment.)
+
+Defining functions and classes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TODO...
+
+Arbitrary code execution
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The normal Python languages provides several ways to execute code from 
+within a script.  None of these methods are available to policies.  This 
+includes the ``exec`` statement and the builtin functions ``eval()``, 
+``compile()``, ``execfile()``, and ``input()``.
+
+Files
+~~~~~
+
+The builtin function ``open()`` is not permitted.
+
+Names
+~~~~~
+
+Names beginning with an underscore are not permitted in policies.  This keeps 
+some implementation details hidden.
+
+Some object attributes have special meaning in Python which should not be 
+exposed within policies.  Such names are not permitted.  This includes 
+``__dict__``, ``__class__``, ``__new__``, and ``__init__`` (and several more).  
+(Disallowing ``__init__`` prohibits its *direct* use on objects.  It does not 
+affect constructing objects via the class name.  In other words, 
+``x = MyClass()`` is permitted.)
+
+Names computed at runtime using strings can circumvent the policy name-checking 
+mechanism.  Therefore, functions which would facilitate this are prohibited, 
+including ``getattr()``, ``setattr()``, ``hasattr()`` and ``delattr()``.
+
+.. note:: Names are found by examining the policy source text.  This means that 
+   *any* use of the forbidden names are prohibited, even if they actually refer 
+   to some other object.  For instance, because the builtin ``type()`` function 
+   is prohibited, policy code such as the following will produce errors: 
+   ``type = "MyType"``
+
+
 Policy Manager
 ==============
 
@@ -122,7 +189,8 @@ Common Issues
 - The Policy Manager must be running.
 - It must have access to the django database where Dispatched Task status is 
   recorded.
-- Celery workers must have access to the CeleryManagementLib package.  (Usually this means installing it on the worker's (virtual) machine.)
+- Celery workers must have access to the CeleryManagementLib package.  (Usually 
+  this means installing it on the worker's (virtual) machine.)
 - Exceptions:
   
   - Syntax Errors found while compiling a policy are displayed through the web 
