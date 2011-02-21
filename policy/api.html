@@ -51,7 +51,7 @@
           <div class="body">
             
   <div class="section" id="policies-api">
-<h1><a class="toc-backref" href="#id8">Policies API</a><a class="headerlink" href="#policies-api" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1><a class="toc-backref" href="#id9">Policies API</a><a class="headerlink" href="#policies-api" title="Permalink to this headline">¶</a></h1>
 <p>Policies consist of three sections: schedule, condition, and apply.  The API
 varies depending on the section it is in.  The first section, <cite>schedule</cite>,
 provides the most restrictive API since its only purpose is to return a
@@ -60,23 +60,23 @@ schedule object.  The <cite>condition</cite> section is also somewhat restricted
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#policies-api" id="id8">Policies API</a><ul>
-<li><a class="reference internal" href="#common-api" id="id9">Common API</a></li>
-<li><a class="reference internal" href="#collections" id="id10">Collections</a><ul>
-<li><a class="reference internal" href="#tasks-collection" id="id11">Tasks Collection</a></li>
-<li><a class="reference internal" href="#workers-collection" id="id12">Workers Collection</a></li>
+<li><a class="reference internal" href="#policies-api" id="id9">Policies API</a><ul>
+<li><a class="reference internal" href="#common-api" id="id10">Common API</a></li>
+<li><a class="reference internal" href="#collections" id="id11">Collections</a><ul>
+<li><a class="reference internal" href="#tasks-collection" id="id12">Tasks Collection</a></li>
+<li><a class="reference internal" href="#workers-collection" id="id13">Workers Collection</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#status-history" id="id13">Status &amp; History</a></li>
-<li><a class="reference internal" href="#schedules" id="id14">Schedules</a></li>
-<li><a class="reference internal" href="#examples" id="id15">Examples</a></li>
-<li><a class="reference internal" href="#api-by-section" id="id16">API by Section</a></li>
+<li><a class="reference internal" href="#status-history" id="id14">Status &amp; History</a></li>
+<li><a class="reference internal" href="#schedules" id="id15">Schedules</a></li>
+<li><a class="reference internal" href="#examples" id="id16">Examples</a></li>
+<li><a class="reference internal" href="#api-by-section" id="id17">API by Section</a></li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="section" id="common-api">
-<h2><a class="toc-backref" href="#id9">Common API</a><a class="headerlink" href="#common-api" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id10">Common API</a><a class="headerlink" href="#common-api" title="Permalink to this headline">¶</a></h2>
 <p>The standard modules <a class="reference external" href="http://docs.python.org/2.7/library/datetime.html#module-datetime" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">datetime</span></tt></a>, <a class="reference external" href="http://docs.python.org/2.7/library/time.html#module-time" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">time</span></tt></a>, <a class="reference external" href="http://docs.python.org/2.7/library/calendar.html#module-calendar" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">calendar</span></tt></a> and <a class="reference external" href="http://docs.python.org/2.7/library/math.html#module-math" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">math</span></tt></a> are
 available in all policy sections.  Also available are two utility functions:
 <tt class="docutils literal"><span class="pre">now()</span></tt> and <tt class="docutils literal"><span class="pre">today()</span></tt>.  The former returns the current time as a
@@ -103,7 +103,7 @@ sum tuple unichr unicode xrange zip</pre>
 <div><a class="reference internal" href="#tasks" title="tasks"><tt class="xref py py-data docutils literal"><span class="pre">tasks</span></tt></a>, <a class="reference internal" href="#workers" title="workers"><tt class="xref py py-data docutils literal"><span class="pre">workers</span></tt></a>, <a class="reference internal" href="#stats" title="stats"><tt class="xref py py-data docutils literal"><span class="pre">stats</span></tt></a></div></blockquote>
 </div>
 <div class="section" id="collections">
-<h2><a class="toc-backref" href="#id10">Collections</a><a class="headerlink" href="#collections" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id11">Collections</a><a class="headerlink" href="#collections" title="Permalink to this headline">¶</a></h2>
 <p>The APIs for <a class="reference internal" href="#tasks" title="tasks"><tt class="xref py py-data docutils literal"><span class="pre">tasks</span></tt></a> and <a class="reference internal" href="#workers" title="workers"><tt class="xref py py-data docutils literal"><span class="pre">workers</span></tt></a> follow the same general pattern.  This is
 probably easier to demonstrate with a couple of examples.:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">tasks</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">the_attribute</span> <span class="o">=</span> <span class="n">value</span>
@@ -177,7 +177,7 @@ group of objects.  Currently, two Collections are available: <tt class="docutils
 </dd></dl>
 
 <div class="section" id="tasks-collection">
-<h3><a class="toc-backref" href="#id11">Tasks Collection</a><a class="headerlink" href="#tasks-collection" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id12">Tasks Collection</a><a class="headerlink" href="#tasks-collection" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
 <dt id="tasks">
 <tt class="descname">tasks</tt><a class="headerlink" href="#tasks" title="Permalink to this definition">¶</a></dt>
@@ -243,7 +243,7 @@ may be retrieved via the <a class="reference internal" href="#tasks" title="task
 
 </div>
 <div class="section" id="workers-collection">
-<h3><a class="toc-backref" href="#id12">Workers Collection</a><a class="headerlink" href="#workers-collection" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id13">Workers Collection</a><a class="headerlink" href="#workers-collection" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
 <dt id="workers">
 <tt class="descname">workers</tt><a class="headerlink" href="#workers" title="Permalink to this definition">¶</a></dt>
@@ -302,7 +302,7 @@ object may be retrieved via the <a class="reference internal" href="#workers" ti
 </div>
 </div>
 <div class="section" id="status-history">
-<h2><a class="toc-backref" href="#id13">Status &amp; History</a><a class="headerlink" href="#status-history" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id14">Status &amp; History</a><a class="headerlink" href="#status-history" title="Permalink to this headline">¶</a></h2>
 <dl class="data">
 <dt id="stats">
 <tt class="descname">stats</tt><a class="headerlink" href="#stats" title="Permalink to this definition">¶</a></dt>
@@ -322,15 +322,15 @@ constants.</li>
 <li><strong>interval</strong> &#8211; <p>A single datetime.timedelta object, or a pair of
 datetime.timedelta and/or datetime.datetime objects (as a tuple).
 When it is a single timedelta object, the interval spans the time
-from timedelta seconds <a class="footnote-reference" href="#id6" id="id1">[1]</a> before now up to now.  When it is a
+from timedelta seconds <a class="footnote-reference" href="#id7" id="id2">[1]</a> before now up to now.  When it is a
 pair, the interpretation depends on the element types:</p>
 <dl class="docutils">
 <dt><tt class="docutils literal"><span class="pre">(timedelta</span> <span class="pre">i,</span> <span class="pre">datetime</span> <span class="pre">j)</span></tt>:</dt>
-<dd>The time between time <cite>j</cite> and <cite>i</cite> seconds <a class="footnote-reference" href="#id6" id="id2">[1]</a> before time <cite>j</cite>.</dd>
+<dd>The time between time <cite>j</cite> and <cite>i</cite> seconds <a class="footnote-reference" href="#id7" id="id3">[1]</a> before time <cite>j</cite>.</dd>
 <dt><tt class="docutils literal"><span class="pre">(datetime</span> <span class="pre">i,</span> <span class="pre">timedelta</span> <span class="pre">j)</span></tt>:</dt>
-<dd>The time between time <cite>i</cite> and <cite>j</cite> seconds <a class="footnote-reference" href="#id6" id="id3">[1]</a> after time <cite>i</cite>.</dd>
+<dd>The time between time <cite>i</cite> and <cite>j</cite> seconds <a class="footnote-reference" href="#id7" id="id4">[1]</a> after time <cite>i</cite>.</dd>
 <dt><tt class="docutils literal"><span class="pre">(timedelta</span> <span class="pre">i,</span> <span class="pre">timedelta</span> <span class="pre">j)</span></tt>:</dt>
-<dd>The time between <cite>i</cite> seconds <a class="footnote-reference" href="#id6" id="id4">[1]</a> before now and <cite>j</cite> seconds <a class="footnote-reference" href="#id6" id="id5">[1]</a>
+<dd>The time between <cite>i</cite> seconds <a class="footnote-reference" href="#id7" id="id5">[1]</a> before now and <cite>j</cite> seconds <a class="footnote-reference" href="#id7" id="id6">[1]</a>
 before now.</dd>
 <dt><tt class="docutils literal"><span class="pre">(datetime</span> <span class="pre">i,</span> <span class="pre">datetime</span> <span class="pre">j)</span></tt>:</dt>
 <dd>The time between time <cite>i</cite> and time <cite>j</cite>.</dd>
@@ -401,16 +401,16 @@ have the same meaning as in <a class="reference internal" href="#tasks" title="t
 
 </dd></dl>
 
-<table class="docutils footnote" frame="void" id="id6" rules="none">
+<table class="docutils footnote" frame="void" id="id7" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>, <a class="fn-backref" href="#id3">3</a>, <a class="fn-backref" href="#id4">4</a>, <a class="fn-backref" href="#id5">5</a>)</em> <tt class="docutils literal"><span class="pre">timedelta</span></tt> is not restricted to seconds, but using some concrete unit
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>, <a class="fn-backref" href="#id4">3</a>, <a class="fn-backref" href="#id5">4</a>, <a class="fn-backref" href="#id6">5</a>)</em> <tt class="docutils literal"><span class="pre">timedelta</span></tt> is not restricted to seconds, but using some concrete unit
 of time here is clearer.</td></tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="schedules">
-<h2><a class="toc-backref" href="#id14">Schedules</a><a class="headerlink" href="#schedules" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id15">Schedules</a><a class="headerlink" href="#schedules" title="Permalink to this headline">¶</a></h2>
 <p>The schedule section provides functions that (strangely enough) can create
 schedules.  The evaluation of the section must result in a schedule object.</p>
 <dl class="function">
@@ -453,7 +453,7 @@ hours (8am-5pm).</dd>
 
 </div>
 <div class="section" id="examples">
-<h2><a class="toc-backref" href="#id15">Examples</a><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id16">Examples</a><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -481,7 +481,7 @@ old records in the database are cleared periodically.)</p>
 <p>Get the <tt class="docutils literal"><span class="pre">ignore_result</span></tt> setting for tasks of type <tt class="docutils literal"><span class="pre">my_task</span></tt>.</p>
 </div>
 <div class="section" id="api-by-section">
-<h2><a class="toc-backref" href="#id16">API by Section</a><a class="headerlink" href="#api-by-section" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id17">API by Section</a><a class="headerlink" href="#api-by-section" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><pre>schedule
     crontab
 
