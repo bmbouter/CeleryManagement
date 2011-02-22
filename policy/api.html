@@ -51,139 +51,89 @@
           <div class="body">
             
   <div class="section" id="policies-api">
-<span id="id1"></span><h1><a class="toc-backref" href="#id9">Policies API</a><a class="headerlink" href="#policies-api" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1><a class="toc-backref" href="#id11">Policies API</a><a class="headerlink" href="#policies-api" title="Permalink to this headline">¶</a></h1>
 <p>Policies consist of three sections: schedule, condition, and apply.  The API
 varies depending on the section it is in.  The first section, <cite>schedule</cite>,
 provides the most restrictive API since its only purpose is to return a
 schedule object.  The <cite>condition</cite> section is also somewhat restricted, and the
 <cite>apply</cite> section has the most feature-filled API.</p>
+<p>See <a class="reference internal" href="overview.html#policies-overview"><em>Policies Overview</em></a> for information about how
+policies may be used.</p>
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#policies-api" id="id9">Policies API</a><ul>
-<li><a class="reference internal" href="#common-api" id="id10">Common API</a></li>
-<li><a class="reference internal" href="#collections" id="id11">Collections</a><ul>
-<li><a class="reference internal" href="#tasks-collection" id="id12">Tasks Collection</a></li>
-<li><a class="reference internal" href="#workers-collection" id="id13">Workers Collection</a></li>
+<li><a class="reference internal" href="#policies-api" id="id11">Policies API</a><ul>
+<li><a class="reference internal" href="#task-and-worker-settings" id="id12">Task and Worker Settings</a><ul>
+<li><a class="reference internal" href="#collections" id="id13">Collections</a></li>
+<li><a class="reference internal" href="#tasks-collection" id="id14">Tasks Collection</a></li>
+<li><a class="reference internal" href="#workers-collection" id="id15">Workers Collection</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#status-history" id="id14">Status &amp; History</a></li>
-<li><a class="reference internal" href="#schedules" id="id15">Schedules</a></li>
-<li><a class="reference internal" href="#examples" id="id16">Examples</a></li>
-<li><a class="reference internal" href="#api-by-section" id="id17">API by Section</a></li>
+<li><a class="reference internal" href="#task-and-worker-stats" id="id16">Task and Worker Stats</a></li>
+<li><a class="reference internal" href="#policy-schedule" id="id17">Policy Schedule</a></li>
+<li><a class="reference internal" href="#common-api" id="id18">Common API</a><ul>
+<li><a class="reference internal" href="#utilities" id="id19">Utilities</a><ul>
+<li><a class="reference internal" href="#email" id="id20">Email</a></li>
+<li><a class="reference internal" href="#celery-states" id="id21">Celery States</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#available-standard-modules" id="id22">Available Standard Modules</a></li>
+<li><a class="reference internal" href="#python-builtins" id="id23">Python Builtins</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#examples" id="id24">Examples</a></li>
+<li><a class="reference internal" href="#availability-by-policy-section" id="id25">Availability by Policy Section</a></li>
 </ul>
 </li>
 </ul>
 </div>
-<div class="section" id="common-api">
-<h2><a class="toc-backref" href="#id10">Common API</a><a class="headerlink" href="#common-api" title="Permalink to this headline">¶</a></h2>
-<p>The standard modules <a class="reference external" href="http://docs.python.org/2.7/library/datetime.html#module-datetime" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">datetime</span></tt></a>, <a class="reference external" href="http://docs.python.org/2.7/library/time.html#module-time" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">time</span></tt></a>, <a class="reference external" href="http://docs.python.org/2.7/library/calendar.html#module-calendar" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">calendar</span></tt></a> and <a class="reference external" href="http://docs.python.org/2.7/library/math.html#module-math" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">math</span></tt></a> are
-available in all policy sections.  Also available are two utility functions:
-<tt class="docutils literal"><span class="pre">now()</span></tt> and <tt class="docutils literal"><span class="pre">today()</span></tt>.  The former returns the current time as a
-<tt class="docutils literal"><span class="pre">datetime.datetime</span></tt> object.  The latter returns the current date as a
-<tt class="docutils literal"><span class="pre">datetime.date</span></tt> object.</p>
-<p>Many of the standard builtin functions are available.  But some, like
-<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a> and <a class="reference external" href="http://docs.python.org/2.7/library/functions.html#__import__" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">__import__()</span></tt></a> are not allowed.  The following are available:</p>
-<div class="highlight-python"><pre>abs all any basestring bin bool bytearray callable chr cmp complex dict
-divmod enumerate filter float format frozenset hash help hex id int
-isinstance issubclass iter len list long map max memoryview min next
-oct ord pow print range reduce repr reversed round set slice sorted str
-sum tuple unichr unicode xrange zip</pre>
-</div>
-<p>The following standard builtin constants are also available:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">None</span>
-</pre></div>
-</div>
-<p>The following Celery states are available as constants:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">PENDING</span><span class="p">,</span> <span class="n">RECEIVED</span><span class="p">,</span> <span class="n">STARTED</span><span class="p">,</span> <span class="n">SUCCESS</span><span class="p">,</span> <span class="n">FAILURE</span><span class="p">,</span> <span class="n">REVOKED</span><span class="p">,</span> <span class="n">RETRY</span>
-</pre></div>
-</div>
-<p>The following names provide access to the APIs described below:</p>
-<blockquote>
-<div><a class="reference internal" href="#tasks" title="tasks"><tt class="xref py py-data docutils literal"><span class="pre">tasks</span></tt></a>, <a class="reference internal" href="#workers" title="workers"><tt class="xref py py-data docutils literal"><span class="pre">workers</span></tt></a>, <a class="reference internal" href="#stats" title="stats"><tt class="xref py py-data docutils literal"><span class="pre">stats</span></tt></a></div></blockquote>
-</div>
+<div class="section" id="task-and-worker-settings">
+<h2><a class="toc-backref" href="#id12">Task and Worker Settings</a><a class="headerlink" href="#task-and-worker-settings" title="Permalink to this headline">¶</a></h2>
+<p>This sections discusses how to check <a class="reference internal" href="#tasks-collection"><em>tasks&#8217;</em></a> and
+<a class="reference internal" href="#workers-collection"><em>workers&#8217;</em></a> settings as well as how to modify those
+settings.  A similar API, called a collection, is followed for both.</p>
 <div class="section" id="collections">
-<h2><a class="toc-backref" href="#id11">Collections</a><a class="headerlink" href="#collections" title="Permalink to this headline">¶</a></h2>
-<p>The APIs for <a class="reference internal" href="#tasks" title="tasks"><tt class="xref py py-data docutils literal"><span class="pre">tasks</span></tt></a> and <a class="reference internal" href="#workers" title="workers"><tt class="xref py py-data docutils literal"><span class="pre">workers</span></tt></a> follow the same general pattern.  This is
-probably easier to demonstrate with a couple of examples.:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">tasks</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">the_attribute</span> <span class="o">=</span> <span class="n">value</span>
-<span class="n">tasks</span><span class="p">[</span><span class="s">&#39;taskname&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">the_attribute</span> <span class="o">=</span> <span class="n">value</span>
-<span class="n">tasks</span><span class="p">[(</span><span class="s">&#39;task1&#39;</span><span class="p">,</span><span class="s">&#39;task2&#39;</span><span class="p">,</span><span class="s">&#39;task3&#39;</span><span class="p">,)]</span><span class="o">.</span><span class="n">the_attribute</span> <span class="o">=</span> <span class="n">value</span>
+<h3><a class="toc-backref" href="#id13">Collections</a><a class="headerlink" href="#collections" title="Permalink to this headline">¶</a></h3>
+<p>The pattern that is followed for accessing both tasks and workers settings is
+called a collection.  Using this interface, one may access one, many, or all
+tasks or workers.</p>
+<p>In the policy API, the collections are referred to by the names <tt class="docutils literal"><span class="pre">tasks</span></tt> for
+tasks, and <tt class="docutils literal"><span class="pre">workers</span></tt> for workers.  Please see their specific topics below for
+the details of accessing tasks and workers.</p>
+<p>Here is the general pattern for accessing specific collection members:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>                    <span class="c"># access all collection members</span>
+<span class="n">collection</span><span class="p">[</span><span class="s">&#39;NAME&#39;</span><span class="p">]</span>                  <span class="c"># access a specific collection member</span>
+<span class="n">collection</span><span class="p">[(</span><span class="s">&#39;NAME1&#39;</span><span class="p">,</span><span class="s">&#39;NAME2&#39;</span><span class="p">,</span><span class="o">...</span><span class="p">)]</span>   <span class="c"># access multiple collection members</span>
 </pre></div>
 </div>
-<p>The first example above assigns to the same attribute on all known task types.
-The second assigns to the attribute on only one task type.  The third example
-assigns to the same attribute on each of the explicitly listed task types.</p>
-<p>Retrieving values is more restricted.  The attribute can be retrieved from only
-one task type at a time.  Otherwise, a dict of attrbute values with task types
-as keys would be required.  This would be too complicated, especially for the
-common case where one is interested in only a single type.</p>
-<p>Therefore, when retrieving values, only the following pattern is allowed:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">value</span> <span class="o">=</span> <span class="n">tasks</span><span class="p">[</span><span class="s">&#39;taskname&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">the_attribute</span>
+<p>The first example above accesses all members of the collection.  The object
+returned can be used to set the same setting on all of those members.  The
+second example accesses only the single named object.  The returned value can
+be used to get or set the settings on that specific object.  The third example
+accesses multiple specificly-named objects.  The returned value can be used to
+set the same setting on those specifically-named objects.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The Collections API is designed to be simple and intuitive.
+One manifestiation of this is that they always return single values.
+Because the same setting may have different values on different objects, it
+makes no sense to get a single setting from multiple objects.  As a result,
+settings may be retrieved for only one named object at a time.</p>
+<p>For example:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">val</span> <span class="o">=</span> <span class="n">tasks</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">ignore_result</span>             <span class="c"># This will raise an exception.</span>
+<span class="n">val</span> <span class="o">=</span> <span class="n">tasks</span><span class="p">[</span><span class="s">&#39;tasks.MyTask&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">ignore_result</span>   <span class="c"># This is OK.</span>
 </pre></div>
 </div>
-<p>The following description of the &#8220;Collection&#8221; class is for documentation
-purposes only.  It may be implemented in using any means which provides
-equivalent behavior.  Indeed, there may not even be a class by this name.</p>
-<dl class="class">
-<dt id="Collection">
-<em class="property">class </em><tt class="descname">Collection</tt><a class="headerlink" href="#Collection" title="Permalink to this definition">¶</a></dt>
-<dd><p>A class which provides access to an item or items within a homogeneous
-group of objects.  Currently, two Collections are available: <tt class="docutils literal"><span class="pre">tasks</span></tt> and
-<tt class="docutils literal"><span class="pre">workers</span></tt>.  The user may not create objects of this class.</p>
-<dl class="method">
-<dt id="Collection.__getitem__">
-<tt class="descname">__getitem__</tt><big>(</big><em>itemname</em><big>)</big><a class="headerlink" href="#Collection.__getitem__" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itemname</strong> &#8211; A single itemname as a string.</td>
-</tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">An object which allows the item&#8217;s attributes to be queried.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="Collection.__setitem__">
-<tt class="descname">__setitem__</tt><big>(</big><em>itemnames</em>, <em>value</em><big>)</big><a class="headerlink" href="#Collection.__setitem__" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itemnames</strong> &#8211; A single itemname as a string, or an iterable of itemnames.</td>
-</tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">An object which allows setting of the items&#8217; attributes.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="Collection.all">
-<tt class="descname">all</tt><big>(</big><big>)</big><a class="headerlink" href="#Collection.all" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">An object which allows setting the attributes of <em>all</em> items within the collection.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
+</div>
+</div>
 <div class="section" id="tasks-collection">
-<h3><a class="toc-backref" href="#id12">Tasks Collection</a><a class="headerlink" href="#tasks-collection" title="Permalink to this headline">¶</a></h3>
+<span id="id2"></span><h3><a class="toc-backref" href="#id14">Tasks Collection</a><a class="headerlink" href="#tasks-collection" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
 <dt id="tasks">
 <tt class="descname">tasks</tt><a class="headerlink" href="#tasks" title="Permalink to this definition">¶</a></dt>
-<dd><p>An instance of <a class="reference internal" href="#Collection" title="Collection"><tt class="xref py py-class docutils literal"><span class="pre">Collection</span></tt></a> that allows one to inspect and modify
-selected Celery Task class attributes.  The methods on this object return
-instances of <a class="reference internal" href="#TaskItem" title="TaskItem"><tt class="xref py py-class docutils literal"><span class="pre">TaskItem</span></tt></a>.</p>
+<dd><p>The tasks collection available to policies.  This allows one to inspect and
+modify selected Celery <a class="reference external" href="http://ask.github.com/celery/userguide/tasks.html#guide-tasks" title="(in Celery v2.2)"><em class="xref std std-ref">Task</em></a> attributes.  The methods
+on this object return instances of <a class="reference internal" href="#TaskItem" title="TaskItem"><tt class="xref py py-class docutils literal"><span class="pre">TaskItem</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="class">
@@ -191,6 +141,15 @@ instances of <a class="reference internal" href="#TaskItem" title="TaskItem"><tt
 <em class="property">class </em><tt class="descname">TaskItem</tt><a class="headerlink" href="#TaskItem" title="Permalink to this definition">¶</a></dt>
 <dd><p>An object which represents one or more Celery Task types.  Such an object
 may be retrieved via the <a class="reference internal" href="#tasks" title="tasks"><tt class="xref py py-data docutils literal"><span class="pre">tasks</span></tt></a> object within a Policy.</p>
+<p>To retrieve the routing_key on a Task named tasks.MyTask:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">tasks</span><span class="p">[</span><span class="s">&#39;tasks.MyTask&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">routing_key</span>
+</pre></div>
+</div>
+<p>To set the ignore_result attribute on the same Task:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tasks</span><span class="p">[</span><span class="s">&#39;tasks.MyTask&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">ignore_result</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>The following Task attributes are available:</p>
 <dl class="attribute">
 <dt id="TaskItem.ignore_result">
 <tt class="descname">ignore_result</tt><a class="headerlink" href="#TaskItem.ignore_result" title="Permalink to this definition">¶</a></dt>
@@ -243,13 +202,14 @@ may be retrieved via the <a class="reference internal" href="#tasks" title="task
 
 </div>
 <div class="section" id="workers-collection">
-<h3><a class="toc-backref" href="#id13">Workers Collection</a><a class="headerlink" href="#workers-collection" title="Permalink to this headline">¶</a></h3>
+<span id="id3"></span><h3><a class="toc-backref" href="#id15">Workers Collection</a><a class="headerlink" href="#workers-collection" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
 <dt id="workers">
 <tt class="descname">workers</tt><a class="headerlink" href="#workers" title="Permalink to this definition">¶</a></dt>
-<dd><p>An instance of <a class="reference internal" href="#Collection" title="Collection"><tt class="xref py py-class docutils literal"><span class="pre">Collection</span></tt></a> that allows one to inspect and modify
-selected attributes of running Celery Workers.  The methods on this object
-return instances of <a class="reference internal" href="#WorkerItem" title="WorkerItem"><tt class="xref py py-class docutils literal"><span class="pre">WorkerItem</span></tt></a>.</p>
+<dd><p>The workers collection available to policies.  This allows one to inspect
+and modify selected attributes of running Celery
+<a class="reference external" href="http://ask.github.com/celery/userguide/workers.html#guide-worker" title="(in Celery v2.2)"><em class="xref std std-ref">Workers</em></a>.  The methods on this object return instances
+of <a class="reference internal" href="#WorkerItem" title="WorkerItem"><tt class="xref py py-class docutils literal"><span class="pre">WorkerItem</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="class">
@@ -257,6 +217,14 @@ return instances of <a class="reference internal" href="#WorkerItem" title="Work
 <em class="property">class </em><tt class="descname">WorkerItem</tt><a class="headerlink" href="#WorkerItem" title="Permalink to this definition">¶</a></dt>
 <dd><p>An object which represents one or more running Celery Workers.  Such an
 object may be retrieved via the <a class="reference internal" href="#workers" title="workers"><tt class="xref py py-data docutils literal"><span class="pre">workers</span></tt></a> object within a Policy.</p>
+<p>To get the prefetch value for a Worker named myworker.example.org:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">workers</span><span class="p">[</span><span class="s">&quot;myworker.example.org&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">prefetch</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To increment the number of subprocesses on the same worker:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workers</span><span class="p">[</span><span class="s">&quot;myworker.example.org&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">subprocesses</span><span class="o">.</span><span class="n">increment</span><span class="p">()</span>
+</pre></div>
+</div>
 <dl class="attribute">
 <dt id="WorkerItem.prefetch">
 <tt class="descname">prefetch</tt><a class="headerlink" href="#WorkerItem.prefetch" title="Permalink to this definition">¶</a></dt>
@@ -272,7 +240,7 @@ object may be retrieved via the <a class="reference internal" href="#workers" ti
 <dl class="method">
 <dt id="WorkerItem.get">
 <tt class="descname">get</tt><big>(</big><big>)</big><a class="headerlink" href="#WorkerItem.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>TODO</p>
+<dd><p>Return the worker&#8217;s current prefetch value.</p>
 </dd></dl>
 
 </dd></dl>
@@ -292,7 +260,7 @@ object may be retrieved via the <a class="reference internal" href="#workers" ti
 <dl class="method">
 <dt>
 <tt class="descname">get</tt><big>(</big><big>)</big></dt>
-<dd><p>TODO</p>
+<dd><p>Return the number of subprocesses the worker has.</p>
 </dd></dl>
 
 </dd></dl>
@@ -301,8 +269,8 @@ object may be retrieved via the <a class="reference internal" href="#workers" ti
 
 </div>
 </div>
-<div class="section" id="status-history">
-<h2><a class="toc-backref" href="#id14">Status &amp; History</a><a class="headerlink" href="#status-history" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="task-and-worker-stats">
+<h2><a class="toc-backref" href="#id16">Task and Worker Stats</a><a class="headerlink" href="#task-and-worker-stats" title="Permalink to this headline">¶</a></h2>
 <dl class="data">
 <dt id="stats">
 <tt class="descname">stats</tt><a class="headerlink" href="#stats" title="Permalink to this definition">¶</a></dt>
@@ -322,15 +290,15 @@ constants.</li>
 <li><strong>interval</strong> &#8211; <p>A single datetime.timedelta object, or a pair of
 datetime.timedelta and/or datetime.datetime objects (as a tuple).
 When it is a single timedelta object, the interval spans the time
-from timedelta seconds <a class="footnote-reference" href="#id7" id="id2">[1]</a> before now up to now.  When it is a
+from timedelta seconds <a class="footnote-reference" href="#id9" id="id4">[1]</a> before now up to now.  When it is a
 pair, the interpretation depends on the element types:</p>
 <dl class="docutils">
 <dt><tt class="docutils literal"><span class="pre">(timedelta</span> <span class="pre">i,</span> <span class="pre">datetime</span> <span class="pre">j)</span></tt>:</dt>
-<dd>The time between time <cite>j</cite> and <cite>i</cite> seconds <a class="footnote-reference" href="#id7" id="id3">[1]</a> before time <cite>j</cite>.</dd>
+<dd>The time between time <cite>j</cite> and <cite>i</cite> seconds <a class="footnote-reference" href="#id9" id="id5">[1]</a> before time <cite>j</cite>.</dd>
 <dt><tt class="docutils literal"><span class="pre">(datetime</span> <span class="pre">i,</span> <span class="pre">timedelta</span> <span class="pre">j)</span></tt>:</dt>
-<dd>The time between time <cite>i</cite> and <cite>j</cite> seconds <a class="footnote-reference" href="#id7" id="id4">[1]</a> after time <cite>i</cite>.</dd>
+<dd>The time between time <cite>i</cite> and <cite>j</cite> seconds <a class="footnote-reference" href="#id9" id="id6">[1]</a> after time <cite>i</cite>.</dd>
 <dt><tt class="docutils literal"><span class="pre">(timedelta</span> <span class="pre">i,</span> <span class="pre">timedelta</span> <span class="pre">j)</span></tt>:</dt>
-<dd>The time between <cite>i</cite> seconds <a class="footnote-reference" href="#id7" id="id5">[1]</a> before now and <cite>j</cite> seconds <a class="footnote-reference" href="#id7" id="id6">[1]</a>
+<dd>The time between <cite>i</cite> seconds <a class="footnote-reference" href="#id9" id="id7">[1]</a> before now and <cite>j</cite> seconds <a class="footnote-reference" href="#id9" id="id8">[1]</a>
 before now.</dd>
 <dt><tt class="docutils literal"><span class="pre">(datetime</span> <span class="pre">i,</span> <span class="pre">datetime</span> <span class="pre">j)</span></tt>:</dt>
 <dd>The time between time <cite>i</cite> and time <cite>j</cite>.</dd>
@@ -401,16 +369,16 @@ have the same meaning as in <a class="reference internal" href="#tasks" title="t
 
 </dd></dl>
 
-<table class="docutils footnote" frame="void" id="id7" rules="none">
+<table class="docutils footnote" frame="void" id="id9" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>, <a class="fn-backref" href="#id4">3</a>, <a class="fn-backref" href="#id5">4</a>, <a class="fn-backref" href="#id6">5</a>)</em> <tt class="docutils literal"><span class="pre">timedelta</span></tt> is not restricted to seconds, but using some concrete unit
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id4">1</a>, <a class="fn-backref" href="#id5">2</a>, <a class="fn-backref" href="#id6">3</a>, <a class="fn-backref" href="#id7">4</a>, <a class="fn-backref" href="#id8">5</a>)</em> <tt class="docutils literal"><span class="pre">timedelta</span></tt> is not restricted to seconds, but using some concrete unit
 of time here is clearer.</td></tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="schedules">
-<h2><a class="toc-backref" href="#id15">Schedules</a><a class="headerlink" href="#schedules" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="policy-schedule">
+<h2><a class="toc-backref" href="#id17">Policy Schedule</a><a class="headerlink" href="#policy-schedule" title="Permalink to this headline">¶</a></h2>
 <p>The schedule section provides functions that (strangely enough) can create
 schedules.  The evaluation of the section must result in a schedule object.</p>
 <dl class="function">
@@ -452,47 +420,299 @@ hours (8am-5pm).</dd>
 </dd></dl>
 
 </div>
+<div class="section" id="common-api">
+<h2><a class="toc-backref" href="#id18">Common API</a><a class="headerlink" href="#common-api" title="Permalink to this headline">¶</a></h2>
+<p>Although using a subset of Python, policies still provide many of the
+language&#8217;s built-in functions, constants and a few selected modules.</p>
+<div class="section" id="utilities">
+<h3><a class="toc-backref" href="#id19">Utilities</a><a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="now">
+<tt class="descname">now</tt><big>(</big><big>)</big><a class="headerlink" href="#now" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the current time as a <a class="reference external" href="http://docs.python.org/2.7/library/datetime.html#datetime.datetime" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">datetime.datetime</span></tt></a> object.  (The
+datetime module is also available to policies.)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="today">
+<tt class="descname">today</tt><big>(</big><big>)</big><a class="headerlink" href="#today" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the current date as a <a class="reference external" href="http://docs.python.org/2.7/library/datetime.html#datetime.date" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">datetime.date</span></tt></a> object.  (The datetime
+module is also available to policies.)</p>
+</dd></dl>
+
+<div class="section" id="email">
+<h4><a class="toc-backref" href="#id20">Email</a><a class="headerlink" href="#email" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="send_email">
+<tt class="descname">send_email</tt><big>(</big><em>subject</em>, <em>message</em>, <em>from_email</em>, <em>recipient_list</em>, <em>auth_user=None</em>, <em>auth_password=None</em><big>)</big><a class="headerlink" href="#send_email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sometimes, a policy does not need to (or is not able to) respond
+automatically to the condition it finds.  This function allows a policy to
+send you an email in such situations.  It is built on top of <a class="reference external" href="http://www.djangoproject.com/">Django</a>&#8216;s
+email feature.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>subject</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) &#8211; The subject of the email message, as a string.</li>
+<li><strong>message</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) &#8211; The content of the email message, as a string.</li>
+<li><strong>from_email</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) &#8211; The email address that will appear in the <em>from</em> field.</li>
+<li><strong>recipient_list</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; A list of email addresses to which to send the email.</li>
+<li><strong>auth_user</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) &#8211; Username for the SMTP server.  If not given,
+Django will use the EMAIL_HOST_USER setting.</li>
+<li><strong>auth_password</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) &#8211; Password for the SMTP server.  If not given,
+Django will use the EMAIL_HOST_PASSWORD
+setting.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="celery-states">
+<h4><a class="toc-backref" href="#id21">Celery States</a><a class="headerlink" href="#celery-states" title="Permalink to this headline">¶</a></h4>
+<p>The following <a class="reference external" href="http://ask.github.com/celery/userguide/tasks.html#task-states" title="(in Celery v2.2)"><em class="xref std std-ref">Celery states</em></a> are available as
+constants:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">PENDING</span><span class="p">,</span> <span class="n">RECEIVED</span><span class="p">,</span> <span class="n">STARTED</span><span class="p">,</span> <span class="n">SUCCESS</span><span class="p">,</span> <span class="n">FAILURE</span><span class="p">,</span> <span class="n">REVOKED</span><span class="p">,</span> <span class="n">RETRY</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="available-standard-modules">
+<h3><a class="toc-backref" href="#id22">Available Standard Modules</a><a class="headerlink" href="#available-standard-modules" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="http://docs.python.org/2.7/library/datetime.html#module-datetime" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">datetime</span></tt></a></li>
+<li><a class="reference external" href="http://docs.python.org/2.7/library/time.html#module-time" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">time</span></tt></a></li>
+<li><a class="reference external" href="http://docs.python.org/2.7/library/calendar.html#module-calendar" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">calendar</span></tt></a></li>
+<li><a class="reference external" href="http://docs.python.org/2.7/library/math.html#module-math" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">math</span></tt></a></li>
+</ul>
+</div>
+<div class="section" id="python-builtins">
+<h3><a class="toc-backref" href="#id23">Python Builtins</a><a class="headerlink" href="#python-builtins" title="Permalink to this headline">¶</a></h3>
+<p>Many of the standard builtin functions are available.  But some, like
+<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a> and <a class="reference external" href="http://docs.python.org/2.7/library/functions.html#__import__" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">__import__()</span></tt></a> are not allowed. The following builtin
+functions are available:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="20%" />
+<col width="21%" />
+<col width="20%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head"></th>
+<th class="head"></th>
+<th class="head">Built-in Functions</th>
+<th class="head"></th>
+<th class="head"></th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#abs" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">abs()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/stdtypes.html#dict" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">int()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#next" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">next()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#slice" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">slice()</span></tt></a></td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#all" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">all()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#divmod" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">divmod()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#isinstance" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">isinstance()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#oct" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">oct()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#sorted" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">sorted()</span></tt></a></td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#any" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">any()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#enumerate" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">enumerate()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#issubclass" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">issubclass()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#ord" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">ord()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">str()</span></tt></a></td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#basestring" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">basestring()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#filter" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">filter()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#iter" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">iter()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#pow" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">pow()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#sum" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">sum()</span></tt></a></td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#bin" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">bin()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#float" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">float()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#len" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">len()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#print" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">print()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#tuple" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">tuple()</span></tt></a></td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#bool" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">bool()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#format" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">format()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#list" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">list()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#range" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">range()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#unichr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">unichr()</span></tt></a></td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#bytearray" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">bytearray()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/stdtypes.html#frozenset" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">frozenset</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#long" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">long()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#reduce" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">reduce()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#unicode" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">unicode()</span></tt></a></td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#callable" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">callable()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#hash" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">hash()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#map" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">map()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#repr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">repr()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#xrange" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">xrange()</span></tt></a></td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#chr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">chr()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#help" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">help()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#max" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">max()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#reversed" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">reversed()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#zip" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">zip()</span></tt></a></td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#cmp" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">cmp()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#hex" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">hex()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/stdtypes.html#memoryview" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">memoryview</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#round" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">round()</span></tt></a></td>
+<td>&nbsp;</td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#complex" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">complex()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#id" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">id()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#min" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">min()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/stdtypes.html#set" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">set</span></tt></a></td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p>The following builtin functions are <em>not</em> available (this list may be
+incomplete):</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="35%" />
+<col width="35%" />
+<col width="30%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head"></th>
+<th class="head">Prohibited Functions</th>
+<th class="head"></th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#compile" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">compile()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#globals" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">globals()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#raw_input" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">raw_input()</span></tt></a></td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#hasattr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">hasattr()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#reload" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">reload()</span></tt></a></td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#execfile" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">execfile()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#input" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">input()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#setattr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">setattr()</span></tt></a></td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#file" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">file()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#locals" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">locals()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#type" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">type()</span></tt></a></td>
+</tr>
+<tr><td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#getattr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">getattr()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#open" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">open()</span></tt></a></td>
+<td><a class="reference external" href="http://docs.python.org/2.7/library/functions.html#__import__" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">__import__()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+<p>The following standard builtin constants are also available:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">None</span>
+</pre></div>
+</div>
+</div>
+</div>
 <div class="section" id="examples">
-<h2><a class="toc-backref" href="#id16">Examples</a><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">()</span>
+<h2><a class="toc-backref" href="#id24">Examples</a><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>The following examples show how to use various portions of the policies API.
+See <a class="reference internal" href="recipes.html#policy-recipes"><em>Policy Recipes</em></a> for examples of entire policies.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">()</span>   <span class="c"># 1</span>
 </pre></div>
 </div>
-<p>The number of tasks sent.  (This will not be all tasks ever sent because
-old records in the database are cleared periodically.)</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<ol class="arabic simple">
+<li>The number of tasks sent.  (This will not be all tasks ever sent because
+old records in the database are cleared periodically.)</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>    <span class="c"># 2</span>
 </pre></div>
 </div>
-<p>The number of tasks sent over the last hour.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+<ol class="arabic simple" start="2">
+<li>The number of tasks sent over the last hour.</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>    <span class="c"># 3</span>
 </pre></div>
 </div>
-<p>The number of tasks sent between one hour and two hours ago.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">(</span><span class="n">tasknames</span><span class="o">=</span><span class="s">&quot;my_task&quot;</span><span class="p">)</span>
+<ol class="arabic simple" start="3">
+<li>The number of tasks sent between one hour and two hours ago.</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">(</span><span class="n">tasknames</span><span class="o">=</span><span class="s">&quot;my_task&quot;</span><span class="p">)</span>    <span class="c"># 4</span>
 </pre></div>
 </div>
-<p>The number of tasks of type <tt class="docutils literal"><span class="pre">my_task</span></tt> sent.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">(</span><span class="n">tasknames</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;my_task&quot;</span><span class="p">,</span><span class="s">&quot;your_task&quot;</span><span class="p">])</span>
+<ol class="arabic simple" start="4">
+<li>The number of tasks of type <tt class="docutils literal"><span class="pre">my_task</span></tt> sent.</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks</span><span class="p">(</span><span class="n">tasknames</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;my_task&quot;</span><span class="p">,</span><span class="s">&quot;your_task&quot;</span><span class="p">])</span>      <span class="c"># 5</span>
 </pre></div>
 </div>
-<p>The number of tasks of type <tt class="docutils literal"><span class="pre">my_task</span></tt> <cite>or</cite> <tt class="docutils literal"><span class="pre">your_task</span></tt> sent.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">tasks</span><span class="p">[</span><span class="s">&quot;my_task&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ignore_result</span>
+<ol class="arabic simple" start="5">
+<li>The number of tasks of type <tt class="docutils literal"><span class="pre">my_task</span></tt> <cite>or</cite> <tt class="docutils literal"><span class="pre">your_task</span></tt> sent.</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">tasks</span><span class="p">[</span><span class="s">&quot;my_task&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ignore_result</span>      <span class="c"># 6</span>
 </pre></div>
 </div>
-<p>Get the <tt class="docutils literal"><span class="pre">ignore_result</span></tt> setting for tasks of type <tt class="docutils literal"><span class="pre">my_task</span></tt>.</p>
+<ol class="arabic simple" start="6">
+<li>Get the <tt class="docutils literal"><span class="pre">ignore_result</span></tt> setting for tasks of type <tt class="docutils literal"><span class="pre">my_task</span></tt>.</li>
+</ol>
 </div>
-<div class="section" id="api-by-section">
-<h2><a class="toc-backref" href="#id17">API by Section</a><a class="headerlink" href="#api-by-section" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><pre>schedule
-    crontab
-
-condition
-    stats
-
-apply
-    stats
-    tasks
-    workers</pre>
-</div>
+<div class="section" id="availability-by-policy-section">
+<h2><a class="toc-backref" href="#id25">Availability by Policy Section</a><a class="headerlink" href="#availability-by-policy-section" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="28%" />
+<col width="28%" />
+<col width="17%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head"></th>
+<th class="head">schedule</th>
+<th class="head">condition</th>
+<th class="head">apply</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Common API</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr><td>send_email</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>✓</td>
+</tr>
+<tr><td>crontab</td>
+<td>✓</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>stats</td>
+<td>&nbsp;</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr><td>tasks</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>✓</td>
+</tr>
+<tr><td>workers</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 
@@ -505,16 +725,26 @@ apply
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Policies API</a><ul>
-<li><a class="reference internal" href="#common-api">Common API</a></li>
-<li><a class="reference internal" href="#collections">Collections</a><ul>
+<li><a class="reference internal" href="#task-and-worker-settings">Task and Worker Settings</a><ul>
+<li><a class="reference internal" href="#collections">Collections</a></li>
 <li><a class="reference internal" href="#tasks-collection">Tasks Collection</a></li>
 <li><a class="reference internal" href="#workers-collection">Workers Collection</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#status-history">Status &amp; History</a></li>
-<li><a class="reference internal" href="#schedules">Schedules</a></li>
+<li><a class="reference internal" href="#task-and-worker-stats">Task and Worker Stats</a></li>
+<li><a class="reference internal" href="#policy-schedule">Policy Schedule</a></li>
+<li><a class="reference internal" href="#common-api">Common API</a><ul>
+<li><a class="reference internal" href="#utilities">Utilities</a><ul>
+<li><a class="reference internal" href="#email">Email</a></li>
+<li><a class="reference internal" href="#celery-states">Celery States</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#available-standard-modules">Available Standard Modules</a></li>
+<li><a class="reference internal" href="#python-builtins">Python Builtins</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#examples">Examples</a></li>
-<li><a class="reference internal" href="#api-by-section">API by Section</a></li>
+<li><a class="reference internal" href="#availability-by-policy-section">Availability by Policy Section</a></li>
 </ul>
 </li>
 </ul>
