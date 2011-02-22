@@ -218,7 +218,8 @@ man_pages = [
 
 # -- Options for intersphinx extension -----------------------------------------
 
-intersphinx_mapping = {'python': ('http://docs.python.org/2.7', None)}
+intersphinx_mapping = {'python': ('http://docs.python.org/2.7', None),
+                       'Celery': ('http://ask.github.com/celery/', None),}
 
 
 

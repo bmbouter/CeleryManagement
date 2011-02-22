@@ -10,105 +10,81 @@ provides the most restrictive API since its only purpose is to return a
 schedule object.  The `condition` section is also somewhat restricted, and the 
 `apply` section has the most feature-filled API.
 
+See :ref:`Policies Overview <policies-overview>` for information about how 
+policies may be used.
 
 .. contents::
 
 
-Common API
-==========
+Task and Worker Settings
+========================
 
-The standard modules :mod:`datetime`, :mod:`time`, :mod:`calendar` and :mod:`math` are 
-available in all policy sections.  Also available are two utility functions: 
-``now()`` and ``today()``.  The former returns the current time as a 
-``datetime.datetime`` object.  The latter returns the current date as a 
-``datetime.date`` object.
-
-Many of the standard builtin functions are available.  But some, like 
-:func:`eval()` and :func:`__import__()` are not allowed.  The following are available::
-
-    abs all any basestring bin bool bytearray callable chr cmp complex dict 
-    divmod enumerate filter float format frozenset hash help hex id int 
-    isinstance issubclass iter len list long map max memoryview min next 
-    oct ord pow print range reduce repr reversed round set slice sorted str 
-    sum tuple unichr unicode xrange zip
-        
-    
-The following standard builtin constants are also available::
-
-    True, False, None
-    
-The following Celery states are available as constants::
-    
-    PENDING, RECEIVED, STARTED, SUCCESS, FAILURE, REVOKED, RETRY
-    
-The following names provide access to the APIs described below:
-
-    :data:`tasks`, :data:`workers`, :data:`stats`
-    
+This sections discusses how to check :ref:`tasks' <tasks-collection>` and 
+:ref:`workers' <workers-collection>` settings as well as how to modify those 
+settings.  A similar API, called a collection, is followed for both.  
 
 .. _collection: collections_
 
 Collections
-===========
+~~~~~~~~~~~
 
-The APIs for :data:`tasks` and :data:`workers` follow the same general pattern.  This is 
-probably easier to demonstrate with a couple of examples.::
+The pattern that is followed for accessing both tasks and workers settings is 
+called a collection.  Using this interface, one may access one, many, or all 
+tasks or workers.
 
-    tasks.all().the_attribute = value
-    tasks['taskname'].the_attribute = value
-    tasks[('task1','task2','task3',)].the_attribute = value
+In the policy API, the collections are referred to by the names ``tasks`` for 
+tasks, and ``workers`` for workers.  Please see their specific topics below for 
+the details of accessing tasks and workers.
+
+Here is the general pattern for accessing specific collection members::
+
+    collection.all()                    # access all collection members
+    collection['NAME']                  # access a specific collection member
+    collection[('NAME1','NAME2',...)]   # access multiple collection members
     
-The first example above assigns to the same attribute on all known task types.  
-The second assigns to the attribute on only one task type.  The third example 
-assigns to the same attribute on each of the explicitly listed task types.  
+The first example above accesses all members of the collection.  The object 
+returned can be used to set the same setting on all of those members.  The 
+second example accesses only the single named object.  The returned value can 
+be used to get or set the settings on that specific object.  The third example 
+accesses multiple specificly-named objects.  The returned value can be used to 
+set the same setting on those specifically-named objects.
 
-Retrieving values is more restricted.  The attribute can be retrieved from only 
-one task type at a time.  Otherwise, a dict of attrbute values with task types 
-as keys would be required.  This would be too complicated, especially for the 
-common case where one is interested in only a single type.
-
-Therefore, when retrieving values, only the following pattern is allowed::
-
-    value = tasks['taskname'].the_attribute
-
-The following description of the "Collection" class is for documentation 
-purposes only.  It may be implemented in using any means which provides 
-equivalent behavior.  Indeed, there may not even be a class by this name.
-    
-.. class:: Collection
-
-    A class which provides access to an item or items within a homogeneous 
-    group of objects.  Currently, two Collections are available: ``tasks`` and 
-    ``workers``.  The user may not create objects of this class.
-
-    .. method:: __getitem__(itemname)
+.. note:: The Collections API is designed to be simple and intuitive.  
+   One manifestiation of this is that they always return single values.  
+   Because the same setting may have different values on different objects, it 
+   makes no sense to get a single setting from multiple objects.  As a result, 
+   settings may be retrieved for only one named object at a time. 
    
-        :param itemname: A single itemname as a string.
-        :returns: An object which allows the item's attributes to be queried.
-      
-    .. method:: __setitem__(itemnames, value)
+   For example::
    
-        :param itemnames: A single itemname as a string, or an iterable of itemnames.
-        :returns: An object which allows setting of the items' attributes.
-      
-    .. method:: all()
-   
-        :returns: An object which allows setting the attributes of *all* items within the collection.
-
+        val = tasks.all().ignore_result             # This will raise an exception.
+        val = tasks['tasks.MyTask'].ignore_result   # This is OK.
+        
+.. _tasks-collection:
 
 Tasks Collection
 ~~~~~~~~~~~~~~~~
 
 .. data:: tasks
 
-    An instance of :class:`Collection` that allows one to inspect and modify 
-    selected Celery Task class attributes.  The methods on this object return 
-    instances of :class:`TaskItem`.
+    The tasks collection available to policies.  This allows one to inspect and 
+    modify selected Celery :ref:`Task <guide-tasks>` attributes.  The methods 
+    on this object return instances of :class:`TaskItem`.
 
 .. class:: TaskItem
     
     An object which represents one or more Celery Task types.  Such an object 
     may be retrieved via the :data:`tasks` object within a Policy.
+    
+    To retrieve the routing_key on a Task named tasks.MyTask::
+        
+        x = tasks['tasks.MyTask'].routing_key
+        
+    To set the ignore_result attribute on the same Task::
+        
+        tasks['tasks.MyTask'].ignore_result = True
+        
+    The following Task attributes are available:
     
     .. attribute:: ignore_result
         
@@ -142,22 +118,31 @@ Tasks Collection
         
         int or None
 
-
-
+        
+.. _workers-collection:
 
 Workers Collection
 ~~~~~~~~~~~~~~~~~~
 
 .. data:: workers
 
-    An instance of :class:`Collection` that allows one to inspect and modify 
-    selected attributes of running Celery Workers.  The methods on this object 
-    return instances of :class:`WorkerItem`.
+    The workers collection available to policies.  This allows one to inspect 
+    and modify selected attributes of running Celery 
+    :ref:`Workers <guide-worker>`.  The methods on this object return instances 
+    of :class:`WorkerItem`.
 
 .. class:: WorkerItem
     
     An object which represents one or more running Celery Workers.  Such an 
     object may be retrieved via the :data:`workers` object within a Policy.
+    
+    To get the prefetch value for a Worker named myworker.example.org::
+        
+        x = workers["myworker.example.org"].prefetch.get()
+        
+    To increment the number of subprocesses on the same worker::
+        
+        workers["myworker.example.org"].subprocesses.increment()
     
     .. attribute:: prefetch
     
@@ -170,7 +155,7 @@ Workers Collection
             
         .. method:: get()
         
-            TODO
+            Return the worker's current prefetch value.
     
     .. attribute:: subprocesses
     
@@ -183,11 +168,10 @@ Workers Collection
             
         .. method:: get()
         
-            TODO
+            Return the number of subprocesses the worker has.
 
-
-Status & History
-================
+Task and Worker Stats
+=====================
 
 .. data:: stats
     
@@ -266,8 +250,9 @@ Status & History
 .. [1] ``timedelta`` is not restricted to seconds, but using some concrete unit 
    of time here is clearer.  
 
-Schedules
-=========
+
+Policy Schedule
+===============
 
 The schedule section provides functions that (strangely enough) can create 
 schedules.  The evaluation of the section must result in a schedule object.
@@ -321,61 +306,161 @@ schedules.  The evaluation of the section must result in a schedule object.
 .. __: http://ask.github.com/celery/userguide/periodic-tasks.html#crontab-schedules
 
 
+Common API
+==========
+
+Although using a subset of Python, policies still provide many of the 
+language's built-in functions, constants and a few selected modules.
+    
+Utilities
+~~~~~~~~~
+
+.. function:: now()
+    
+    Returns the current time as a :class:`datetime.datetime` object.  (The 
+    datetime module is also available to policies.)
+    
+.. function:: today()
+    
+    Returns the current date as a :class:`datetime.date` object.  (The datetime 
+    module is also available to policies.)
+
+Email
+-----
+
+.. function:: send_email(subject, message, from_email, recipient_list, auth_user=None, auth_password=None)
+
+    Sometimes, a policy does not need to (or is not able to) respond 
+    automatically to the condition it finds.  This function allows a policy to 
+    send you an email in such situations.  It is built on top of Django_'s 
+    email feature.
+    
+    :param string subject: The subject of the email message, as a string.
+    :param string message: The content of the email message, as a string.
+    :param string from_email: The email address that will appear in the *from* field.
+    :param list recipient_list: A list of email addresses to which to send the email.
+    :param string auth_user: Username for the SMTP server.  If not given, 
+                             Django will use the EMAIL_HOST_USER setting.
+    :param string auth_password: Password for the SMTP server.  If not given, 
+                                 Django will use the EMAIL_HOST_PASSWORD 
+                                 setting.
+
+Celery States
+-------------
+    
+The following :ref:`Celery states <task-states>` are available as 
+constants::
+    
+    PENDING, RECEIVED, STARTED, SUCCESS, FAILURE, REVOKED, RETRY
+
+Available Standard Modules
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- :mod:`datetime`
+- :mod:`time`
+- :mod:`calendar`
+- :mod:`math`
+
+Python Builtins
+~~~~~~~~~~~~~~~
+
+Many of the standard builtin functions are available.  But some, like 
+:func:`eval()` and :func:`__import__()` are not allowed. The following builtin 
+functions are available:
+
+==================  ==================  ===================  ==================  ==================
+..                  ..                  Built-in Functions   ..                  ..
+==================  ==================  ===================  ==================  ==================
+:func:`abs`         :class:`dict`       :func:`int`          :func:`next`        :func:`slice`       
+:func:`all`         :func:`divmod`      :func:`isinstance`   :func:`oct`         :func:`sorted`      
+:func:`any`         :func:`enumerate`   :func:`issubclass`   :func:`ord`         :func:`str`         
+:func:`basestring`  :func:`filter`      :func:`iter`         :func:`pow`         :func:`sum`         
+:func:`bin`         :func:`float`       :func:`len`          :func:`print`       :func:`tuple`       
+:func:`bool`        :func:`format`      :func:`list`         :func:`range`       :func:`unichr`      
+:func:`bytearray`   :class:`frozenset`  :func:`long`         :func:`reduce`      :func:`unicode`     
+:func:`callable`    :func:`hash`        :func:`map`          :func:`repr`        :func:`xrange`      
+:func:`chr`         :func:`help`        :func:`max`          :func:`reversed`    :func:`zip`
+:func:`cmp`         :func:`hex`         :class:`memoryview`  :func:`round`       
+:func:`complex`     :func:`id`          :func:`min`          :class:`set`        
+==================  ==================  ===================  ==================  ==================
+
+The following builtin functions are *not* available (this list may be 
+incomplete):
+
+======================  ======================  ===================
+..                      Prohibited Functions    ..
+======================  ======================  ===================
+:func:`compile`         :func:`globals`         :func:`raw_input`     
+:func:`eval`            :func:`hasattr`         :func:`reload`        
+:func:`execfile`        :func:`input`           :func:`setattr`       
+:func:`file`            :func:`locals`          :func:`type`          
+:func:`getattr`         :func:`open`            :func:`__import__`   
+======================  ======================  =================== 
+
+The following standard builtin constants are also available::
+
+    True, False, None
+    
 Examples
 ========
 
-::
-
-    x = stats.tasks()
-    
-The number of tasks sent.  (This will not be all tasks ever sent because 
-old records in the database are cleared periodically.)
-    
-::
-
-    x = stats.tasks(interval=datetime.timedelta(hour=1))
-    
-The number of tasks sent over the last hour.
-    
-::
-    
-    x = stats.tasks(interval=(datetime.timedelta(hour=2),datetime.timedelta(hour=1)))
-    
-The number of tasks sent between one hour and two hours ago.
+The following examples show how to use various portions of the policies API.  
+See :ref:`Policy Recipes <policy-recipes>` for examples of entire policies.
 
 ::
 
-    x = stats.tasks(tasknames="my_task")
+    x = stats.tasks()   # 1
+
+1. The number of tasks sent.  (This will not be all tasks ever sent because 
+   old records in the database are cleared periodically.)
+
     
-The number of tasks of type ``my_task`` sent.
+::
+
+    x = stats.tasks(interval=datetime.timedelta(hour=1))    # 2
+    
+2. The number of tasks sent over the last hour.
+    
+::
+    
+    x = stats.tasks(interval=(datetime.timedelta(hour=2),datetime.timedelta(hour=1)))    # 3
+    
+3. The number of tasks sent between one hour and two hours ago.
 
 ::
 
-    x = stats.tasks(tasknames=["my_task","your_task"])
+    x = stats.tasks(tasknames="my_task")    # 4
     
-The number of tasks of type ``my_task`` `or` ``your_task`` sent.
+4. The number of tasks of type ``my_task`` sent.
 
 ::
 
-    x = tasks["my_task"].ignore_result
+    x = stats.tasks(tasknames=["my_task","your_task"])      # 5
     
-Get the ``ignore_result`` setting for tasks of type ``my_task``.
-
-API by Section
-==============
+5. The number of tasks of type ``my_task`` `or` ``your_task`` sent.
 
 ::
 
-    schedule
-        crontab
-        
-    condition
-        stats
-        
-    apply
-        stats
-        tasks
-        workers
+    x = tasks["my_task"].ignore_result      # 6
+    
+6. Get the ``ignore_result`` setting for tasks of type ``my_task``.
 
+
+Availability by Policy Section
+==============================
+
+==========  ==========  ==========  ======
+..          schedule    condition   apply
+==========  ==========  ==========  ======
+Common API      ✓           ✓        ✓     
+send_email                            ✓    
+crontab         ✓                          
+stats                        ✓        ✓     
+tasks                                 ✓    
+workers                               ✓
+==========  ==========  ==========  ======
+
+
+.. _Django: http://www.djangoproject.com/
 
 

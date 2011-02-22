@@ -15,6 +15,8 @@ available to executing policies.
 .. note:: Policies run outside of Celery.  You may alter worker and task 
    settings without worrying how it will affect your currently-running policy.
    
+.. contents::
+   
 
 Example
 =======
