@@ -4,7 +4,7 @@ import re
 from celerymanagementapp.policy import exceptions, tokenlib, config
 
 # Import token constants directly into this module's namespace.
-for v,name in tokenlib.tok_name.iteritems():
+for v, name in tokenlib.tok_name.iteritems():
     globals()[name] = v
 
 #==============================================================================#
@@ -20,7 +20,7 @@ def error(msg='', lineno=None, column=None, line=''):
 class PolicySectionSplitter(object):
     def __init__(self, text):
         self.tokenizer = tokenlib.tokenize(text)
-        self.endmarker = (ENDMARKER,None,(-1,-1),(-1,-1),-1)
+        self.endmarker = (ENDMARKER, None, (-1, -1), (-1, -1), -1)
         self.cur = None
         self.peek = None
         self.nexttok()
@@ -54,8 +54,8 @@ class PolicySectionSplitter(object):
                 else:
                     tok0 = tokenlib.tok_name[toktype]
                     tok1 = tokenlib.tok_name[self.peek[0]]
-                msg = 'expected "{0}", found "{1}"'.format(tok0,tok1)
-            row,col = self.peek[2]
+                msg = 'expected "{0}", found "{1}"'.format(tok0, tok1)
+            row, col = self.peek[2]
             line = self.peek[4]
             error(msg, row, col, line)
         
@@ -87,7 +87,7 @@ class PolicySectionSplitter(object):
         schedule = self.schedule()
         conditions = self.conditions()
         apply = self.apply()
-        return schedule,conditions,apply
+        return schedule, conditions, apply
         
     def schedule(self):
         self.require(NAME, 'schedule')
@@ -172,7 +172,8 @@ class ApplySectionVisitor(NodeVisitor):
     def visit_Name(self, node):
         if isinstance(node.ctx, (ast.Store, ast.Del, ast.AugStore)):
             if node.id in self.unassignable_names:
-                msg = 'The name "{0}" may not be assigned to nor deleted.'.format(node.id)
+                msg = 'The name "{0}" may not be '.format(node.id)
+                msg += 'assigned to nor deleted.'
                 self.syntax_error(node, msg)
         return self.generic_visit(node)
         
@@ -182,16 +183,19 @@ class RestrictedNodeVisitor(NodeVisitor):
         super(RestrictedNodeVisitor, self).__init__(text)
     def visit(self, node):
         if isinstance(node, ast.stmt) and not isinstance(node, ast.Expr):
-            self.syntax_error(node, 'No statements are allowed in this context.')
-        super(RestrictedNodeVisitor,self).visit(node)
+            errmsg = 'No statements are allowed in this context.'
+            self.syntax_error(node, errmsg)
+        super(RestrictedNodeVisitor, self).visit(node)
     def visit_Delete(self, node):
-        self.syntax_error(node, 'Delete statements are not allowed in this context.')
+        errmsg = 'Delete statements are not allowed in this context.'
+        self.syntax_error(node, errmsg)
     def visit_Assign(self, node):
         self.syntax_error(node, 'Assignment is not allowed in this context.')
     def visit_AugAssign(self, node):
         self.syntax_error(node, 'Assignment is not allowed in this context.')
     def visit_If(self, node):
-        self.syntax_error(node, 'If statements are not allowed in this context.')
+        errmsg = 'If statements are not allowed in this context.'
+        self.syntax_error(node, errmsg)
 
 #==============================================================================#
 class SectionParser(object):
@@ -243,17 +247,17 @@ class SectionParser(object):
     
     def check_tokens(self, tokens):
         badnames = self.forbidden_names
-        for ty,val,start,end,ln in tokens:
+        for ty, val, start, end, ln in tokens:
             if ty==NAME and (val in badnames or val.startswith('_')):
-                row,col = start
+                row, col = start
                 line = self.text[row-1]
                 msg = 'The name "{name}" is not allowed.'.format(name=val)
-                error(msg,row,col,line)
+                error(msg, row, col, line)
             elif ty==KEYWORD and val in badnames:
-                row,col = start
+                row, col = start
                 line = self.text[row-1]
                 msg = 'The keyword "{name}" is not allowed.'.format(name=val)
-                error(msg,row,col,line)
+                error(msg, row, col, line)
         
     def correct_tokens(self, tokens):
         return tokens
@@ -271,10 +275,10 @@ class SectionParser(object):
         assert len(tree.body) == 1
         ifnode = tree.body[0]
         if not isinstance(ifnode, ast.If):
-            row,col = ifnode.lineno, ifnode.col_offset
+            row, col = ifnode.lineno, ifnode.col_offset
             line = self.text[row-1]
             msg = 'Internal error.  Expected an if statement.'
-            error(msg,row,col,line)
+            error(msg, row, col, line)
         
         tree.body = ifnode.body
         return tree
@@ -339,7 +343,7 @@ class ConditionSectionParser(SectionParser):
         super(ConditionSectionParser, self).__init__(text)
         
     def correct_ast(self, tree):
-        tree = super(ConditionSectionParser,self).correct_ast(tree)
+        tree = super(ConditionSectionParser, self).correct_ast(tree)
         assert tree.body
         
         andnodes = [x.value for x in tree.body]
@@ -358,7 +362,11 @@ class ConditionSectionParser(SectionParser):
         if not trees:
             # Handles the case where there are no conditions.  Condition is 
             # always true.
-            trees = [ast.Module(body=[ast.Expr(value=ast.Name(id='True', ctx=ast.Load()))])]
+            trees = [ast.Module(
+                        body=[ast.Expr(
+                            value=ast.Name(id='True', ctx=ast.Load())
+                            )]
+                        )]
         for tree in trees:
             assert len(tree.body) == 1
             exprs.append(tree.body[0])
@@ -389,13 +397,6 @@ def _get_forbidden_builtins(allowed_builtins):
 
 
 class PolicyParser(object):
-    #_forbidden_names = set(FORBIDDEN_NAMES)
-    #_forbidden_keywords = set(FORBIDDEN_KEYWORDS)
-    #_allowed_builtins = set(ALLOWED_BUILTINS)
-    #_forbidden_builtins = _get_forbidden_builtins(_allowed_builtins)
-    #forbidden_names = _forbidden_names | _forbidden_keywords | _forbidden_builtins
-    
-    #unassignable_names = set(UNASSIGNABLE_NAMES)
     
     def __init__(self):
         pass
@@ -431,7 +432,7 @@ def smart_indent(text, sz):
         indent_next = True
         col_offset = sz
         for tok in tokenizer(text):
-            ty,val,start,end,ln = tok
+            ty, val, start, end, ln = tok
             start = (start[0], start[1]+col_offset)
             # Only if token starts and ends on the same line, is the end column
             # corrected.
@@ -445,7 +446,7 @@ def smart_indent(text, sz):
                 col_offset = 0
             if ty==NEWLINE or ty==NL:
                 col_offset = sz
-            yield (ty,val,start,end,ln)
+            yield (ty, val, start, end, ln)
     
     tokenize = tokenlib.tokenize
     untokenize = tokenlib.untokenize
@@ -471,9 +472,11 @@ def combine_section_sources(schedule_src, condition_srcs, apply_src):
     condition_srcs = [smart_indent(src, 2) for src in condition_srcs]
     apply_src = smart_indent(apply_src, 2)
     schedule = section_tpl.format(section='schedule', body=schedule_src)
-    condition = ''.join(section_tpl.format(section='condition', body=src) for src in condition_srcs)
+    condition = ''.join(section_tpl.format(section='condition', body=src) 
+                        for src in condition_srcs)
     apply = section_tpl.format(section='apply', body=apply_src)
-    section = policy_tpl.format(schedule=schedule, conditions=condition, apply=apply)
+    section = policy_tpl.format(schedule=schedule, conditions=condition, 
+                                apply=apply)
     return section
     
 

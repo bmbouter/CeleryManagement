@@ -47,7 +47,7 @@ def _json_from_post(request, *args, **kwargs):
     """Return the json content of the given request.  The json must be in the 
        request's POST data."""
     rawjson = request.raw_post_data
-    if kwargs.pop('allow_empty',False) and not rawjson:
+    if kwargs.pop('allow_empty', False) and not rawjson:
         return None
     return jsonutil.loads(rawjson, *args, **kwargs)
     
@@ -67,14 +67,16 @@ def _update_json_request(json_request, **kwargs):
         dict.
     """
     if 'filter' in kwargs:
-        filter = json_request.get('filter',[])
+        filter = json_request.get('filter', [])
         filter.extend(kwargs.pop('filter'))
         json_request['filter'] = filter
     if 'exclude' in kwargs:
-        exclude = json_request.get('exclude',[])
+        exclude = json_request.get('exclude', [])
         exclude.extend(kwargs.pop('exclude'))
         json_request['exclude'] = exclude
-    json_request.update(dict((k,v) for k,v in kwargs.iteritems() if v is not None))
+    json_request.update( dict((k, v) for k, v in kwargs.iteritems() 
+                            if v is not None)
+                       )
     return json_request
         
     
@@ -88,7 +90,8 @@ def _resolve_name(name):
 class SimpleCache(object):
     def __init__(self, refresh_interval=20.0):
         self._cache = []
-        self._next_refresh = 0.0  # timestamp in seconds, as returned from time.time()
+        self._next_refresh = 0.0  # timestamp in seconds, as returned from 
+                                  # time.time()
         self._refresh_interval = refresh_interval  # seconds
         
     def getdata(self):
@@ -127,7 +130,9 @@ def get_defined_tasks_live():
     workers = i.registered_tasks()
     defined = []
     if workers:
-        defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
+        defined = set(x for x in 
+                      itertools.chain.from_iterable(workers.itervalues())
+                     )
         defined = list(defined)
         defined.sort()
     return defined
@@ -218,10 +223,10 @@ def pending_task_count_dataview(request, name=None):
     json_request = _json_from_post(request, allow_empty=True) or {}
     tasknames = get_defined_tasks()
     
-    filterexp = [['state','PENDING']]
+    filterexp = [['state', 'PENDING']]
     if name:
-        filterexp.append(['name',name])
-    segmentize = {'field': 'taskname', 'method': ['values', tasknames],}
+        filterexp.append(['name', name])
+    segmentize = {'field': 'taskname', 'method': ['values', tasknames], }
     aggregate = [{'field': 'count'}]
     
     json_request = _update_json_request(json_request, filter=filterexp, 
@@ -265,7 +270,7 @@ def tasks_per_worker_dataview(request, name=None):
     
     filterexp = []
     if name:
-        filterexp.append(['name',name])
+        filterexp.append(['name', name])
     json_request = _update_json_request(json_request, filter=filterexp)
     
     modelmap = JsonTaskModelMap()
@@ -347,7 +352,8 @@ def delete_inbandworker(request, worker_pk):
         return HttpResponse(json)
 
 def delete_provider(request, provider_pk):
-    """Deletes a provider object and all corresponding InBandWorkerNode objects"""
+    """ Deletes a provider object and all corresponding InBandWorkerNode 
+        objects """
     for inbandworker in InBandWorkerNode.objects.filter(provider=provider_pk):
         inbandworker.delete()
     Provider.objects.get(pk=provider_pk).delete()
@@ -370,7 +376,8 @@ def create_or_update_outofbandworker(request, worker_pk=None):
             new_obj = OutOfBandWorkerNodeForm(request.POST, request.FILES)
         else:
             worker_node = OutOfBandWorkerNode.objects.get(pk=worker_pk)
-            new_obj = OutOfBandWorkerNodeForm(request.POST, request.FILES, instance=worker_node)
+            new_obj = OutOfBandWorkerNodeForm(request.POST, request.FILES, 
+                                              instance=worker_node)
         if new_obj.is_valid():
             worker = new_obj.save()
             if worker_pk is not None:
@@ -379,9 +386,9 @@ def create_or_update_outofbandworker(request, worker_pk=None):
                 worker.active = worker.is_celeryd_running()
                 context = { 'worker': {'worker': worker,
                             'workerForm': new_obj }}
-                html = render_to_response("celerymanagementapp/configure_outofbandworker_instance.html",
-                        context,
-                        context_instance=RequestContext(request))
+                tpl = "celerymanagementapp/configure_outofbandworker_instance.html"
+                html = render_to_response(tpl, context,
+                                    context_instance=RequestContext(request))
                 success = { 'success': 'Worker successfully created.',
                             'html': urlquote(html.content),
                             'pk': worker.pk }
@@ -425,7 +432,7 @@ class PolicyDataviewBase(object):
     def __init__(self):
         self.success = False
         self.record = {'id': -1, 'name': '', 'source': '', 'enabled': False, 
-                       'modified': None, 'last_run_time': None,}
+                       'modified': None, 'last_run_time': None, }
         self.error_info = {'compile_error': False, 'type': '', 'msg': '', 
                            'traceback': ''}
     def _result(self):
@@ -436,7 +443,7 @@ class PolicyDataviewBase(object):
             PolicyDataviewError exception.  This exception is caught in the 
             __call__ method. 
         """
-        for k,v in kwargs.iteritems():
+        for k, v in kwargs.iteritems():
             assert k in self.error_info
             self.error_info[k] = v
         raise PolicyDataviewError()
@@ -487,7 +494,8 @@ class PolicyDataviewBase(object):
                 return True
         else:
             if objs.exists() and objs[0].id != id:
-                s = 'A different policy with the name "{0}" already exists.'.format(name)
+                s =  'A different policy with the name '
+                s += '"{0}" already exists.'.format(name)
                 self._error(msg=s, type='DuplicateName')
             else:
                 return True
@@ -499,15 +507,20 @@ class PolicyDataviewBase(object):
             'name': model.name,
             'source': model.source,
             'enabled': model.enabled,
-            'modified': model.modified and timeutil.datetime_from_python(model.modified),
-            'last_run_time': model.last_run_time and timeutil.datetime_from_python(model.last_run_time),
+            'modified': (model.modified and 
+                        timeutil.datetime_from_python(model.modified)),
+            'last_run_time': (model.last_run_time and 
+                        timeutil.datetime_from_python(model.last_run_time)),
             }
             
     def create_policy(self):
-        """ Creates the policy model.  If the source cannot be compiled, this will fail. """
+        """ Creates the policy model.  If the source cannot be compiled, this 
+            will fail. 
+        """
         # Used by derived classes.
         try:
-            m = create_policy(self.name, source=self.source, enabled=self.enabled)
+            m = create_policy(self.name, source=self.source, 
+                              enabled=self.enabled)
             self.record = self.make_record(m)
             self.success = True
         except policy_exceptions.Error as e:
@@ -519,7 +532,8 @@ class PolicyDataviewBase(object):
         return True
         
     def save_policy(self, model):
-        """ Modifies the policy model.  If the source cannot be compiled, this will fail. """
+        """ Modifies the policy model.  If the source cannot be compiled, this 
+            will fail. """
         # Used by derived classes.
         try:
             model.name = self.name
@@ -554,7 +568,7 @@ class PolicyCreate(PolicyDataviewBase):
     def __init__(self):
         super(PolicyCreate, self).__init__()
     def do_dataview(self, json_request):
-        self.parse_json_request(json_request, ('name','source','enabled'))
+        self.parse_json_request(json_request, ('name', 'source', 'enabled'))
         self.verify_name_is_unique(self.name)
         self.create_policy()
         
@@ -562,7 +576,7 @@ class PolicyModify(PolicyDataviewBase):
     def __init__(self):
         super(PolicyModify, self).__init__()
     def do_dataview(self, json_request, id):
-        self.parse_json_request(json_request, ('name','source','enabled'))
+        self.parse_json_request(json_request, ('name', 'source', 'enabled'))
         model = self.get_model(id)
         self.verify_name_is_unique(self.name, id)
         self.save_policy(model)
@@ -589,9 +603,9 @@ def policy_create(request):
             policy = policy_form.save()
             context = { 'policy': {'policy': policy,
                         'policyForm': policy_form }}
-            html = render_to_response("celerymanagementapp/policy_instance.html",
-                    context,
-                    context_instance=RequestContext(request))
+            tpl = "celerymanagementapp/policy_instance.html"
+            html = render_to_response(tpl, context,
+                                      context_instance=RequestContext(request))
             success = { 'success': 'Policy successfully created.',
                         'html': html.content,
                         'pk': policy.pk }
@@ -656,8 +670,10 @@ def policy_list(request):
             'id': obj.id, 
             'name': obj.name, 
             'enabled': obj.enabled, 
-            'modified': obj.modified and timeutil.datetime_from_python(obj.modified), 
-            'last_run_time': obj.last_run_time and timeutil.datetime_from_python(obj.last_run_time),
+            'modified': (obj.modified and 
+                        timeutil.datetime_from_python(obj.modified)), 
+            'last_run_time': (obj.last_run_time and 
+                        timeutil.datetime_from_python(obj.last_run_time)),
             }
     qs = PolicyModel.objects.all()
     ret = [make_row(obj) for obj in qs]
@@ -670,14 +686,16 @@ TASKDEMO_RUNFOR_MAX = 60.*10  # ten minutes
 
 def validate_task_demo_request(json_request):
     """ Helper to task_demo_dataview.  It validates the Json request. """
-    # return (is_valid, msg)
     name = json_request.get('name', None)
     rate = json_request.get('rate', None)
     runfor = json_request.get('runfor', None)
     if not name or not rate or not runfor:
-        return False, "The keys: 'name', 'rate', and 'runfor' are all required."
-    if not isinstance(rate, (int,float)) or not isinstance(runfor, (int,float)):
-        return False, "The keys: 'rate' and 'runfor' must be integers or floats."
+        msg = "The keys: 'name', 'rate', and 'runfor' are all required."
+        return False, msg
+    if not isinstance(rate, (int, float)) \
+       or not isinstance(runfor, (int, float)):
+        msg = "The keys: 'rate' and 'runfor' must be integers or floats."
+        return False, msg
     
     kwargs = json_request.get('kwargs', {})
     args = json_request.get('args', [])

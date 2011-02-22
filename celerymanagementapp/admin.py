@@ -1,12 +1,10 @@
 from celery import states
 
 from django.contrib import admin
-from django.utils.translation import ugettext_lazy as _
 
-from djcelery.admin import TaskMonitor, fixedwidth
-
-from celerymanagementapp.models import DispatchedTask, OutOfBandWorkerNode, Provider, InBandWorkerNode
-from celerymanagementapp.models import RegisteredTaskType, TaskDemoGroup, PolicyModel
+from celerymanagementapp.models import DispatchedTask, OutOfBandWorkerNode 
+from celerymanagementapp.models import Provider, InBandWorkerNode, PolicyModel
+from celerymanagementapp.models import RegisteredTaskType, TaskDemoGroup
 
 # 'TASK_STATE_COLORS' and 'colored_state()' from djcelery.admin
 TASK_STATE_COLORS = {states.SUCCESS: "green",
@@ -18,7 +16,7 @@ TASK_STATE_COLORS = {states.SUCCESS: "green",
 
 def format_seconds(val, fracdigits=6):
     if val:
-        return '{0:.{flen}f}'.format(val,flen=fracdigits)
+        return '{0:.{flen}f}'.format(val, flen=fracdigits)
     else:
         return ''
     
@@ -45,10 +43,10 @@ def totaltime_field(obj):
 def name_field(obj):
     name = obj.name
     if len(name) > 20:
-        head,sep,tail = name.rpartition('.')
+        head, sep, tail = name.rpartition('.')
         hlen = max(20 - len(tail), 8)
         head = head[:hlen]
-        name = '{0}[.]{1}'.format(head,tail)
+        name = '{0}[.]{1}'.format(head, tail)
     return name
     
 @display_field('State', allow_tags=True)
@@ -65,12 +63,12 @@ class DispatchedTaskAdmin(admin.ModelAdmin):
     list_filter = ('name', 'state', 'worker', 'routing_key', 'tstamp')
     
 class RegisteredTaskTypeAdmin(admin.ModelAdmin):
-    list_display = ('worker','name','modified')
-    list_filter = ('worker','name','modified')
+    list_display = ('worker', 'name', 'modified')
+    list_filter = ('worker', 'name', 'modified')
     
 class PolicyModelAdmin(admin.ModelAdmin):
-    list_display = ('name','modified','enabled','last_run_time')
-    list_filter = ('modified','last_run_time','enabled')
+    list_display = ('name', 'modified', 'enabled', 'last_run_time')
+    list_filter = ('modified', 'last_run_time', 'enabled')
 
 class ProviderAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -78,7 +76,9 @@ class ProviderAdmin(admin.ModelAdmin):
             'fields': ('provider_name', 'provider_user_id', 'provider_key')
         }),
         ('Image Settings', {
-            'fields': ('image_id', 'celeryd_username', 'ssh_key', 'celeryd_start_cmd', 'celeryd_stop_cmd', 'celeryd_status_cmd')
+            'fields': ('image_id', 'celeryd_username', 'ssh_key', 
+                       'celeryd_start_cmd', 'celeryd_stop_cmd', 
+                       'celeryd_status_cmd')
         }),
     )
     

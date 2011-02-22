@@ -1,33 +1,27 @@
 import datetime
-import calendar
-import time
 import itertools
 import urllib
-import sys
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.core.context_processors import csrf
-from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django.core.paginator import Paginator, EmptyPage
 from django.conf import settings
 
-from djcelery.models import WorkerState
-from celery.registry import TaskRegistry, tasks
 from celery.task.control import inspect, broadcast
 
 #from celery.task.control import Control
 #from celery.app import app_or_default
-from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes#, CeleryStats
-from celerymanagementapp.models import DispatchedTask, OutOfBandWorkerNode, Provider, PolicyModel
-from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm, PolicyModelForm
+from celerymanagementapp.stats import calculate_throughputs, calculate_runtimes
+from celerymanagementapp.models import DispatchedTask, OutOfBandWorkerNode
+from celerymanagementapp.models import Provider, PolicyModel
+from celerymanagementapp.forms import OutOfBandWorkerNodeForm, ProviderForm
+from celerymanagementapp.forms import PolicyModelForm
 
 import gviz_api
-import json
 
 #==============================================================================#
 # DATETIME_FMT is used by the datestr_to_datetime() and datetime_to_datestr() 
@@ -55,9 +49,9 @@ def searchrange_from_post(post):
         QueryDict.  The tuple will contain None in place of either time (or 
         both times) if they are not found.
     """
-    min = datestr_to_datetime(post.get('start_time',None))
-    max = datestr_to_datetime(post.get('end_time',None))
-    return (min,max)
+    min = datestr_to_datetime(post.get('start_time', None))
+    max = datestr_to_datetime(post.get('end_time', None))
+    return (min, max)
     
     
 def string_to_bool(s):
@@ -110,7 +104,7 @@ class QueryStringBuilder(object):
         """The view function parameters should be given as keyword arguments."""
         self.args = {}
         for name in self.param_names:
-            val = kwargs.get(name,'')
+            val = kwargs.get(name, '')
             self.args[name] = str(val)  if val is not None else  None
     
     def add_querydict(self, pdict):
@@ -118,12 +112,14 @@ class QueryStringBuilder(object):
            will override those given in __init__().
         """
         for name in self.param_names:
-            val = pdict.get(name,None)
+            val = pdict.get(name, None)
             if val is not None:
                 self.args[name] = str(val)
                 
     def _iter_formatted_params(self):
-        return ('{0}={1}'.format(quote(name), quote(val)) for name,val in self.args if val is not None)
+        return ('{0}={1}'.format(quote(name), quote(val)) 
+                for name, val in self.args 
+                    if val is not None)
                 
     def to_querystring(self):
         """Build a query string from the QueryStringBuilder's values."""
@@ -131,8 +127,8 @@ class QueryStringBuilder(object):
         def single_query(n, v):
             return '{0}={1}'.format(quote(n), quote(v))
         # Join all name/value pairs, except those that have an empty value.
-        r = '&'.join( single_query(name,val) 
-                      for name,val in self.args.iteritems() if val )
+        r = '&'.join( single_query(name, val) 
+                      for name, val in self.args.iteritems() if val )
         if r:
             r = '?' + r
         return r
@@ -144,7 +140,9 @@ def test_view(request, taskname=None):
     timerange = (now-datetime.timedelta(seconds=120), now)
     start = timerange[0]
     stop = timerange[1]
-    states_in_range = DispatchedTask.objects.filter(state='SUCCESS', tstamp__range=(start, stop))
+    states_in_range = DispatchedTask.objects.filter(state='SUCCESS', 
+                                                    tstamp__range=(start, stop)
+                                                   )
     return HttpResponse(states_in_range)
     
 #==============================================================================#
@@ -162,8 +160,8 @@ def view_throughputs(request, taskname=None):
 def get_throughput_data(request, taskname=None):
     all_data = [] 
     description = {}
-    description['timestamp'] = ("DateTime","timestamp")
-    description['tasks'] = ("number","tasks")
+    description['timestamp'] = ("DateTime", "timestamp")
+    description['tasks'] = ("number", "tasks")
     
     now = datetime.datetime.now()
     timerange = (now-datetime.timedelta(seconds=120), now)
@@ -172,7 +170,8 @@ def get_throughput_data(request, taskname=None):
     
     for i, p in enumerate(throughputs):
         data = {}
-        data['timestamp'] = now-datetime.timedelta(seconds=120) + datetime.timedelta(seconds=interval*i)
+        tdiff = now-datetime.timedelta(seconds=120)
+        data['timestamp'] = tdiff + datetime.timedelta(seconds=interval*i)
         data['tasks'] = p
         all_data.append(data)
 
@@ -183,8 +182,15 @@ def get_throughput_data(request, taskname=None):
         tqx = request.GET['tqx']
         params = dict([p.split(':') for p in tqx.split(';')])
         reqId = params['reqId'] 
-        return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","tasks"),req_id=reqId))
-    return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","tasks")))
+        return HttpResponse(
+                    data_table.ToJSonResponse(
+                        columns_order=("timestamp", "tasks"),
+                        req_id=reqId)
+                    )
+    return HttpResponse(
+                data_table.ToJSonResponse(
+                    columns_order=("timestamp", "tasks"))
+                )
 
 
 @login_required()
@@ -197,14 +203,17 @@ def get_runtime_data(request, taskname=None):
     bin_count =             get_postval(request.GET, 'bin_count', int, None)
     auto_runtime_range =    get_postval(request.GET, 'auto_runtime_range', 
                                         string_to_bool, False)
-    runtimes = calculate_runtimes(taskname, search_range=search_range, 
-                                  runtime_range=runtime_range, 
-                                  bin_size=float(bin_size)  if bin_size is not None else  None, 
-                                  bin_count=int(bin_count)  if bin_count is not None else  None,
-                                  auto_runtime_range=auto_runtime_range)
+    runtimes = calculate_runtimes(
+                    taskname, 
+                    search_range=search_range, 
+                    runtime_range=runtime_range, 
+                    bin_size=float(bin_size) if bin_size is not None else None, 
+                    bin_count=int(bin_count) if bin_count is not None else None,
+                    auto_runtime_range=auto_runtime_range
+                    )
     all_data = []
     description = {
-        'bin_name': ("string","bin_name"),
+        'bin_name': ("string", "bin_name"),
         'count':    ("number", "count"),
         }
     for (runtime_min, runtime_max), count  in  runtimes:
@@ -221,13 +230,20 @@ def get_runtime_data(request, taskname=None):
         tqx = request.GET['tqx']
         params = dict([p.split(':') for p in tqx.split(';')])
         reqId = params['reqId']
-        return HttpResponse(data_table.ToJSonResponse(columns_order=("bin_name","count"), req_id=reqId))
-    return HttpResponse(data_table.ToJSonResponse(columns_order=("bin_name","count")))
+        return HttpResponse(
+                    data_table.ToJSonResponse(
+                        columns_order=("bin_name", "count"), 
+                        req_id=reqId)
+                    )
+    return HttpResponse(
+                data_table.ToJSonResponse(
+                    columns_order=("bin_name", "count"))
+                )
     
 
 class RuntimeQueryStringBuilder(QueryStringBuilder):
-    param_names = ['runtime_min', 'runtime_max', 'bin_count', 'bin_size','start_time',
-                   'end_time','auto_runtime_range']
+    param_names = ['runtime_min', 'runtime_max', 'bin_count', 'bin_size',
+                   'start_time', 'end_time', 'auto_runtime_range']
 
 
 #==============================================================================#
@@ -263,7 +279,9 @@ def view_defined_tasks(request):
     workers = i.registered_tasks()
     defined = []
     if workers:
-        defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
+        defined = set(x for x in 
+                        itertools.chain.from_iterable(workers.itervalues())
+                     )
         defined = list(defined)
         defined.sort()
 
@@ -271,14 +289,6 @@ def view_defined_tasks(request):
             {'tasks':defined},
             context_instance=RequestContext(request))
 
-# def get_defined_tasks(request):
-    # i = inspect()  
-    # workers = i.registered_tasks()
-    # defined = set(x for x in itertools.chain.from_iterable(workers.itervalues()))
-    # defined = list(defined)
-    # defined.sort()
-
-    # return HttpResponse(json.dumps(defined))
 
 @login_required()
 def get_dispatched_tasks(request, taskname=None):
@@ -291,9 +301,9 @@ def get_dispatched_tasks(request, taskname=None):
     
     pg = Paginator(alltasks, 50)
     try:
-        page = int(request.GET.get('page','1'))
+        page = int(request.GET.get('page', '1'))
     except ValueError:
-       page = 1
+        page = 1
         
     try:
         tasks = pg.page(page)
@@ -314,7 +324,7 @@ def view_dispatched_tasks(request, taskname=None):
     
     pg = Paginator(alltasks, 50)
     try:
-        page = int(request.GET.get('page','1'))
+        page = int(request.GET.get('page', '1'))
     except ValueError:
         page = 1
         
@@ -336,12 +346,13 @@ def get_runtimes_new(request, taskname=None, interval=0):
     if interval is 0:
         runtimes = stats.calculate_runtimes()
     else:
-        runtimes = stats.calculate_runtimes(datetime.timedelta(seconds=interval))
+        TD = datetime.timedelta
+        runtimes = stats.calculate_runtimes(TD(seconds=interval))
 
     all_data = [] 
     description = {}
-    description['timestamp'] = ("DateTime","timestamp")
-    description['runtime'] = ("number","runtime")
+    description['timestamp'] = ("DateTime", "timestamp")
+    description['runtime'] = ("number", "runtime")
     
     for i in runtimes:
         data = {}
@@ -356,22 +367,21 @@ def get_runtimes_new(request, taskname=None, interval=0):
         tqx = request.GET['tqx']
         params = dict([p.split(':') for p in tqx.split(';')])
         reqId = params['reqId'] 
-        return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","runtime"),req_id=reqId))
-    return HttpResponse(data_table.ToJSonResponse(columns_order=("timestamp","runtime")))
+        return HttpResponse(
+                    data_table.ToJSonResponse(
+                        columns_order=("timestamp", "runtime"),
+                        req_id=reqId)
+                    )
+    return HttpResponse(
+                data_table.ToJSonResponse(
+                    columns_order=("timestamp", "runtime"))
+                )
 
 @login_required()
 def visualize_runtimes_new(request, taskname=None, interval=0):
     return render_to_response('celerymanagementapp/runtime_timeseries.html',
             {'task': taskname, 'taskname': taskname },
             context_instance=RequestContext(request))
-
-
-# def get_worker_data(request):
-    # worker_dict = {}
-    # workers = WorkerState.objects.all()
-    # for w in workers:
-        # worker_dict[w.__str__()] = w.is_alive()
-    # return HttpResponse(json.dumps(worker_dict))
 
 @login_required()
 def system_overview(request):
@@ -394,7 +404,8 @@ def configure(request):
         for worker in outofbandworkernodes:
             worker.active = worker.is_celeryd_running()
             workerForm = OutOfBandWorkerNodeForm(instance=worker)
-            OutOfBandWorkers.append({ "worker" : worker, "workerForm" : workerForm })
+            OutOfBandWorkers.append({ "worker" : worker, 
+                                      "workerForm" : workerForm })
 
         context["outofbandworkernode_form"] = out_of_band_worker_node_form
         context["outofbandworkernodes"] = OutOfBandWorkers

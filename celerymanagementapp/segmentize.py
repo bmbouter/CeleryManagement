@@ -72,7 +72,9 @@ def range_query_sequence(fieldname, range, interval_size, conv=lambda x: x):
     
     while range_min < range_max:
         label = range_min + interval_size/2
-        yield (conv(label), {queryname_gte: range_min, queryname_lt: range_next })
+        yield (conv(label), {queryname_gte: range_min, 
+                             queryname_lt:  range_next }
+              )
         range_min = range_next
         range_next += interval_size
     
@@ -91,7 +93,7 @@ def basic_query_sequence(fieldname, labels, conv=lambda x: x):
     """
     queryname = '{0}'.format(fieldname)
     if labels and isinstance(labels[0], tuple):
-        return ((conv(label), {queryname: val}) for (label,val) in labels)
+        return ((conv(label), {queryname: val}) for (label, val) in labels)
     else:
         return ((conv(label), {queryname: label}) for label in labels)
     
@@ -151,7 +153,7 @@ def make_segments(queryset, segmentizer, aggregator):
         aggregator callables.  Returns a list of (label,value) pairs, where 
         'label' is generally the x-value and 'value' is generally the y-value.
     """
-    return [(label,aggregator(seg)) for (label,seg) in segmentizer(queryset)]
+    return [(label, aggregator(seg)) for (label, seg) in segmentizer(queryset)]
 
 #==============================================================================#
 

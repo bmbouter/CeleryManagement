@@ -43,14 +43,16 @@ class DispatchedTask(models.Model):
     waittime =  models.FloatField(_(u"wait time"), null=True)
     totaltime = models.FloatField(_(u"total time"), null=True)
     
-    tstamp =    models.DateTimeField(_(u"last event received at"), db_index=True)
+    tstamp =    models.DateTimeField(_(u"last event received at"), 
+                                     db_index=True)
     sent =      models.DateTimeField(_(u"sent time"), null=True)
     received =  models.DateTimeField(_(u"received time"), null=True)
     started =   models.DateTimeField(_(u"started time"), null=True)
     succeeded = models.DateTimeField(_(u"succeeded time"), null=True)
     failed =    models.DateTimeField(_(u"failed time"), null=True)
     
-    routing_key = models.CharField(_(u"routing key"), max_length=200, null=True)
+    routing_key = models.CharField(_(u"routing key"), max_length=200, 
+                                   null=True)
     expires =   models.DateTimeField(_(u"expires"), null=True)
     result =    models.TextField(_(u"result"), null=True)
     retries =   models.IntegerField(_(u"number of retries"), default=0)
@@ -70,7 +72,8 @@ class DispatchedTask(models.Model):
         ordering = ["-tstamp"]
 
 class AbstractWorkerNode(models.Model):
-    """An abstract class containing common attributes used by Provider and WorkerNode"""
+    """ An abstract class containing common attributes used by Provider and 
+        WorkerNode. """
     celeryd_username = models.CharField(_(u"username"),
             max_length=64)
     ssh_key = models.FileField("SSH key", upload_to='sshkeys', storage=fs)
@@ -100,7 +103,8 @@ class OutOfBandWorkerNode(AbstractWorkerNode):
         ssh = self._get_SSH_Object()
         if not ssh.ssh_avail():
             from django.core.exceptions import ValidationError
-            raise ValidationError("SSH does not seem to be available on %s" % self.ip)
+            raise ValidationError("SSH does not seem to be available on %s" 
+                                  % self.ip)
 
     def _get_SSH_Object(self):
         return NodeUtil(self.ip, settings.SECURE_UPLOADS + str(self.ssh_key),
@@ -155,7 +159,8 @@ class Provider(AbstractWorkerNode):
             max_length=128, blank=True)
     provider_key = models.CharField(_(u"Provider key"),
             max_length=128)
-    provider_name = models.CharField(_('provider'), max_length=32, choices=PROVIDER_CHOICES)
+    provider_name = models.CharField(_('provider'), max_length=32, 
+                                     choices=PROVIDER_CHOICES)
     image_id = models.CharField(_(u"image id"),
             max_length=64)
 
@@ -179,7 +184,8 @@ class Provider(AbstractWorkerNode):
         return self.provider_name
 
     def _get_image_obj(self):
-        """Returns an object of type libcloud.base.NodeImage looked up by id or name"""
+        """ Returns an object of type libcloud.base.NodeImage looked up by id 
+            or name """
         images = self.conn.list_images()
         for image in images:
             if self.image_id == unicode(image.id):
@@ -205,8 +211,11 @@ class Provider(AbstractWorkerNode):
         try:
             return Driver(self.provider_user_id, secret=self.provider_key)
         except TypeError as type_error:
-            if type_error.args[0] == "__init__() got an unexpected keyword argument 'secret'":
-                #Libcloud doesn't have consistant interfaces so some objects that inherit from Driver need to only take one parameter.  This code is designed to detect and workaround this error.
+            errmsg = "__init__() got an unexpected keyword argument 'secret'"
+            if type_error.args[0] == errmsg:
+                # Libcloud doesn't have consistant interfaces so some objects 
+                # that inherit from Driver need to only take one parameter.  
+                # This code is designed to detect and workaround this error.
                 return Driver(self.provider_user_id)
 
     def create_vm(self):
@@ -217,12 +226,14 @@ class Provider(AbstractWorkerNode):
             vm_name = 'celerydworker%s' % random_string
             node_image = self._get_image_obj()
             try:
-                new_vm = self.conn.create_node(name=vm_name, image=node_image, size=self.sizes[0]) 
+                new_vm = self.conn.create_node(name=vm_name, image=node_image, 
+                                               size=self.sizes[0]) 
                 break
             except Exception as e:
                 if 'Server name already in use' in e.args[0]:
                     pass
-        in_band_worker_node = InBandWorkerNode(instance_id=new_vm.id, provider=self)
+        in_band_worker_node = InBandWorkerNode(instance_id=new_vm.id, 
+                                               provider=self)
         in_band_worker_node.save()
         start_celeyrd_on_vm(in_band_worker_node.pk)
         return in_band_worker_node
@@ -233,7 +244,8 @@ class InBandWorkerNode(models.Model):
     provider = models.ForeignKey('celerymanagementapp.Provider')
 
     def __unicode__(self):
-        return 'Image %s on %s' % (self.instance_id, self.provider.provider_name)
+        return 'Image %s on %s' % (self.instance_id, 
+                                   self.provider.provider_name)
 
     def _get_node_obj(self):
         """Returns an object of type libcloud.base.Node looked up by id"""
@@ -250,8 +262,9 @@ class InBandWorkerNode(models.Model):
 
     def _get_SSH_Object(self):
         node = self._get_node_obj()
-        return NodeUtil(node.public_ip[0], settings.SECURE_UPLOADS + str(self.provider.ssh_key),
-            self.provider.celeryd_username)
+        return NodeUtil(node.public_ip[0], 
+                        settings.SECURE_UPLOADS + str(self.provider.ssh_key), 
+                        self.provider.celeryd_username)
 
     def celeryd_start(self):
         """SSH's to the Node and runs the celeryd_start commands"""
@@ -272,12 +285,6 @@ class InBandWorkerNode(models.Model):
         output = self.celeryd_status()
         return output.strip('\n').isdigit()
 
-#  DefinedTask(models.Model):
-    # """A task type that has been defined."""
-    # name =      models.CharField(_(u"name"), max_length=200, null=True, 
-                                 # db_index=True)
-    # worker =    models.CharField(_(u"worker"), max_length=200, null=True, 
-                                 # db_index=True)
         
 class RegisteredTaskType(models.Model):
     """ A task type that has been registered with a worker.  This is *not* the 
@@ -291,7 +298,7 @@ class RegisteredTaskType(models.Model):
     
     class Meta:
         """Model meta-data."""
-        unique_together = (('name','worker'),)
+        unique_together = (('name', 'worker'), )
         
     @staticmethod
     def clear_tasks(workername):
@@ -301,14 +308,16 @@ class RegisteredTaskType(models.Model):
     @staticmethod
     def add_task(taskname, workername):
         """Add a new task registered with the given worker."""
-        RegisteredTaskType.objects.get_or_create(name=taskname, worker=workername)
+        RegisteredTaskType.objects.get_or_create(name=taskname, 
+                                                 worker=workername)
         
     def __unicode__(self):
         return u'{0} --- {1}'.format(self.name, self.worker)
         
         
 class TaskDemoGroup(models.Model):
-    uuid =              models.CharField(max_length=32, db_index=True, unique=True)
+    uuid =              models.CharField(max_length=32, db_index=True, 
+                                         unique=True)
     name =              models.CharField(max_length=200)
     ##launcher_uuid =     models.CharField(max_length=36, unique=True)
     elapsed =           models.FloatField(default=-1.0)
@@ -338,11 +347,13 @@ class PolicyModel(models.Model):
     # add field which keeps error information
     
     def __unicode__(self):
-        return u"<{0}>  last run: {1}  enabled: {2}".format(self.name, self.last_run_time, self.enabled)
+        return u"<{0}>  last run: {1}  enabled: {2}".format(self.name, 
+                                                            self.last_run_time, 
+                                                            self.enabled)
         
     def save(self, *args, **kwargs):
         # convert Windows newlines to Unix newlines
-        self.source = self.source.replace('\r\n','\n')
+        self.source = self.source.replace('\r\n', '\n')
         super(PolicyModel, self).save(*args, **kwargs)
 
 
@@ -355,6 +366,6 @@ class TestModel(models.Model):
     intval =    models.IntegerField()
     charval =   models.CharField(max_length=128)
     enumval =   models.CharField(max_length=1, 
-                                 choices=(('A','A'),('B','B'),
-                                          ('C','C'),('D','D'))
+                                 choices=(('A', 'A'), ('B', 'B'),
+                                          ('C', 'C'), ('D', 'D'))
                                 )

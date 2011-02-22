@@ -47,7 +47,7 @@ class ApplyAsyncWrapper(object):
     def __enter__(self):
         # create connection
         return self
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, tb):
         # close connection
         self.close()
         
@@ -108,12 +108,13 @@ class TimeLoop(object):
 
 
 def commit(obj, **kwargs):
-    for k,v in kwargs.iteritems():
+    for k, v in kwargs.iteritems():
         setattr(obj, k, v)
     obj.save()
 
 
-def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, kwargs=None):
+def demo_dispatch(taskname, id, runfor, rate, options=None, args=None, 
+                  kwargs=None):
     print 'celerymanagement.demo_dispatch::  task: {0}'.format(taskname)
     
     ignores_results = False

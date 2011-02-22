@@ -9,7 +9,7 @@ from celerymanagementapp.models import PolicyModel
 from celerymanagementapp.policy import policy, signals, util
 
 #==============================================================================#
-default_time = datetime.datetime(2000,1,1)
+default_time = datetime.datetime(2000, 1, 1)
 
 class Entry(object):
     """ An entry in the Policy registry. """
@@ -71,7 +71,8 @@ class Registry(object):
         assert obj.enabled
         assert obj.id not in self.data
         policyobj = policy.Policy(source=obj.source, id=obj.id, name=obj.name)
-        entry = Entry(policy=policyobj, modified=obj.modified, last_run_time=obj.last_run_time)
+        entry = Entry(policy=policyobj, modified=obj.modified, 
+                      last_run_time=obj.last_run_time)
         self.data[obj.id] = entry
         
     def reregister(self, obj):
@@ -81,7 +82,8 @@ class Registry(object):
         """
         assert obj.enabled
         entry = self.data[obj.id]
-        assert obj.last_run_time is None or obj.last_run_time <= entry.last_run_time
+        assert (obj.last_run_time is None or 
+                obj.last_run_time <= entry.last_run_time)
         entry.policy.reinit(source=obj.source, name=obj.name)
         entry.update(modified=obj.modified)
         
@@ -101,7 +103,7 @@ class Registry(object):
         """
         updated = False
         objects = PolicyModel.objects.all()
-        for id,entry in self.data.iteritems():
+        for id, entry in self.data.iteritems():
             try:
                 obj = objects.get(id=id)
                 # existing enabled Policy was modified
@@ -247,8 +249,8 @@ class TaskSettings(object):
     def restore(self):
         """ Restore the Task to its original settings. """
         # restore Task settings to the original settings
-        restore = dict((k,v) for (k,v) in self.initial_settings.iteritems() 
-                                       if self.settings.get(k,v) != v)
+        restore = dict((k, v) for (k, v) in self.initial_settings.iteritems() 
+                                         if self.settings.get(k, v) != v)
         # TODO: maybe base the restore behavior here on _setting_names in 
         # additon to self.settings
         erase = [k for k in self.settings if k not in self.initial_settings]
@@ -259,7 +261,8 @@ class TaskSettings(object):
         self.settings[attr] = value
     
     def current(self):
-        # get current settings, for instance, for writing settings of newly-started worker
+        # get current settings, for instance, for writing settings of 
+        # newly-started worker
         return self.settings
         
 
@@ -305,11 +308,12 @@ class TaskSettingsManager(object):
         # return list of tasks found
         if not isinstance(tasks_settings, dict):
             self.logger.error(
-                'Error retrieving task settings: {0}'.format(tasks_settings) + '\n' +
+                'Error retrieving task settings: {0}\n'.format(tasks_settings) +
                 'This may indicate a worker is not properly configured for use with\n' +
                 'CeleryManagement.  Please check that the celeryconfig.py (and/or settings.py\n' + 
                 'for django-celery) contains the CeleryManagement imports in the CELERY_IMPORTS\n' + 
-                'setting. ' )
+                'setting. '
+                )
             return
         found_tasks = []
         for taskname, tasksettings in tasks_settings.iteritems():
@@ -320,7 +324,8 @@ class TaskSettingsManager(object):
             self.logger.debug(
                 'Found task settings -> {0}:\n    {1}'.format(
                     taskname, 
-                    '\n    '.join('{0}: {1}'.format(k,v) for k,v in tasksettings.iteritems())
+                    '\n    '.join('{0}: {1}'.format(k, v) 
+                                  for k, v in tasksettings.iteritems())
                 )
             )
             ts = TaskSettings(taskname, tasksettings)
@@ -332,7 +337,10 @@ class TaskSettingsManager(object):
         """ Handles the task modified event so that Task class settings can be 
             updated accordingly. 
         """
-        self.logger.debug('Tasks modified:: {0}: {1} = {2}'.format(','.join(tasknames), setting_name, value))
+        self.logger.debug(
+            'Tasks modified:: {0}: {1} = {2}'.format(
+                ','.join(tasknames), setting_name, value)
+            )
         for taskname in tasknames:
             if taskname in self.data:
                 self.data[taskname].set(setting_name, value)
@@ -350,8 +358,10 @@ class TaskSettingsManager(object):
         new_tasknames = [s for s in tasknames if s not in self.data]
         new_task_settings = get_task_settings(workername, new_tasknames)
         found_tasks = self._store_settings_info(new_task_settings)
-        msg = 'Worker "{0}" has started.\nFound the following tasks:\n    '.format(workername)
-        msg += '\n    '.join((name + ('*' if name in new_tasknames else '')) for name in tasknames)
+        msg =  'Worker "{0}" has started.\n'
+        msg += 'Found the following tasks:\n    '.format(workername)
+        msg += '\n    '.join((name + ('*' if name in new_tasknames else '')) 
+                             for name in tasknames)
         self.logger.info(msg)
                     
     def restore(self):
@@ -359,8 +369,8 @@ class TaskSettingsManager(object):
             policy-manager shuts down. 
         """
         restore_data = {}
-        for taskname,settings in self.data.iteritems():
-            restore,erase = settings.restore()
+        for taskname, settings in self.data.iteritems():
+            restore, erase = settings.restore()
             restore_data[taskname] = (restore, erase)
         msg = 'Restoring settings for the following tasks:\n    '
         if restore_data:
@@ -374,17 +384,20 @@ class TaskSettingsManager(object):
         
 #==============================================================================#
 
-def create_policy(name, source=None, schedule_src=None, condition_srcs=None, apply_src=None, enabled=True):
+def create_policy(name, source=None, schedule_src=None, condition_srcs=None, 
+                  apply_src=None, enabled=True):
     """ Creates a new policy model object to the database.  If it doesn't 
         compile, an exception will be thrown.
     """
     assert isinstance(name, basestring)  # TODO: make this an exception
-    source = policy.combine_sources(source, schedule_src, condition_srcs, apply_src)
+    source = policy.combine_sources(source, schedule_src, condition_srcs, 
+                                    apply_src)
     # The following method should throw an exception if it fails, so the 
     # following 'raise' statement should never get called.  It is here for 
     # explanatory purposes.
     if not policy.check_source(source):
-        raise RuntimeError('Invariant error:  policy.check_source() returned False.')
+        msg = 'Invariant error:  policy.check_source() returned False.'
+        raise RuntimeError(msg)
     model = PolicyModel(name=name, source=source, enabled=enabled)
     model.modified = datetime.datetime.now()
     model.save()
@@ -396,7 +409,8 @@ def save_policy(model):
     """
     # The following should throw an exception if it fails.
     if not policy.check_source(model.source):
-        raise RuntimeError('Invariant error:  policy.check_source() returned False.')
+        msg = 'Invariant error:  policy.check_source() returned False.'
+        raise RuntimeError(msg)
     model.modified = datetime.datetime.now()
     model.save()
     

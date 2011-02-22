@@ -9,7 +9,7 @@ def decode_datetime_datetime(dct):
     """ Convert from a Json dict to a datetime.datetime object. """
     assert dct['__type__'] == 'datetime.datetime'
     
-    timestamp = dct.get('timestamp',None)
+    timestamp = dct.get('timestamp', None)
     if timestamp is not None:
         return datetime.datetime.fromtimestamp(timestamp)
     
@@ -17,9 +17,9 @@ def decode_datetime_datetime(dct):
     month = dct['month']
     day = dct['day']
     
-    keys = ['hour','minute','second','microsecond']
-    xdct = dict((k,dct[k]) for k in keys if k in dct)
-    return datetime.datetime(year,month,day,**xdct)
+    keys = ['hour', 'minute', 'second', 'microsecond']
+    xdct = dict((k, dct[k]) for k in keys if k in dct)
+    return datetime.datetime(year, month, day, **xdct)
 
 def encode_datetime_datetime(o):
     """ Convert from a datetime.datetime object to a Json dict. """
@@ -53,7 +53,7 @@ class Encoder(json.JSONEncoder):
 
 
 def json_object_decoder(dct):
-    tp = dct.get('__type__',None)
+    tp = dct.get('__type__', None)
     if tp and tp in _object_decoder_lookup:
         try:
             return _object_decoder_lookup[tp](dct)

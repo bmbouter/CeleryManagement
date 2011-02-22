@@ -7,7 +7,7 @@ import re
 import keyword
 
 # Import token constants directly into this module's namespace.
-for name,v in _tokenize.__dict__.iteritems():
+for name, v in _tokenize.__dict__.iteritems():
     if name==name.upper() and isinstance(v, int):
         globals()[name] = v
 
@@ -72,7 +72,8 @@ tok_name = _tokenize.tok_name.copy()
 tok_name[KEYWORD] = 'KEYWORD'
 
 #==============================================================================#
-_assigns = frozenset((EQUAL,PLUSEQUAL,MINEQUAL,STAREQUAL,SLASHEQUAL,PERCENTEQUAL,))
+_assigns = frozenset((EQUAL, PLUSEQUAL, MINEQUAL, STAREQUAL, SLASHEQUAL, 
+                      PERCENTEQUAL, ))
 
 def is_assignmentop(toktype):
     return toktype in _assigns
@@ -105,7 +106,7 @@ def tokenize(readline):
     elif isinstance(readline, basestring):
         readline = StringReadline(readline).readline
     for tok in _tokenize.generate_tokens(readline):
-        ty,val,start,end,ln = tok
+        ty, val, start, end, ln = tok
         if ty==OP:
             ty = _op_tokens_lookup[val]
         if ty==NAME and keyword.iskeyword(val):
@@ -113,7 +114,7 @@ def tokenize(readline):
         ## skip COMMENTs
         #elif ty==COMMENT:
         #    continue
-        yield (ty,val,start,end,ln)
+        yield (ty, val, start, end, ln)
         
 
 #==============================================================================#
@@ -135,11 +136,11 @@ def untokenize(iterable):
             toks.append(' ' * col_diff)
     
     for tok in iterable:
-        ty,val,start,end,ln = tok
+        ty, val, start, end, ln = tok
         insert_space(start)
         toks.append(val)
         prev_row, prev_col = end
-        if ty in (NEWLINE,NL):
+        if ty in (NEWLINE, NL):
             prev_row += 1
             prev_col = 0
             

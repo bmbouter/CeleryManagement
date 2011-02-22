@@ -19,8 +19,6 @@ class Signal(object):
         self.handlers.discard(handler)
         
     def __call__(self, *args, **kwargs):
-        ##if self.name:
-            ##print 'Activated signal: {0} ({1})'.format(self.name, len(self.handlers))
         for handler in self.handlers:
             handler(*args, **kwargs)
 
@@ -54,7 +52,9 @@ class Receiver(EventReceiver):
         tasknames = event.get('tasknames')
         if tasknames and attrname and value:
             self.logger.debug(
-                'policy.signals.Receiver: Task(s) modified: {0} {1} = {2}'.format(tasknames, attrname, value))
+                'policy.signals.Receiver: Task(s) modified: {0} {1} = {2}'
+                .format(tasknames, attrname, value)
+                )
             on_task_modified(tasknames, attrname, value)
         
 class Dispatcher(EventDispatcher):

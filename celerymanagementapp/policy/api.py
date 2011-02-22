@@ -32,7 +32,7 @@ def make_time_interval(arg, now=None):
         if len(arg) != 2:
             msg = 'Sequence arguments must have a length of two.'
             raise TimeIntervalError(msg)
-        a,b = arg
+        a, b = arg
         if isinstance(a, datetime.timedelta):
             if isinstance(b, datetime.timedelta):
             # (timedelta 'a' before now,  timedelta 'b' before now)
@@ -47,7 +47,8 @@ def make_time_interval(arg, now=None):
             # (time 'a', time'b')
             result = arg
     else:
-        msg = 'Argument must be a datetime.timedelta or a sequence of length two.'
+        msg =  'Argument must be a datetime.timedelta'
+        msg += ' or a sequence of length two.'
         raise TimeIntervalError(msg)
     return (min(result), max(result))
 
@@ -58,7 +59,8 @@ def string_or_sequence(arg):
     
 def get_filter_seq_arg(field, arg):
     if arg is not None:
-        if isinstance(arg, collections.Iterable) and not isinstance(arg, basestring):
+        if (isinstance(arg, collections.Iterable) 
+           and not isinstance(arg, basestring)):
             return { '{0}__in'.format(field): tuple(arg) }
         else:
             return { field: arg }
@@ -121,7 +123,8 @@ class ItemApi(object):
         self._locked = True
         
     def __setattr__(self, name, val):
-        if not name.startswith('_') and getattr(self, '_locked', False) and name not in self.assignable_names:
+        if (not name.startswith('_') and getattr(self, '_locked', False) 
+           and name not in self.assignable_names):
             raise ApiError('Cannot assign to item attribute: {0}'.format(name))
         object.__setattr__(self, name, val)
     
@@ -146,7 +149,7 @@ class ItemsCollectionApi(object):
         
     def __getitem__(self, names):
         if isinstance(names, basestring):
-            names = (names,)
+            names = (names, )
         return self._get_item_api(self._broadcast, names)
         
     def all(self):
@@ -179,7 +182,8 @@ class ItemsCollectionApi(object):
         
     def __setattr__(self, name, val):
         if not name.startswith('_') and getattr(self, '_locked', False):
-            raise ApiError('Cannot assign to item collection attribute: {0}'.format(name))
+            msg = 'Cannot assign to item collection attribute: {0}'.format(name)
+            raise ApiError(msg)
         object.__setattr__(self, name, val)
 
 #==============================================================================#
@@ -193,7 +197,8 @@ class TaskSetting(object):
         if len(taskapi.names) != 1:
             raise ApiError('Cannot retrieve this attribute for multiple tasks.')
         arguments = {'taskname': taskapi.names[0], 'attrname': self.attrname}
-        r = taskapi._broadcast('get_task_attribute', arguments=arguments, reply=True)
+        r = taskapi._broadcast('get_task_attribute', arguments=arguments, 
+                               reply=True)
         r = util._merge_broadcast_result(r)
         if not r:
             tmpl = 'Unable to retrieve task attribute: {0}.'
@@ -212,7 +217,8 @@ class TaskSetting(object):
         value = self.validator(value)
         arguments = {'tasknames': taskapi.names, 'attrname':self.attrname, 
                      'value': value}
-        r = taskapi._broadcast('set_task_attribute', arguments=arguments, reply=True)
+        r = taskapi._broadcast('set_task_attribute', arguments=arguments, 
+                               reply=True)
         r = util._merge_broadcast_result(r)
         if not r:
             msg = 'Unable to set task attribute: {0}.'.format(self.attrname)
@@ -248,7 +254,6 @@ class TaskApi(ItemApi):
         super(TaskApi, self).__init__(_broadcast, names)
         
     def _on_task_modified(self, attrname, value):
-        ##print 'TaskApi._on_task_modified(): {0}={1}'.format(attrname, value)
         self._event_dispatcher.send(signals.CM_TASK_MODIFIED_EVENT, 
                                     tasknames=self.names, attrname=attrname, 
                                     value=value)
@@ -270,7 +275,8 @@ class WorkerPrefetchProxy(object):
         self._broadcast = broadcast
     def get(self):
         if len(self.names) != 1:
-            raise ApiError('Cannot retrieve this attribute for multiple workers.')
+            msg = 'Cannot retrieve this attribute for multiple workers.'
+            raise ApiError(msg)
         r = self._broadcast('stats', destination=self.names, reply=True)
         r = util._merge_broadcast_result(r)
         if not r:
@@ -308,14 +314,17 @@ class WorkerSubprocessesProxy(object):
         self._broadcast = broadcast
     def get(self):
         if len(self.names) != 1:
-            raise ApiError('Cannot retrieve this attribute for multiple workers.')
+            msg = 'Cannot retrieve this attribute for multiple workers.'
+            raise ApiError(msg)
         r = self._broadcast('stats', destination=self.names, reply=True)
         r = util._merge_broadcast_result(r)
         if not r:
-            raise ApiError('Unable to retrieve worker attribute: subprocess pool.')
+            msg = 'Unable to retrieve worker attribute: subprocess pool.'
+            raise ApiError(msg)
         r = util._condense_broadcast_result(r)
         if isinstance(r, dict) and 'error' in r:
-            raise ApiError('Error occurred while retrieving worker subprocess pool.')
+            msg = 'Error occurred while retrieving worker subprocess pool.'
+            raise ApiError(msg)
         return len(r['pool']['processes'])
         
     def increment(self, n=1):
@@ -327,7 +336,9 @@ class WorkerSubprocessesProxy(object):
         # check that the value doesn't indicate an error
         for worker_ret in r:
             if isinstance(worker_ret, dict) and 'error' in worker_ret:
-                raise ApiError('Error occurred while incrementing worker subprocess pool.')
+                msg =  'Error occurred while incrementing '
+                msg += 'worker subprocess pool.'
+                raise ApiError(msg)
         
     def decrement(self, n=1):
         n = validate_int(n)
@@ -338,7 +349,9 @@ class WorkerSubprocessesProxy(object):
         # check that the value doesn't indicate an error
         for worker_ret in r:
             if isinstance(worker_ret, dict) and 'error' in worker_ret:
-                raise ApiError('Error occurred while decrementing worker subprocess pool.')
+                msg =  'Error occurred while decrementing '
+                msg += 'worker subprocess pool.'
+                raise ApiError(msg)
                 
 class WorkerSetting(object):
     def __init__(self, cls):
@@ -438,11 +451,13 @@ class StatsApi(object):
         """
         return filter(states, interval, workers, tasknames).count()
     
-    def mean_waittime(self, states=None, interval=None, workers=None, tasknames=None):
+    def mean_waittime(self, states=None, interval=None, workers=None, 
+                      tasknames=None):
         qs = filter(states, interval, workers, tasknames).exclude(waittime=None)
         return qs.aggregate(Avg('waittime'))['waittime__avg']
     
-    def mean_runtime(self, states=None, interval=None, workers=None, tasknames=None):
+    def mean_runtime(self, states=None, interval=None, workers=None, 
+                     tasknames=None):
         qs = filter(states, interval, workers, tasknames).exclude(runtime=None)
         return qs.aggregate(Avg('runtime'))['runtime__avg']
 

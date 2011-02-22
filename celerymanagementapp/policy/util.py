@@ -38,11 +38,12 @@ def _merge_broadcast_result(result):
 def _condense_broadcast_result(result):
     checkval = None
     first_iteration = True
-    for k,v in result.iteritems():
+    for k, v in result.iteritems():
         if first_iteration:
             checkval = v
             first_iteration = False
-        assert v==checkval, 'v!=checkval:\nv: {0}\ncheckval: {1}\n'.format(v,checkval)
+        assert v==checkval, ('v!=checkval:\nv: {0}\ncheckval: {1}\n'
+                             .format(v, checkval))
     return checkval
 
 

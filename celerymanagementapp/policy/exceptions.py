@@ -69,8 +69,10 @@ class StaticError(Error):
     clsname = 'StaticError'
     def __init__(self, msg, lineno=None, column=None, line='', file=None):
         super(StaticError, self).__init__(msg)
-        super(StaticError, self).set_policy_context(lineno=lineno, column=column, 
-                                                    line=line, file=file)
+        super(StaticError, self).set_policy_context(lineno=lineno, 
+                                                    column=column, 
+                                                    line=line, 
+                                                    file=file)
 
 class _ExceptionWrapper(Error):
     clsname = 'ExceptionWrapper'
@@ -99,7 +101,7 @@ class SyntaxError(StaticError):
 #==============================================================================#
 def current_policy_traceback():
     stack = traceback.extract_stack()
-    for i in range(len(stack)-1,-1,-1):
+    for i in range(len(stack)-1, -1, -1):
         # the first item in a traceback is the filename
         if stack[i][0].startswith('<policy:'):
             return stack[:i+1]
@@ -108,14 +110,14 @@ def current_policy_traceback():
 
 def policy_traceback_info(source_lines, tb):
     tbstack = traceback.extract_tb(tb)
-    for i in range(len(tbstack)-1,-1,-1):
+    for i in range(len(tbstack)-1, -1, -1):
         # the first item in a traceback is the filename
         if tbstack[i][0].startswith('<policy:'):
             lineno = tbstack[i][1] 
             s = source_lines[lineno-1]
-            return (s,lineno,tbstack[i][0])   # line, lineno, filename
+            return (s, lineno, tbstack[i][0])   # line, lineno, filename
     else:
-        return ('',-1,'')
+        return ('', -1, '')
 
 def apply_policy_traceback():
     pass

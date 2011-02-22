@@ -57,7 +57,8 @@ class Runner(object):
 
 #==============================================================================#
 class Policy(object):
-    def __init__(self, source=None, schedule_src=None, condition_srcs=None, apply_src=None, id=None, name=None):
+    def __init__(self, source=None, schedule_src=None, condition_srcs=None, 
+                 apply_src=None, id=None, name=None):
         """ Create a policy object. 
         
             If the 'source' arg is not provided, then all three 'schedule_src', 
@@ -112,12 +113,15 @@ class Policy(object):
         self.apply_code = None  # the compiled apply-section code
         self.schedule = None  # the result of running the schedule-section code
         
-    def _compile_src(self, source=None, schedule_src=None, condition_srcs=None, apply_src=None):
+    def _compile_src(self, source=None, schedule_src=None, condition_srcs=None, 
+                     apply_src=None):
         #if source is None:
         if source is not None:
             self._source = source
         else:
-            self._source = parser.combine_section_sources(schedule_src, condition_srcs, apply_src)
+            self._source = parser.combine_section_sources(schedule_src, 
+                                                          condition_srcs, 
+                                                          apply_src)
         self.sourcelines = self._source.splitlines()
         ret = _policyparser(self._source)
         schedule_code, self.condition_code, self.apply_code = ret
@@ -141,8 +145,11 @@ class Policy(object):
 
 
 #==============================================================================#
-def combine_sources(source=None, schedule_src=None, condition_srcs=None, apply_src=None):
-    return source or parser.combine_section_sources(schedule_src, condition_srcs, apply_src)
+def combine_sources(source=None, schedule_src=None, condition_srcs=None, 
+                    apply_src=None):
+    return source or parser.combine_section_sources(schedule_src, 
+                                                    condition_srcs, 
+                                                    apply_src)
 
 def check_source(source):
     """ Throws an exception on error.  If no exception was thrown, the 

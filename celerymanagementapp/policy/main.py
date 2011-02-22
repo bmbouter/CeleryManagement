@@ -52,7 +52,7 @@ class PolicyMain(object):
             while True:
                 self.refresh_registry()
                 sleeptime = self.run_ready_policies()
-                sleeptime = max(sleeptime,MIN_LOOP_SLEEP_TIME)
+                sleeptime = max(sleeptime, MIN_LOOP_SLEEP_TIME)
                 self.logger.debug(
                     'Sleeping for {0:.2f} seconds.'.format(sleeptime))
                 self.handle_messages(sleeptime)
