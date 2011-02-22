@@ -8,7 +8,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.core.paginator import Paginator, EmptyPage
+from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.conf import settings
 
 from celery.task.control import inspect, broadcast
@@ -56,11 +56,11 @@ def searchrange_from_post(post):
     
 def string_to_bool(s):
     s = s.lower()
-    if s=='true' or s=='yes':
+    if s == 'true' or s == 'yes':
         return True
     elif s.isdigit():
         return int(s) != 0
-    return false
+    return False
     
 
 def get_postval(postdict, name, convfunc, default=None):
@@ -117,6 +117,7 @@ class QueryStringBuilder(object):
                 self.args[name] = str(val)
                 
     def _iter_formatted_params(self):
+        quote = urllib.quote
         return ('{0}={1}'.format(quote(name), quote(val)) 
                 for name, val in self.args 
                     if val is not None)
@@ -295,7 +296,7 @@ def get_dispatched_tasks(request, taskname=None):
     """View DispatchedTasks, possibly limited to those for a particular 
        DefinedTask.
     """
-    alltasks = TaskState.objects.all()
+    alltasks = DispatchedTask.objects.all()  # was TaskState
     if taskname:
         alltasks = alltasks.filter(name=taskname)
     
@@ -307,7 +308,7 @@ def get_dispatched_tasks(request, taskname=None):
         
     try:
         tasks = pg.page(page)
-    except (EmptyPage, InavlidPage):
+    except (EmptyPage, InvalidPage):
         tasks = pg.page(pg.num_pages)
     
     return HttpResponse(tasks)
@@ -330,7 +331,7 @@ def view_dispatched_tasks(request, taskname=None):
         
     try:
         tasks = pg.page(page)
-    except (EmptyPage, InavlidPage):
+    except (EmptyPage, InvalidPage):
         tasks = pg.page(pg.num_pages)
      
     return render_to_response('celerymanagementapp/dispatched_tasklist.html',
@@ -339,9 +340,9 @@ def view_dispatched_tasks(request, taskname=None):
 
 def get_runtimes_new(request, taskname=None, interval=0):
     if taskname is None:
-        dataset = TaskState.objects.all()
+        dataset = DispatchedTask.objects.all()  # was TaskState
     else:
-        dataset = TaskState.objects.filter(name=taskname)
+        dataset = DispatchedTask.objects.filter(name=taskname)  # was TaskState
     stats = CeleryStats(dataset)
     if interval is 0:
         runtimes = stats.calculate_runtimes()
@@ -449,9 +450,9 @@ def dashboard(request):
 def policy(request):
     pols = PolicyModel.objects.all()
     policies = []
-    for policy in pols:
-        policyForm = PolicyModelForm(instance=policy)
-        policies.append({ "policy" : policy, "policyForm" : policyForm })
+    for policyobj in pols:
+        policyForm = PolicyModelForm(instance=policyobj)
+        policies.append({ "policy" : policyobj, "policyForm" : policyForm })
     blank_policy_form = PolicyModelForm()
     return render_to_response('celerymanagementapp/policy.html',
             { 'policies': policies,
