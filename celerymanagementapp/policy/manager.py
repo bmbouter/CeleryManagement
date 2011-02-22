@@ -15,17 +15,30 @@ class Entry(object):
     """ An entry in the Policy registry. """
     
     def __init__(self, policy, modified, last_run_time=None):
+        """ :param policy: A Policy object.
+            :param modified: A datetime.datetime object which is the last time 
+                the Policy was modified, or None.
+            :param last_run_time: A datatime.datetime object which is the last 
+                time the Policy was run, or None.
+        """
         self.policy = policy
         self.last_run_time = last_run_time or default_time
         self.modified = modified  # this comes from PolicyModel.modified
         
     def is_due(self):
+        """ :returns: A tuple: (bool, float).  The first field is whether the 
+                      policy should be run now.  The second field is the number 
+                      of seconds until the policy should be run *again*. 
+        """
         return self.policy.is_due(self.last_run_time)
         
     def set_last_run_time(self, current_time):
         self.last_run_time = current_time
         
     def update(self, **kwargs):
+        """ Updates the entry's values.  The fields are given as keyword 
+            arguments.  Any fields not explicitly stated will not be changed. 
+        """
         self.policy = kwargs.pop('policy', self.policy)
         self.last_run_time = kwargs.pop('last_run_time', self.last_run_time)
         self.modified = kwargs.pop('modified', self.modified)
@@ -51,7 +64,9 @@ class Registry(object):
         
     def register(self, obj):
         """ Register a PolicyModel object that is not currently in the 
-            Registry. 
+            Registry.
+            
+            :param obj: A PolicyModel instance.
         """
         assert obj.enabled
         assert obj.id not in self.data
@@ -60,7 +75,10 @@ class Registry(object):
         self.data[obj.id] = entry
         
     def reregister(self, obj):
-        """ Update the information of a PolicyModel that has been modified. """
+        """ Update the information of a PolicyModel that has been modified. 
+            
+            :param obj: A PolicyModel instance.
+        """
         assert obj.enabled
         entry = self.data[obj.id]
         assert obj.last_run_time is None or obj.last_run_time <= entry.last_run_time
@@ -68,7 +86,10 @@ class Registry(object):
         entry.update(modified=obj.modified)
         
     def unregister(self, id):
-        """ Remove a PolicyModel--is was deleted from the database. """
+        """ Remove a PolicyModel--it was already deleted from the database. 
+        
+            :param id: The PolicyModel id in the database.
+        """
         del self.data[id]
         
     def refresh(self):
@@ -125,6 +146,19 @@ _setting_names = ('ignore_result', 'routing_key', 'exchange',
                  )
     
 def get_task_settings(workername, tasknames):
+    """ Get the settings for one or more tasks. 
+    
+        :param workername: The name of a worker to get the task settings from, 
+                           or None to examine all task settings.
+        :param tasknames: The name or names of tasks to get settings from.  It 
+                          can either be a single string, a or a tuple or list 
+                          of strings.
+        :returns: A dict whose format varies depending on whether a workername 
+                  is supplied or not. If the workername is None, the dict has 
+                  three levels: name of the worker, name of the task, name of 
+                  the setting, and finally the setting's value. If a workername 
+                  is supplied, the top level of the dict is omitted.
+    """
     destination = [workername] if workername else None
     settings = broadcast('get_task_settings', destination=destination, 
                          arguments={'tasknames': tasknames, 
@@ -136,6 +170,9 @@ def get_task_settings(workername, tasknames):
         return settings
     
 def get_all_task_settings():
+    """ Like get_task_settings(), but it always returns the settings for all 
+        tasks in all workers. 
+    """
     # don't do anything if there are no workers
     if len(util.get_all_worker_names()) == 0:
         return {}
@@ -147,10 +184,51 @@ def get_all_task_settings():
     return util._condense_broadcast_result(settings) or {}
     
 def update_tasks_settings(workername, tasks_settings):
+    """ Update settings for one or more tasks in the given worker or all 
+        workers. 
+        
+        The tasks_settings argument must be a dict with the following format: 
+        dict[taskname][settingname] = settingvalue.  For example::
+        
+            {
+                'tasks.task1': {
+                    'ignore_result': False,
+                    'routing_key': 'MyRoutingKey',
+                },
+                'tasks.task2': {
+                    'acks_late': True,
+                },
+            }
+    """
     broadcast('update_tasks_settings', destination=[workername],
               arguments={'tasks_settings': tasks_settings})
 
 def restore_task_settings(restore_data):
+    """ Restores task settings to the given values.  This restores the initial 
+        task settings when the Task Manager is closed. 
+        
+        The restore_data argument must be a dict.  The keys correspond to task 
+        names, and the values are tuples containing: 1. a dict mapping setting 
+        names to their new values, and 2. a list of setting names to erase.  
+        Every setting name should be found in one or the other, but not both.
+        Here is a brief example (for brevity, not all setting names are shown)::
+            
+            {
+                'task.task1': (
+                    {
+                        'ignore_result': True,
+                    },
+                    ['expires', acks_late],
+                ),
+                'task.task2': (
+                    {
+                        'exchange': 'MyExchange',
+                        'routing_key': 'MyRoutingKey',
+                    },
+                    ['expires', 'rate_limit'],
+                ),
+            }
+    """
     # only broadcast if there are workers
     if len(util.get_all_worker_names()):
         broadcast('restore_task_settings', 
@@ -167,6 +245,7 @@ class TaskSettings(object):
         self.settings = {}
         
     def restore(self):
+        """ Restore the Task to its original settings. """
         # restore Task settings to the original settings
         restore = dict((k,v) for (k,v) in self.initial_settings.iteritems() 
                                        if self.settings.get(k,v) != v)
@@ -200,11 +279,15 @@ class TaskSettingsManager(object):
         self._initialize_settings()
         
     def cleanup(self):
+        """ Clean up resources owned by the settings manager.  This must be 
+            called. 
+        """
         signals.on_worker_started.unregister(self.on_worker_start)
         signals.on_task_modified.unregister(self.on_tasks_modified)
         self.restore()
         
     def _initialize_settings(self):
+        """ Initialize settings based on known tasks and workers. """
         tasks_settings = get_all_task_settings()
         
         found_tasks = self._store_settings_info(tasks_settings)
@@ -217,6 +300,7 @@ class TaskSettingsManager(object):
             self.logger.warn(msg)
             
     def _store_settings_info(self, tasks_settings):
+        """ Store a task's current settings. """
         # verify that task_settings is a dict
         # return list of tasks found
         if not isinstance(tasks_settings, dict):
@@ -296,7 +380,9 @@ def create_policy(name, source=None, schedule_src=None, condition_srcs=None, app
     """
     assert isinstance(name, basestring)  # TODO: make this an exception
     source = policy.combine_sources(source, schedule_src, condition_srcs, apply_src)
-    # The following should throw an exception if it fails.
+    # The following method should throw an exception if it fails, so the 
+    # following 'raise' statement should never get called.  It is here for 
+    # explanatory purposes.
     if not policy.check_source(source):
         raise RuntimeError('Invariant error:  policy.check_source() returned False.')
     model = PolicyModel(name=name, source=source, enabled=enabled)

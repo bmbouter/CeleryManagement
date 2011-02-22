@@ -17,6 +17,11 @@ class PolicyMain(object):
         here. 
     """
     def __init__(self, connection, logger, app=None):
+        """ :param connection: A Celery connection object.  This connection is 
+                               used throughout the Policy Manager.
+            :param logger: A Celery logger.
+            :param app: A Celery application instance, or None.
+        """
         ##print 'cmrun: Starting PolicyMain...'
         self.logger = logger
         self.logger.debug('Starting PolicyMain...')
@@ -33,30 +38,25 @@ class PolicyMain(object):
         self.cleanup()
         
     def cleanup(self):
-        ##print 'cmrun: PolicyMain.cleanup()...'
         self.logger.debug('PolicyMain.cleanup()...')
         
         self.registry.close()
         self.task_settings.cleanup()
         
-        ##print 'cmrun: PolicyMain.cleanup()... complete.'
         self.logger.debug('PolicyMain.cleanup()... complete.')
         
     def loop(self):
         """ The main policy-manager loop. """
-        ##print 'cmrun: Starting PolicyMain loop...'
         self.logger.debug('Starting PolicyMain loop...')
         try:
             while True:
                 self.refresh_registry()
                 sleeptime = self.run_ready_policies()
                 sleeptime = max(sleeptime,MIN_LOOP_SLEEP_TIME)
-                ##print 'cmrun: Sleeping for {0:.2f} seconds.'.format(sleeptime)
                 self.logger.debug(
                     'Sleeping for {0:.2f} seconds.'.format(sleeptime))
                 self.handle_messages(sleeptime)
         finally:
-            ##print 'cmrun: Exiting PolicyMain loop.'
             self.logger.debug('Exiting PolicyMain loop.')
         
     def refresh_registry(self):
@@ -64,7 +64,10 @@ class PolicyMain(object):
         
     def handle_messages(self, sleeptime):
         """ Handles Celery events until sleeptime seconds has elapsed or an 
-            exception is thrown. 
+            exception is thrown.
+            
+            :param sleeptime: The maximum amount of time (in seconds) to listen 
+                              for events.
         """
         try:
             self.event_receiver.capture(limit=None, timeout=sleeptime)
@@ -120,7 +123,8 @@ class PolicyMain(object):
                 self.run_policy(entry.policy)
                 was_run = True
         except (KeyboardInterrupt, SystemExit):
-            # Do not ignore these exceptions.
+            # Do not ignore these exceptions.  We only catch them here so they 
+            # are not caught by the general handler below.
             raise
         except Exception:
             import traceback
@@ -139,6 +143,8 @@ class PolicyMain(object):
             
             First, the Policy's condition section is run.  If that evaluates to 
             true, then the apply section is run.
+            
+            :param policyobj: A Policy instance that will be executed.
         """
         name = policyobj.name
         self.logger.debug('Checking policy {0} (condition)'.format(name))
