@@ -1,5 +1,6 @@
 import time
 import logging
+import os
 
 from celery.task.control import broadcast, inspect
 
@@ -8,36 +9,64 @@ from celerymanagementapp.policy import api, signals, util
 from celerymanagementapp.testutil import process
 from celerymanagementapp.tests_celery import base
 
+LOGLEVEL = 'DEBUG'
+
 
 class PolicyApi_TestCaseBase(base.CeleryManagement_DBTestCaseBase):
     hostname = None
+    def _launch_celeryd(self):
+        ##print 'Launching celeryd...'
+        ##self.celeryd = process.DjCeleryd(log='celeryd.log.txt', hostname=self.hostname)
+        
+        self.procs.add('celeryd', process.DjCeleryd, log='celeryd.log.txt', 
+                       hostname=self.hostname, loglevel=LOGLEVEL, env=os.environ)
+        
+    def _launch_cmrun(self):
+        ##print 'Launching cmrun...'
+        ##self.cmrun = process.CMRun(freq=0.1, log='celeryev.log.txt')
+        
+        self.procs.add('cmrun', process.CMRun, freq=0.1, log='celeryev.log.txt', 
+                       loglevel=LOGLEVEL, env=os.environ)
+        
+    def _terminate_celeryd(self):
+        ##print 'Terminating celeryd...'
+        self.procs.close('celeryd')
+        ##self.celeryd.close()
+        ##self.celeryd.wait()
+        
+    def _terminate_cmrun(self):
+        ##print 'Terminating cmrun...'
+        self.procs.close('cmrun')
+        ##self.cmrun.close()
+        ##self.cmrun.wait()
+    
     def setUp(self):
         super(PolicyApi_TestCaseBase, self).setUp()
-        try:
-            print 'Launching celeryd...'
-            self.celeryd = process.DjCeleryd(log='celeryd.log.txt', hostname=self.hostname)
-            print 'Launching cmrun...'
-            self.cmrun = process.CMRun(freq=0.1, log='celeryev.log.txt')
-            time.sleep(2.0)
-        except Exception:
-            print 'Error encountered while starting celeryd and/or cmrun.'
-            if self.celeryd and not self.celeryd.is_stopped():
-                self.celeryd.close()
-                self.celeryd.wait()
-            if self.cmrun and not self.cmrun.is_stopped():
-                self.cmrun.close()
-                self.cmrun.wait()
-            raise
+        os.environ['PYTHONWARNINGS'] = 'ignore'  # silence warnings
+        self.procs = process.ProcessSequence()
+        self._launch_celeryd()
+        self._launch_cmrun()
+        # try:
+            # self._launch_celeryd()
+            # self._launch_cmrun()
+            # time.sleep(2.0)
+        # except Exception:
+            # print 'Error encountered while starting celeryd and/or cmrun.'
+            # if self.celeryd and not self.celeryd.is_stopped():
+                # self.celeryd.close()
+                # self.celeryd.wait()
+            # if self.cmrun and not self.cmrun.is_stopped():
+                # self.cmrun.close()
+                # self.cmrun.wait()
+            # raise
         
     def tearDown(self):
         super(PolicyApi_TestCaseBase, self).tearDown()
         print ''
-        print 'Terminating cmrun...'
-        self.cmrun.close()
-        self.cmrun.wait()
-        print 'Terminating celeryd...'
-        self.celeryd.close()
-        self.celeryd.wait()
+        self._terminate_cmrun()
+        self._terminate_celeryd()
+        self.procs.close()
+        del os.environ['PYTHONWARNINGS']
         
     def broadcast(self, name, *args, **kwargs):
         if 'reply' not in kwargs:
@@ -72,6 +101,9 @@ class PolicyWorkerApi_TestCase(PolicyApi_TestCaseBase):
     hostname = 'worker1'
     
     def test_prefetch(self):
+        ##import os
+        ##print 'COVERAGE_PROCESS_START: {0}'.format(os.environ.get('COVERAGE_PROCESS_START','COVERAGE_PROCESS_START is not set'))
+        
         workername = self.hostname
         workers = api.WorkersCollectionApi()
         prefetch = workers[workername].prefetch.get()
@@ -136,7 +168,7 @@ class PolicyRestoreTaskSettings_TestCase(base.CeleryManagement_DBTestCaseBase):
                 
                 time.sleep(2.0)
                 procs.close('cmrun')
-                time.sleep(1.0)
+                time.sleep(2.0)
                 # after closing cmrun, any changes should be undone
                 self.assertTrue(self.task_setting_is_undefined(taskname, 'routing_key'), 
                                 'setting = "{0}"'.format(self.get_task_setting(taskname, 'routing_key'))

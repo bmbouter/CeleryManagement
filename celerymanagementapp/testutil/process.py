@@ -80,7 +80,7 @@ class Process(object):
 
 #==============================================================================#
 class DjangoCommand(Process):
-    def __init__(self, name, args, log=None, loglevel=None):
+    def __init__(self, name, args, log=None, loglevel=None, env=None):
         assert DEFAULT_SETTINGS is not None
         settings = '--settings={0}'.format(DEFAULT_SETTINGS)
         pypath = '--pythonpath={0}'.format(DEFAULT_PYPATH)
@@ -91,7 +91,7 @@ class DjangoCommand(Process):
             args.extend(['-l','{0}'.format(loglevel)])
         args.extend([settings, pypath])  # settings has to come after other arguments
         
-        super(DjangoCommand, self).__init__(args)
+        super(DjangoCommand, self).__init__(args, env=env)
         
         
 class DjCeleryd(DjangoCommand):

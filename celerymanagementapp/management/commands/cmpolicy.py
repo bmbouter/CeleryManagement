@@ -2,6 +2,14 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
 
+# For test coverage:
+# try:
+    # import coverage
+    # coverage.process_startup()
+# except ImportError:
+    # pass
+
+
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('-l', '--loglevel',

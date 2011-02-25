@@ -4,6 +4,15 @@ from django.core.management.base import BaseCommand, CommandError
 
 from celery.bin import celeryev
 
+# For test coverage:
+# try:
+    # import coverage
+    # coverage.process_startup()
+# except ImportError:
+    # pass
+    
+
+
 class CmEvCommand(celeryev.EvCommand):
     def run_evcam(self, *args, **kwargs):
         from celerymanagementapp.snapshot.snapshot import evcam
