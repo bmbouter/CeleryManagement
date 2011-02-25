@@ -84,7 +84,12 @@ Schedule
 The Schedule section determines when and/or how frequently a policy is 
 executed.  The schedule section is required.
 
-TODO....
+The schedule section must be an expression that results in a schedule object.  
+The ``crontab`` function available to policies returns such an object.  (Other 
+schedule types may be added at a later time, if there is a demand.)
+
+See :ref:`Policy Schedule <policy-schedule>` in the API documentation for more 
+information about how to use ``crontab``.
 
 .. _Condition:
 
@@ -119,17 +124,26 @@ Apply
 The apply section is the body of the policy.  It is where the behavior of 
 Celery can be modified.  The apply section is required.
 
-TODO....
+Unlike the condition and schedule sections which must be expressions, the apply 
+section can be composed of statements.  To keep policies focused, only a subset 
+of Python statements are allowed.
 
 Execution Environment
 =====================
 
-Policies are run in a limited execution environment.  There are both 
-parse-time and run-time mechanisms which enfore this environment.
+Policies are run in a limited execution environment.  The main purpose of these 
+restrictions is to keep policies focused and simple.  Policies have a specific 
+design aim: to provide some automated monitoring and control of Celery workers.  
+To provide the full power of the Python language may encourage users to put in 
+policies code which would be better put elsewhere.  
 
-At parse-time, the policy source is checked for certain language constructs 
-which are available in the full Python language, but are not desired in 
-policies.
+The restrictions also provide some measure of security, but they should not be 
+solely relied upon for this purpose.
+
+There are both parse-time and run-time mechanisms which enfore this 
+environment.  At parse-time, the policy source is checked for certain language 
+constructs which are available in the full Python language, but are not desired 
+in policies.
 
 Scope
 ~~~~~
@@ -242,7 +256,7 @@ Common Issues
   recorded.
 - Celery workers must have access to the CeleryManagementLib package.  (Usually 
   this means installing it on the worker's (virtual) machine.)
-  
+- Length of execution
 
   
 

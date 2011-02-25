@@ -251,6 +251,8 @@ Task and Worker Stats
    of time here is clearer.  
 
 
+.. _policy-schedule:
+
 Policy Schedule
 ===============
 
