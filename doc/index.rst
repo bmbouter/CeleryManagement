@@ -15,6 +15,7 @@ Contents:
    operation
    policy/index
    cloud
+   graph
 
 Indices and tables
 ==================
