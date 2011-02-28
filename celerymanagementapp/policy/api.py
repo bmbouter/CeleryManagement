@@ -5,7 +5,6 @@ import collections
 from django.db.models import Avg, Min, Max, Variance
 from django.core.mail import send_mail as django_send_mail
 
-from celery.task.control import broadcast, inspect
 from celery.states import RECEIVED, FAILURE, SUCCESS, PENDING, STARTED, REVOKED
 from celery.states import RETRY, READY_STATES, UNREADY_STATES
 
@@ -173,7 +172,7 @@ class ItemsCollectionApi(object):
             kwargs['limit'] = len(kwargs['destination'])
         else:
             kwargs['limit'] = self._get_worker_count()
-        return broadcast(*args, **kwargs)
+        return util.broadcast(*args, **kwargs)
         
     def __getattr__(self, name):
         if not name.startswith('_') and name != 'all':

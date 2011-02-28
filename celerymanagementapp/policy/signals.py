@@ -24,6 +24,7 @@ class Signal(object):
 
 on_task_modified = Signal('on_task_modified')
 on_worker_started = Signal('on_worker_started')
+on_worker_stopped = Signal('on_worker_stopped')
 
 #==============================================================================#
 class Receiver(EventReceiver):
@@ -35,6 +36,7 @@ class Receiver(EventReceiver):
     def _init_handlers(self):
         handlers = {
             'worker-online': self.on_worker_online,
+            'worker-offline': self.on_worker_offline,
             CM_TASK_MODIFIED_EVENT: self.on_task_modified,
             }
         return handlers
@@ -45,6 +47,13 @@ class Receiver(EventReceiver):
             self.logger.debug(
                 'policy.signals.Receiver: Worker started: {0}'.format(hostname))
             on_worker_started(hostname)
+    
+    def on_worker_offline(self, event):
+        hostname = event.get('hostname')
+        if hostname:
+            self.logger.debug(
+                'policy.signals.Receiver: Worker stopped: {0}'.format(hostname))
+            on_worker_stopped(hostname)
     
     def on_task_modified(self, event):
         attrname = event.get('attrname')

@@ -1,17 +1,36 @@
 import itertools
 
-from celery.task.control import broadcast, inspect
+from celery.task.control import broadcast as celery_broadcast
+from celery.task.control import inspect as celery_inspect
+
+from celerymanagementapp.policy import signals
 
 
+DEFAULT_BROADCAST_TIMEOUT = 1
+DEFAULT_INSPECT_TIMEOUT = 1
+
+#==============================================================================#
+def broadcast(*args, **kwargs):
+    if 'timeout' not in kwargs:
+        kwargs['timeout'] = DEFAULT_BROADCAST_TIMEOUT
+    return celery_broadcast(*args, **kwargs)
+    
+def inspect(*args, **kwargs):
+    if 'timeout' not in kwargs:
+        kwargs['timeout'] = DEFAULT_INSPECT_TIMEOUT
+    return celery_inspect(*args, **kwargs)
+
+
+#==============================================================================#
 def get_registered_tasks_for_worker(workername):
-    i = inspect()
+    i = inspect(timeout=1)
     tasks_by_worker = i.registered_tasks() or {}
     return tasks_by_worker.get(workername, [])
     
 def get_registered_tasks(workernames=None):
     if isinstance(workernames, basestring):
         workernames = [workernames]
-    i = inspect(destination=workernames)
+    i = inspect(destination=workernames, timeout=1)
     return i.registered_tasks() or {}
     
 def get_all_registered_tasks():
@@ -21,12 +40,13 @@ def get_all_registered_tasks():
     return list(defined)
     
 def get_all_worker_names():
-    i = inspect()
+    i = inspect(timeout=1)
     r = i.ping()
     if r:
         return r.keys()
     return []
     
+#==============================================================================#
 def _merge_broadcast_result(result):
     # merge a sequence of dicts into a single dict
     r = {}
@@ -46,6 +66,7 @@ def _condense_broadcast_result(result):
                              .format(v, checkval))
     return checkval
 
+#==============================================================================#
 
 
 

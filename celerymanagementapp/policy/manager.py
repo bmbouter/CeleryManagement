@@ -3,8 +3,6 @@ import time
 
 from django.core.exceptions import ObjectDoesNotExist
 
-from celery.task.control import broadcast, inspect
-
 from celerymanagementapp.models import PolicyModel
 from celerymanagementapp.policy import policy, signals, util
 
@@ -162,7 +160,7 @@ def get_task_settings(workername, tasknames):
                   is supplied, the top level of the dict is omitted.
     """
     destination = [workername] if workername else None
-    settings = broadcast('get_task_settings', destination=destination, 
+    settings = util.broadcast('get_task_settings', destination=destination, 
                          arguments={'tasknames': tasknames, 
                          'setting_names': _setting_names}, reply=True)
     settings = util._merge_broadcast_result(settings)
@@ -178,7 +176,7 @@ def get_all_task_settings():
     # don't do anything if there are no workers
     if len(util.get_all_worker_names()) == 0:
         return {}
-    settings = broadcast('get_task_settings', 
+    settings = util.broadcast('get_task_settings', 
                          arguments={'tasknames': None, 
                          'setting_names': _setting_names}, 
                          reply=True)
@@ -202,7 +200,7 @@ def update_tasks_settings(workername, tasks_settings):
                 },
             }
     """
-    broadcast('update_tasks_settings', destination=[workername],
+    util.broadcast('update_tasks_settings', destination=[workername],
               arguments={'tasks_settings': tasks_settings})
 
 def restore_task_settings(restore_data):
@@ -233,7 +231,7 @@ def restore_task_settings(restore_data):
     """
     # only broadcast if there are workers
     if len(util.get_all_worker_names()):
-        broadcast('restore_task_settings', 
+        util.broadcast('restore_task_settings', 
                   arguments={'restore_data': restore_data})
 
 
