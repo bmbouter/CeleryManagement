@@ -9,6 +9,9 @@ When a policy is executed, they first check to see if a condition is true.  If
 it is, then the body of the policy is executed.  Within the body, various 
 Worker and Task attributes can be modified.
 
+Policies are designed to be simple and focused.  Python language features that 
+may conflict with this goal are purposely forbidden within policy code.
+
 See :ref:`Policies-API` for information about the objects and functions 
 available to executing policies.
 
@@ -48,27 +51,6 @@ not.  It is optional—when not supplied the apply section is run every time.
 
 The :ref:`apply section <Apply>` is the body of the policy—it is where Worker 
 and Task settings may be modified.
-
-Features & Limitations
-======================
-
-TODO....
-
-Not permitted in any section:
-
-- imports (selected modules are available to policies)
-- defining functions (with ``def`` or with ``lambda``)
-- defining classes
-- ``exec`` statement or ``eval()`` function
-- any name beginning with an underscore (this hides implementation details)
-- selected built-in functions and types
-
-Not permitted in the ``schedule`` or ``condition`` sections:
-
-- assignment (these sections must be expressions)
-- deletion (the ``del`` keyword)
-
-These limitations keep policies focused and simple.
 
 
 Policy Sections
@@ -113,8 +95,6 @@ Some key points about conditions:
   lines in a condition must be true for the condition as a whole to evaluate to 
   True.  (You can work around this using the usual Python line continuation 
   techniques: a backslash or wrapping it in parentheses.)
-  
-TODO....
 
 .. _Apply:
 
@@ -127,6 +107,7 @@ Celery can be modified.  The apply section is required.
 Unlike the condition and schedule sections which must be expressions, the apply 
 section can be composed of statements.  To keep policies focused, only a subset 
 of Python statements are allowed.
+
 
 Execution Environment
 =====================
@@ -244,9 +225,27 @@ Policy Manager
 ==============
 
 The Policy Manager is the process that executes the policies.  There are two 
-ways to run it: directly using ``cmpolicy`` or as part of ``cmrun``.
+ways to run it: directly using ``cmpolicy`` or as part of ``cmrun``.  Both of 
+these must be run as Django commands.
 
-TODO....
+.. rubric:: cmpolicy
+
+usage: ``python manage.py cmpolicy [options]``
+
+options:
+
+-l LEVEL, --loglevel=LEVEL  Logging level.  One of: fatal, critical, error, 
+                            warning, info, debug.  Default is warning.
+-f FILE, --logfile=FILE     Logging file.  Default is stdout.
+
+.. rubric:: cmrun
+
+usage: ``python manage.py cmrun [options]``
+
+The cmrun command runs both the ``cmpolicy`` and ``cmevents`` commands as 
+subprocesses.  However, they share the command line options, so the log output 
+may not be as expected. For this reason, it is reccomended that ``cmpolicy`` 
+and ``cmevents`` be used directly.
 
 Common Issues
 =============
@@ -257,10 +256,6 @@ Common Issues
 - Celery workers must have access to the CeleryManagementLib package.  (Usually 
   this means installing it on the worker's (virtual) machine.)
 - Length of execution
-
-  
-
-
   
 TODO....
 
