@@ -1,0 +1,295 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CeleryManagement Graphing Interface &mdash; CeleryManagement v0.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="CeleryManagement v0.0 documentation" href="index.html" />
+    <link rel="prev" title="Cloud Enabled" href="cloud.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="cloud.html" title="Cloud Enabled"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">CeleryManagement v0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="celerymanagement-graphing-interface">
+<span id="example"></span><h1><a class="toc-backref" href="#id6">CeleryManagement Graphing Interface</a><a class="headerlink" href="#celerymanagement-graphing-interface" title="Permalink to this headline">¶</a></h1>
+<p>CeleryManagement includes several utilities included in the web interface that
+allow you to easily manage tasks and workers, as well as visualize data
+associated with your tasks and workers through an included charting interface.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#celerymanagement-graphing-interface" id="id6">CeleryManagement Graphing Interface</a><ul>
+<li><a class="reference internal" href="#charting" id="id7">Charting</a><ul>
+<li><a class="reference internal" href="#query-panel" id="id8">Query Panel</a><ul>
+<li><a class="reference internal" href="#segmentation" id="id9">Segmentation</a></li>
+<li><a class="reference internal" href="#aggregation" id="id10">Aggregation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#examples" id="id11">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="charting">
+<span id="id1"></span><h2><a class="toc-backref" href="#id7">Charting</a><a class="headerlink" href="#charting" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="query-panel">
+<span id="id2"></span><h3><a class="toc-backref" href="#id8">Query Panel</a><a class="headerlink" href="#query-panel" title="Permalink to this headline">¶</a></h3>
+<p>Presentation of information while using CeleryManagement is important. This is
+why a simple interface is included that allows you to query the system and
+quickly view the data that you requested.</p>
+<div class="figure align-center">
+<img alt="query panel" src="_images/query_panel.png" />
+<p class="caption">The CeleryManagement query panel</p>
+</div>
+<p>The query panel included with CeleryManagement allows you to filter, exclude,
+segment, and aggregate your data in multiple ways. The main portions of the
+panel are the segmentize and aggregate options.</p>
+<div class="section" id="segmentation">
+<span id="id3"></span><h4><a class="toc-backref" href="#id9">Segmentation</a><a class="headerlink" href="#segmentation" title="Permalink to this headline">¶</a></h4>
+<p>You can segment your data across the x-axis by various fields, including:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>Enumerated Data</dt>
+<dd><ul class="first last simple">
+<li>Task name</li>
+<li>State</li>
+<li>Worker</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Time data</dt>
+<dd><ul class="first last simple">
+<li>Run time</li>
+<li>Wait time</li>
+<li>Total time</li>
+<li>Sent time</li>
+<li>Received time</li>
+<li>Start time</li>
+<li>Success time</li>
+<li>Failed time</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Each field also has associated methods. Some methods do not apply to certain
+fields, but there are four total fields:</p>
+<ul class="simple">
+<li>Each</li>
+<li>Range</li>
+<li>Value</li>
+<li>All</li>
+</ul>
+<p>The &#8216;range&#8217; and &#8216;each&#8217; fields correspond with time data while the &#8216;each&#8217;, &#8216;value&#8217;,
+and &#8216;all&#8217; fields correspond with enumerated data.</p>
+</div>
+<div class="section" id="aggregation">
+<span id="id4"></span><h4><a class="toc-backref" href="#id10">Aggregation</a><a class="headerlink" href="#aggregation" title="Permalink to this headline">¶</a></h4>
+<p>Aggregation is similar to segmentation in that it also has methods and
+corresponding fields to choose from. You aggregate your data across the y-axis
+by various fields, including:</p>
+<ul class="simple">
+<li>Count</li>
+<li>Task name</li>
+<li>State</li>
+<li>Worker</li>
+<li>Run time</li>
+<li>Wait time</li>
+<li>Total time</li>
+</ul>
+<p>Each field also has its associated methods and some methods do not apply
+to certain fields, as it is with <a class="reference internal" href="#segmentation">Segmentation</a>. The fields include:</p>
+<ul class="simple">
+<li>Count</li>
+<li>Enumerate</li>
+<li>Average</li>
+<li>Min</li>
+<li>Max</li>
+<li>Sum</li>
+<li>Variance</li>
+</ul>
+<p>&#8216;Count&#8217; corresponds to the &#8216;count&#8217; method. &#8216;Enumerate&#8217; corresponds to enumerated
+data: &#8216;task name&#8217;, &#8216;state&#8217;, and &#8216;worker.&#8217; Time data, being discrete, allows the
+fields: &#8216;average&#8217;, &#8216;min&#8217;, &#8216;max&#8217;, &#8216;sum&#8217;, and &#8216;variance.&#8217;</p>
+<p>An important distinction when choosing aggregate methods is that a particular
+field can have multiple methods associated with it at one time.</p>
+</div>
+</div>
+<div class="section" id="examples">
+<span id="id5"></span><h3><a class="toc-backref" href="#id11">Examples</a><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<p>You can expect very different output from different queries that are sent to the
+server. All data that is returned depends on the tasks that have been run, the
+amount of workers you have executing said tasks, as well as other information.</p>
+<p>Below you can see a char of the average, min, and max run times of tasks that were
+executed on a particular worker. The associated query sent to the server was:</p>
+<div class="highlight-python"><pre>Segmentize
+    Field: Worker
+    Method: All
+Aggregate
+    Field: Runtime
+    Methods: Average, Min, Max</pre>
+</div>
+<div class="figure align-center">
+<img alt="average, min, and max worker runtime line" src="_images/chart_runtime_avgminmax_line.png" style="width: 500px;" />
+<p class="caption">The average, minimum, and maximum runtime for a single worker
+presented in line graph form</p>
+</div>
+<p>What if you have multiple workers executing tasks? When another worked was
+activated, the same task was run, and the same query used before was submitted,
+the data returned what charted below.</p>
+<div class="figure align-center">
+<img alt="average, min, and max worker runtime bar" src="_images/chart_runtime_avgminmax_bar.png" style="width: 500px;" />
+<p class="caption">The average, minimum, and maximum runtime for workers presented in
+a bar graph form</p>
+</div>
+<p>In this chart, the option was set to display data as bar graphs. You can still see
+the average, min, and max run times of tasks executed on each worker.</p>
+<p>Besides working with workers, you can retrieve data related to tasks. For example,
+running the following query yields a chart of the number of tasks:</p>
+<div class="highlight-python"><pre>Segmentize
+    Field: Task Name
+    Method: All
+Aggregate
+    Field: Count
+    Methods: Count</pre>
+</div>
+<div class="figure align-center">
+<img alt="taskname count" src="_images/chart_taskname_count.png" style="width: 500px;" />
+<p class="caption">The number of tasks that were executed by all workers</p>
+</div>
+<p>The chart shows that you that 50 ErlangBPolicySimTask were run on the several
+different workers.</p>
+<p>When visualizing large amounts of data, sometimes you have to decided which type of
+graphs (line or chart) that you wish to use. The chart below shows the total time
+taken for each task to execute on a given worker. It was generated using:</p>
+<div class="highlight-python"><pre>Segmentize
+   Field: Task Name
+   Method: Each
+Aggregate
+   Field: Total Time
+   Methods: Average</pre>
+</div>
+<div class="figure align-center">
+<img alt="taskname totaltime bar" src="_images/chart_taskname_totaltime_bar.png" style="width: 500px;" />
+<p class="caption">The total time of each task that was executed presented in bar graph
+form</p>
+</div>
+<p>As you can see, it seems like there isnt much variation in the data. That is because
+we are using a bar graph to display time values that are very close. When you switch
+to a line graph, like below, you can see the variation more clearly.</p>
+<div class="figure align-center">
+<img alt="taskname totaltime line" src="_images/chart_taskname_totaltime_line.png" style="width: 500px;" />
+<p class="caption">The total time of each task that was executed presented in line graph
+form</p>
+</div>
+<p>With any data that is charted, you can choose to display through a bar or line graph.
+It is up to you to decide which form would be the best for your data. Sometimes, all
+you need is a bar graph and sometimes, like in the previous case, a line graph will
+show you the small variations in your data. The choice is left up to you.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">CeleryManagement Graphing Interface</a><ul>
+<li><a class="reference internal" href="#charting">Charting</a><ul>
+<li><a class="reference internal" href="#query-panel">Query Panel</a><ul>
+<li><a class="reference internal" href="#segmentation">Segmentation</a></li>
+<li><a class="reference internal" href="#aggregation">Aggregation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="cloud.html"
+                        title="previous chapter">Cloud Enabled</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/graph.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="cloud.html" title="Cloud Enabled"
+             >previous</a> |</li>
+        <li><a href="index.html">CeleryManagement v0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, ITng Services.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
