@@ -1,6 +1,6 @@
 .. _example:
 
-CeleryManagement Graphing Interface
+Graphing Interface
 ###################################
 
 CeleryManagement includes several utilities included in the web interface that
