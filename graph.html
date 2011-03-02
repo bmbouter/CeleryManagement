@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>CeleryManagement Graphing Interface &mdash; CeleryManagement v0.0 documentation</title>
+    <title>Graphing Interface &mdash; CeleryManagement v0.0 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,7 +23,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="CeleryManagement v0.0 documentation" href="index.html" />
-    <link rel="prev" title="Cloud Enabled" href="cloud.html" /> 
+    <link rel="next" title="Policies" href="policy/index.html" />
+    <link rel="prev" title="Operation" href="operation.html" /> 
   </head>
   <body>
     <div class="related">
@@ -33,7 +34,10 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="cloud.html" title="Cloud Enabled"
+          <a href="policy/index.html" title="Policies"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="operation.html" title="Operation"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">CeleryManagement v0.0 documentation</a> &raquo;</li> 
       </ul>
@@ -44,15 +48,15 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="celerymanagement-graphing-interface">
-<span id="example"></span><h1><a class="toc-backref" href="#id6">CeleryManagement Graphing Interface</a><a class="headerlink" href="#celerymanagement-graphing-interface" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="graphing-interface">
+<span id="example"></span><h1><a class="toc-backref" href="#id6">Graphing Interface</a><a class="headerlink" href="#graphing-interface" title="Permalink to this headline">¶</a></h1>
 <p>CeleryManagement includes several utilities included in the web interface that
 allow you to easily manage tasks and workers, as well as visualize data
 associated with your tasks and workers through an included charting interface.</p>
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#celerymanagement-graphing-interface" id="id6">CeleryManagement Graphing Interface</a><ul>
+<li><a class="reference internal" href="#graphing-interface" id="id6">Graphing Interface</a><ul>
 <li><a class="reference internal" href="#charting" id="id7">Charting</a><ul>
 <li><a class="reference internal" href="#query-panel" id="id8">Query Panel</a><ul>
 <li><a class="reference internal" href="#segmentation" id="id9">Segmentation</a></li>
@@ -74,7 +78,7 @@ associated with your tasks and workers through an included charting interface.</
 why a simple interface is included that allows you to query the system and
 quickly view the data that you requested.</p>
 <div class="figure align-center">
-<img alt="query panel" src="_images/query_panel.png" />
+<img alt="query panel" src="_images/query_panel1.png" />
 <p class="caption">The CeleryManagement query panel</p>
 </div>
 <p>The query panel included with CeleryManagement allows you to filter, exclude,
@@ -168,7 +172,7 @@ Aggregate
     Methods: Average, Min, Max</pre>
 </div>
 <div class="figure align-center">
-<img alt="average, min, and max worker runtime line" src="_images/chart_runtime_avgminmax_line.png" style="width: 500px;" />
+<img alt="average, min, and max worker runtime line" src="_images/chart_runtime_avgminmax_line1.png" style="width: 500px;" />
 <p class="caption">The average, minimum, and maximum runtime for a single worker
 presented in line graph form</p>
 </div>
@@ -176,7 +180,7 @@ presented in line graph form</p>
 activated, the same task was run, and the same query used before was submitted,
 the data returned what charted below.</p>
 <div class="figure align-center">
-<img alt="average, min, and max worker runtime bar" src="_images/chart_runtime_avgminmax_bar.png" style="width: 500px;" />
+<img alt="average, min, and max worker runtime bar" src="_images/chart_runtime_avgminmax_bar1.png" style="width: 500px;" />
 <p class="caption">The average, minimum, and maximum runtime for workers presented in
 a bar graph form</p>
 </div>
@@ -192,7 +196,7 @@ Aggregate
     Methods: Count</pre>
 </div>
 <div class="figure align-center">
-<img alt="taskname count" src="_images/chart_taskname_count.png" style="width: 500px;" />
+<img alt="taskname count" src="_images/chart_taskname_count1.png" style="width: 500px;" />
 <p class="caption">The number of tasks that were executed by all workers</p>
 </div>
 <p>The chart shows that you that 50 ErlangBPolicySimTask were run on the several
@@ -208,7 +212,7 @@ Aggregate
    Methods: Average</pre>
 </div>
 <div class="figure align-center">
-<img alt="taskname totaltime bar" src="_images/chart_taskname_totaltime_bar.png" style="width: 500px;" />
+<img alt="taskname totaltime bar" src="_images/chart_taskname_totaltime_bar1.png" style="width: 500px;" />
 <p class="caption">The total time of each task that was executed presented in bar graph
 form</p>
 </div>
@@ -216,7 +220,7 @@ form</p>
 we are using a bar graph to display time values that are very close. When you switch
 to a line graph, like below, you can see the variation more clearly.</p>
 <div class="figure align-center">
-<img alt="taskname totaltime line" src="_images/chart_taskname_totaltime_line.png" style="width: 500px;" />
+<img alt="taskname totaltime line" src="_images/chart_taskname_totaltime_line1.png" style="width: 500px;" />
 <p class="caption">The total time of each task that was executed presented in line graph
 form</p>
 </div>
@@ -236,7 +240,7 @@ show you the small variations in your data. The choice is left up to you.</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">CeleryManagement Graphing Interface</a><ul>
+<li><a class="reference internal" href="#">Graphing Interface</a><ul>
 <li><a class="reference internal" href="#charting">Charting</a><ul>
 <li><a class="reference internal" href="#query-panel">Query Panel</a><ul>
 <li><a class="reference internal" href="#segmentation">Segmentation</a></li>
@@ -251,8 +255,11 @@ show you the small variations in your data. The choice is left up to you.</p>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="cloud.html"
-                        title="previous chapter">Cloud Enabled</a></p>
+  <p class="topless"><a href="operation.html"
+                        title="previous chapter">Operation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="policy/index.html"
+                        title="next chapter">Policies</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/graph.txt"
@@ -282,7 +289,10 @@ show you the small variations in your data. The choice is left up to you.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="cloud.html" title="Cloud Enabled"
+          <a href="policy/index.html" title="Policies"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="operation.html" title="Operation"
              >previous</a> |</li>
         <li><a href="index.html">CeleryManagement v0.0 documentation</a> &raquo;</li> 
       </ul>
