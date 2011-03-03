@@ -4,9 +4,8 @@ import types
 
 from celerymanagementapp.tests import base
 from celerymanagementapp import policy
-from celerymanagementapp.policy import exceptions
+from celerymanagementapp.policy import exceptions, env, api
 from celerymanagementapp.policy.policy import Runner
-from celerymanagementapp.policy import env
 
 
 
@@ -428,7 +427,100 @@ class StatsApi_TestCase(base.CeleryManagement_DBTestCaseBase):
         self.assertEquals(4, stats.tasks(workers='worker2'))
 
 #==============================================================================#
-
+class TodayApiFunction_TestCase(base.CeleryManagement_TestCaseBase):
+    def test_empty(self):
+        T = datetime.time
+        D = datetime.date
+        dt = api.today()
+        self.assertEquals(D.today(), dt.date())
+        self.assertEquals(T(hour=0,minute=0,second=0), dt.time())
+    
+    def test_with_offset0(self):
+        T = datetime.time
+        D = datetime.date
+        dt = api.today(offset_days=0)
+        self.assertEquals(D.today(), dt.date())
+        self.assertEquals(T(hour=0,minute=0,second=0), dt.time())
+    
+    def test_with_offset1(self):
+        T = datetime.time
+        D = datetime.date
+        tomorrow = D.today()+datetime.timedelta(days=1)
+        dt = api.today(offset_days=1)
+        self.assertEquals(tomorrow, dt.date())
+        self.assertEquals(T(hour=0,minute=0,second=0), dt.time())
+    
+    def test_with_offset2(self):
+        T = datetime.time
+        D = datetime.date
+        yesterday = D.today()+datetime.timedelta(days=-1)
+        dt = api.today(offset_days=-1)
+        self.assertEquals(yesterday, dt.date())
+        self.assertEquals(T(hour=0,minute=0,second=0), dt.time())
+    
+    def test_with_time0(self):
+        T = datetime.time
+        D = datetime.date
+        dt = api.today(time=(0,0))
+        self.assertEquals(D.today(), dt.date())
+        self.assertEquals(T(hour=0,minute=0,second=0), dt.time())
+    
+    def test_with_time1(self):
+        T = datetime.time
+        D = datetime.date
+        dt = api.today(time=(1,15))
+        self.assertEquals(D.today(), dt.date())
+        self.assertEquals(T(1,15,0), dt.time())
+    
+    def test_with_time2(self):
+        T = datetime.time
+        D = datetime.date
+        dt = api.today(time=(22,4,55,123456))
+        self.assertEquals(D.today(), dt.date())
+        self.assertEquals(T(22,4,55,123456), dt.time())
+    
+    def test_with_time3(self):
+        T = datetime.time
+        D = datetime.date
+        # use a list instead of a tuple
+        dt = api.today(time=[1,15])
+        self.assertEquals(D.today(), dt.date())
+        self.assertEquals(T(1,15,0), dt.time())
+    
+    def test_with_timestr0(self):
+        T = datetime.time
+        D = datetime.date
+        dt = api.today(timestr='0:00')
+        self.assertEquals(D.today(), dt.date())
+        self.assertEquals(T(hour=0,minute=0,second=0), dt.time())
+    
+    def test_with_timestr1(self):
+        T = datetime.time
+        D = datetime.date
+        dt = api.today(timestr='18:05')
+        self.assertEquals(D.today(), dt.date())
+        self.assertEquals(T(18,5,0), dt.time())
+    
+    def test_with_timestr2(self):
+        T = datetime.time
+        D = datetime.date
+        dt = api.today(timestr='22:00:59')
+        self.assertEquals(D.today(), dt.date())
+        self.assertEquals(T(22,0,59), dt.time())
+    
+    def test_with_timestr3(self):
+        T = datetime.time
+        D = datetime.date
+        dt = api.today(timestr='10:00:33.9')
+        self.assertEquals(D.today(), dt.date())
+        self.assertEquals(T(10,0,33,900000), dt.time())
+    
+    def test_with_timestr4(self):
+        T = datetime.time
+        D = datetime.date
+        dt = api.today(timestr='10:00:33.123456')
+        self.assertEquals(D.today(), dt.date())
+        self.assertEquals(T(10,0,33,123456), dt.time())
 
 
 

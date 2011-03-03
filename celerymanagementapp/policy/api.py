@@ -1,6 +1,7 @@
 import datetime
 import itertools
 import collections
+import re
 
 from django.db.models import Avg, Min, Max, Variance
 from django.core.mail import send_mail as django_send_mail
@@ -477,6 +478,66 @@ def send_email(subject, message, from_email, recipient_list, auth_user=None,
     django_send_mail(subject, message, from_email, recipient_list, 
                      auth_user=auth_user, auth_password=auth_password)
                      
+#==============================================================================#
+
+_TIME_FMT = r'''
+      (\d{1,2}) : (\d{2})                   # HH:MM
+      (?: : (\d{2}) (?: \. (\d{0,6}))? )?   # [:SS[.mmmmmm]]
+                                            # mmmmmm = microseconds
+    '''
+
+_time_fmt = re.compile(_TIME_FMT, re.VERBOSE)
+
+def today(**kwargs):
+    """ Return a datetime.datetime object representing today's date.
+        
+        With no arguments, the time is set to 00:00:00 (midnight).  However, 
+        some keyword arguments are offered which can change this behavior.
+        
+        :keyword offset_days: An integer which can set the date forward or 
+                              backward from the current date.
+        :keyword timestr: A string representing a time which will be used in 
+                          the returned datetime object.  The string's format is 
+                          as follows: HH:MM:SS.mmmmmm
+                          HH, MM, SS are the minutes, hours, and seconds.
+                          mmmmmm is the microseconds, which can be 0-6 digits.
+                          The seconds and microseconds are optional.
+        :keyword time: A tuple representing a time which will be used in the 
+                       returned datetime object.  The elements much be integers 
+                       which represent: hours, minutes, seconds, and 
+                       microseconds.  The seconds and microseconds are optional.
+                       
+        If both `timestr` and `time` are provided, only `timestr` will be used.
+    """
+    if not kwargs:
+        return datetime.datetime.today().replace(hour=0, minute=0, second=0, 
+                                                 microsecond=0)
+    offset_days = kwargs.pop('offset_days',0)
+    hour, minute, second, microsecond = 0,0,0,0
+    if 'timestr' in kwargs:
+        m = _time_fmt.match(kwargs['timestr'].strip())
+        if m is None:
+            msg = 'Invalid time string.  '
+            msg += 'Must have format: HH:MM[:SS[.mmmmmm]] '
+            msg += 'where seconds (S) and microseconds (m) are optional.'
+            raise ApiError(msg)
+        hour, minute, second, microsecond = m.groups(default='0')
+        # microsecond must have 6 digits.  Account for user entering shorter 
+        # numbers.
+        microsecond = '{0:<06}'.format(microsecond[:6]) 
+        hour, minute, second = int(hour), int(minute), int(second)
+        microsecond = int(microsecond)
+    elif 'time' in kwargs:
+        # The 'time' tuple may be 2..4 items long.  The last two items default 
+        # to 0.  So, append a tuple with 2 zeros to make sure we have at least 
+        # 4 items, then slice off the first four items to get our four values.
+        time = tuple(kwargs['time']) + (0,0)
+        hour, minute, second, microsecond = time[:4]
+    _today = datetime.datetime.today() + datetime.timedelta(days=offset_days)
+    return _today.replace(hour=hour, minute=minute, second=second, 
+                          microsecond=microsecond)
+        
+
 #==============================================================================#
 
 
