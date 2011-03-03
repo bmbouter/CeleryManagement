@@ -51,8 +51,102 @@
           <div class="body">
             
   <div class="section" id="policy-recipes">
-<span id="id1"></span><h1>Policy Recipes<a class="headerlink" href="#policy-recipes" title="Permalink to this headline">¶</a></h1>
-<p>TODO...</p>
+<span id="id1"></span><h1><a class="toc-backref" href="#id2">Policy Recipes</a><a class="headerlink" href="#policy-recipes" title="Permalink to this headline">¶</a></h1>
+<p>This section provides some example policies and explains how they work.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#policy-recipes" id="id2">Policy Recipes</a><ul>
+<li><a class="reference internal" href="#email-when-task-is-not-completed" id="id3">Email When Task is Not Completed</a></li>
+<li><a class="reference internal" href="#add-remove-worker-subprocesses-depending-on-average-wait-time" id="id4">Add/Remove Worker Subprocesses Depending on Average Wait Time</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="email-when-task-is-not-completed">
+<h2><a class="toc-backref" href="#id3">Email When Task is Not Completed</a><a class="headerlink" href="#email-when-task-is-not-completed" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-policy"><div class="highlight"><pre><span class="k">policy</span><span class="p">:</span>
+    <span class="k">schedule</span><span class="p">:</span>
+        <span class="c"># Runs every day at 3:00 AM.</span>
+        <span class="n">crontab</span><span class="p">(</span><span class="n">minute</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">condition</span><span class="p">:</span>
+        <span class="c"># Checks that no tasks of type &quot;tasks.my_task&quot; succeeded between</span>
+        <span class="c"># 2:00 and 3:00 AM today.  If this is true, then the apply section</span>
+        <span class="c"># is executed.</span>
+        <span class="mi">0</span> <span class="o">==</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks_succeeded</span><span class="p">(</span> <span class="n">interval</span><span class="o">=</span><span class="p">(</span><span class="n">today</span><span class="p">(</span><span class="n">timestr</span><span class="o">=</span><span class="s">&#39;2:00&#39;</span><span class="p">),</span>
+                                              <span class="n">today</span><span class="p">(</span><span class="n">timestr</span><span class="o">=</span><span class="s">&#39;3:00&#39;</span><span class="p">)),</span>
+                                    <span class="n">tasknames</span><span class="o">=</span><span class="s">&#39;tasks.my_task&#39;</span> <span class="p">)</span>
+
+    <span class="k">apply</span><span class="p">:</span>
+        <span class="c"># Assemble components of the email.</span>
+        <span class="n">subject</span> <span class="o">=</span>       <span class="s">&#39;Celery Info: tasks.my_task did not succeed.&#39;</span>
+        <span class="n">msg</span> <span class="o">=</span>          <span class="p">(</span><span class="s">&#39;The tasks.my_task Task did not succeed between &#39;</span>
+                        <span class="s">&#39;2am and 3am this morning.&#39;</span><span class="p">)</span>
+        <span class="n">from_email</span> <span class="o">=</span>    <span class="s">&#39;celery_notice@example.com&#39;</span>
+        <span class="n">recipient_list</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;admin@example.com&#39;</span><span class="p">]</span>
+
+        <span class="c"># Send the email.</span>
+        <span class="n">send_email</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">from_email</span><span class="p">,</span> <span class="n">recipient_list</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="add-remove-worker-subprocesses-depending-on-average-wait-time">
+<h2><a class="toc-backref" href="#id4">Add/Remove Worker Subprocesses Depending on Average Wait Time</a><a class="headerlink" href="#add-remove-worker-subprocesses-depending-on-average-wait-time" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-policy"><div class="highlight"><pre><span class="c"># Policy to handle an excessively low wait time.</span>
+<span class="k">policy</span><span class="p">:</span>
+    <span class="k">schedule</span><span class="p">:</span>
+        <span class="c"># Run every 10 minutes, on Monday through Friday.</span>
+        <span class="n">crontab</span><span class="p">(</span><span class="n">minute</span><span class="o">=</span><span class="s">&#39;*/10&#39;</span><span class="p">,</span> <span class="n">day_of_week</span><span class="o">=</span><span class="s">&#39;mon,tue,wed,thu,fri&#39;</span><span class="p">)</span>
+
+    <span class="k">condition</span><span class="p">:</span>
+        <span class="c"># A condition combines multiple lines using AND.  Therefore, both</span>
+        <span class="c"># of the following expressions must evaluate to True.</span>
+
+        <span class="c"># Check that there has been at least one task of type</span>
+        <span class="c"># &quot;tasks.my_task&quot; to have succeeded on worker &quot;worker1&quot; over the</span>
+        <span class="c"># past hour.</span>
+        <span class="mi">0</span> <span class="o">!=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks_succeeded</span><span class="p">(</span> <span class="n">interval</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="n">tasknames</span><span class="o">=</span><span class="s">&#39;tasks.my_task&#39;</span><span class="p">,</span>
+                                    <span class="n">workers</span><span class="o">=</span><span class="s">&#39;worker1&#39;</span> <span class="p">)</span>
+        <span class="c"># Check if the mean wait time of those same tasks has dipped below</span>
+        <span class="c"># 15 seconds.</span>
+        <span class="mf">15.0</span> <span class="o">&gt;</span> <span class="n">stats</span><span class="o">.</span><span class="n">mean_waittime</span><span class="p">(</span> <span class="n">interval</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="n">tasknames</span><span class="o">=</span><span class="s">&#39;tasks.my_task&#39;</span><span class="p">,</span>
+                                    <span class="n">workers</span><span class="o">=</span><span class="s">&#39;worker1&#39;</span> <span class="p">)</span>
+
+    <span class="k">apply</span><span class="p">:</span>
+        <span class="c"># Decrease the number of subprocesses that worker &quot;worker1&quot; is</span>
+        <span class="c"># running.</span>
+        <span class="n">workers</span><span class="p">[</span><span class="s">&#39;worker1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">subprocesses</span><span class="o">.</span><span class="n">decrement</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-policy"><div class="highlight"><pre><span class="c"># Policy to handle an excessively high wait time.</span>
+<span class="k">policy</span><span class="p">:</span>
+    <span class="k">schedule</span><span class="p">:</span>
+        <span class="c"># Run every 10 minutes, on Monday through Friday.</span>
+        <span class="n">crontab</span><span class="p">(</span><span class="n">minute</span><span class="o">=</span><span class="s">&#39;*/10&#39;</span><span class="p">,</span> <span class="n">day_of_week</span><span class="o">=</span><span class="s">&#39;mon,tue,wed,thu,fri&#39;</span><span class="p">)</span>
+
+    <span class="k">condition</span><span class="p">:</span>
+        <span class="c"># Check that there has been at least one task of type</span>
+        <span class="c"># &quot;tasks.my_task&quot; to have succeeded on worker &quot;worker1&quot; over the</span>
+        <span class="c"># past hour.</span>
+        <span class="mi">0</span> <span class="o">!=</span> <span class="n">stats</span><span class="o">.</span><span class="n">tasks_succeeded</span><span class="p">(</span> <span class="n">interval</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="n">tasknames</span><span class="o">=</span><span class="s">&#39;tasks.my_task&#39;</span><span class="p">,</span>
+                                    <span class="n">workers</span><span class="o">=</span><span class="s">&#39;worker1&#39;</span> <span class="p">)</span>
+        <span class="c"># Check if the mean wait time of those same tasks has risen above</span>
+        <span class="c"># 60 seconds.</span>
+        <span class="mf">60.0</span> <span class="o">&lt;</span> <span class="n">stats</span><span class="o">.</span><span class="n">mean_waittime</span><span class="p">(</span> <span class="n">interval</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="n">tasknames</span><span class="o">=</span><span class="s">&#39;tasks.my_task&#39;</span><span class="p">,</span>
+                                    <span class="n">workers</span><span class="o">=</span><span class="s">&#39;worker1&#39;</span> <span class="p">)</span>
+
+    <span class="k">apply</span><span class="p">:</span>
+        <span class="c"># Increase the number of subprocesses that worker &quot;worker1&quot; is</span>
+        <span class="c"># running.</span>
+        <span class="n">workers</span><span class="p">[</span><span class="s">&#39;worker1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">subprocesses</span><span class="o">.</span><span class="n">increment</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -61,6 +155,15 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Policy Recipes</a><ul>
+<li><a class="reference internal" href="#email-when-task-is-not-completed">Email When Task is Not Completed</a></li>
+<li><a class="reference internal" href="#add-remove-worker-subprocesses-depending-on-average-wait-time">Add/Remove Worker Subprocesses Depending on Average Wait Time</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="api.html"
                         title="previous chapter">Policies API</a></p>

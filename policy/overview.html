@@ -56,6 +56,8 @@
 When a policy is executed, they first check to see if a condition is true.  If
 it is, then the body of the policy is executed.  Within the body, various
 Worker and Task attributes can be modified.</p>
+<p>Policies are designed to be simple and focused.  Python language features that
+may conflict with this goal are purposely forbidden within policy code.</p>
 <p>See <a class="reference internal" href="api.html#policies-api"><em>Policies API</em></a> for information about the objects and functions
 available to executing policies.</p>
 <div class="admonition note">
@@ -68,21 +70,20 @@ settings without worrying how it will affect your currently-running policy.</p>
 <ul class="simple">
 <li><a class="reference internal" href="#policies-overview" id="id5">Policies Overview</a><ul>
 <li><a class="reference internal" href="#example" id="id6">Example</a></li>
-<li><a class="reference internal" href="#features-limitations" id="id7">Features &amp; Limitations</a></li>
-<li><a class="reference internal" href="#policy-sections" id="id8">Policy Sections</a><ul>
-<li><a class="reference internal" href="#schedule" id="id9">Schedule</a></li>
-<li><a class="reference internal" href="#condition" id="id10">Condition</a></li>
-<li><a class="reference internal" href="#apply" id="id11">Apply</a></li>
+<li><a class="reference internal" href="#policy-sections" id="id7">Policy Sections</a><ul>
+<li><a class="reference internal" href="#schedule" id="id8">Schedule</a></li>
+<li><a class="reference internal" href="#condition" id="id9">Condition</a></li>
+<li><a class="reference internal" href="#apply" id="id10">Apply</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#execution-environment" id="id12">Execution Environment</a><ul>
-<li><a class="reference internal" href="#scope" id="id13">Scope</a></li>
-<li><a class="reference internal" href="#restrictions" id="id14">Restrictions</a></li>
-<li><a class="reference internal" href="#exception-handling" id="id15">Exception handling</a></li>
+<li><a class="reference internal" href="#execution-environment" id="id11">Execution Environment</a><ul>
+<li><a class="reference internal" href="#scope" id="id12">Scope</a></li>
+<li><a class="reference internal" href="#restrictions" id="id13">Restrictions</a></li>
+<li><a class="reference internal" href="#exception-handling" id="id14">Exception handling</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#policy-manager" id="id16">Policy Manager</a></li>
-<li><a class="reference internal" href="#common-issues" id="id17">Common Issues</a></li>
+<li><a class="reference internal" href="#policy-manager" id="id15">Policy Manager</a></li>
+<li><a class="reference internal" href="#common-issues" id="id16">Common Issues</a></li>
 </ul>
 </li>
 </ul>
@@ -113,36 +114,21 @@ not.  It is optional—when not supplied the apply section is run every time.</p
 <p>The <a class="reference internal" href="#apply"><em>apply section</em></a> is the body of the policy—it is where Worker
 and Task settings may be modified.</p>
 </div>
-<div class="section" id="features-limitations">
-<h2><a class="toc-backref" href="#id7">Features &amp; Limitations</a><a class="headerlink" href="#features-limitations" title="Permalink to this headline">¶</a></h2>
-<p>TODO....</p>
-<p>Not permitted in any section:</p>
-<ul class="simple">
-<li>imports (selected modules are available to policies)</li>
-<li>defining functions (with <tt class="docutils literal"><span class="pre">def</span></tt> or with <tt class="docutils literal"><span class="pre">lambda</span></tt>)</li>
-<li>defining classes</li>
-<li><tt class="docutils literal"><span class="pre">exec</span></tt> statement or <tt class="docutils literal"><span class="pre">eval()</span></tt> function</li>
-<li>any name beginning with an underscore (this hides implementation details)</li>
-<li>selected built-in functions and types</li>
-</ul>
-<p>Not permitted in the <tt class="docutils literal"><span class="pre">schedule</span></tt> or <tt class="docutils literal"><span class="pre">condition</span></tt> sections:</p>
-<ul class="simple">
-<li>assignment (these sections must be expressions)</li>
-<li>deletion (the <tt class="docutils literal"><span class="pre">del</span></tt> keyword)</li>
-</ul>
-<p>These limitations keep policies focused and simple.</p>
-</div>
 <div class="section" id="policy-sections">
-<h2><a class="toc-backref" href="#id8">Policy Sections</a><a class="headerlink" href="#policy-sections" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id7">Policy Sections</a><a class="headerlink" href="#policy-sections" title="Permalink to this headline">¶</a></h2>
 <p>A Policy is made up of three sections: Schedule, Condition and Apply.</p>
 <div class="section" id="schedule">
-<span id="id2"></span><h3><a class="toc-backref" href="#id9">Schedule</a><a class="headerlink" href="#schedule" title="Permalink to this headline">¶</a></h3>
+<span id="id2"></span><h3><a class="toc-backref" href="#id8">Schedule</a><a class="headerlink" href="#schedule" title="Permalink to this headline">¶</a></h3>
 <p>The Schedule section determines when and/or how frequently a policy is
 executed.  The schedule section is required.</p>
-<p>TODO....</p>
+<p>The schedule section must be an expression that results in a schedule object.
+The <tt class="docutils literal"><span class="pre">crontab</span></tt> function available to policies returns such an object.  (Other
+schedule types may be added at a later time, if there is a demand.)</p>
+<p>See <a class="reference internal" href="api.html#policy-schedule"><em>Policy Schedule</em></a> in the API documentation for more
+information about how to use <tt class="docutils literal"><span class="pre">crontab</span></tt>.</p>
 </div>
 <div class="section" id="condition">
-<span id="id3"></span><h3><a class="toc-backref" href="#id10">Condition</a><a class="headerlink" href="#condition" title="Permalink to this headline">¶</a></h3>
+<span id="id3"></span><h3><a class="toc-backref" href="#id9">Condition</a><a class="headerlink" href="#condition" title="Permalink to this headline">¶</a></h3>
 <p>The condition section is what determines whether the apply section will be run.
 The idea being that policies follow a simple if...then structure:
 if&nbsp;<tt class="docutils literal"><span class="pre">condition</span></tt>&nbsp;then&nbsp;<tt class="docutils literal"><span class="pre">apply</span></tt>.</p>
@@ -160,67 +146,71 @@ lines in a condition must be true for the condition as a whole to evaluate to
 True.  (You can work around this using the usual Python line continuation
 techniques: a backslash or wrapping it in parentheses.)</li>
 </ul>
-<p>TODO....</p>
 </div>
 <div class="section" id="apply">
-<span id="id4"></span><h3><a class="toc-backref" href="#id11">Apply</a><a class="headerlink" href="#apply" title="Permalink to this headline">¶</a></h3>
+<span id="id4"></span><h3><a class="toc-backref" href="#id10">Apply</a><a class="headerlink" href="#apply" title="Permalink to this headline">¶</a></h3>
 <p>The apply section is the body of the policy.  It is where the behavior of
 Celery can be modified.  The apply section is required.</p>
-<p>TODO....</p>
+<p>Unlike the condition and schedule sections which must be expressions, the apply
+section can be composed of statements.  To keep policies focused, only a subset
+of Python statements are allowed.</p>
 </div>
 </div>
 <div class="section" id="execution-environment">
-<h2><a class="toc-backref" href="#id12">Execution Environment</a><a class="headerlink" href="#execution-environment" title="Permalink to this headline">¶</a></h2>
-<p>Policies are run in a limited execution environment.  There are both
-parse-time and run-time mechanisms which enfore this environment.</p>
-<p>At parse-time, the policy source is checked for certain language constructs
-which are available in the full Python language, but are not desired in
-policies.</p>
+<h2><a class="toc-backref" href="#id11">Execution Environment</a><a class="headerlink" href="#execution-environment" title="Permalink to this headline">¶</a></h2>
+<p>Policies are run in a limited execution environment.  The main purpose of these
+restrictions is to keep policies focused and simple.  Policies have a specific
+design aim: to provide some automated monitoring and control of Celery workers.
+To provide the full power of the Python language may encourage users to put in
+policies code which would be better put elsewhere.</p>
+<p>The restrictions also provide some measure of security, but they should not be
+solely relied upon for this purpose.</p>
+<p>There are both parse-time and run-time mechanisms which enfore this
+environment.  At parse-time, the policy source is checked for certain language
+constructs which are available in the full Python language, but are not desired
+in policies.</p>
 <div class="section" id="scope">
-<h3><a class="toc-backref" href="#id13">Scope</a><a class="headerlink" href="#scope" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id12">Scope</a><a class="headerlink" href="#scope" title="Permalink to this headline">¶</a></h3>
 <p>At run-time, each policy is given a new copy of the execution environment in
 which to run.  Changes to the namespace (e.g. creating a new name) exist only
 while the execution continues.  Other policies, and indeed the same policy
 executed at a later time, will not see the changes.</p>
 </div>
 <div class="section" id="restrictions">
-<h3><a class="toc-backref" href="#id14">Restrictions</a><a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>Imports</strong></dt>
-<dd><p class="first">No imports are allowed in policies.  This includes the import statements
+<h3><a class="toc-backref" href="#id13">Restrictions</a><a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h3>
+<p class="rubric">Imports</p>
+<p>No imports are allowed in policies.  This includes the import statements
 <tt class="docutils literal"><span class="pre">import&nbsp;...</span></tt> and <tt class="docutils literal"><span class="pre">from&nbsp;...&nbsp;import&nbsp;...</span></tt> as well as the builtin
 <tt class="docutils literal"><span class="pre">__import__</span></tt> function.</p>
-<p class="last">Selected builtin modules are made available, including <tt class="docutils literal"><span class="pre">datetime</span></tt>,
+<p>Selected builtin modules are made available, including <tt class="docutils literal"><span class="pre">datetime</span></tt>,
 <tt class="docutils literal"><span class="pre">time</span></tt>, <tt class="docutils literal"><span class="pre">calendar</span></tt>, and <tt class="docutils literal"><span class="pre">math</span></tt>.  (Actually, they are wrappers around
 those modules to prevent any details of those modules leaking into the
 execution environment.)</p>
-</dd>
-<dt><strong>Defining functions and classes</strong></dt>
-<dd>Function and class definitions are not allowed in policies.  This includes
+<p class="rubric">Defining functions and classes</p>
+<p>Function and class definitions are not allowed in policies.  This includes
 the defintiions themselves, as well as their associated keywords
 (<tt class="docutils literal"><span class="pre">return</span></tt>, <tt class="docutils literal"><span class="pre">yield</span></tt>, etc).  Functions defined using <tt class="docutils literal"><span class="pre">lambda</span></tt> are also
-not permitted.</dd>
-<dt><strong>Arbitrary code execution</strong></dt>
-<dd>The normal Python languages provides several ways to execute code from
+not permitted.</p>
+<p class="rubric">Arbitrary code execution</p>
+<p>The normal Python languages provides several ways to execute code from
 within a script.  None of these methods are available to policies.  This
 includes the <tt class="docutils literal"><span class="pre">exec</span></tt> statement and the builtin functions <tt class="docutils literal"><span class="pre">eval()</span></tt>,
-<tt class="docutils literal"><span class="pre">compile()</span></tt>, <tt class="docutils literal"><span class="pre">execfile()</span></tt>, and <tt class="docutils literal"><span class="pre">input()</span></tt>.</dd>
-<dt><strong>Files</strong></dt>
-<dd>The builtin function <tt class="docutils literal"><span class="pre">open()</span></tt> is not permitted.</dd>
-<dt><strong>Assignment</strong></dt>
-<dd><p class="first">In the schedule and apply sections of a policy, assignment is not
+<tt class="docutils literal"><span class="pre">compile()</span></tt>, <tt class="docutils literal"><span class="pre">execfile()</span></tt>, and <tt class="docutils literal"><span class="pre">input()</span></tt>.</p>
+<p class="rubric">Files</p>
+<p>The builtin function <tt class="docutils literal"><span class="pre">open()</span></tt> is not permitted.</p>
+<p class="rubric">Assignment</p>
+<p>In the schedule and apply sections of a policy, assignment is not
 permitted.  For instance: neither <tt class="docutils literal"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span></tt> nor <tt class="docutils literal"><span class="pre">x</span> <span class="pre">+=</span> <span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span></tt> is
 permitted.  This is because those sections must be expressions.  In the
 apply section, assignment is permitted.</p>
-<p class="last">Certain API objects cannot be assigned to, even in the apply section.  This
+<p>Certain API objects cannot be assigned to, even in the apply section.  This
 is primarily to alert the user to a possible error.  The names affected
 include (but are not limited to) <tt class="docutils literal"><span class="pre">tasks</span></tt>, <tt class="docutils literal"><span class="pre">workers</span></tt>, and <tt class="docutils literal"><span class="pre">stats</span></tt>.</p>
-</dd>
-<dt><strong>Looping statements</strong></dt>
-<dd>Looping statements are not permitted (<tt class="docutils literal"><span class="pre">for</span></tt> and <tt class="docutils literal"><span class="pre">while</span></tt>), except
-within list comprehensions and generator expressions.</dd>
-<dt><strong>Names</strong></dt>
-<dd><p class="first">Names beginning with an underscore are not permitted in policies.  This
+<p class="rubric">Looping statements</p>
+<p>Looping statements are not permitted (<tt class="docutils literal"><span class="pre">for</span></tt> and <tt class="docutils literal"><span class="pre">while</span></tt>), except
+within list comprehensions and generator expressions.</p>
+<p class="rubric">Names</p>
+<p>Names beginning with an underscore are not permitted in policies.  This
 keeps some implementation details hidden.</p>
 <p>Some object attributes have special meaning in Python which should not be
 exposed within policies.  Such names are not permitted.  This includes
@@ -228,12 +218,10 @@ exposed within policies.  Such names are not permitted.  This includes
 more).  (Disallowing <tt class="docutils literal"><span class="pre">__init__</span></tt> prohibits its <em>direct</em> use on objects.
 It does not affect constructing objects via the class name.  In other
 words, <tt class="docutils literal"><span class="pre">x&nbsp;=&nbsp;MyClass()</span></tt> is permitted.)</p>
-<p class="last">Names computed at runtime using strings can circumvent the policy
+<p>Names computed at runtime using strings can circumvent the policy
 name-checking mechanism.  Therefore, functions which would facilitate this
 are prohibited, including <tt class="docutils literal"><span class="pre">getattr()</span></tt>, <tt class="docutils literal"><span class="pre">setattr()</span></tt>, <tt class="docutils literal"><span class="pre">hasattr()</span></tt> and
 <tt class="docutils literal"><span class="pre">delattr()</span></tt>.</p>
-</dd>
-</dl>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Names are found by examining the policy source text.  This means that
@@ -244,7 +232,7 @@ is prohibited, policy code such as the following will produce errors:
 </div>
 </div>
 <div class="section" id="exception-handling">
-<h3><a class="toc-backref" href="#id15">Exception handling</a><a class="headerlink" href="#exception-handling" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id14">Exception handling</a><a class="headerlink" href="#exception-handling" title="Permalink to this headline">¶</a></h3>
 <p>The goal of the policy mechanism is to make it as robust in the face of
 exceptions as possible.  Care is taken in the implementation to prevent an
 exception raised while one policy is executing from affecting other policies as
@@ -266,21 +254,48 @@ probably best to consult both the celeryd and Policy Manager logs.</li>
 </div>
 </div>
 <div class="section" id="policy-manager">
-<h2><a class="toc-backref" href="#id16">Policy Manager</a><a class="headerlink" href="#policy-manager" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id15">Policy Manager</a><a class="headerlink" href="#policy-manager" title="Permalink to this headline">¶</a></h2>
 <p>The Policy Manager is the process that executes the policies.  There are two
-ways to run it: directly using <tt class="docutils literal"><span class="pre">cmpolicy</span></tt> or as part of <tt class="docutils literal"><span class="pre">cmrun</span></tt>.</p>
-<p>TODO....</p>
+ways to run it: directly using <tt class="docutils literal"><span class="pre">cmpolicy</span></tt> or as part of <tt class="docutils literal"><span class="pre">cmrun</span></tt>.  Both of
+these must be run as Django commands.</p>
+<p class="rubric">cmpolicy</p>
+<p>usage: <tt class="docutils literal"><span class="pre">python&nbsp;manage.py&nbsp;cmpolicy&nbsp;[options]</span></tt></p>
+<p>options:</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-l <var>LEVEL</var></span>, <span class="option">--loglevel=<var>LEVEL</var></span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Logging level.  One of: fatal, critical, error,
+warning, info, debug.  Default is warning.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-f <var>FILE</var></span>, <span class="option">--logfile=<var>FILE</var></span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Logging file.  Default is stdout.</td></tr>
+</tbody>
+</table>
+<p class="rubric">cmrun</p>
+<p>usage: <tt class="docutils literal"><span class="pre">python&nbsp;manage.py</span> <span class="pre">cmrun</span> <span class="pre">[options]</span></tt></p>
+<p>The cmrun command runs both the <tt class="docutils literal"><span class="pre">cmpolicy</span></tt> and <tt class="docutils literal"><span class="pre">cmevents</span></tt> commands as
+subprocesses.  However, they share the command line options, so the log output
+may not be garbled and some portions may be missing. For this reason, it is
+reccomended that <tt class="docutils literal"><span class="pre">cmpolicy</span></tt> and <tt class="docutils literal"><span class="pre">cmevents</span></tt> be used directly.</p>
 </div>
 <div class="section" id="common-issues">
-<h2><a class="toc-backref" href="#id17">Common Issues</a><a class="headerlink" href="#common-issues" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id16">Common Issues</a><a class="headerlink" href="#common-issues" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>The Policy Manager must be running for policies to be executed.</li>
 <li>It must have access to the django database where Dispatched Task status is
 recorded.</li>
 <li>Celery workers must have access to the CeleryManagementLib package.  (Usually
 this means installing it on the worker&#8217;s (virtual) machine.)</li>
+<li>A policy may take a while to execute.  This is mostly due to the time it
+takes a policy to communicate with Celery Workers.  Since policies should be
+short and run infrequently, this hopefully will not be a significant issue.
+However, if execution time becomes a problem, we may look to improve it.</li>
 </ul>
-<p>TODO....</p>
 </div>
 </div>
 
@@ -294,7 +309,6 @@ this means installing it on the worker&#8217;s (virtual) machine.)</li>
   <ul>
 <li><a class="reference internal" href="#">Policies Overview</a><ul>
 <li><a class="reference internal" href="#example">Example</a></li>
-<li><a class="reference internal" href="#features-limitations">Features &amp; Limitations</a></li>
 <li><a class="reference internal" href="#policy-sections">Policy Sections</a><ul>
 <li><a class="reference internal" href="#schedule">Schedule</a></li>
 <li><a class="reference internal" href="#condition">Condition</a></li>
