@@ -306,8 +306,13 @@ before now.</dd>
 <p>In all cases, the calculated date pairs are adjusted so the left
 datetime is less than the right.</p>
 </li>
-<li><strong>workers</strong> &#8211; TODO</li>
-<li><strong>tasknames</strong> &#8211; TODO</li>
+<li><strong>workers</strong> &#8211; The worker or workers to which to limit the search.
+This can be a worker name as a string, an iterable of
+worker names, or None in which case all workers are
+queried.</li>
+<li><strong>tasknames</strong> &#8211; The task or tasks to which to limit the search.  This
+can be a task name as a string, an iterable of task
+names, or None in which case all tasks are queried.</li>
 </ul>
 </td>
 </tr>
