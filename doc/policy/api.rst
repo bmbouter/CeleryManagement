@@ -204,9 +204,14 @@ Task and Worker Stats
             In all cases, the calculated date pairs are adjusted so the left 
             datetime is less than the right.
             
-        :param workers: TODO
+        :param workers: The worker or workers to which to limit the search.  
+                        This can be a worker name as a string, an iterable of 
+                        worker names, or None in which case all workers are 
+                        queried.
         
-        :param tasknames: TODO
+        :param tasknames: The task or tasks to which to limit the search.  This 
+                          can be a task name as a string, an iterable of task 
+                          names, or None in which case all tasks are queried.
         
 
     .. method:: tasks_failed(interval=None, workers=None, tasknames=None)

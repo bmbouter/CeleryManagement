@@ -125,7 +125,7 @@ policies code which would be better put elsewhere.
 The restrictions also provide some measure of security, but they should not be
 solely relied upon for this purpose.
 
-There are both parse-time and run-time mechanisms which enfore this
+There are both parse-time and run-time mechanisms which enforce this
 environment.  At parse-time, the policy source is checked for certain language
 constructs which are available in the full Python language, but are not desired
 in policies.
@@ -146,10 +146,10 @@ Restrictions
 .. rubric:: Imports
 
 No imports are allowed in policies.  This includes the import statements
-``import ...`` and ``from ... import ...`` as well as the builtin
+``import ...`` and ``from ... import ...`` as well as the built-in
 ``__import__`` function.
 
-Selected builtin modules are made available, including ``datetime``,
+Selected built-in modules are made available, including ``datetime``,
 ``time``, ``calendar``, and ``math``.  (Actually, they are wrappers around
 those modules to prevent any details of those modules leaking into the
 execution environment.)
@@ -157,7 +157,7 @@ execution environment.)
 .. rubric:: Defining functions and classes
 
 Function and class definitions are not allowed in policies.  This includes
-the defintiions themselves, as well as their associated keywords
+the definitions themselves, as well as their associated keywords
 (``return``, ``yield``, etc).  Functions defined using ``lambda`` are also
 not permitted.
 
@@ -170,7 +170,7 @@ includes the ``exec`` statement and the builtin functions ``eval()``,
 
 .. rubric:: Files
 
-The builtin function ``open()`` is not permitted.
+The built-in function ``open()`` is not permitted.
 
 .. rubric:: Assignment
 
@@ -207,7 +207,7 @@ are prohibited, including ``getattr()``, ``setattr()``, ``hasattr()`` and
 
 .. note:: Names are found by examining the policy source text.  This means that
    *any* use of the forbidden names are prohibited, even if they actually refer
-   to some other object.  For instance, because the builtin ``type()`` function
+   to some other object.  For instance, because the built-in ``type()`` function
    is prohibited, policy code such as the following will produce errors:
    ``type = "MyType"``
 
@@ -218,7 +218,7 @@ The goal of the policy mechanism is to make it as robust in the face of
 exceptions as possible.  Care is taken in the implementation to prevent an
 exception raised while one policy is executing from affecting other policies as
 well as the Policy Manager process.  Where exceptions must be prevented from
-propogating further, the Policy Manager will attempt to print out the exception
+propagating further, the Policy Manager will attempt to print out the exception
 traceback.
 
 Some details:
@@ -257,8 +257,8 @@ usage: ``python manage.py cmrun [options]``
 
 The cmrun command runs both the ``cmpolicy`` and ``cmevents`` commands as
 subprocesses.  However, they share the command line options, so the log output
-may not be garbled and some portions may be missing. For this reason, it is
-reccomended that ``cmpolicy`` and ``cmevents`` be used directly.
+may be garbled and some portions may be missing. For this reason, it is
+recommended that ``cmpolicy`` and ``cmevents`` be used directly.
 
 
 Common Issues
