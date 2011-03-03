@@ -13,6 +13,10 @@
 
 import sys, os
 
+# NOTE: This import allows syntax highlighting of Policy code samples in the 
+#       Sphinx-generated docs.
+import policy_lexer
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.

@@ -322,30 +322,56 @@ Utilities
     Returns the current time as a :class:`datetime.datetime` object.  (The 
     datetime module is also available to policies.)
     
-.. function:: today()
+.. function:: today([offset_days, timestr, time])
     
-    Returns the current date as a :class:`datetime.date` object.  (The datetime 
-    module is also available to policies.)
+    Returns the current date as a :class:`datetime.datetime` object.  (The 
+    datetime module is also available to policies.)  All arguments are 
+    optional, and only keyword arguments are allowed.
+    
+    If no arguments are provided, the time defaults to ``00:00:00`` (midnight).  
+    However, some keyword arguments are offered which can change this behavior.
+        
+    :keyword int offset_days: An integer which can set the date forward or 
+                              backward from the current date.
+                          
+    :keyword str timestr: A string representing a time which will be used in 
+                          the returned datetime object.  The string's format is 
+                          as follows: ``HH:MM:SS.mmmmmm``
+                      
+                          - ``HH``, ``MM``, ``SS`` are the minutes, hours, and 
+                            seconds.
+                          - ``mmmmmm`` is the microseconds, which can be 0-6 
+                            digits.
+                          
+                          The seconds and microseconds are optional.
+                      
+    :keyword tuple time: A tuple representing a time which will be used in the 
+                         returned datetime object.  The elements much be 
+                         integers which represent: hours, minutes, seconds, and 
+                         microseconds.  The seconds and microseconds are 
+                         optional.
+                   
+    If both *timestr* and *time* are provided, only *timestr* will be used.
 
 Email
 -----
 
-.. function:: send_email(subject, message, from_email, recipient_list, auth_user=None, auth_password=None)
+.. function:: send_email(subject, message, from_email, recipient_list, [auth_user [, auth_password]])
 
     Sometimes, a policy does not need to (or is not able to) respond 
     automatically to the condition it finds.  This function allows a policy to 
     send you an email in such situations.  It is built on top of Django_'s 
     email feature.
     
-    :param string subject: The subject of the email message, as a string.
-    :param string message: The content of the email message, as a string.
-    :param string from_email: The email address that will appear in the *from* field.
+    :param str subject: The subject of the email message, as a string.
+    :param str message: The content of the email message, as a string.
+    :param str from_email: The email address that will appear in the *from* field.
     :param list recipient_list: A list of email addresses to which to send the email.
-    :param string auth_user: Username for the SMTP server.  If not given, 
-                             Django will use the EMAIL_HOST_USER setting.
-    :param string auth_password: Password for the SMTP server.  If not given, 
-                                 Django will use the EMAIL_HOST_PASSWORD 
-                                 setting.
+    :param str auth_user: Username for the SMTP server.  If not given, 
+                          Django will use the ``EMAIL_HOST_USER`` setting.
+    :param str auth_password: Password for the SMTP server.  If not given, 
+                              Django will use the ``EMAIL_HOST_PASSWORD`` 
+                              setting.
 
 Celery States
 -------------
