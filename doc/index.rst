@@ -13,9 +13,9 @@ Contents:
    
    getting-started/index
    operation
+   graph
    policy/index
    cloud
-   graph
 
 Indices and tables
 ==================
